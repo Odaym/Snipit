@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/rotate_right"
+        android:title="@string/rotate_right"
+        app:showAsAction="collapseActionView" />
+
+    <item
+        android:id="@+id/rotate_left"
+        android:title="@string/rotate_left"
+        app:showAsAction="collapseActionView" />
+</menu>

@@ -1,0 +1,60 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_gray">
+
+    <com.ttco.bookmarker.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
+        android:id="@android:id/list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/darker_gray"
+        android:drawSelectorOnTop="true"
+        dslv:drag_scroll_start="0.33"
+        dslv:drag_start_mode="onLongPress"
+        dslv:float_alpha="0.6"
+        dslv:float_background_color="@android:color/darker_gray"
+        dslv:max_drag_scroll_speed="0.9"
+        dslv:slide_shuffle_speed="0.2" />
+
+    <RelativeLayout
+        android:id="@+id/emptyListLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:alpha="0.5"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/bookIMG"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/book_outline" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/bookIMG"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/activity_books_hint"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/books_bookmarks_activity_hint_fsize" />
+
+    </RelativeLayout>
+
+    <ImageButton
+        android:id="@+id/createNewBookBTN"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:background="@drawable/ripple"
+        android:elevation="10dp"
+        android:onClick="handleAddBook_Pressed"
+        android:src="@drawable/create_book" />
+
+</RelativeLayout>

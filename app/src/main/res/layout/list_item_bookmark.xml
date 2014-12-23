@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="20dp"
+        android:paddingEnd="20dp"
+        android:paddingStart="20dp"
+        android:paddingTop="20dp">
+
+        <TextView
+            android:id="@+id/bookmarkNameTV"
+            android:layout_width="@dimen/bookmark_list_item_bookmark_name_width"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/book_name_fsize"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/bookmarkPageNumberTV"
+            android:layout_width="@dimen/bookmark_list_item_bookmark_page_width"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/bookmarkNameTV"
+            android:layout_marginTop="5dp"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/book_author_fsize" />
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/bookmarkAction"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/menu_overflow_fade"
+        android:focusable="false" />
+
+    <TextView
+        android:id="@+id/bookmarkViewsTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:fontFamily="sans-serif-light"
+        android:paddingBottom="10dp"
+        android:paddingEnd="10dp"
+        android:textSize="@dimen/book_date_added_fsize" />
+</RelativeLayout>

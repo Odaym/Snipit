@@ -1,0 +1,85 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_vertical_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
+
+        <TextView
+            android:id="@+id/titleTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/titleET"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/book_title"
+            android:textColor="@color/gray"
+            android:textSize="@dimen/books_bookmarks_activity_hint_fsize" />
+
+        <EditText
+            android:id="@+id/titleET"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_toEndOf="@+id/titleTV"
+            android:fontFamily="sans-serif-light"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:textColor="@android:color/black"
+            android:textCursorDrawable="@null"
+            android:theme="@android:style/Theme.Holo" />
+
+        <View
+            android:id="@+id/separator"
+            android:layout_width="match_parent"
+            android:layout_height="0.3dp"
+            android:layout_below="@id/titleET"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:id="@+id/authorTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/authorET"
+            android:layout_below="@+id/separator"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/book_author"
+            android:textColor="@color/gray"
+            android:textSize="@dimen/books_bookmarks_activity_hint_fsize" />
+
+        <EditText
+            android:id="@+id/authorET"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/separator"
+            android:layout_marginStart="20dp"
+            android:layout_toEndOf="@+id/authorTV"
+            android:fontFamily="sans-serif-light"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:textColor="@android:color/black"
+            android:textCursorDrawable="@null"
+            android:theme="@android:style/Theme.Holo" />
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/doneBTN"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_vertical_margin"
+        android:background="@drawable/ripple_done"
+        android:elevation="10dp"
+        android:onClick="handleDone_Pressed"
+        android:src="@drawable/check_done" />
+
+</RelativeLayout>

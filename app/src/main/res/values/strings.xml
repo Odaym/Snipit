@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Book Marker</string>
+
+    <!-- BOOKS_ACTIVITY -->
+    <string name="activity_books_hint">Add a new book to get started!</string>
+    <string name="edit_book_option">Edit</string>
+    <string name="remove_book_option">Remove</string>
+
+    <!-- BOOKMARKS_ACTIVITY -->
+    <string name="activity_bookmarks_hint">Add a new bookmark to get started!</string>
+    <string name="edit_bookmark_option">Edit</string>
+    <string name="remove_bookmark_option">Remove</string>
+    <string name="sort_option_title">Sort</string>
+    <string name="sort_action_by_page_number">Sort by Page</string>
+    <string name="sort_action_by_name">Sort by Name</string>
+    <string name="sort_action_by_date">Sort by Date</string>
+
+    <!-- CREATE_BOOKMARK_ACTIVITY -->
+    <string name="create_bookmark_activity_title">New Bookmark</string>
+    <string name="bookmark_name">Bookmark Name</string>
+    <string name="bookmark_page">Page</string>
+
+    <!-- CREATE_BOOK_ACTIVITY -->
+    <string name="create_book_activity_title">New Book</string>
+    <string name="book_title">Book Title</string>
+    <string name="book_author">Author</string>
+    <string name="done_and_create_book">Done</string>
+
+    <!-- VIEW_BOOKMARKS_ACTIVITY -->
+    <string name="rotate_left">Rotate Left</string>
+    <string name="rotate_right">Rotate Right</string>
+    <string name="page">page:</string>
+
+</resources>
