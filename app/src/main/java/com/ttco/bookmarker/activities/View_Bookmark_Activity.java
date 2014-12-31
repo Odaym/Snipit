@@ -116,11 +116,11 @@ public class View_Bookmark_Activity extends FragmentActivity {
             switch (item.getItemId()) {
                 case R.id.rotate_right:
                     rotation += 90;
-                    Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(2000, 2000).centerInside().rotate(rotation).into(bookmarkIMG);
+                    Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG);
                     break;
                 case R.id.rotate_left:
                     rotation -= 90;
-                    Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(2000, 2000).centerInside().rotate(rotation).into(bookmarkIMG);
+                    Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG);
                     break;
             }
             return super.onOptionsItemSelected(item);
@@ -132,15 +132,10 @@ public class View_Bookmark_Activity extends FragmentActivity {
 
             context = activity;
 
-            DatabaseHelper dbHelper = new DatabaseHelper(activity);
-
-            int book_id = getArguments().getInt(Constants.EXTRAS_BOOK_ID);
             bookmark_imagepath = getArguments().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH);
             bookmark_name = getArguments().getString(Constants.EXTRAS_BOOKMARK_NAME);
             bookmark_pagenumber = getArguments().getInt(Constants.EXTRAS_BOOKMARK_PAGENUMBER);
             bookmark_dateAdded = getArguments().getString(Constants.EXTRAS_BOOKMARK_DATE_ADDED);
-
-            List<Bookmark> bookmarks = dbHelper.getAllBookmarks(book_id, null);
         }
 
         @Override
@@ -161,7 +156,7 @@ public class View_Bookmark_Activity extends FragmentActivity {
             bookmarkPageNumberTV.setText(" " + String.valueOf(bookmark_pagenumber));
             bookmarkDateAddedTV.setText(bookmark_dateAdded);
 
-            Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(2000, 2000).centerInside().into(bookmarkIMG);
+            Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(1500, 1500).centerInside().into(bookmarkIMG);
 
             PhotoViewAttacher mAttacher = new PhotoViewAttacher(bookmarkIMG);
 
@@ -178,7 +173,6 @@ public class View_Bookmark_Activity extends FragmentActivity {
         public Fragment getItem(int position) {
             View_Bookmark_Fragment imageFragment = new View_Bookmark_Fragment();
             Bundle bundle = new Bundle();
-            bundle.putInt(Constants.EXTRAS_BOOK_ID, book_id);
             bundle.putString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, bookmarks.get(position).getImage_path());
             bundle.putString(Constants.EXTRAS_BOOKMARK_NAME, bookmarks.get(position).getName());
             bundle.putInt(Constants.EXTRAS_BOOKMARK_PAGENUMBER, bookmarks.get(position).getPage_number());
