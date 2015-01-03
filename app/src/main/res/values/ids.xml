@@ -1,0 +1,5 @@
+<resources>
+    <item name="showcase_button" type="id" />
+    <item name="showcase_title_text" type="id" />
+    <item name="showcase_sub_text" type="id" />
+</resources>
