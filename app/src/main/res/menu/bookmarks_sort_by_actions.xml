@@ -9,7 +9,7 @@
         android:title="@string/sort_action_by_name"
         android:orderInCategory="2" />
     <item
-        android:id="@+id/sort_by_date"
+        android:id="@+id/sort_by_views"
         android:title="@string/sort_action_by_date"
         android:orderInCategory="3" />
 </menu>

@@ -2,40 +2,47 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/bookmark_list_item_height"
     android:background="@color/white">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="20dp"
-        android:paddingEnd="20dp"
-        android:paddingStart="20dp"
-        android:paddingTop="20dp">
+        android:paddingEnd="20dp">
+
+        <RelativeLayout
+            android:id="@+id/bookmarkImageAndPageNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/bookmarkIMG"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/bookmarkPageNumberTV"
+                android:layout_width="@dimen/bookmark_list_item_bookmark_pagenumber_width"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-light"
+                android:textSize="@dimen/bookmark_page_number_fsize"
+                android:textStyle="bold" />
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/bookmarkNameTV"
             android:layout_width="@dimen/bookmark_list_item_bookmark_name_width"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
+            android:layout_toEndOf="@+id/bookmarkImageAndPageNumber"
             android:ellipsize="end"
             android:fontFamily="sans-serif-light"
             android:textColor="@android:color/black"
-            android:textSize="@dimen/book_name_fsize"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/bookmarkPageNumberTV"
-            android:layout_width="@dimen/bookmark_list_item_bookmark_page_width"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/bookmarkNameTV"
-            android:layout_marginTop="5dp"
-            android:fontFamily="sans-serif-light"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/book_author_fsize" />
+            android:textSize="@dimen/book_name_fsize" />
 
     </RelativeLayout>
 

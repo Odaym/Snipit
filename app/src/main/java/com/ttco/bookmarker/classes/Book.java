@@ -17,6 +17,7 @@ public class Book implements Parcelable {
     private int id;
     private String title;
     private String author;
+    private String image_path;
     private String date_added;
     private int color_code;
     private int order;
@@ -28,15 +29,17 @@ public class Book implements Parcelable {
         id = in.readInt();
         title = in.readString();
         author = in.readString();
+        image_path = in.readString();
         date_added = in.readString();
         color_code = in.readInt();
         order = in.readInt();
     }
 
-    public Book(int id, String title, String author, String date_added, int color_code, int order) {
+    public Book(int id, String title, String author, String image_path, String date_added, int color_code, int order) {
         this.id = id;
         this.title = title;
         this.author = author;
+        this.image_path = image_path;
         this.date_added = date_added;
         this.color_code = color_code;
         this.order = order;
@@ -48,6 +51,14 @@ public class Book implements Parcelable {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getImagePath() {
+        return image_path;
+    }
+
+    public void setImagePath(String image_path) {
+        this.image_path = image_path;
     }
 
     public int getId() {
@@ -99,6 +110,7 @@ public class Book implements Parcelable {
         dest.writeInt(id);
         dest.writeString(title);
         dest.writeString(author);
+        dest.writeString(image_path);
         dest.writeString(date_added);
         dest.writeInt(color_code);
         dest.writeInt(order);

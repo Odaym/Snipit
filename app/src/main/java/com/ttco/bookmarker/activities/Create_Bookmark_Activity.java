@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.ttco.bookmarker.R;
@@ -70,28 +71,33 @@ public class Create_Bookmark_Activity extends Activity {
     }
 
     public void handleDone_Pressed(View view) {
-        if (!nameET.getText().toString().isEmpty() && !pageNumberET.getText().toString().isEmpty()) {
+        if (!nameET.getText().toString().isEmpty()) {
             if (CALL_PURPOSE != Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
                 Date date = new Date();
                 String month = (String) android.text.format.DateFormat.format("MMM", date);
                 String day = (String) android.text.format.DateFormat.format("dd", date);
                 String year = (String) android.text.format.DateFormat.format("yyyy", date);
 
-                Bookmark bookmark = new Bookmark();
-                bookmark.setName(nameET.getText().toString());
-                bookmark.setPage_number(Integer.parseInt(pageNumberET.getText().toString()));
-                bookmark.setImage_path(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH));
-                bookmark.setDate_added(month + " " + day + " " + year);
+                try {
+                    Bookmark bookmark = new Bookmark();
+                    bookmark.setName(nameET.getText().toString());
+                    bookmark.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
+                    bookmark.setImage_path(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH));
+                    bookmark.setDate_added(month + " " + day + " " + year);
 
-                dbHelper.createBookmark(bookmark, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
+                    dbHelper.createBookmark(bookmark, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
 
-                Intent bookmarkAdded = new Intent();
-                String bookmarkAddedIntent_String = "com.ttco.bookmarker.newBookmarkAdded";
-                bookmarkAdded.setAction(bookmarkAddedIntent_String);
-                bookmarkAdded.putExtra(Constants.EXTRAS_BOOK_ID, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
-                sendBroadcast(bookmarkAdded);
+                    Intent bookmarkAdded = new Intent();
+                    String bookmarkAddedIntent_String = "com.ttco.bookmarker.newBookmarkAdded";
+                    bookmarkAdded.setAction(bookmarkAddedIntent_String);
+                    bookmarkAdded.putExtra(Constants.EXTRAS_BOOK_ID, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
+                    sendBroadcast(bookmarkAdded);
 
-                finish();
+                    finish();
+                } catch (NumberFormatException e) {
+                    pageNumberET.setText("");
+                    Toast.makeText(this, getString(R.string.page_number_error), Toast.LENGTH_LONG).show();
+                }
             } else {
                 bookmark_from_list.setName(nameET.getText().toString());
                 bookmark_from_list.setPage_number(Integer.valueOf(pageNumberET.getText().toString()));

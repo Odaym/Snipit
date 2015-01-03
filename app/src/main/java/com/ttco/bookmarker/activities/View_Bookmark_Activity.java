@@ -24,29 +24,29 @@ import com.squareup.picasso.Picasso;
 import com.ttco.bookmarker.R;
 import com.ttco.bookmarker.classes.Bookmark;
 import com.ttco.bookmarker.classes.Constants;
-import com.ttco.bookmarker.classes.DatabaseHelper;
 import com.ttco.bookmarker.classes.HackyViewPager;
 
 import java.io.File;
-import java.util.List;
+import java.util.ArrayList;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
 public class View_Bookmark_Activity extends FragmentActivity {
 
-    private List<Bookmark> bookmarks;
+    private ArrayList<Bookmark> bookmarks;
     private int NUM_PAGES;
-    private int book_id;
+    private String sorting_type_pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_bookmarks);
 
-        book_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID);
+        int book_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID);
         String book_title = getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
         int current_bookmark_position = getIntent().getExtras().getInt(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION);
+        bookmarks = getIntent().getExtras().getParcelableArrayList("bookmarks");
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setTitle(book_title);
@@ -54,9 +54,13 @@ public class View_Bookmark_Activity extends FragmentActivity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
 
+//        DatabaseHelper dbHelper = new DatabaseHelper(this);
 
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
-        bookmarks = dbHelper.getAllBookmarks(book_id, null);
+//        if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+//            bookmarks = dbHelper.getAllBookmarks(book_id, null);
+//        } else {
+//            bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
+//        }
 
         NUM_PAGES = bookmarks.size();
 

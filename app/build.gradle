@@ -1,4 +1,19 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
+
 
 android {
     compileSdkVersion 21
@@ -13,12 +28,10 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
-
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -27,4 +40,8 @@ dependencies {
     compile files('libs/CrashlyticsPlugin.jar')
     compile files('libs/nineoldandroids-2.4.0.jar')
     compile files('libs/photoview_1.2.jar')
+    compile files('libs/android-integration-3.1.0.jar')
+    compile('com.crashlytics.sdk.android:crashlytics:2.2.0@aar') {
+        transitive = true;
+    }
 }

@@ -5,8 +5,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
@@ -15,30 +17,43 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
+import com.squareup.picasso.Picasso;
 import com.ttco.bookmarker.R;
 import com.ttco.bookmarker.classes.Book;
 import com.ttco.bookmarker.classes.Bookmark;
 import com.ttco.bookmarker.classes.Constants;
 import com.ttco.bookmarker.classes.DatabaseHelper;
+import com.ttco.bookmarker.classes.Helper_Methods;
 import com.ttco.bookmarker.dragsort_listview.DragSortListView;
+import com.ttco.bookmarker.showcaseview.ShowcaseView;
+import com.ttco.bookmarker.showcaseview.ViewTarget;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Books_Activity extends ListActivity {
+import io.fabric.sdk.android.Fabric;
 
-    public static final int DELETE_MENU_ITEM = 0;
+public class Books_Activity extends ListActivity {
 
     private Books_Adapter booksAdapter;
 
     private DatabaseHelper dbHelper;
     private BroadcastReceiver bookAddedBR, bookmarkAddedBR, bookmarkDeletedBR;
     private RelativeLayout emptyListLayout;
+    private ArrayList<Book> books;
+    private ShowcaseView createBookShowcase;
+
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor prefsEditor;
+
     private String bookAddedIntent_String = "com.ttco.bookmarker.newBookAdded";
     private String bookmarkAddedIntent_String = "com.ttco.bookmarker.newBookmarkAdded";
     private String bookmarkDeletedIntent_String = "com.ttco.bookmarker.bookmarkDeleted";
@@ -47,7 +62,7 @@ public class Books_Activity extends ListActivity {
             new DragSortListView.DropListener() {
                 @Override
                 public void drop(int from, int to) {
-                    booksAdapter.notifyData();
+                    booksAdapter.notifyDataSetChanged();
                 }
             };
 
@@ -61,19 +76,30 @@ public class Books_Activity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (Constants.APPLICATION_CODE_STATE.equals("PRODUCTION"))
+            Fabric.with(this, new Crashlytics());
+
         setContentView(R.layout.activity_books);
 
         dbHelper = new DatabaseHelper(this);
 
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefsEditor = prefs.edit();
+        prefsEditor.apply();
+
         emptyListLayout = (RelativeLayout) findViewById(R.id.emptyListLayout);
 
-        handleEmptyOrPopulatedScreen(dbHelper.getAllBooks(null));
+        books = dbHelper.getAllBooks(null);
+
+        handleEmptyOrPopulatedScreen(books);
 
         bookAddedBR = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().compareTo(bookAddedIntent_String) == 0) {
-                    handleEmptyOrPopulatedScreen(dbHelper.getAllBooks(null));
+                if (intent.getAction().equals(bookAddedIntent_String)) {
+                    prepareForNotifyDataChanged();
+                    booksAdapter.notifyDataSetChanged();
                 }
             }
         };
@@ -81,8 +107,9 @@ public class Books_Activity extends ListActivity {
         bookmarkAddedBR = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().compareTo(bookmarkAddedIntent_String) == 0) {
-                    handleEmptyOrPopulatedScreen(dbHelper.getAllBooks(null));
+                if (intent.getAction().equals(bookmarkAddedIntent_String)) {
+                    prepareForNotifyDataChanged();
+                    booksAdapter.notifyDataSetChanged();
                 }
             }
         };
@@ -91,7 +118,8 @@ public class Books_Activity extends ListActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().compareTo(bookmarkDeletedIntent_String) == 0) {
-                    handleEmptyOrPopulatedScreen(dbHelper.getAllBooks(null));
+                    prepareForNotifyDataChanged();
+                    booksAdapter.notifyDataSetChanged();
                 }
             }
         };
@@ -108,10 +136,12 @@ public class Books_Activity extends ListActivity {
         bookmarksEmptyFilter.addAction(bookmarkDeletedIntent_String);
         registerReceiver(bookmarkDeletedBR, bookmarksEmptyFilter);
 
-//        registerForContextMenu(getListView());
     }
 
     public void handleAddBook_Pressed(View view) {
+        if (createBookShowcase != null)
+            createBookShowcase.hide();
+
         Intent openCreateBookActivity = new Intent(Books_Activity.this, Create_Book_Activity.class);
         startActivity(openCreateBookActivity);
     }
@@ -123,21 +153,69 @@ public class Books_Activity extends ListActivity {
         Book book = (Book) listView.getAdapter().getItem(position);
         openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
         openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
+        openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
         startActivity(openBookmarksForBook);
+    }
+
+    public void prepareForNotifyDataChanged() {
+        books = dbHelper.getAllBooks(null);
+
+        if (books.isEmpty()) {
+            emptyListLayout.setVisibility(View.VISIBLE);
+            showCreateBookShowcase();
+        } else {
+            emptyListLayout.setVisibility(View.GONE);
+        }
     }
 
     public void handleEmptyOrPopulatedScreen(List<Book> books) {
         if (books.isEmpty()) {
             emptyListLayout.setVisibility(View.VISIBLE);
+            showCreateBookShowcase();
         } else {
             emptyListLayout.setVisibility(View.GONE);
         }
 
-        booksAdapter = new Books_Adapter(this, books);
+        booksAdapter = new Books_Adapter(this);
         DragSortListView thisDragSortListView = (DragSortListView) getListView();
         thisDragSortListView.setDropListener(onDrop);
         thisDragSortListView.setDragListener(onDrag);
         thisDragSortListView.setAdapter(booksAdapter);
+    }
+
+    public void showCreateBookShowcase() {
+        if (!prefs.getBoolean(Constants.SEEN_BOOKS_SHOWCASE, false)) {
+            RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            lps.setMargins(getResources().getDimensionPixelOffset(R.dimen.button_margin_left), 0, 0, getResources().getDimensionPixelOffset(R.dimen.button_margin_bottom));
+
+            ViewTarget target = new ViewTarget(R.id.createNewBookBTN, Books_Activity.this);
+
+            String showcaseTitle = getString(R.string.create_book_showcase_title);
+
+            String showcaseDescription = getString(R.string.create_book_showcase_description);
+
+            createBookShowcase = new ShowcaseView.Builder(Books_Activity.this, getResources().getDimensionPixelSize(R.dimen.create_book_showcase_inner_rad), getResources().getDimensionPixelSize(R.dimen.create_book_showcase_outer_rad))
+                    .setTarget(target)
+                    .setContentTitle(Helper_Methods.fontifyString(showcaseTitle))
+                    .setContentText(Helper_Methods.fontifyString(showcaseDescription))
+                    .setStyle(R.style.CustomShowcaseTheme)
+                    .hasManualPosition(true)
+                    .xPostion(getResources().getDimensionPixelSize(R.dimen.create_book_text_x))
+                    .yPostion(getResources().getDimensionPixelSize(R.dimen.create_book_text_y))
+                    .build();
+            createBookShowcase.setButtonPosition(lps);
+            createBookShowcase.findViewById(R.id.showcase_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    createBookShowcase.hide();
+                    prefsEditor.putBoolean(Constants.SEEN_BOOKS_SHOWCASE, true);
+                    prefsEditor.commit();
+                }
+            });
+            createBookShowcase.show();
+        }
     }
 
     @Override
@@ -153,14 +231,12 @@ public class Books_Activity extends ListActivity {
         private LayoutInflater inflater;
         private Context context;
         private BooksViewHolder holder;
-        private List<Book> books;
         private List<Bookmark> bookmarks;
         private DatabaseHelper dbHelper;
 
-        public Books_Adapter(Context context, List<Book> books) {
+        public Books_Adapter(Context context) {
             super();
             this.context = context;
-            this.books = books;
 
             dbHelper = new DatabaseHelper(context);
         }
@@ -192,6 +268,7 @@ public class Books_Activity extends ListActivity {
                 holder.bookDateAddedTV = (TextView) convertView.findViewById(R.id.bookDateAddedTV);
                 holder.bookTitleTV = (TextView) convertView.findViewById(R.id.bookTitleTV);
                 holder.bookAuthorTV = (TextView) convertView.findViewById(R.id.bookAuthorTV);
+                holder.bookThumbIMG = (ImageView) convertView.findViewById(R.id.bookThumbIMG);
                 holder.bookmarksNumberTV = (TextView) convertView.findViewById(R.id.bookmarksNumberTV);
                 holder.bookAction = (Button) convertView.findViewById(R.id.bookAction);
 
@@ -202,6 +279,9 @@ public class Books_Activity extends ListActivity {
 
             holder.bookTitleTV.setText(books.get(position).getTitle());
             holder.bookAuthorTV.setText(books.get(position).getAuthor());
+
+            Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(holder.bookThumbIMG);
+
             String[] bookDateAdded = books.get(position).getDate_added().split(" ");
             holder.bookDateAddedTV.setText(bookDateAdded[0] + " " + bookDateAdded[1]);
 
@@ -255,7 +335,8 @@ public class Books_Activity extends ListActivity {
                                     break;
                                 case R.id.remove:
                                     dbHelper.deleteBook(books.get(position).getId());
-                                    handleEmptyOrPopulatedScreen(dbHelper.getAllBooks(null));
+                                    prepareForNotifyDataChanged();
+                                    notifyDataSetChanged();
                                     break;
                             }
 
@@ -288,14 +369,11 @@ public class Books_Activity extends ListActivity {
             }
         }
 
-        public void notifyData() {
-            notifyDataSetChanged();
-        }
-
         private class BooksViewHolder {
             TextView bookDateAddedTV;
             TextView bookTitleTV;
             TextView bookAuthorTV;
+            ImageView bookThumbIMG;
             TextView bookmarksNumberTV;
             Button bookAction;
         }

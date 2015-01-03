@@ -5,10 +5,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -16,25 +18,30 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.ttco.bookmarker.R;
 import com.ttco.bookmarker.classes.Bookmark;
 import com.ttco.bookmarker.classes.Constants;
 import com.ttco.bookmarker.classes.DatabaseHelper;
+import com.ttco.bookmarker.classes.Helper_Methods;
 import com.ttco.bookmarker.dragsort_listview.DragSortListView;
+import com.ttco.bookmarker.showcaseview.ShowcaseView;
+import com.ttco.bookmarker.showcaseview.ViewTarget;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -47,8 +54,11 @@ public class Bookmarks_Activity extends ListActivity {
 
     private int book_id;
     private String book_title;
+    private int book_color_code;
+    private ShowcaseView createBookmarkShowcase;
+
+    private ArrayList<Bookmark> bookmarks;
     private DatabaseHelper dbHelper;
-    private List<Bookmark> bookmarks;
     private RelativeLayout emptyListLayout;
     private BroadcastReceiver bookmarkAddedBR, bookmarkDeletedBR;
     private String mCurrentPhotoPath;
@@ -65,11 +75,13 @@ public class Bookmarks_Activity extends ListActivity {
             sendBroadcast(bookmarkDeletedIntent);
         }
     };
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor prefsEditor;
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
                 @Override
                 public void drop(int from, int to) {
-                    bookmarksAdapter.notifyData();
+                    bookmarksAdapter.notifyDataSetChanged();
                 }
             };
     private DragSortListView.DragListener onDrag = new DragSortListView.DragListener() {
@@ -84,25 +96,39 @@ public class Bookmarks_Activity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
 
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefsEditor = prefs.edit();
+        prefsEditor.apply();
+
         dbHelper = new DatabaseHelper(this);
 
         book_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID);
         book_title = getIntent().getStringExtra(Constants.EXTRAS_BOOK_TITLE);
+        book_color_code = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR);
 
         emptyListLayout = (RelativeLayout) findViewById(R.id.emptyListLayout);
 
-        bookmarks = dbHelper.getAllBookmarks(book_id, null);
+        String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
+        if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+            bookmarks = dbHelper.getAllBookmarks(book_id, null);
+        } else {
+            bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
+        }
 
         handleEmptyOrPopulatedScreen(bookmarks);
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setTitle(book_title);
 
+        /**
+         * If a specific sorting order exists, follow that order when getting the bookmarks
+         */
         bookmarkAddedBR = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(bookmarkAddedIntent_String)) {
-                    handleEmptyOrPopulatedScreen(dbHelper.getAllBookmarks(book_id, null));
+                    prepareForNotifyDataChanged(book_id);
+                    bookmarksAdapter.notifyDataSetChanged();
                 }
             }
         };
@@ -111,7 +137,8 @@ public class Bookmarks_Activity extends ListActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(bookmarkDeletedIntent_String)) {
-                    handleEmptyOrPopulatedScreen(dbHelper.getAllBookmarks(book_id, null));
+                    prepareForNotifyDataChanged(book_id);
+                    bookmarksAdapter.notifyDataSetChanged();
                 }
             }
         };
@@ -125,19 +152,6 @@ public class Bookmarks_Activity extends ListActivity {
         registerReceiver(bookmarkDeletedBR, bookmarkDeletedFilter);
 
         registerForContextMenu(getListView());
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                getListView().requestDisallowInterceptTouchEvent(true);
-                break;
-            case MotionEvent.ACTION_UP:
-                getListView().requestDisallowInterceptTouchEvent(true);
-                break;
-        }
-        return super.onTouchEvent(event);
     }
 
     @Override
@@ -173,15 +187,24 @@ public class Bookmarks_Activity extends ListActivity {
                 break;
             case R.id.sort_page_number:
                 sortByFormattedForSQL = "page_number";
-                handleEmptyOrPopulatedScreen(dbHelper.getAllBookmarks(book_id, sortByFormattedForSQL));
+                prefsEditor.putString(Constants.SORTING_TYPE_PREF, sortByFormattedForSQL);
+                prefsEditor.commit();
+                bookmarks = dbHelper.getAllBookmarks(book_id, sortByFormattedForSQL);
+                bookmarksAdapter.notifyDataSetChanged();
                 break;
             case R.id.sort_by_name:
                 sortByFormattedForSQL = "name";
-                handleEmptyOrPopulatedScreen(dbHelper.getAllBookmarks(book_id, sortByFormattedForSQL));
+                prefsEditor.putString(Constants.SORTING_TYPE_PREF, sortByFormattedForSQL);
+                prefsEditor.commit();
+                bookmarks = dbHelper.getAllBookmarks(book_id, sortByFormattedForSQL);
+                bookmarksAdapter.notifyDataSetChanged();
                 break;
-            case R.id.sort_by_date:
-                sortByFormattedForSQL = "date_added";
-                handleEmptyOrPopulatedScreen(dbHelper.getAllBookmarks(book_id, sortByFormattedForSQL));
+            case R.id.sort_by_views:
+                sortByFormattedForSQL = "views";
+                prefsEditor.putString(Constants.SORTING_TYPE_PREF, sortByFormattedForSQL);
+                prefsEditor.commit();
+                bookmarks = dbHelper.getAllBookmarks(book_id, sortByFormattedForSQL);
+                bookmarksAdapter.notifyDataSetChanged();
                 break;
         }
 
@@ -191,19 +214,22 @@ public class Bookmarks_Activity extends ListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
+
         Intent intent = new Intent(Bookmarks_Activity.this, View_Bookmark_Activity.class);
         intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
         intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
         intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position);
+        intent.putParcelableArrayListExtra("bookmarks", bookmarks);
         startActivity(intent);
 
-        bookmarks.get(position).setViews(bookmarks.get(position).getViews() + 1);
+        int bookmarkViews = dbHelper.getBookmarkViews(bookmarks.get(position));
+        bookmarks.get(position).setViews(bookmarkViews + 1);
         dbHelper.updateBookmark(bookmarks.get(position));
         bookmarksAdapter.notifyDataSetChanged();
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (resultCode != RESULT_OK)
             return;
 
@@ -235,6 +261,9 @@ public class Bookmarks_Activity extends ListActivity {
     }
 
     public void handleAddBookmark_Pressed(View view) {
+        if (createBookmarkShowcase != null)
+            createBookmarkShowcase.hide();
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;
@@ -267,14 +296,31 @@ public class Bookmarks_Activity extends ListActivity {
         return image;
     }
 
+    public void prepareForNotifyDataChanged(int book_id) {
+        String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
+        if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+            bookmarks = dbHelper.getAllBookmarks(book_id, null);
+        } else {
+            bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
+        }
+
+        if (bookmarks.isEmpty()) {
+            emptyListLayout.setVisibility(View.VISIBLE);
+            showCreateBookShowcase();
+        } else {
+            emptyListLayout.setVisibility(View.GONE);
+        }
+    }
+
     public void handleEmptyOrPopulatedScreen(List<Bookmark> bookmarks) {
         if (bookmarks.isEmpty()) {
             emptyListLayout.setVisibility(View.VISIBLE);
+            showCreateBookShowcase();
         } else {
             emptyListLayout.setVisibility(View.GONE);
         }
 
-        bookmarksAdapter = new Bookmarks_Adapter(this, bookmarks);
+        bookmarksAdapter = new Bookmarks_Adapter(this);
         DragSortListView thisDragSortListView = (DragSortListView) getListView();
         thisDragSortListView.setDropListener(onDrop);
         thisDragSortListView.setDragListener(onDrag);
@@ -282,20 +328,53 @@ public class Bookmarks_Activity extends ListActivity {
         setListAdapter(bookmarksAdapter);
     }
 
+    public void showCreateBookShowcase() {
+        if (!prefs.getBoolean(Constants.SEEN_BOOKMARKS_SHOWCASE, false)) {
+
+            RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            lps.setMargins(getResources().getDimensionPixelOffset(R.dimen.button_margin_left), 0, 0, getResources().getDimensionPixelOffset(R.dimen.button_margin_bottom));
+
+            ViewTarget target = new ViewTarget(R.id.createNewBookmarkBTN, Bookmarks_Activity.this);
+
+            String showcaseTitle = getString(R.string.create_bookmark_showcase_title);
+            String showcaseDescription = getString(R.string.create_bookmark_showcase_description);
+
+            createBookmarkShowcase = new ShowcaseView.Builder(Bookmarks_Activity.this, getResources().getDimensionPixelSize(R.dimen.create_bookmark_showcase_inner_rad), getResources().getDimensionPixelSize(R.dimen.create_bookmark_showcase_outer_rad))
+                    .setTarget(target)
+                    .setContentTitle(Helper_Methods.fontifyString(showcaseTitle))
+                    .setContentText(Helper_Methods.fontifyString(showcaseDescription))
+                    .setStyle(R.style.CustomShowcaseTheme)
+                    .hasManualPosition(true)
+                    .xPostion(getResources().getDimensionPixelSize(R.dimen.create_bookmark_text_x))
+                    .yPostion(getResources().getDimensionPixelSize(R.dimen.create_bookmark_text_y))
+                    .build();
+            createBookmarkShowcase.setButtonPosition(lps);
+            createBookmarkShowcase.findViewById(R.id.showcase_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    createBookmarkShowcase.hide();
+                    prefsEditor.putBoolean(Constants.SEEN_BOOKMARKS_SHOWCASE, true);
+                    prefsEditor.commit();
+                }
+            });
+            createBookmarkShowcase.show();
+        }
+    }
+
     private class Bookmarks_Adapter extends BaseAdapter {
 
         private LayoutInflater inflater;
         private Context context;
         private BookmarksViewHolder holder;
-        private List<Bookmark> bookmarks;
         private DatabaseHelper dbHelper;
 
         private String bookmarkDeletedIntent_String = "com.ttco.bookmarker.bookmarkDeleted";
 
-        public Bookmarks_Adapter(Context context, List<Bookmark> bookmarks) {
+        public Bookmarks_Adapter(Context context) {
             super();
             this.context = context;
-            this.bookmarks = bookmarks;
 
             dbHelper = new DatabaseHelper(context);
         }
@@ -327,6 +406,7 @@ public class Bookmarks_Activity extends ListActivity {
                 holder.bookmarkName = (TextView) convertView.findViewById(R.id.bookmarkNameTV);
                 holder.bookmarkPageNumber = (TextView) convertView.findViewById(R.id.bookmarkPageNumberTV);
                 holder.bookmarkAction = (Button) convertView.findViewById(R.id.bookmarkAction);
+                holder.bookmarkIMG = (ImageView) convertView.findViewById(R.id.bookmarkIMG);
                 holder.bookmarkViews = (TextView) convertView.findViewById(R.id.bookmarkViewsTV);
 
                 convertView.setTag(holder);
@@ -335,8 +415,31 @@ public class Bookmarks_Activity extends ListActivity {
             }
 
             holder.bookmarkName.setText(bookmarks.get(position).getName());
-            holder.bookmarkPageNumber.setText("page : " + bookmarks.get(position).getPage_number());
+            holder.bookmarkPageNumber.setText(bookmarks.get(position).getPage_number() + "");
             holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
+
+            switch (book_color_code) {
+                case 0:
+                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.pink));
+                    break;
+                case 1:
+                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.red));
+                    break;
+                case 2:
+                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.purple));
+                    break;
+                case 3:
+                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.yellow));
+                    break;
+                case 4:
+                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.blue));
+                    break;
+                case 5:
+                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.brown));
+                    break;
+            }
+
+            Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(holder.bookmarkIMG);
 
             holder.bookmarkAction.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -400,13 +503,10 @@ public class Bookmarks_Activity extends ListActivity {
             }
         }
 
-        public void notifyData() {
-            notifyDataSetChanged();
-        }
-
         private class BookmarksViewHolder {
             TextView bookmarkName;
             TextView bookmarkPageNumber;
+            ImageView bookmarkIMG;
             Button bookmarkAction;
             TextView bookmarkViews;
         }

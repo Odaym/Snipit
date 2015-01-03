@@ -3,7 +3,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_item_book"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/book_list_item_height"
+    android:layout_height="wrap_content"
     android:background="@color/white">
 
     <RelativeLayout
@@ -41,11 +41,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/bookTitleTV"
+            android:layout_marginTop="5dp"
             android:layout_toEndOf="@+id/bookmarksNumberTV"
             android:ellipsize="end"
             android:fontFamily="sans-serif-light"
             android:textSize="@dimen/book_author_fsize" />
 
+        <ImageView
+            android:id="@+id/bookThumbIMG"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/bookAuthorTV"
+            android:layout_marginTop="5dp"
+            android:layout_toEndOf="@+id/bookmarksNumberTV" />
     </RelativeLayout>
 
     <Button
@@ -65,7 +73,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:fontFamily="sans-serif-light"
-        android:paddingBottom="10dp"
+        android:paddingBottom="20dp"
         android:paddingEnd="10dp"
         android:textSize="@dimen/book_date_added_fsize" />
 

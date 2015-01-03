@@ -2846,7 +2846,6 @@ public class DragSortListView extends ListView {
             doDragFloatView(movePos, moveItem, false);
 
             mPrevTime = mCurrTime;
-            Log.d("mobeta", "  updated prevTime=" + mPrevTime);
 
             post(this);
         }

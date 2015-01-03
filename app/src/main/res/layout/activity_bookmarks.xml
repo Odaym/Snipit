@@ -8,7 +8,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/darker_gray"
-        dslv:drag_scroll_start="0.33"
+        android:drawSelectorOnTop="true"
+        dslv:drag_scroll_start="0.11"
         dslv:drag_start_mode="onLongPress"
         dslv:float_alpha="0.6"
         dslv:float_background_color="@android:color/darker_gray"
@@ -20,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:alpha="0.4"
+        android:alpha="0.5"
         android:visibility="gone">
 
         <ImageView
@@ -29,16 +30,6 @@
             android:layout_height="200dp"
             android:layout_centerInParent="true"
             android:src="@drawable/bookmark_outline" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/bookmarkIMG"
-            android:layout_centerHorizontal="true"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/activity_bookmarks_hint"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/books_bookmarks_activity_hint_fsize" />
 
     </RelativeLayout>
 
@@ -51,7 +42,7 @@
         android:layout_marginBottom="20dp"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:background="@drawable/ripple"
-        android:elevation="10dp"
+        android:elevation="12dp"
         android:onClick="handleAddBookmark_Pressed"
         android:src="@android:drawable/ic_menu_camera" />
 

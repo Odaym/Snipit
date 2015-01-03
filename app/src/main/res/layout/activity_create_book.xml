@@ -64,9 +64,16 @@
             android:fontFamily="sans-serif-light"
             android:inputType="textCapWords"
             android:singleLine="true"
+            android:layout_marginBottom="20dp"
             android:textColor="@android:color/black"
             android:textCursorDrawable="@null"
             android:theme="@android:style/Theme.Holo" />
+
+        <ImageView
+            android:id="@+id/bookIMG"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/authorET" />
     </RelativeLayout>
 
     <ImageView
@@ -81,5 +88,18 @@
         android:elevation="10dp"
         android:onClick="handleDone_Pressed"
         android:src="@drawable/check_done" />
+
+    <ImageView
+        android:id="@+id/scanBTN"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_vertical_margin"
+        android:background="@drawable/ripple_scan"
+        android:elevation="12dp"
+        android:onClick="handleScan_Pressed"
+        android:src="@drawable/scan_book" />
 
 </RelativeLayout>

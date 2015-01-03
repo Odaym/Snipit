@@ -88,7 +88,7 @@
         android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:background="@drawable/ripple_done"
-        android:elevation="10dp"
+        android:elevation="12dp"
         android:onClick="handleDone_Pressed"
         android:src="@drawable/check_done" />
 

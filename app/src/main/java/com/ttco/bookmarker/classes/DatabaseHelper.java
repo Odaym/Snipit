@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String databaseName = "bookmarker.db";
@@ -19,6 +18,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String B_ID = "book_id";
     public static final String B_TITLE = "title";
     public static final String B_AUTHOR = "author";
+    public static final String B_IMAGE = "image_path";
     public static final String B_DATE_ADDED = "date_added";
     public static final String B_COLOR_CODE = "color_code";
     public static final String B_ORDER = "book_order";
@@ -58,7 +58,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         String CREATE_BOOK_TABLE = "CREATE TABLE IF NOT EXISTS " + BOOK_TABLE
-                + " (" + B_ID + " INTEGER PRIMARY KEY, " + B_TITLE + " TEXT, " + B_AUTHOR + " TEXT, " + B_DATE_ADDED + " TEXT, " + B_COLOR_CODE + " INTEGER, " + B_ORDER + " INTEGER)";
+                + " (" + B_ID + " INTEGER PRIMARY KEY, " + B_TITLE + " TEXT, " + B_AUTHOR + " TEXT, " + B_IMAGE + " TEXT, " + B_DATE_ADDED + " TEXT, " + B_COLOR_CODE + " INTEGER, " + B_ORDER + " INTEGER)";
 
         String CREATE_BOOKMARK_TABLE = "CREATE TABLE IF NOT EXISTS " + BOOKMARK_TABLE
                 + " (" + BM_ID + " INTEGER PRIMARY KEY, " + BM_BOOK_FOREIGN_KEY + " INTEGER, " + BM_NAME + " TEXT, " + BM_PAGENUMBER + " INTEGER, " + BM_IMAGEPATH + " TEXT, " + BM_DATE_ADDED + " TEXT, " + BM_ORDER + " INTEGER, " + BM_VIEWS + " INTEGER, FOREIGN KEY (" + BM_BOOK_FOREIGN_KEY + ") REFERENCES " + BOOK_TABLE + " (" + B_ID + ") ON DELETE CASCADE)";
@@ -71,10 +71,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i2) {
     }
 
-    public List<Book> getAllBooks(String sortBy) {
+    public ArrayList<Book> getAllBooks(String sortBy) {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
 
-        List<Book> books = new ArrayList<Book>();
+        ArrayList<Book> books = new ArrayList<Book>();
 
         String query = "";
 
@@ -91,9 +91,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 book.setId(cursor.getInt(0));
                 book.setTitle(cursor.getString(1));
                 book.setAuthor(cursor.getString(2));
-                book.setDate_added(cursor.getString(3));
-                book.setColorCode(cursor.getInt(4));
-                book.setOrder(cursor.getInt(5));
+                book.setImagePath(cursor.getString(3));
+                book.setDate_added(cursor.getString(4));
+                book.setColorCode(cursor.getInt(5));
+                book.setOrder(cursor.getInt(6));
                 books.add(book);
             } while (cursor.moveToNext());
         }
@@ -113,6 +114,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.putNull(B_ID);
         cv.put(B_TITLE, book.getTitle());
         cv.put(B_AUTHOR, book.getAuthor());
+        cv.put(B_IMAGE, book.getImagePath());
         cv.put(B_DATE_ADDED, book.getDate_added());
         cv.put(B_COLOR_CODE, book.getColorCode());
         cv.put(B_ORDER, getMax_BookOrder(dbHandler));
@@ -150,10 +152,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         dbHandler.delete(table, whereClause, whereArgs);
     }
 
-    public List<Bookmark> getAllBookmarks(int book_id, String sortBy) {
+    public ArrayList<Bookmark> getAllBookmarks(int book_id, String sortBy) {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
 
-        List<Bookmark> bookmarks = new ArrayList<Bookmark>();
+        ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
 
         String query = "";
 
@@ -197,7 +199,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(BM_IMAGEPATH, bookmark.getImage_path());
         cv.put(BM_DATE_ADDED, bookmark.getDate_added());
         cv.put(BM_ORDER, getMax_BookmarkOrder(dbHandler));
-        cv.put(BM_VIEWS, getBookmarkViews(dbHandler));
+        cv.put(BM_VIEWS, 0);
 
         dbHandler.insert(BOOKMARK_TABLE, null, cv);
         dbHandler.close();
@@ -256,8 +258,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return max_bookmark_order;
     }
 
-    public int getBookmarkViews(SQLiteDatabase dbHandler){
-        Cursor cursor = dbHandler.rawQuery("SELECT " + BM_VIEWS + " FROM " + BOOKMARK_TABLE, null);
+    public int getBookmarkViews(Bookmark bookmark){
+        SQLiteDatabase dbHandler = this.getReadableDatabase();
+        Cursor cursor = dbHandler.rawQuery("SELECT " + BM_VIEWS + " FROM " + BOOKMARK_TABLE + " WHERE " + BM_ID + " = " + bookmark.getId(), null);
 
         int views = 0;
 
