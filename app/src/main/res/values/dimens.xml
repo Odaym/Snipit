@@ -8,8 +8,10 @@
     <dimen name="bookmark_list_item_bookmark_page_width">170dp</dimen>
     <dimen name="bookmark_list_item_bookmark_pagenumber_width">100dp</dimen>
 
+    <dimen name="book_with_image_height">160dp</dimen>
+    <dimen name="book_without_image_height">110dp</dimen>
+
     <dimen name="bookmark_list_item_height">100dp</dimen>
-    <dimen name="book_list_item_height">180dp</dimen>
     <dimen name="bookmark_details_layout_height">100dp</dimen>
 
     <dimen name="bookmark_thumb_height">100dp</dimen>
