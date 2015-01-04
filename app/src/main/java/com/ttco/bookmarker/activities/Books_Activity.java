@@ -265,6 +265,7 @@ public class Books_Activity extends ListActivity {
 
                 holder = new BooksViewHolder();
 
+                holder.list_item_book = (RelativeLayout) convertView.findViewById(R.id.list_item_book);
                 holder.bookDateAddedTV = (TextView) convertView.findViewById(R.id.bookDateAddedTV);
                 holder.bookTitleTV = (TextView) convertView.findViewById(R.id.bookTitleTV);
                 holder.bookAuthorTV = (TextView) convertView.findViewById(R.id.bookAuthorTV);
@@ -275,6 +276,17 @@ public class Books_Activity extends ListActivity {
                 convertView.setTag(holder);
             } else {
                 holder = (BooksViewHolder) convertView.getTag();
+            }
+
+            ViewGroup.LayoutParams listItemHeightParam = holder.list_item_book.getLayoutParams();
+
+            //If the item has a bookmark image, increase the hosting row's height
+            if (books.get(position).getImagePath() != null) {
+                listItemHeightParam.height = context.getResources().getDimensionPixelSize(R.dimen.book_with_image_height);
+                holder.list_item_book.setLayoutParams(listItemHeightParam);
+            } else {
+                listItemHeightParam.height = context.getResources().getDimensionPixelSize(R.dimen.book_without_image_height);
+                holder.list_item_book.setLayoutParams(listItemHeightParam);
             }
 
             holder.bookTitleTV.setText(books.get(position).getTitle());
@@ -370,6 +382,7 @@ public class Books_Activity extends ListActivity {
         }
 
         private class BooksViewHolder {
+            RelativeLayout list_item_book;
             TextView bookDateAddedTV;
             TextView bookTitleTV;
             TextView bookAuthorTV;
