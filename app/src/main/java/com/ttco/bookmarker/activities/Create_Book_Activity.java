@@ -129,17 +129,11 @@ public class Create_Book_Activity extends Activity {
                     scanBookShowcase.hide();
                     InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     inputMethodManager.toggleSoftInputFromWindow(scanBookShowcase.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
-                }
-            });
-            scanBookShowcase.setShouldCentreText(true);
-            scanBookShowcase.findViewById(R.id.showcase_button).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    scanBookShowcase.hide();
                     prefsEditor.putBoolean(Constants.SEEN_CREATE_BOOK_SHOWCASE, true);
                     prefsEditor.commit();
                 }
             });
+            scanBookShowcase.setShouldCentreText(true);
             scanBookShowcase.show();
         }
     }
