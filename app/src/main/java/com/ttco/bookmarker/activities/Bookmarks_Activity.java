@@ -34,12 +34,14 @@ import com.ttco.bookmarker.classes.Bookmark;
 import com.ttco.bookmarker.classes.Constants;
 import com.ttco.bookmarker.classes.DatabaseHelper;
 import com.ttco.bookmarker.classes.Helper_Methods;
+import com.ttco.bookmarker.classes.Param;
 import com.ttco.bookmarker.dragsort_listview.DragSortListView;
 import com.ttco.bookmarker.showcaseview.ShowcaseView;
 import com.ttco.bookmarker.showcaseview.ViewTarget;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -241,6 +243,12 @@ public class Bookmarks_Activity extends ListActivity {
                 startActivity(openCreateBookmark);
                 break;
         }
+//        deleteFile("result.txt");
+//
+//        Intent results = new Intent(this, ResultsActivity.class);
+//        results.putExtra("IMAGE_PATH", mCurrentPhotoPath);
+//        results.putExtra("RESULT_PATH", "result.txt");
+//        startActivity(results);
     }
 
     @Override
@@ -329,7 +337,7 @@ public class Bookmarks_Activity extends ListActivity {
     }
 
     public void showCreateBookShowcase() {
-        if (!prefs.getBoolean(Constants.SEEN_BOOKMARKS_SHOWCASE, false)) {
+        if (!dbHelper.getSeensParam(null, 1)) {
 
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -355,8 +363,11 @@ public class Bookmarks_Activity extends ListActivity {
                 @Override
                 public void onClick(View view) {
                     createBookmarkShowcase.hide();
-                    prefsEditor.putBoolean(Constants.SEEN_BOOKMARKS_SHOWCASE, true);
-                    prefsEditor.commit();
+
+                    Param param = new Param();
+                    param.setNumber(1);
+                    param.setValue("True");
+                    dbHelper.updateParam(param);
                 }
             });
             createBookmarkShowcase.show();
@@ -415,7 +426,12 @@ public class Bookmarks_Activity extends ListActivity {
             }
 
             holder.bookmarkName.setText(bookmarks.get(position).getName());
-            holder.bookmarkPageNumber.setText(bookmarks.get(position).getPage_number() + "");
+
+            String pageNumber = bookmarks.get(position).getPage_number() + "";
+            short pageNumberShort = Short.parseShort(pageNumber);
+            DecimalFormat formatter = new DecimalFormat("#,###");
+            holder.bookmarkPageNumber.setText(formatter.format(pageNumberShort));
+
             holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
 
             switch (book_color_code) {

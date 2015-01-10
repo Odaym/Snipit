@@ -2,7 +2,10 @@ package com.ttco.bookmarker.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -16,15 +19,21 @@ import com.ttco.bookmarker.classes.Constants;
 import com.ttco.bookmarker.classes.DatabaseHelper;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
 public class Create_Bookmark_Activity extends Activity {
 
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+
     private DatabaseHelper dbHelper;
     private EditText nameET, pageNumberET;
+    private ImageView bookmarkIMG;
     private int CALL_PURPOSE;
     private Bookmark bookmark_from_list;
+    private String finalImagePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,14 +48,18 @@ public class Create_Bookmark_Activity extends Activity {
 
         nameET = (EditText) findViewById(R.id.nameET);
         pageNumberET = (EditText) findViewById(R.id.pageNumberET);
-        ImageView bookmarkIMG = (ImageView) findViewById(R.id.bookmarkIMG);
+        bookmarkIMG = (ImageView) findViewById(R.id.bookmarkIMG);
 
+        finalImagePath = getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH);
+
+        //If it is a create operation, the path to the bookmark image is inside the extras that were sent to this activity (from Camera intent)
         try {
-            Picasso.with(this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH))).into(bookmarkIMG);
+            Picasso.with(this).load(new File(finalImagePath)).into(bookmarkIMG);
         } catch (NullPointerException NPE) {
             NPE.printStackTrace();
         }
 
+        //If it's an edit operation, the path to the bookmark image is inside the object being sent to this activity
         if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
             bookmark_from_list = getIntent().getParcelableExtra("bookmark");
 
@@ -70,6 +83,25 @@ public class Create_Bookmark_Activity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (resultCode != RESULT_OK)
+            return;
+
+        switch (requestCode) {
+            case REQUEST_IMAGE_CAPTURE:
+                Picasso.with(this).load(new File(finalImagePath)).into(bookmarkIMG);
+                break;
+        }
+//        deleteFile("result.txt");
+//
+//        Intent results = new Intent(this, ResultsActivity.class);
+//        results.putExtra("IMAGE_PATH", mCurrentPhotoPath);
+//        results.putExtra("RESULT_PATH", "result.txt");
+//        startActivity(results);
+    }
+
+
     public void handleDone_Pressed(View view) {
         if (!nameET.getText().toString().isEmpty()) {
             if (CALL_PURPOSE != Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
@@ -82,7 +114,7 @@ public class Create_Bookmark_Activity extends Activity {
                     Bookmark bookmark = new Bookmark();
                     bookmark.setName(nameET.getText().toString());
                     bookmark.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
-                    bookmark.setImage_path(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH));
+                    bookmark.setImage_path(finalImagePath);
                     bookmark.setDate_added(month + " " + day + " " + year);
 
                     dbHelper.createBookmark(bookmark, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
@@ -113,5 +145,38 @@ public class Create_Bookmark_Activity extends Activity {
                 finish();
             }
         }
+    }
+
+    public void takeAnotherPicture_Pressed(View view) {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                        Uri.fromFile(photoFile));
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        finalImagePath = image.getAbsolutePath();
+        return image;
     }
 }

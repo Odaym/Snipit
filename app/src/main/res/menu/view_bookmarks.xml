@@ -11,4 +11,11 @@
         android:id="@+id/rotate_left"
         android:title="@string/rotate_left"
         app:showAsAction="collapseActionView" />
+
+    <item
+        android:id="@+id/share_picture"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title=""
+        android:showAsAction="always" />
+
 </menu>

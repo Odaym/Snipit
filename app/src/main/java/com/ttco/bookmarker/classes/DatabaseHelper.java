@@ -13,7 +13,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String databaseName = "bookmarker.db";
     public static final int version = 1;
 
-    public static final String BOOK_TABLE = "book";
+    public static final String BOOK_TABLE = "Book";
 
     public static final String B_ID = "book_id";
     public static final String B_TITLE = "title";
@@ -23,7 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String B_COLOR_CODE = "color_code";
     public static final String B_ORDER = "book_order";
 
-    public static final String BOOKMARK_TABLE = "bookmark";
+    public static final String BOOKMARK_TABLE = "Bookmark";
 
     public static final String BM_ID = "bookmark_id";
     public static final String BM_BOOK_FOREIGN_KEY = "book_id";
@@ -33,6 +33,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String BM_DATE_ADDED = "date_added";
     public static final String BM_VIEWS = "views";
     public static final String BM_ORDER = "bookmark_order";
+
+    public static final String PARAM_TABLE = "Param";
+
+    public static final String PRM_NUMBER = "number";
+    public static final String PRM_STRINGVALUE = "stringValue";
 
     private Context context;
 
@@ -63,8 +68,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String CREATE_BOOKMARK_TABLE = "CREATE TABLE IF NOT EXISTS " + BOOKMARK_TABLE
                 + " (" + BM_ID + " INTEGER PRIMARY KEY, " + BM_BOOK_FOREIGN_KEY + " INTEGER, " + BM_NAME + " TEXT, " + BM_PAGENUMBER + " INTEGER, " + BM_IMAGEPATH + " TEXT, " + BM_DATE_ADDED + " TEXT, " + BM_ORDER + " INTEGER, " + BM_VIEWS + " INTEGER, FOREIGN KEY (" + BM_BOOK_FOREIGN_KEY + ") REFERENCES " + BOOK_TABLE + " (" + B_ID + ") ON DELETE CASCADE)";
 
+        String CREATE_PARAM_TABLE = "CREATE TABLE " + PARAM_TABLE
+                + " (id INTEGER PRIMARY KEY AUTOINCREMENT, " + PRM_NUMBER
+                + " INTEGER, " + PRM_STRINGVALUE + " TEXT)";
+
         sqLiteDatabase.execSQL(CREATE_BOOK_TABLE);
         sqLiteDatabase.execSQL(CREATE_BOOKMARK_TABLE);
+        sqLiteDatabase.execSQL(CREATE_PARAM_TABLE);
+
+        /**
+         * Initilize the Seen Books, Bookmarks and Create Book params (for Showcase Views in each)
+         */
+        initializeParam(sqLiteDatabase, 1);
+        initializeParam(sqLiteDatabase, 2);
+        initializeParam(sqLiteDatabase, 3);
     }
 
     @Override
@@ -258,7 +275,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return max_bookmark_order;
     }
 
-    public int getBookmarkViews(Bookmark bookmark){
+    public int getBookmarkViews(Bookmark bookmark) {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
         Cursor cursor = dbHandler.rawQuery("SELECT " + BM_VIEWS + " FROM " + BOOKMARK_TABLE + " WHERE " + BM_ID + " = " + bookmark.getId(), null);
 
@@ -270,5 +287,49 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
 
         return views;
+    }
+
+    public void initializeParam(SQLiteDatabase db, int paramNumber) {
+        ContentValues newValues = new ContentValues();
+
+        newValues.putNull("id");
+        newValues.put(PRM_NUMBER, paramNumber);
+        newValues.putNull(PRM_STRINGVALUE);
+
+        db.insert(PARAM_TABLE, null, newValues);
+    }
+
+    public void updateParam(Param param) {
+        SQLiteDatabase dbHandler = this.getWritableDatabase();
+        ContentValues newValues = new ContentValues();
+
+        String[] args = new String[]{String.valueOf(param.getNumber())};
+
+        newValues.put(PRM_STRINGVALUE, param.getValue());
+
+        dbHandler.update(PARAM_TABLE, newValues, PRM_NUMBER + " = ?", args);
+    }
+
+    public boolean getSeensParam(SQLiteDatabase dbHandler, int paramNumber) {
+        if (dbHandler == null)
+            dbHandler = this.getReadableDatabase();
+
+        String query = "SELECT " + PRM_STRINGVALUE + " FROM " + PARAM_TABLE
+                + " WHERE " + PRM_NUMBER + " = " + paramNumber;
+        Cursor cursor = dbHandler.rawQuery(query, null);
+
+        boolean seen = false;
+
+        try {
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    seen = cursor.getString(0) != null && cursor.getString(0).equals("True");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return seen;
     }
 }

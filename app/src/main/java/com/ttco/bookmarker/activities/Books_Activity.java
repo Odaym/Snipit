@@ -5,10 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
@@ -31,6 +29,7 @@ import com.ttco.bookmarker.classes.Bookmark;
 import com.ttco.bookmarker.classes.Constants;
 import com.ttco.bookmarker.classes.DatabaseHelper;
 import com.ttco.bookmarker.classes.Helper_Methods;
+import com.ttco.bookmarker.classes.Param;
 import com.ttco.bookmarker.dragsort_listview.DragSortListView;
 import com.ttco.bookmarker.showcaseview.ShowcaseView;
 import com.ttco.bookmarker.showcaseview.ViewTarget;
@@ -50,9 +49,6 @@ public class Books_Activity extends ListActivity {
     private RelativeLayout emptyListLayout;
     private ArrayList<Book> books;
     private ShowcaseView createBookShowcase;
-
-    private SharedPreferences prefs;
-    private SharedPreferences.Editor prefsEditor;
 
     private String bookAddedIntent_String = "com.ttco.bookmarker.newBookAdded";
     private String bookmarkAddedIntent_String = "com.ttco.bookmarker.newBookmarkAdded";
@@ -83,10 +79,6 @@ public class Books_Activity extends ListActivity {
         setContentView(R.layout.activity_books);
 
         dbHelper = new DatabaseHelper(this);
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefsEditor = prefs.edit();
-        prefsEditor.apply();
 
         emptyListLayout = (RelativeLayout) findViewById(R.id.emptyListLayout);
 
@@ -184,7 +176,7 @@ public class Books_Activity extends ListActivity {
     }
 
     public void showCreateBookShowcase() {
-        if (!prefs.getBoolean(Constants.SEEN_BOOKS_SHOWCASE, false)) {
+        if (!dbHelper.getSeensParam(null, 2)) {
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
@@ -210,8 +202,11 @@ public class Books_Activity extends ListActivity {
                 @Override
                 public void onClick(View view) {
                     createBookShowcase.hide();
-                    prefsEditor.putBoolean(Constants.SEEN_BOOKS_SHOWCASE, true);
-                    prefsEditor.commit();
+
+                    Param param = new Param();
+                    param.setNumber(2);
+                    param.setValue("True");
+                    dbHelper.updateParam(param);
                 }
             });
             createBookShowcase.show();

@@ -22,7 +22,7 @@
     <string name="create_bookmark_activity_title">New Bookmark</string>
     <string name="bookmark_name">Bookmark Name</string>
     <string name="bookmark_page">Page</string>
-    <string name="page_number_error">Page number is way too large!</string>
+    <string name="page_number_error">Invalid page number</string>
 
     <!-- CREATE_BOOK_ACTIVITY -->
     <string name="create_book_activity_title">New Book</string>

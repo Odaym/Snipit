@@ -27,6 +27,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentStart="true"
                 android:ellipsize="end"
+                android:background="@drawable/bookmark_details_gradient"
                 android:fontFamily="sans-serif-light"
                 android:textSize="@dimen/bookmark_page_number_fsize"
                 android:textStyle="bold" />

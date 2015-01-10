@@ -6,7 +6,6 @@ import android.view.View;
 
 import com.ttco.bookmarker.showcaseview.targets.Target;
 
-
 /**
  * Target a view on the screen. This will centre the target on the view.
  */

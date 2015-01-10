@@ -4,10 +4,8 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +23,7 @@ import com.ttco.bookmarker.classes.Book;
 import com.ttco.bookmarker.classes.Constants;
 import com.ttco.bookmarker.classes.DatabaseHelper;
 import com.ttco.bookmarker.classes.Helper_Methods;
+import com.ttco.bookmarker.classes.Param;
 import com.ttco.bookmarker.showcaseview.ShowcaseView;
 import com.ttco.bookmarker.showcaseview.ViewTarget;
 
@@ -44,16 +43,12 @@ import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.Random;
 
-
 public class Create_Book_Activity extends Activity {
 
     private DatabaseHelper dbHelper;
     private EditText titleET, authorET;
     private ImageView bookIMG;
     private String bookImagePath;
-
-    private SharedPreferences prefs;
-    private SharedPreferences.Editor prefsEditor;
 
     private ShowcaseView scanBookShowcase;
 
@@ -65,10 +60,6 @@ public class Create_Book_Activity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_book);
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefsEditor = prefs.edit();
-        prefsEditor.apply();
 
         dbHelper = new DatabaseHelper(this);
 
@@ -103,7 +94,7 @@ public class Create_Book_Activity extends Activity {
     }
 
     public void showScanBookHintShowcase() {
-        if (!prefs.getBoolean(Constants.SEEN_CREATE_BOOK_SHOWCASE, false)) {
+        if (!dbHelper.getSeensParam(null, 3)) {
 
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -129,8 +120,11 @@ public class Create_Book_Activity extends Activity {
                     scanBookShowcase.hide();
                     InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     inputMethodManager.toggleSoftInputFromWindow(scanBookShowcase.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
-                    prefsEditor.putBoolean(Constants.SEEN_CREATE_BOOK_SHOWCASE, true);
-                    prefsEditor.commit();
+
+                    Param param = new Param();
+                    param.setNumber(3);
+                    param.setValue("True");
+                    dbHelper.updateParam(param);
                 }
             });
             scanBookShowcase.setShouldCentreText(true);

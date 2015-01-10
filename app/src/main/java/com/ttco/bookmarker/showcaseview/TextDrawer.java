@@ -13,7 +13,6 @@ import android.text.style.TextAppearanceSpan;
 
 import com.ttco.bookmarker.R;
 
-
 /**
  * Draws the text as required by the ShowcaseView
  */

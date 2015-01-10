@@ -2,7 +2,9 @@ package com.ttco.bookmarker.activities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -36,14 +38,12 @@ public class View_Bookmark_Activity extends FragmentActivity {
 
     private ArrayList<Bookmark> bookmarks;
     private int NUM_PAGES;
-    private String sorting_type_pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_bookmarks);
 
-        int book_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID);
         String book_title = getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
         int current_bookmark_position = getIntent().getExtras().getInt(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION);
         bookmarks = getIntent().getExtras().getParcelableArrayList("bookmarks");
@@ -53,14 +53,6 @@ public class View_Bookmark_Activity extends FragmentActivity {
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-
-//        DatabaseHelper dbHelper = new DatabaseHelper(this);
-
-//        if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-//            bookmarks = dbHelper.getAllBookmarks(book_id, null);
-//        } else {
-//            bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
-//        }
 
         NUM_PAGES = bookmarks.size();
 
@@ -125,6 +117,16 @@ public class View_Bookmark_Activity extends FragmentActivity {
                 case R.id.rotate_left:
                     rotation -= 90;
                     Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG);
+                    break;
+                case R.id.share_picture:
+                    String book_title = getActivity().getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
+                    Uri imageURI = Uri.parse("file://" + bookmark_imagepath);
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_STREAM, imageURI);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Bookmark name: \"" + bookmark_name + "\"\nfrom book: \"" + book_title + "\"\non page: " + bookmark_pagenumber);
+                    sendIntent.setType("*/*");
+                    startActivity(Intent.createChooser(sendIntent, "Choose title"));
                     break;
             }
             return super.onOptionsItemSelected(item);
