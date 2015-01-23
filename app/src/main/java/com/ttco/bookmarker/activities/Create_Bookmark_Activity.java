@@ -93,12 +93,6 @@ public class Create_Bookmark_Activity extends Activity {
                 Picasso.with(this).load(new File(finalImagePath)).into(bookmarkIMG);
                 break;
         }
-//        deleteFile("result.txt");
-//
-//        Intent results = new Intent(this, ResultsActivity.class);
-//        results.putExtra("IMAGE_PATH", mCurrentPhotoPath);
-//        results.putExtra("RESULT_PATH", "result.txt");
-//        startActivity(results);
     }
 
 

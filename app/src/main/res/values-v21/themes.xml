@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="android:Theme.Material.Light">
+        <!-- inherit from the material theme -->
+        <!-- Main theme colors -->
+        <!--   your app branding color for the app bar -->
+        <item name="android:colorPrimary">@color/green</item>
+        <item name="android:colorPrimaryDark">@color/darker_green</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:actionModeBackground">@color/transparent</item>
+        <item name="android:windowBackground">@color/light_gray</item>
+    </style>
+
+    <style name="View_Bookmark_Activity_Theme" parent="android:Theme.Material.Light">
+        <item name="android:colorPrimary">@android:color/transparent</item>
+        <item name="android:colorPrimaryDark">@android:color/transparent</item>
+        <item name="android:textColorPrimary">@color/white</item>
+    </style>
+</resources>

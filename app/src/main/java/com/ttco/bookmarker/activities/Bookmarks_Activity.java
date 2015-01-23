@@ -1,6 +1,7 @@
 package com.ttco.bookmarker.activities;
 
 import android.app.ListActivity;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -66,6 +68,9 @@ public class Bookmarks_Activity extends ListActivity {
     private String mCurrentPhotoPath;
     private String bookmarkAddedIntent_String = "com.ttco.bookmarker.newBookmarkAdded";
     private String bookmarkDeletedIntent_String = "com.ttco.bookmarker.bookmarkDeleted";
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor prefsEditor;
+
     private DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
         @Override
         public void remove(int which) {
@@ -77,8 +82,6 @@ public class Bookmarks_Activity extends ListActivity {
             sendBroadcast(bookmarkDeletedIntent);
         }
     };
-    private SharedPreferences prefs;
-    private SharedPreferences.Editor prefsEditor;
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
                 @Override
@@ -176,6 +179,13 @@ public class Bookmarks_Activity extends ListActivity {
         dateString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, dateString.length(), 0);
         byDate.setTitle(dateString);
 
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -237,18 +247,12 @@ public class Bookmarks_Activity extends ListActivity {
 
         switch (requestCode) {
             case REQUEST_IMAGE_CAPTURE:
-                Intent openCreateBookmark = new Intent(Bookmarks_Activity.this, Create_Bookmark_Activity.class);
+                Intent openCreateBookmark = new Intent(Bookmarks_Activity.this, Crop_Image_Activity.class);
                 openCreateBookmark.putExtra(Constants.EXTRAS_BOOK_ID, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
                 openCreateBookmark.putExtra(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, mCurrentPhotoPath);
                 startActivity(openCreateBookmark);
                 break;
         }
-//        deleteFile("result.txt");
-//
-//        Intent results = new Intent(this, ResultsActivity.class);
-//        results.putExtra("IMAGE_PATH", mCurrentPhotoPath);
-//        results.putExtra("RESULT_PATH", "result.txt");
-//        startActivity(results);
     }
 
     @Override

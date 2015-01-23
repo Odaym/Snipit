@@ -35,7 +35,23 @@
 
         <activity
             android:name=".activities.Bookmarks_Activity"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustNothing" />
+            android:windowSoftInputMode="stateAlwaysHidden|adjustNothing">
+            <meta-data
+                android:name="android.app.default_searchable"
+                android:value=".activities.SearchResults_Activity" />
+        </activity>
+
+        <activity
+            android:name=".activities.SearchResults_Activity"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
 
         <activity
             android:name=".activities.Create_Bookmark_Activity"
@@ -46,7 +62,8 @@
             android:name=".activities.View_Bookmark_Activity"
             android:theme="@style/View_Bookmark_Activity_Theme" />
 
-        <activity android:name=".activities.ResultsActivity"/>
+        <activity android:name=".activities.Crop_Image_Activity" />
+
 
     </application>
 

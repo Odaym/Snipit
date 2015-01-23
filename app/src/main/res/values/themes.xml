@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="AppTheme.Base" />
+
+    <style name="AppTheme.Base" parent="Theme.AppCompat">
+        <item name="colorPrimary">@color/green</item>
+        <item name="colorPrimaryDark">@color/darker_green</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:actionModeBackground">@color/transparent</item>
+        <item name="android:windowBackground">@color/light_gray</item>
+    </style>
+
+</resources>

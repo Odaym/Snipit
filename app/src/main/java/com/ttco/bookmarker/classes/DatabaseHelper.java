@@ -222,6 +222,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         dbHandler.close();
     }
 
+    public void searchBookmark(String searchTerm, int book_id){
+
+    }
+
     public void updateBookmark(Bookmark bookmark) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
 

@@ -149,7 +149,7 @@ public class Create_Book_Activity extends Activity {
                 book.setDate_added(month + " " + day + " " + year);
                 book.setColorCode(rand.nextInt(7 - 1));
 
-                int book_id = dbHelper.createBook(book);
+                int last_insert_book_id = dbHelper.createBook(book);
 
                 Intent bookAdded = new Intent();
                 String bookAddedIntent_String = "com.ttco.bookmarker.newBookAdded";
@@ -159,8 +159,10 @@ public class Create_Book_Activity extends Activity {
                 finish();
 
                 Intent takeToBookmarks = new Intent(this, Bookmarks_Activity.class);
-                takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
-                takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_TITLE, titleET.getText().toString());
+                takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, last_insert_book_id);
+                takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
+                takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
+
                 startActivity(takeToBookmarks);
             } else {
                 book_from_list.setTitle(titleET.getText().toString());
