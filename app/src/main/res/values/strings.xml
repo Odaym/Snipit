@@ -50,4 +50,8 @@
 
     <string name="scan_books_showcase">You can also add a book by scanning its barcode</string>
 
+    <!-- SEARCH_RESULTS_ACTIVITY -->
+    <string name="search_results_activity_title">Search Results</string>
+    <string name="search_not_found">Couldn\'t find what you were looking for</string>
+
 </resources>

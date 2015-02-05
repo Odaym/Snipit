@@ -2,5 +2,5 @@
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="@color/yellow">
 
-    <item android:drawable="@drawable/fab_scan" />
+    <item android:drawable="@drawable/fab_rotate" />
 </ripple>

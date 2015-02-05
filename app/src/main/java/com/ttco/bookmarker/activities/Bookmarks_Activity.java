@@ -2,10 +2,8 @@ package com.ttco.bookmarker.activities;
 
 import android.app.ListActivity;
 import android.app.SearchManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
@@ -15,6 +13,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,11 +29,14 @@ import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 import com.ttco.bookmarker.R;
 import com.ttco.bookmarker.classes.Bookmark;
 import com.ttco.bookmarker.classes.Constants;
 import com.ttco.bookmarker.classes.DatabaseHelper;
+import com.ttco.bookmarker.classes.EventBus_Poster;
+import com.ttco.bookmarker.classes.EventBus_Singleton;
 import com.ttco.bookmarker.classes.Helper_Methods;
 import com.ttco.bookmarker.classes.Param;
 import com.ttco.bookmarker.dragsort_listview.DragSortListView;
@@ -53,35 +55,6 @@ import java.util.List;
 public class Bookmarks_Activity extends ListActivity {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
-
-    private Bookmarks_Adapter bookmarksAdapter;
-
-    private int book_id;
-    private String book_title;
-    private int book_color_code;
-    private ShowcaseView createBookmarkShowcase;
-
-    private ArrayList<Bookmark> bookmarks;
-    private DatabaseHelper dbHelper;
-    private RelativeLayout emptyListLayout;
-    private BroadcastReceiver bookmarkAddedBR, bookmarkDeletedBR;
-    private String mCurrentPhotoPath;
-    private String bookmarkAddedIntent_String = "com.ttco.bookmarker.newBookmarkAdded";
-    private String bookmarkDeletedIntent_String = "com.ttco.bookmarker.bookmarkDeleted";
-    private SharedPreferences prefs;
-    private SharedPreferences.Editor prefsEditor;
-
-    private DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
-        @Override
-        public void remove(int which) {
-            dbHelper.deleteBookmark(dbHelper.getAllBookmarks(book_id, null).get(which).getId());
-            handleEmptyOrPopulatedScreen(dbHelper.getAllBookmarks(book_id, null));
-
-            Intent bookmarkDeletedIntent = new Intent();
-            bookmarkDeletedIntent.setAction(bookmarkDeletedIntent_String);
-            sendBroadcast(bookmarkDeletedIntent);
-        }
-    };
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
                 @Override
@@ -95,11 +68,33 @@ public class Bookmarks_Activity extends ListActivity {
             bookmarksAdapter.swap(from, to);
         }
     };
+    private Bookmarks_Adapter bookmarksAdapter;
+    private int book_id;
+    private DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
+        @Override
+        public void remove(int which) {
+            dbHelper.deleteBookmark(dbHelper.getAllBookmarks(book_id, null).get(which).getId());
+            handleEmptyOrPopulatedScreen(dbHelper.getAllBookmarks(book_id, null));
+
+            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_deleted"));
+        }
+    };
+    private String book_title;
+    private int book_color_code;
+    private ShowcaseView createBookmarkShowcase;
+    private ArrayList<Bookmark> bookmarks;
+    private DatabaseHelper dbHelper;
+    private RelativeLayout emptyListLayout;
+    private String mCurrentPhotoPath;
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor prefsEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
+
+        EventBus_Singleton.getInstance().register(this);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefsEditor = prefs.edit();
@@ -125,73 +120,44 @@ public class Bookmarks_Activity extends ListActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setTitle(book_title);
 
-        /**
-         * If a specific sorting order exists, follow that order when getting the bookmarks
-         */
-        bookmarkAddedBR = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(bookmarkAddedIntent_String)) {
-                    prepareForNotifyDataChanged(book_id);
-                    bookmarksAdapter.notifyDataSetChanged();
-                }
-            }
-        };
-
-        bookmarkDeletedBR = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(bookmarkDeletedIntent_String)) {
-                    prepareForNotifyDataChanged(book_id);
-                    bookmarksAdapter.notifyDataSetChanged();
-                }
-            }
-        };
-
-        IntentFilter bookmarkAddedFilter = new IntentFilter();
-        bookmarkAddedFilter.addAction(bookmarkAddedIntent_String);
-        registerReceiver(bookmarkAddedBR, bookmarkAddedFilter);
-
-        IntentFilter bookmarkDeletedFilter = new IntentFilter();
-        bookmarkDeletedFilter.addAction(bookmarkDeletedIntent_String);
-        registerReceiver(bookmarkDeletedBR, bookmarkDeletedFilter);
-
         registerForContextMenu(getListView());
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.bookmarks_sort_by_actions, menu);
+        if (!bookmarks.isEmpty()) {
+            inflater.inflate(R.menu.bookmarks_sort_by_actions, menu);
 
-        MenuItem byNumber = menu.getItem(0);
-        SpannableString numberString = new SpannableString(byNumber.getTitle().toString());
-        numberString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, numberString.length(), 0);
-        byNumber.setTitle(numberString);
+            MenuItem byNumber = menu.getItem(1);
+            SpannableString numberString = new SpannableString(byNumber.getTitle().toString());
+            numberString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, numberString.length(), 0);
+            byNumber.setTitle(numberString);
 
-        MenuItem byName = menu.getItem(1);
-        SpannableString nameString = new SpannableString(byName.getTitle().toString());
-        nameString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, nameString.length(), 0);
-        byName.setTitle(nameString);
+            MenuItem byName = menu.getItem(2);
+            SpannableString nameString = new SpannableString(byName.getTitle().toString());
+            nameString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, nameString.length(), 0);
+            byName.setTitle(nameString);
 
-        MenuItem byDate = menu.getItem(2);
-        SpannableString dateString = new SpannableString(byDate.getTitle().toString());
-        dateString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, dateString.length(), 0);
-        byDate.setTitle(dateString);
+            MenuItem byViews = menu.getItem(3);
+            SpannableString viewsString = new SpannableString(byViews.getTitle().toString());
+            viewsString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, viewsString.length(), 0);
+            byViews.setTitle(viewsString);
 
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
+            SearchManager searchManager =
+                    (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            SearchView searchView =
+                    (SearchView) menu.findItem(R.id.search).getActionView();
+            searchView.setSearchableInfo(
+                    searchManager.getSearchableInfo(getComponentName()));
+        }
 
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        String sortByFormattedForSQL = "";
+        String sortByFormattedForSQL;
 
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -221,6 +187,17 @@ public class Bookmarks_Activity extends ListActivity {
         }
 
         return super.onMenuItemSelected(featureId, item);
+    }
+
+    @Override
+    public void startActivity(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
+            intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
+            intent.putExtra(Constants.EXTRAS_BOOK_COLOR, book_color_code);
+        }
+
+        super.startActivity(intent);
     }
 
     @Override
@@ -256,13 +233,6 @@ public class Bookmarks_Activity extends ListActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(bookmarkAddedBR);
-        unregisterReceiver(bookmarkDeletedBR);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -270,6 +240,22 @@ public class Bookmarks_Activity extends ListActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Subscribe
+    public void handle_BusEvents(EventBus_Poster ebp) {
+        if (ebp.getMessage().equals("bookmark_viewed")) {
+            String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
+            if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+                bookmarks = dbHelper.getAllBookmarks(book_id, null);
+            } else {
+                bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
+            }
+            bookmarksAdapter.notifyDataSetChanged();
+        } else if (ebp.getMessage().equals("bookmark_added")) {
+            prepareForNotifyDataChanged(book_id);
+            bookmarksAdapter.notifyDataSetChanged();
+        }
     }
 
     public void handleAddBookmark_Pressed(View view) {
@@ -284,7 +270,6 @@ public class Bookmarks_Activity extends ListActivity {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-            // Continue only if the File was successfully created
             if (photoFile != null) {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         Uri.fromFile(photoFile));
@@ -295,20 +280,29 @@ public class Bookmarks_Activity extends ListActivity {
 
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
+        String imageFileName = "JPEG_" + timeStamp;
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "Atomic");
+
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d(Constants.DEBUG_TAG, "failed to create directory");
+                return null;
+            }
+        }
+
+        File image = new File(mediaStorageDir.getPath() + File.separator + imageFileName);
 
         mCurrentPhotoPath = image.getAbsolutePath();
+
         return image;
     }
 
     public void prepareForNotifyDataChanged(int book_id) {
+        /**
+         * If a specific sorting order exists, follow that order when getting the bookmarks
+         */
         String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
         if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
             bookmarks = dbHelper.getAllBookmarks(book_id, null);
@@ -319,8 +313,10 @@ public class Bookmarks_Activity extends ListActivity {
         if (bookmarks.isEmpty()) {
             emptyListLayout.setVisibility(View.VISIBLE);
             showCreateBookShowcase();
+            invalidateOptionsMenu();
         } else {
             emptyListLayout.setVisibility(View.GONE);
+            invalidateOptionsMenu();
         }
     }
 
@@ -378,14 +374,18 @@ public class Bookmarks_Activity extends ListActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus_Singleton.getInstance().unregister(this);
+    }
+
     private class Bookmarks_Adapter extends BaseAdapter {
 
         private LayoutInflater inflater;
         private Context context;
         private BookmarksViewHolder holder;
         private DatabaseHelper dbHelper;
-
-        private String bookmarkDeletedIntent_String = "com.ttco.bookmarker.bookmarkDeleted";
 
         public Bookmarks_Adapter(Context context) {
             super();
@@ -489,11 +489,9 @@ public class Bookmarks_Activity extends ListActivity {
                                     startActivity(editBookmarkIntent);
                                     break;
                                 case R.id.delete:
-                                    Intent bookmarkDeletedIntent = new Intent();
-                                    bookmarkDeletedIntent.setAction(bookmarkDeletedIntent_String);
-                                    context.sendBroadcast(bookmarkDeletedIntent);
+                                    EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_deleted"));
                                     dbHelper.deleteBookmark(bookmarks.get(position).getId());
-                                    bookmarks = dbHelper.getAllBookmarks(bookmarks.get(position).getBookId(), null);
+                                    prepareForNotifyDataChanged(book_id);
                                     notifyDataSetChanged();
                                     break;
                             }
@@ -523,7 +521,7 @@ public class Bookmarks_Activity extends ListActivity {
             }
         }
 
-        private class BookmarksViewHolder {
+        public class BookmarksViewHolder {
             TextView bookmarkName;
             TextView bookmarkPageNumber;
             ImageView bookmarkIMG;

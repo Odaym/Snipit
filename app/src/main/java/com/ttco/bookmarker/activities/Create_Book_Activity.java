@@ -22,6 +22,8 @@ import com.ttco.bookmarker.R;
 import com.ttco.bookmarker.classes.Book;
 import com.ttco.bookmarker.classes.Constants;
 import com.ttco.bookmarker.classes.DatabaseHelper;
+import com.ttco.bookmarker.classes.EventBus_Poster;
+import com.ttco.bookmarker.classes.EventBus_Singleton;
 import com.ttco.bookmarker.classes.Helper_Methods;
 import com.ttco.bookmarker.classes.Param;
 import com.ttco.bookmarker.showcaseview.ShowcaseView;
@@ -43,12 +45,20 @@ import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.Random;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 public class Create_Book_Activity extends Activity {
 
-    private DatabaseHelper dbHelper;
-    private EditText titleET, authorET;
-    private ImageView bookIMG;
+    @InjectView(R.id.titleET)
+    EditText titleET;
+    @InjectView(R.id.authorET)
+    EditText authorET;
+    @InjectView(R.id.bookIMG)
+    ImageView bookIMG;
+
     private String bookImagePath;
+    private DatabaseHelper dbHelper;
 
     private ShowcaseView scanBookShowcase;
 
@@ -61,11 +71,9 @@ public class Create_Book_Activity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_book);
 
-        dbHelper = new DatabaseHelper(this);
+        ButterKnife.inject(this);
 
-        titleET = (EditText) findViewById(R.id.titleET);
-        authorET = (EditText) findViewById(R.id.authorET);
-        bookIMG = (ImageView) findViewById(R.id.bookIMG);
+        dbHelper = new DatabaseHelper(this);
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -151,10 +159,7 @@ public class Create_Book_Activity extends Activity {
 
                 int last_insert_book_id = dbHelper.createBook(book);
 
-                Intent bookAdded = new Intent();
-                String bookAddedIntent_String = "com.ttco.bookmarker.newBookAdded";
-                bookAdded.setAction(bookAddedIntent_String);
-                sendBroadcast(bookAdded);
+                EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
 
                 finish();
 
@@ -169,10 +174,7 @@ public class Create_Book_Activity extends Activity {
                 book_from_list.setAuthor(authorET.getText().toString());
                 dbHelper.updateBook(book_from_list);
 
-                Intent bookAdded = new Intent();
-                String bookAddedIntent_String = "com.ttco.bookmarker.newBookAdded";
-                bookAdded.setAction(bookAddedIntent_String);
-                sendBroadcast(bookAdded);
+                EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
 
                 finish();
             }

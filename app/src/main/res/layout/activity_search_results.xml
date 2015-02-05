@@ -10,13 +10,21 @@
         android:background="@android:color/darker_gray"
         android:drawSelectorOnTop="true" />
 
-    <ImageView
-        android:id="@+id/bookmarkIMG"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+    <RelativeLayout
+        android:id="@+id/emptyListLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:alpha="0.5"
-        android:src="@drawable/bookmark_outline"
-        android:visibility="gone" />
+        android:alpha="0.8"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/bookmarkIMG"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/sad_image_not_found" />
+
+    </RelativeLayout>
 
 </RelativeLayout>

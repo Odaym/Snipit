@@ -31,6 +31,8 @@ import com.ttco.bookmarker.classes.HackyViewPager;
 import java.io.File;
 import java.util.ArrayList;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
@@ -78,8 +80,13 @@ public class View_Bookmark_Activity extends FragmentActivity {
 
     public static class View_Bookmark_Fragment extends Fragment {
         private Context context;
-        private ImageView bookmarkIMG;
-        private TextView bookmarkNameTV, bookmarkPageNumberLabelTV, bookmarkPageNumberTV, bookmarkDateAddedTV;
+
+        @InjectView(R.id.bookmarkIMG) ImageView bookmarkIMG;
+        @InjectView(R.id.bookmarkPageNumberLabelTV) TextView bookmarkPageNumberLabelTV;
+        @InjectView(R.id.bookmarkPageNumberTV) TextView bookmarkPageNumberTV;
+        @InjectView(R.id.bookmarkDateAddedTV) TextView bookmarkDateAddedTV;
+        @InjectView(R.id.bookmarkNameTV) TextView bookmarkNameTV;
+
         private int rotation = 0;
         private String bookmark_imagepath, bookmark_name, bookmark_dateAdded;
         private int bookmark_pagenumber;
@@ -151,11 +158,7 @@ public class View_Bookmark_Activity extends FragmentActivity {
             ViewGroup rootView = (ViewGroup) inflater.inflate(
                     R.layout.fragment_bookmarks, container, false);
 
-            bookmarkIMG = (ImageView) rootView.findViewById(R.id.bookmarkIMG);
-            bookmarkNameTV = (TextView) rootView.findViewById(R.id.bookmarkNameTV);
-            bookmarkPageNumberLabelTV = (TextView) rootView.findViewById(R.id.bookmarkPageNumberLabelTV);
-            bookmarkPageNumberTV = (TextView) rootView.findViewById(R.id.bookmarkPageNumberTV);
-            bookmarkDateAddedTV = (TextView) rootView.findViewById(R.id.bookmarkDateAddedTV);
+            ButterKnife.inject(this, rootView);
 
             bookmarkNameTV.setText(bookmark_name);
             bookmarkPageNumberLabelTV.setText(getString(R.string.page));

@@ -41,7 +41,7 @@
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="20dp"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:background="@drawable/ripple"
+        android:background="@drawable/ripple_picture"
         android:elevation="12dp"
         android:onClick="handleAddBookmark_Pressed"
         android:src="@android:drawable/ic_menu_camera" />

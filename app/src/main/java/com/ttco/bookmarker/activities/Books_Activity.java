@@ -1,10 +1,8 @@
 package com.ttco.bookmarker.activities;
 
 import android.app.ListActivity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -22,12 +20,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 import com.ttco.bookmarker.R;
 import com.ttco.bookmarker.classes.Book;
 import com.ttco.bookmarker.classes.Bookmark;
 import com.ttco.bookmarker.classes.Constants;
 import com.ttco.bookmarker.classes.DatabaseHelper;
+import com.ttco.bookmarker.classes.EventBus_Poster;
+import com.ttco.bookmarker.classes.EventBus_Singleton;
 import com.ttco.bookmarker.classes.Helper_Methods;
 import com.ttco.bookmarker.classes.Param;
 import com.ttco.bookmarker.dragsort_listview.DragSortListView;
@@ -45,14 +46,9 @@ public class Books_Activity extends ListActivity {
     private Books_Adapter booksAdapter;
 
     private DatabaseHelper dbHelper;
-    private BroadcastReceiver bookAddedBR, bookmarkAddedBR, bookmarkDeletedBR;
     private RelativeLayout emptyListLayout;
     private ArrayList<Book> books;
     private ShowcaseView createBookShowcase;
-
-    private String bookAddedIntent_String = "com.ttco.bookmarker.newBookAdded";
-    private String bookmarkAddedIntent_String = "com.ttco.bookmarker.newBookmarkAdded";
-    private String bookmarkDeletedIntent_String = "com.ttco.bookmarker.bookmarkDeleted";
 
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
@@ -76,6 +72,8 @@ public class Books_Activity extends ListActivity {
         if (Constants.APPLICATION_CODE_STATE.equals("PRODUCTION"))
             Fabric.with(this, new Crashlytics());
 
+        EventBus_Singleton.getInstance().register(this);
+
         setContentView(R.layout.activity_books);
 
         dbHelper = new DatabaseHelper(this);
@@ -85,49 +83,12 @@ public class Books_Activity extends ListActivity {
         books = dbHelper.getAllBooks(null);
 
         handleEmptyOrPopulatedScreen(books);
+    }
 
-        bookAddedBR = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(bookAddedIntent_String)) {
-                    prepareForNotifyDataChanged();
-                    booksAdapter.notifyDataSetChanged();
-                }
-            }
-        };
-
-        bookmarkAddedBR = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(bookmarkAddedIntent_String)) {
-                    prepareForNotifyDataChanged();
-                    booksAdapter.notifyDataSetChanged();
-                }
-            }
-        };
-
-        bookmarkDeletedBR = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().compareTo(bookmarkDeletedIntent_String) == 0) {
-                    prepareForNotifyDataChanged();
-                    booksAdapter.notifyDataSetChanged();
-                }
-            }
-        };
-
-        IntentFilter bookAddedFilter = new IntentFilter();
-        bookAddedFilter.addAction(bookAddedIntent_String);
-        registerReceiver(bookAddedBR, bookAddedFilter);
-
-        IntentFilter bookmarkAddedFilter = new IntentFilter();
-        bookmarkAddedFilter.addAction(bookmarkAddedIntent_String);
-        registerReceiver(bookmarkAddedBR, bookmarkAddedFilter);
-
-        IntentFilter bookmarksEmptyFilter = new IntentFilter();
-        bookmarksEmptyFilter.addAction(bookmarkDeletedIntent_String);
-        registerReceiver(bookmarkDeletedBR, bookmarksEmptyFilter);
-
+    @Subscribe
+    public void handle_BusEvents(EventBus_Poster ebp) {
+        prepareForNotifyDataChanged();
+        booksAdapter.notifyDataSetChanged();
     }
 
     public void handleAddBook_Pressed(View view) {
@@ -216,12 +177,10 @@ public class Books_Activity extends ListActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(bookAddedBR);
-        unregisterReceiver(bookmarkAddedBR);
-        unregisterReceiver(bookmarkDeletedBR);
+        EventBus_Singleton.getInstance().unregister(this);
     }
 
-    private class Books_Adapter extends BaseAdapter {
+    public class Books_Adapter extends BaseAdapter {
 
         private LayoutInflater inflater;
         private Context context;
@@ -376,7 +335,7 @@ public class Books_Activity extends ListActivity {
             }
         }
 
-        private class BooksViewHolder {
+        public class BooksViewHolder {
             RelativeLayout list_item_book;
             TextView bookDateAddedTV;
             TextView bookTitleTV;

@@ -3,7 +3,6 @@ package com.ttco.bookmarker.classes;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -39,19 +38,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String PRM_NUMBER = "number";
     public static final String PRM_STRINGVALUE = "stringValue";
 
-    private Context context;
-
-    public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, factory, version);
-    }
-
-    public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
-        super(context, name, factory, version, errorHandler);
-    }
-
     public DatabaseHelper(Context context) {
         super(context, databaseName, null, version);
-        this.context = context;
     }
 
     @Override
@@ -91,9 +79,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList<Book> getAllBooks(String sortBy) {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
 
-        ArrayList<Book> books = new ArrayList<Book>();
+        ArrayList<Book> books = new ArrayList<>();
 
-        String query = "";
+        String query;
 
         if (sortBy == null)
             query = "SELECT * FROM " + BOOK_TABLE + " ORDER BY " + B_ORDER;
@@ -121,7 +109,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return books;
     }
-
 
     public int createBook(Book book) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
@@ -167,14 +154,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String whereClause = B_ID + " = ?";
         String[] whereArgs = new String[]{String.valueOf(book_id)};
         dbHandler.delete(table, whereClause, whereArgs);
+        dbHandler.close();
     }
 
     public ArrayList<Bookmark> getAllBookmarks(int book_id, String sortBy) {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
 
-        ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
+        ArrayList<Bookmark> bookmarks = new ArrayList<>();
 
-        String query = "";
+        String query;
 
         if (sortBy == null)
             query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = " + book_id + " ORDER BY " + BM_ORDER;
@@ -204,6 +192,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return bookmarks;
     }
 
+    public ArrayList<Bookmark> searchAllBookmarks(int book_id, String likeText) {
+        SQLiteDatabase dbHandler = this.getReadableDatabase();
+
+        ArrayList<Bookmark> bookmarkResults = new ArrayList<>();
+
+        String query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = ? AND " + BM_NAME + " LIKE ? COLLATE NOCASE";
+
+        Cursor cursor = dbHandler.rawQuery(query, new String[]{String.valueOf(book_id), "%" + likeText + "%"});
+
+        if (cursor.moveToFirst()) {
+            do {
+                Bookmark bookmark = new Bookmark();
+                bookmark.setId(cursor.getInt(0));
+                bookmark.setBookId(cursor.getInt(1));
+                bookmark.setName(cursor.getString(2));
+                bookmark.setPage_number(cursor.getInt(3));
+                bookmark.setImage_path(cursor.getString(4));
+                bookmark.setDate_added(cursor.getString(5));
+                bookmark.setOrder(cursor.getInt(6));
+                bookmark.setViews(cursor.getInt(7));
+                bookmarkResults.add(bookmark);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        dbHandler.close();
+
+        return bookmarkResults;
+    }
+
     public void createBookmark(Bookmark bookmark, int book_id) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
         ContentValues cv;
@@ -220,10 +238,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         dbHandler.insert(BOOKMARK_TABLE, null, cv);
         dbHandler.close();
-    }
-
-    public void searchBookmark(String searchTerm, int book_id){
-
     }
 
     public void updateBookmark(Bookmark bookmark) {
@@ -251,6 +265,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String whereClause = BM_ID + " = ?";
         String[] whereArgs = new String[]{String.valueOf(bookmark_id)};
         dbHandler.delete(table, whereClause, whereArgs);
+        dbHandler.close();
     }
 
     public int getMax_BookOrder(SQLiteDatabase dbHandler) {
@@ -301,6 +316,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         newValues.putNull(PRM_STRINGVALUE);
 
         db.insert(PARAM_TABLE, null, newValues);
+        db.close();
     }
 
     public void updateParam(Param param) {
@@ -312,6 +328,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         newValues.put(PRM_STRINGVALUE, param.getValue());
 
         dbHandler.update(PARAM_TABLE, newValues, PRM_NUMBER + " = ?", args);
+        dbHandler.close();
     }
 
     public boolean getSeensParam(SQLiteDatabase dbHandler, int paramNumber) {

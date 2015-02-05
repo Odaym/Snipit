@@ -25,4 +25,16 @@
         android:onClick="handleDone_Pressed"
         android:src="@drawable/check_done" />
 
+    <ImageButton
+        android:id="@+id/rotateImage"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_vertical_margin"
+        android:background="@drawable/ripple_rotate"
+        android:elevation="10dp"
+        android:onClick="rotateImage_Pressed"
+        android:src="@android:drawable/ic_menu_rotate" />
 </RelativeLayout>

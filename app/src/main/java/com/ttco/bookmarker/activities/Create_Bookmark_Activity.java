@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -17,20 +18,30 @@ import com.ttco.bookmarker.R;
 import com.ttco.bookmarker.classes.Bookmark;
 import com.ttco.bookmarker.classes.Constants;
 import com.ttco.bookmarker.classes.DatabaseHelper;
+import com.ttco.bookmarker.classes.EventBus_Poster;
+import com.ttco.bookmarker.classes.EventBus_Singleton;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 
 public class Create_Bookmark_Activity extends Activity {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
+    @InjectView(R.id.nameET)
+    EditText nameET;
+    @InjectView(R.id.pageNumberET)
+    EditText pageNumberET;
+    @InjectView(R.id.bookmarkIMG)
+    ImageView bookmarkIMG;
+
     private DatabaseHelper dbHelper;
-    private EditText nameET, pageNumberET;
-    private ImageView bookmarkIMG;
     private int CALL_PURPOSE;
     private Bookmark bookmark_from_list;
     private String finalImagePath;
@@ -40,15 +51,13 @@ public class Create_Bookmark_Activity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_bookmark);
 
+        ButterKnife.inject(this);
+
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
         dbHelper = new DatabaseHelper(this);
 
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, -1);
-
-        nameET = (EditText) findViewById(R.id.nameET);
-        pageNumberET = (EditText) findViewById(R.id.pageNumberET);
-        bookmarkIMG = (ImageView) findViewById(R.id.bookmarkIMG);
 
         finalImagePath = getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH);
 
@@ -98,7 +107,21 @@ public class Create_Bookmark_Activity extends Activity {
 
     public void handleDone_Pressed(View view) {
         if (!nameET.getText().toString().isEmpty()) {
-            if (CALL_PURPOSE != Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
+            if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
+                bookmark_from_list.setName(nameET.getText().toString());
+                try {
+                    bookmark_from_list.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
+                    dbHelper.updateBookmark(bookmark_from_list);
+
+                    EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_added"));
+
+                    finish();
+                } catch (NumberFormatException e) {
+                    pageNumberET.setText("");
+                    Toast.makeText(this, getString(R.string.page_number_error), Toast.LENGTH_LONG).show();
+                }
+
+            } else {
                 Date date = new Date();
                 String month = (String) android.text.format.DateFormat.format("MMM", date);
                 String day = (String) android.text.format.DateFormat.format("dd", date);
@@ -113,30 +136,13 @@ public class Create_Bookmark_Activity extends Activity {
 
                     dbHelper.createBookmark(bookmark, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
 
-                    Intent bookmarkAdded = new Intent();
-                    String bookmarkAddedIntent_String = "com.ttco.bookmarker.newBookmarkAdded";
-                    bookmarkAdded.setAction(bookmarkAddedIntent_String);
-                    bookmarkAdded.putExtra(Constants.EXTRAS_BOOK_ID, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
-                    sendBroadcast(bookmarkAdded);
+                    EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_added"));
 
                     finish();
                 } catch (NumberFormatException e) {
                     pageNumberET.setText("");
                     Toast.makeText(this, getString(R.string.page_number_error), Toast.LENGTH_LONG).show();
                 }
-            } else {
-                bookmark_from_list.setName(nameET.getText().toString());
-                bookmark_from_list.setPage_number(Integer.valueOf(pageNumberET.getText().toString()));
-
-                dbHelper.updateBookmark(bookmark_from_list);
-
-                Intent bookmarkAdded = new Intent();
-                String bookmarkAddedIntent_String = "com.ttco.bookmarker.newBookmarkAdded";
-                bookmarkAdded.setAction(bookmarkAddedIntent_String);
-                bookmarkAdded.putExtra(Constants.EXTRAS_BOOK_ID, bookmark_from_list.getBookId());
-                sendBroadcast(bookmarkAdded);
-
-                finish();
             }
         }
     }
@@ -147,10 +153,9 @@ public class Create_Bookmark_Activity extends Activity {
             File photoFile = null;
             try {
                 photoFile = createImageFile();
-            } catch (IOException ex) {
-                ex.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            // Continue only if the File was successfully created
             if (photoFile != null) {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         Uri.fromFile(photoFile));
@@ -162,13 +167,17 @@ public class Create_Bookmark_Activity extends Activity {
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "Atomic");
+
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d(Constants.DEBUG_TAG, "failed to create directory");
+                return null;
+            }
+        }
+
+        File image = new File(mediaStorageDir.getPath() + File.separator + imageFileName);
 
         finalImagePath = image.getAbsolutePath();
         return image;
