@@ -105,7 +105,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         cursor.close();
-        dbHandler.close();
 
         return books;
     }
@@ -125,8 +124,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         int lastInsertRowId = (int) dbHandler.insert(BOOK_TABLE, null, cv);
 
-        dbHandler.close();
-
         return lastInsertRowId;
     }
 
@@ -143,7 +140,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         newValues.put(B_ORDER, book.getOrder());
 
         dbHandler.update(BOOK_TABLE, newValues, B_ID + "= ?", args);
-        dbHandler.close();
     }
 
 
@@ -154,7 +150,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String whereClause = B_ID + " = ?";
         String[] whereArgs = new String[]{String.valueOf(book_id)};
         dbHandler.delete(table, whereClause, whereArgs);
-        dbHandler.close();
     }
 
     public ArrayList<Bookmark> getAllBookmarks(int book_id, String sortBy) {
@@ -187,7 +182,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         cursor.close();
-        dbHandler.close();
 
         return bookmarks;
     }
@@ -217,7 +211,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         cursor.close();
-        dbHandler.close();
 
         return bookmarkResults;
     }
@@ -237,7 +230,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(BM_VIEWS, 0);
 
         dbHandler.insert(BOOKMARK_TABLE, null, cv);
-        dbHandler.close();
     }
 
     public void updateBookmark(Bookmark bookmark) {
@@ -255,7 +247,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         newValues.put(BM_VIEWS, bookmark.getViews());
 
         dbHandler.update(BOOKMARK_TABLE, newValues, BM_ID + "= ?", args);
-        dbHandler.close();
     }
 
     public void deleteBookmark(int bookmark_id) {
@@ -265,7 +256,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String whereClause = BM_ID + " = ?";
         String[] whereArgs = new String[]{String.valueOf(bookmark_id)};
         dbHandler.delete(table, whereClause, whereArgs);
-        dbHandler.close();
     }
 
     public int getMax_BookOrder(SQLiteDatabase dbHandler) {
@@ -316,7 +306,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         newValues.putNull(PRM_STRINGVALUE);
 
         db.insert(PARAM_TABLE, null, newValues);
-        db.close();
     }
 
     public void updateParam(Param param) {
@@ -328,7 +317,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         newValues.put(PRM_STRINGVALUE, param.getValue());
 
         dbHandler.update(PARAM_TABLE, newValues, PRM_NUMBER + " = ?", args);
-        dbHandler.close();
     }
 
     public boolean getSeensParam(SQLiteDatabase dbHandler, int paramNumber) {
