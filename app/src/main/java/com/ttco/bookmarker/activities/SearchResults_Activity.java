@@ -30,7 +30,6 @@ import com.ttco.bookmarker.classes.EventBus_Poster;
 import com.ttco.bookmarker.classes.EventBus_Singleton;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,7 +64,6 @@ public class SearchResults_Activity extends ListActivity {
         }
 
         emptyListLayout = (RelativeLayout) findViewById(R.id.emptyListLayout);
-
 
         bookmarks = dbHelper.searchAllBookmarks(book_id, query);
 
@@ -163,7 +161,6 @@ public class SearchResults_Activity extends ListActivity {
                 holder = new BookmarksViewHolder();
 
                 holder.bookmarkName = (TextView) convertView.findViewById(R.id.bookmarkNameTV);
-                holder.bookmarkPageNumber = (TextView) convertView.findViewById(R.id.bookmarkPageNumberTV);
                 holder.bookmarkAction = (Button) convertView.findViewById(R.id.bookmarkAction);
                 holder.bookmarkIMG = (ImageView) convertView.findViewById(R.id.bookmarkIMG);
                 holder.bookmarkViews = (TextView) convertView.findViewById(R.id.bookmarkViewsTV);
@@ -174,34 +171,6 @@ public class SearchResults_Activity extends ListActivity {
             }
 
             holder.bookmarkName.setText(bookmarks.get(position).getName());
-
-            String pageNumber = bookmarks.get(position).getPage_number() + "";
-            short pageNumberShort = Short.parseShort(pageNumber);
-            DecimalFormat formatter = new DecimalFormat("#,###");
-            holder.bookmarkPageNumber.setText(formatter.format(pageNumberShort));
-
-            holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
-
-            switch (book_color_code) {
-                case 0:
-                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.pink));
-                    break;
-                case 1:
-                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.red));
-                    break;
-                case 2:
-                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.purple));
-                    break;
-                case 3:
-                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.yellow));
-                    break;
-                case 4:
-                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.blue));
-                    break;
-                case 5:
-                    holder.bookmarkPageNumber.setTextColor(context.getResources().getColor(R.color.brown));
-                    break;
-            }
 
             Picasso.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(holder.bookmarkIMG);
 
@@ -256,7 +225,6 @@ public class SearchResults_Activity extends ListActivity {
 
         private class BookmarksViewHolder {
             TextView bookmarkName;
-            TextView bookmarkPageNumber;
             ImageView bookmarkIMG;
             Button bookmarkAction;
             TextView bookmarkViews;
