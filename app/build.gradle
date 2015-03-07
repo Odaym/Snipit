@@ -20,7 +20,7 @@ android {
     buildToolsVersion "20.0.0"
 
     defaultConfig {
-        applicationId "com.ttco.bookmarker"
+        applicationId "com.om.atomic"
         minSdkVersion 16
         targetSdkVersion 21
         versionCode 1
@@ -32,10 +32,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
-        debug {
-            debuggable true
-            applicationIdSuffix ".debug"
-        }
+//        debug {
+//            debuggable true
+//            applicationIdSuffix ".debug"
+//        }
     }
 }
 

@@ -3,7 +3,7 @@
     android:layout_height="match_parent"
     android:background="@color/light_gray">
 
-    <com.ttco.bookmarker.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
+    <com.om.atomic.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
         android:id="@+id/bookmarksList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ttco.bookmarker">
+    package="com.om.atomic">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -63,7 +63,7 @@
 
         <activity
             android:name=".activities.Crop_Image_Activity"
-            android:theme="Crop_Image_Activity_Theme"/>
+            android:theme="@style/Crop_Image_Activity_Theme"/>
 
     </application>
 
