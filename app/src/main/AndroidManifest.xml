@@ -42,9 +42,7 @@
                 android:value=".activities.SearchResults_Activity" />
         </activity>
 
-        <activity
-            android:name=".activities.SearchResults_Activity"
-            android:launchMode="singleTop">
+        <activity android:name=".activities.SearchResults_Activity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -63,8 +61,9 @@
             android:name=".activities.View_Bookmark_Activity"
             android:theme="@style/View_Bookmark_Activity_Theme" />
 
-        <activity android:name=".activities.Crop_Image_Activity" />
-
+        <activity
+            android:name=".activities.Crop_Image_Activity"
+            android:theme="Crop_Image_Activity_Theme"/>
 
     </application>
 

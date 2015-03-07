@@ -4,7 +4,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
 
     <dimen name="book_list_item_book_name_width">200dp</dimen>
-    <dimen name="bookmark_list_item_bookmark_name_width">200dp</dimen>
+    <dimen name="bookmark_list_item_bookmark_name_width">170dp</dimen>
     <dimen name="bookmark_list_item_bookmark_page_width">170dp</dimen>
     <dimen name="bookmark_list_item_bookmark_pagenumber_width">100dp</dimen>
 
@@ -19,7 +19,6 @@
 
     <!-- FONT SIZES -->
     <dimen name="book_name_fsize">18sp</dimen>
-    <dimen name="bookmark_page_number_fsize">30sp</dimen>
     <dimen name="book_author_fsize">15sp</dimen>
     <dimen name="book_date_added_fsize">12sp</dimen>
     <dimen name="number_of_bookmarks_fsize">25sp</dimen>

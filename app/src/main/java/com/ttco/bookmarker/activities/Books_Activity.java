@@ -1,20 +1,22 @@
 package com.ttco.bookmarker.activities;
 
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -39,16 +41,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import io.fabric.sdk.android.Fabric;
 
-public class Books_Activity extends ListActivity {
+public class Books_Activity extends ActionBarActivity {
 
     private Books_Adapter booksAdapter;
 
     private DatabaseHelper dbHelper;
-    private RelativeLayout emptyListLayout;
     private ArrayList<Book> books;
     private ShowcaseView createBookShowcase;
+    private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+
+    @InjectView(R.id.booksList)
+    DragSortListView listView;
+    @InjectView(R.id.emptyListLayout)
+    RelativeLayout emptyListLayout;
+    @InjectView(R.id.createNewBookBTN)
+    ImageButton createNewBookBTN;
 
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
@@ -76,38 +87,46 @@ public class Books_Activity extends ListActivity {
 
         setContentView(R.layout.activity_books);
 
-        dbHelper = new DatabaseHelper(this);
+        ButterKnife.inject(this);
 
-        emptyListLayout = (RelativeLayout) findViewById(R.id.emptyListLayout);
+        dbHelper = new DatabaseHelper(this);
 
         books = dbHelper.getAllBooks(null);
 
         handleEmptyOrPopulatedScreen(books);
+
+        if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
+            createNewBookBTN.setElevation(15f);
+        }
+
+        createNewBookBTN.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (createBookShowcase != null)
+                    createBookShowcase.hide();
+
+                Intent openCreateBookActivity = new Intent(Books_Activity.this, Create_Book_Activity.class);
+                startActivity(openCreateBookActivity);
+            }
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Intent openBookmarksForBook = new Intent(Books_Activity.this, Bookmarks_Activity.class);
+                Book book = (Book) listView.getAdapter().getItem(position);
+                openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
+                openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
+                openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
+                startActivity(openBookmarksForBook);
+            }
+        });
     }
 
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
         prepareForNotifyDataChanged();
         booksAdapter.notifyDataSetChanged();
-    }
-
-    public void handleAddBook_Pressed(View view) {
-        if (createBookShowcase != null)
-            createBookShowcase.hide();
-
-        Intent openCreateBookActivity = new Intent(Books_Activity.this, Create_Book_Activity.class);
-        startActivity(openCreateBookActivity);
-    }
-
-    @Override
-    protected void onListItemClick(ListView listView, View v, int position, long id) {
-        super.onListItemClick(listView, v, position, id);
-        Intent openBookmarksForBook = new Intent(Books_Activity.this, Bookmarks_Activity.class);
-        Book book = (Book) listView.getAdapter().getItem(position);
-        openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
-        openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
-        openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
-        startActivity(openBookmarksForBook);
     }
 
     public void prepareForNotifyDataChanged() {
@@ -130,7 +149,7 @@ public class Books_Activity extends ListActivity {
         }
 
         booksAdapter = new Books_Adapter(this);
-        DragSortListView thisDragSortListView = (DragSortListView) getListView();
+        DragSortListView thisDragSortListView = listView;
         thisDragSortListView.setDropListener(onDrop);
         thisDragSortListView.setDragListener(onDrag);
         thisDragSortListView.setAdapter(booksAdapter);
@@ -232,6 +251,10 @@ public class Books_Activity extends ListActivity {
                 holder = (BooksViewHolder) convertView.getTag();
             }
 
+            if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
+                holder.bookmarksNumberTV.setElevation(5f);
+            }
+
             ViewGroup.LayoutParams listItemHeightParam = holder.list_item_book.getLayoutParams();
 
             //If the item has a bookmark image, increase the hosting row's height
@@ -249,7 +272,7 @@ public class Books_Activity extends ListActivity {
             Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(holder.bookThumbIMG);
 
             String[] bookDateAdded = books.get(position).getDate_added().split(" ");
-            holder.bookDateAddedTV.setText(bookDateAdded[0] + " " + bookDateAdded[1]);
+            holder.bookDateAddedTV.setText(bookDateAdded[0] + " " + bookDateAdded[1] + ", " + bookDateAdded[2]);
 
             switch (books.get(position).getColorCode()) {
                 case 0:
@@ -276,7 +299,7 @@ public class Books_Activity extends ListActivity {
                 @Override
                 public void onClick(View view) {
                     final View overflowButton = view;
-                    overflowButton.setBackground(getDrawable(R.drawable.menu_overflow_focus));
+                    overflowButton.setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
 
                     PopupMenu popup = new PopupMenu(context, view);
                     popup.getMenuInflater().inflate(R.menu.book_edit_delete,
@@ -312,7 +335,7 @@ public class Books_Activity extends ListActivity {
                     popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
                         @Override
                         public void onDismiss(PopupMenu popupMenu) {
-                            overflowButton.setBackground(getDrawable(R.drawable.menu_overflow_fade));
+                            overflowButton.setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_fade));
                         }
                     });
                 }

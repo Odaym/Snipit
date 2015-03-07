@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="green">#44A048</color>
-    <color name="darker_green">#328435</color>
     <color name="white">#FFFFFF</color>
     <color name="gray">#929292</color>
     <color name="light_gray">#EEEEEE</color>
     <color name="transparent">#00000000</color>
+    <color name="mokhmal">#7C6C65</color>
 
+    <color name="green">#44A048</color>
+    <color name="darker_green">#36803A</color>
     <color name="yellow">#FFb300</color>
+    <color name="darker_yellow">#CC8F00</color>
     <color name="red">#DA4336</color>
+    <color name="darker_red">#AE362B</color>
     <color name="purple">#B388FF</color>
+    <color name="darker_purple">#8F6DCC</color>
     <color name="pink">#F06292</color>
+    <color name="darker_pink">#C04E75</color>
     <color name="blue">#4285F4</color>
+    <color name="darker_blue">#356AC3</color>
     <color name="brown">#795548</color>
+    <color name="darker_brown">#61443A</color>
 
     <color name="background_list_back">#e3e3e3</color>
 

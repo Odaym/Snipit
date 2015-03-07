@@ -21,14 +21,20 @@ android {
 
     defaultConfig {
         applicationId "com.ttco.bookmarker"
-        minSdkVersion 21
+        minSdkVersion 16
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
+
     buildTypes {
         release {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            debuggable true
+            applicationIdSuffix ".debug"
         }
     }
 }
@@ -36,6 +42,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.2'
+    compile 'com.balysv:material-ripple:1.0.1'
     compile 'com.squareup:otto:1.3.6'
     compile 'com.jakewharton:butterknife:6.1.0'
     compile files('libs/picasso-2.4.0.jar')

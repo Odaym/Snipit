@@ -3,6 +3,10 @@
 
     <string name="app_name">Book Marker</string>
     <string name="gotit">Got it</string>
+    <string name="cancel">Cancel</string>
+    <string name="OK">OK</string>
+    <string name="takeNote">Take a note</string>
+    <string name="writeSomething">Write something here...</string>
 
     <!-- BOOKS_ACTIVITY -->
     <!--<string name="activity_books_hint">Add a new book to get started!</string>-->
@@ -20,12 +24,14 @@
 
     <!-- CREATE_BOOKMARK_ACTIVITY -->
     <string name="create_bookmark_activity_title">New Bookmark</string>
+    <string name="edit_bookmark_activity_title">Edit Bookmark</string>
     <string name="bookmark_name">Bookmark Name</string>
     <string name="bookmark_page">Page</string>
     <string name="page_number_error">Invalid page number</string>
 
     <!-- CREATE_BOOK_ACTIVITY -->
     <string name="create_book_activity_title">New Book</string>
+    <string name="edit_book_activity_title">Edit Book</string>
     <string name="book_title">Book Title</string>
     <string name="book_author">Author</string>
     <string name="done_and_create_book">Done</string>

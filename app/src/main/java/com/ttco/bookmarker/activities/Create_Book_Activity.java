@@ -1,11 +1,12 @@
 package com.ttco.bookmarker.activities;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +49,7 @@ import java.util.Random;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class Create_Book_Activity extends Activity {
+public class Create_Book_Activity extends ActionBarActivity {
 
     @InjectView(R.id.titleET)
     EditText titleET;
@@ -56,6 +57,10 @@ public class Create_Book_Activity extends Activity {
     EditText authorET;
     @InjectView(R.id.bookIMG)
     ImageView bookIMG;
+    @InjectView(R.id.doneBTN)
+    ImageView doneBTN;
+    @InjectView(R.id.scanBTN)
+    ImageView scanBTN;
 
     private String bookImagePath;
     private DatabaseHelper dbHelper;
@@ -75,7 +80,14 @@ public class Create_Book_Activity extends Activity {
 
         dbHelper = new DatabaseHelper(this);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        Helper_Methods helperMethods = new Helper_Methods(this);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(getString(R.string.edit_book_activity_title));
+        if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
+            doneBTN.setElevation(15f);
+            scanBTN.setElevation(15f);
+        }
 
         showScanBookHintShowcase();
 
@@ -89,13 +101,72 @@ public class Create_Book_Activity extends Activity {
                 Picasso.with(Create_Book_Activity.this).load(book_from_list.getImagePath()).error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(bookIMG);
             }
         }
+
+        doneBTN.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!titleET.getText().toString().isEmpty()) {
+                    if (CALL_PURPOSE != Constants.EDIT_BOOK_PURPOSE_VALUE) {
+                        Random rand = new Random();
+
+                        Date date = new Date();
+                        String day = (String) android.text.format.DateFormat.format("dd", date);
+                        String month = (String) android.text.format.DateFormat.format("MMM", date);
+                        String year = (String) android.text.format.DateFormat.format("yyyy", date);
+
+                        Book book = new Book();
+                        book.setTitle(titleET.getText().toString());
+                        book.setAuthor(authorET.getText().toString());
+                        book.setImagePath(bookImagePath);
+                        book.setDate_added(month + " " + day + " " + year);
+                        book.setColorCode(rand.nextInt(7 - 1));
+
+                        int last_insert_book_id = dbHelper.createBook(book);
+
+                        EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
+
+                        finish();
+
+                        Intent takeToBookmarks = new Intent(Create_Book_Activity.this, Bookmarks_Activity.class);
+                        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, last_insert_book_id);
+                        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
+                        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
+
+                        startActivity(takeToBookmarks);
+                    } else {
+                        book_from_list.setTitle(titleET.getText().toString());
+                        book_from_list.setAuthor(authorET.getText().toString());
+                        dbHelper.updateBook(book_from_list);
+
+                        EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
+
+                        finish();
+                    }
+                }
+            }
+        });
+
+        scanBTN.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (scanBookShowcase != null)
+                    scanBookShowcase.hide();
+
+                if (Helper_Methods.isInternetAvailable(Create_Book_Activity.this)) {
+                    IntentIntegrator scanIntegrator = new IntentIntegrator(Create_Book_Activity.this);
+                    scanIntegrator.initiateScan();
+                } else {
+                    Toast.makeText(Create_Book_Activity.this, getString(R.string.scan_no_internet_error), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                onBackPressed();
+                super.onBackPressed();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -137,59 +208,6 @@ public class Create_Book_Activity extends Activity {
             });
             scanBookShowcase.setShouldCentreText(true);
             scanBookShowcase.show();
-        }
-    }
-
-    public void handleDone_Pressed(View view) {
-        if (!titleET.getText().toString().isEmpty()) {
-            if (CALL_PURPOSE != Constants.EDIT_BOOK_PURPOSE_VALUE) {
-                Random rand = new Random();
-
-                Date date = new Date();
-                String day = (String) android.text.format.DateFormat.format("dd", date);
-                String month = (String) android.text.format.DateFormat.format("MMM", date);
-                String year = (String) android.text.format.DateFormat.format("yyyy", date);
-
-                Book book = new Book();
-                book.setTitle(titleET.getText().toString());
-                book.setAuthor(authorET.getText().toString());
-                book.setImagePath(bookImagePath);
-                book.setDate_added(month + " " + day + " " + year);
-                book.setColorCode(rand.nextInt(7 - 1));
-
-                int last_insert_book_id = dbHelper.createBook(book);
-
-                EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
-
-                finish();
-
-                Intent takeToBookmarks = new Intent(this, Bookmarks_Activity.class);
-                takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, last_insert_book_id);
-                takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
-                takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
-
-                startActivity(takeToBookmarks);
-            } else {
-                book_from_list.setTitle(titleET.getText().toString());
-                book_from_list.setAuthor(authorET.getText().toString());
-                dbHelper.updateBook(book_from_list);
-
-                EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
-
-                finish();
-            }
-        }
-    }
-
-    public void handleScan_Pressed(View view) {
-        if (scanBookShowcase != null)
-            scanBookShowcase.hide();
-
-        if (Helper_Methods.isInternetAvailable(this)) {
-            IntentIntegrator scanIntegrator = new IntentIntegrator(this);
-            scanIntegrator.initiateScan();
-        } else {
-            Toast.makeText(this, getString(R.string.scan_no_internet_error), Toast.LENGTH_LONG).show();
         }
     }
 

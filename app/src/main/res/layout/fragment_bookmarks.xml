@@ -9,6 +9,7 @@
         android:layout_centerInParent="true" />
 
     <RelativeLayout
+        android:id="@+id/bookmarkDetailsView"
         android:layout_width="match_parent"
         android:layout_height="@dimen/bookmark_details_layout_height"
         android:layout_alignParentBottom="true"
@@ -29,6 +30,7 @@
             android:id="@+id/bookmarkPageNumberLabelTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/bookmarkNameTV"
             android:fontFamily="sans-serif-light"
@@ -41,6 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/bookmarkNameTV"
             android:layout_toEndOf="@+id/bookmarkPageNumberLabelTV"
+            android:layout_toRightOf="@+id/bookmarkPageNumberLabelTV"
             android:fontFamily="sans-serif-light"
             android:textColor="@android:color/white"
             android:textSize="@dimen/book_date_added_fsize"
@@ -51,10 +54,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
             android:layout_below="@+id/bookmarkNameTV"
             android:fontFamily="sans-serif-light"
             android:textColor="@android:color/white"
             android:textSize="@dimen/book_date_added_fsize" />
-
     </RelativeLayout>
+
+    <ImageButton
+        android:id="@+id/createNewNoteBTN"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_above="@id/bookmarkDetailsView"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:background="@drawable/fab_take_note"
+        android:src="@drawable/pencil" />
+
 </RelativeLayout>

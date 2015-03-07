@@ -22,6 +22,8 @@ public class Bookmark implements Parcelable {
     private int order;
     private int views;
     private int book_id;
+    private String note;
+    private int isNoteShowing;
 
     public Bookmark() {
     }
@@ -35,10 +37,12 @@ public class Bookmark implements Parcelable {
         order = in.readInt();
         views = in.readInt();
         book_id = in.readInt();
+        note = in.readString();
+        isNoteShowing = in.readInt();
     }
 
 
-    public Bookmark(int id, String name, int page_number, String image_path, String date_added, int order, int book_id, int views) {
+    public Bookmark(int id, String name, int page_number, String image_path, String date_added, int order, int book_id, int views, String note, int isNoteShowing) {
         this.id = id;
         this.name = name;
         this.page_number = page_number;
@@ -47,6 +51,8 @@ public class Bookmark implements Parcelable {
         this.order = order;
         this.views = views;
         this.book_id = book_id;
+        this.note = note;
+        this.isNoteShowing = isNoteShowing;
     }
 
     public int getId() {
@@ -113,6 +119,22 @@ public class Bookmark implements Parcelable {
         this.book_id = book_id;
     }
 
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public int getIsNoteShowing() {
+        return isNoteShowing;
+    }
+
+    public void setIsNoteShowing(int isNoteShowing) {
+        this.isNoteShowing = isNoteShowing;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -128,5 +150,7 @@ public class Bookmark implements Parcelable {
         dest.writeInt(order);
         dest.writeInt(views);
         dest.writeInt(book_id);
+        dest.writeString(note);
+        dest.writeInt(isNoteShowing);
     }
 }

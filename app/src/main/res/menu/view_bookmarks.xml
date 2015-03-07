@@ -16,6 +16,6 @@
         android:id="@+id/share_picture"
         android:icon="@android:drawable/ic_menu_share"
         android:title=""
-        android:showAsAction="always" />
+        app:showAsAction="always" />
 
 </menu>

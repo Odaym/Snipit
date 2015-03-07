@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/sort_page_number"
         android:orderInCategory="1"
@@ -14,8 +15,8 @@
         android:title="@string/sort_action_by_name" />
     <item
         android:id="@+id/search"
-        android:actionViewClass="android.widget.SearchView"
+        app:actionViewClass="android.support.v7.widget.SearchView"
         android:icon="@android:drawable/ic_menu_search"
-        android:showAsAction="always"
+        app:showAsAction="always"
         android:title="@string/gotit" />
 </menu>
