@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Book Marker</string>
+    <string name="app_name">Atomic</string>
     <string name="gotit">Got it</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
