@@ -8,6 +8,14 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" />
 
+    <ProgressBar
+        android:id="@+id/imageProgressBar"
+        android:indeterminate="false"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"/>
+
     <RelativeLayout
         android:id="@+id/bookmarkDetailsView"
         android:layout_width="match_parent"

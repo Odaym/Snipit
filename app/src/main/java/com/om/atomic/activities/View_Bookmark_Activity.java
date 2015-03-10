@@ -29,11 +29,11 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
@@ -43,6 +43,8 @@ import com.om.atomic.classes.DatabaseHelper;
 import com.om.atomic.classes.EventBus_Poster;
 import com.om.atomic.classes.EventBus_Singleton;
 import com.om.atomic.classes.HackyViewPager;
+import com.om.atomic.classes.Helper_Methods;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -110,12 +112,15 @@ public class View_Bookmark_Activity extends ActionBarActivity {
         RelativeLayout bookmarkDetailsView;
         @InjectView(R.id.createNewNoteBTN)
         ImageButton createNewNoteBTN;
+        @InjectView(R.id.imageProgressBar)
+        ProgressBar imageProgressBar;
 
         private DatabaseHelper dbHelper;
+        private Helper_Methods helperMethods;
         private Context context;
         private int rotation = 0;
         private String bookmark_imagepath, bookmark_name, bookmark_dateAdded;
-        private int bookmark_pagenumber, bookmark_order, bookmark_bookId, bookmark_id, bookmark_views, bookmark_isNoteShowing;
+        private int bookmark_pagenumber, bookmark_order, bookmark_bookId, bookmark_id, bookmark_views;
 
         private boolean clutterHidden = false;
 
@@ -125,6 +130,7 @@ public class View_Bookmark_Activity extends ActionBarActivity {
             setHasOptionsMenu(true);
 
             dbHelper = new DatabaseHelper(context);
+            helperMethods = new Helper_Methods(context);
         }
 
         @Override
@@ -150,11 +156,32 @@ public class View_Bookmark_Activity extends ActionBarActivity {
             switch (item.getItemId()) {
                 case R.id.rotate_right:
                     rotation += 90;
-                    Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG);
+                    imageProgressBar.setVisibility(View.VISIBLE);
+                    Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            imageProgressBar.setVisibility(View.INVISIBLE);
+                        }
+
+                        @Override
+                        public void onError() {
+                        }
+                    });
                     break;
                 case R.id.rotate_left:
+                    imageProgressBar.setVisibility(View.VISIBLE);
                     rotation -= 90;
-                    Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG);
+                    Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            imageProgressBar.setVisibility(View.INVISIBLE);
+                        }
+
+                        @Override
+                        public void onError() {
+
+                        }
+                    });
                     break;
                 case R.id.share_picture:
                     String book_title = getActivity().getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
@@ -184,7 +211,6 @@ public class View_Bookmark_Activity extends ActionBarActivity {
             bookmark_bookId = getArguments().getInt(Constants.EXTRAS_FOREIGN_BOOK_ID);
             bookmark_order = getArguments().getInt(Constants.EXTRAS_BOOKMARK_ORDER);
             bookmark_views = getArguments().getInt(Constants.EXTRAS_BOOKMARK_VIEWS);
-            bookmark_isNoteShowing = getArguments().getInt(Constants.EXTRAS_BOOKMARK_ISNOTESHOWING);
         }
 
         @Override
@@ -205,16 +231,25 @@ public class View_Bookmark_Activity extends ActionBarActivity {
                 createNewNoteBTN.setElevation(15f);
             }
 
-            Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(1500, 1500).centerInside().into(bookmarkIMG);
+            Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(1500, 1500).centerInside().into(bookmarkIMG, new Callback() {
+                @Override
+                public void onSuccess() {
+                    imageProgressBar.setVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void onError() {
+                }
+            });
 
             PhotoViewAttacher mAttacher = new PhotoViewAttacher(bookmarkIMG);
             mAttacher.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
                 @Override
                 public void onPhotoTap(View view, float v, float v2) {
                     if (!clutterHidden) {
-                        dealWithClutter(clutterHidden);
+                        dealWithClutter(clutterHidden, view);
                     } else {
-                        dealWithClutter(clutterHidden);
+                        dealWithClutter(clutterHidden, view);
                     }
 
                     clutterHidden = !clutterHidden;
@@ -236,7 +271,7 @@ public class View_Bookmark_Activity extends ActionBarActivity {
                     layoutParams.setMargins(30, 0, 30, 0);
                     alert.setView(input);
 
-                    input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+                    input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
                     input.setText(dbHelper.getBookmarkNote(bookmark_id));
                     input.setSelection(input.getText().length());
 
@@ -282,72 +317,55 @@ public class View_Bookmark_Activity extends ActionBarActivity {
             return rootView;
         }
 
-        public void dealWithClutter(final boolean show) {
+        public void dealWithClutter(final boolean wasHidden, final View view) {
             ArrayList<ObjectAnimator> arrayListObjectAnimators = new ArrayList<ObjectAnimator>();
+            Animator[] objectAnimators;
 
-            if (show) {
+            if (wasHidden) {
                 ((View_Bookmark_Activity) context).getSupportActionBar().show();
-                ObjectAnimator bookmarkDetailsAnimator = ObjectAnimator.ofFloat(bookmarkDetailsView, "Alpha", 0, 1);
-                bookmarkDetailsAnimator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animator) {
-                        bookmarkDetailsView.setVisibility(View.VISIBLE);
-                    }
 
-                });
-                arrayListObjectAnimators.add(bookmarkDetailsAnimator);
+                arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkDetailsView));
+                arrayListObjectAnimators.add(helperMethods.showViewElement(createNewNoteBTN));
 
-                ObjectAnimator createNewNoteAnimator = ObjectAnimator.ofFloat(createNewNoteBTN, "Alpha", 0, 1);
-                createNewNoteAnimator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animator) {
-                        createNewNoteBTN.setVisibility(View.VISIBLE);
-                    }
-                });
-                arrayListObjectAnimators.add(createNewNoteAnimator);
-
-                ObjectAnimator[] objectAnimators = arrayListObjectAnimators
-                        .toArray(new ObjectAnimator[arrayListObjectAnimators
-                                .size()]);
-
-                AnimatorSet hideClutterSet = new AnimatorSet();
-                hideClutterSet.playTogether(objectAnimators);
-                hideClutterSet.setDuration(300);
-                hideClutterSet.start();
-                ((View_Bookmark_Activity) context).getSupportActionBar().show();
                 ((View_Bookmark_Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             } else {
-                ObjectAnimator bookmarkDetailsAnimator = ObjectAnimator.ofFloat(bookmarkDetailsView, "Alpha", 1 - 0, 0);
-                bookmarkDetailsAnimator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animator) {
-                        bookmarkDetailsView.setVisibility(View.INVISIBLE);
-                    }
-
-                });
-                arrayListObjectAnimators.add(bookmarkDetailsAnimator);
-
-                ObjectAnimator createNewNoteAnimator = ObjectAnimator.ofFloat(createNewNoteBTN, "Alpha", 1 - 0, 0);
-                createNewNoteAnimator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animator) {
-                        createNewNoteBTN.setVisibility(View.INVISIBLE);
-                    }
-                });
-                arrayListObjectAnimators.add(createNewNoteAnimator);
-
-                Animator[] objectAnimators = arrayListObjectAnimators
-                        .toArray(new Animator[arrayListObjectAnimators
-                                .size()]);
-
-                AnimatorSet hideClutterSet = new AnimatorSet();
-                hideClutterSet.playTogether(objectAnimators);
-                hideClutterSet.setDuration(300);
-                hideClutterSet.start();
                 ((View_Bookmark_Activity) context).getSupportActionBar().hide();
+
+                arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkDetailsView));
+                arrayListObjectAnimators.add(helperMethods.hideViewElement(createNewNoteBTN));
+
                 ((View_Bookmark_Activity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                         WindowManager.LayoutParams.FLAG_FULLSCREEN);
             }
+
+            objectAnimators = arrayListObjectAnimators
+                    .toArray(new ObjectAnimator[arrayListObjectAnimators
+                            .size()]);
+            AnimatorSet hideClutterSet = new AnimatorSet();
+            hideClutterSet.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+                    view.setEnabled(false);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    view.setEnabled(true);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            hideClutterSet.playTogether(objectAnimators);
+            hideClutterSet.setDuration(300);
+            hideClutterSet.start();
         }
     }
 
