@@ -8,7 +8,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TypefaceSpan;
+import android.view.View;
 
+import com.nineoldandroids.animation.Animator;
+import com.nineoldandroids.animation.AnimatorListenerAdapter;
+import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
 
 public class Helper_Methods {
@@ -96,6 +100,30 @@ public class Helper_Methods {
         }
 
         return 0;
+    }
+
+    public ObjectAnimator hideViewElement(final View view) {
+        ObjectAnimator elementAnimator = ObjectAnimator.ofFloat(view, "Alpha", 1, 0);
+        elementAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                view.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        return elementAnimator;
+    }
+
+    public ObjectAnimator showViewElement(final View view) {
+        ObjectAnimator elementAnimator = ObjectAnimator.ofFloat(view, "Alpha", 0, 1);
+        elementAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+                view.setVisibility(View.VISIBLE);
+            }
+        });
+
+        return elementAnimator;
     }
 
     public int getCurrentapiVersion() {
