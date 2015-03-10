@@ -31,6 +31,9 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.nineoldandroids.animation.Animator;
+import com.nineoldandroids.animation.AnimatorSet;
+import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
 import com.om.atomic.classes.Bookmark;
 import com.om.atomic.classes.Constants;
@@ -458,10 +461,26 @@ public class Bookmarks_Activity extends ActionBarActivity implements SearchView.
                 holder = (BookmarksViewHolder) convertView.getTag();
             }
 
-            if (!bookmarks.get(position).getNote().isEmpty()) {
-                holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
+            //If the bookmark doesn't have a note
+            if (bookmarks.get(position).getNote().isEmpty()) {
+                holder.bookmarkNoteBTN.setVisibility(View.INVISIBLE);
             } else {
-                holder.bookmarkNoteBTN.setVisibility(View.GONE);
+                holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
+            }
+
+            int isNoteShowing = bookmarks.get(position).getIsNoteShowing();
+
+
+            //The note for the bookmark has been removed from inside View_Bookmark_Activity by replacing it with ""
+            Log.d("NOTE", bookmarks.get(position).getNote() + " NOTE SHOWING? : " + isNoteShowing);
+
+            if (isNoteShowing == 1 && bookmarks.get(position).getNote().isEmpty()) {
+            Log.d("NOTE", "NOTE IS SHOWING BUT CONTENT IS EMPTY : ");
+                holder.motherView.setBackgroundColor(Color.WHITE);
+                holder.bookmarkIMG.setVisibility(View.VISIBLE);
+                holder.bookmarkAction.setVisibility(View.VISIBLE);
+                holder.bookmarkName.setVisibility(View.VISIBLE);
+                holder.bookmarkViews.setVisibility(View.VISIBLE);
             }
 
             holder.bookmarkName.setText(bookmarks.get(position).getName());
@@ -519,7 +538,10 @@ public class Bookmarks_Activity extends ActionBarActivity implements SearchView.
 
             holder.bookmarkNoteBTN.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
+                public void onClick(final View view) {
+                    ArrayList<ObjectAnimator> arrayListObjectAnimators = new ArrayList<ObjectAnimator>();
+                    Animator[] objectAnimators;
+
                     RelativeLayout motherView = (RelativeLayout) view.getParent();
                     TextView bookmarkNoteTV = (TextView) motherView.getChildAt(0);
                     ImageView bookmarkIMG = (ImageView) motherView.getChildAt(1);
@@ -529,32 +551,63 @@ public class Bookmarks_Activity extends ActionBarActivity implements SearchView.
 
                     int isNoteShowing = bookmarks.get(position).getIsNoteShowing();
 
+                    //Note was showing, hide
                     if (isNoteShowing == 1) {
-                        //Was on, turn off
                         view.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
 
                         motherView.setBackgroundColor(Color.WHITE);
-                        bookmarkAction.setVisibility(View.VISIBLE);
-                        bookmarkIMG.setVisibility(View.VISIBLE);
-                        bookmarkViews.setVisibility(View.VISIBLE);
-                        bookmarkName.setVisibility(View.VISIBLE);
-                        bookmarkNoteTV.setVisibility(View.INVISIBLE);
+
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkNoteTV));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkAction));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkIMG));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkViews));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkName));
 
                         bookmarks.get(position).setIsNoteShowing(0);
+                        Log.d("NOTE", "Just made noteIsShowing == 0");
                     } else {
-                        //Was off, turn on
                         view.setBackground(context.getResources().getDrawable(R.drawable.red_bookmark));
 
                         motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
                         bookmarkNoteTV.setText(bookmarks.get(position).getNote());
-                        bookmarkNoteTV.setVisibility(View.VISIBLE);
-                        bookmarkAction.setVisibility(View.INVISIBLE);
-                        bookmarkIMG.setVisibility(View.INVISIBLE);
-                        bookmarkViews.setVisibility(View.INVISIBLE);
-                        bookmarkName.setVisibility(View.INVISIBLE);
+
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkNoteTV));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkAction));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkIMG));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkViews));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkName));
 
                         bookmarks.get(position).setIsNoteShowing(1);
                     }
+
+                    objectAnimators = arrayListObjectAnimators
+                            .toArray(new ObjectAnimator[arrayListObjectAnimators
+                                    .size()]);
+                    AnimatorSet hideClutterSet = new AnimatorSet();
+                    hideClutterSet.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animator) {
+                            view.setEnabled(false);
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animator) {
+                            view.setEnabled(true);
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animator) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animator) {
+
+                        }
+                    });
+                    hideClutterSet.playTogether(objectAnimators);
+                    hideClutterSet.setDuration(300);
+                    hideClutterSet.start();
                 }
             });
 
