@@ -6,13 +6,15 @@
     android:layout_height="@dimen/bookmark_list_item_height"
     android:background="@color/white">
 
-    <TextView
+    <me.grantland.widget.AutofitTextView
         android:id="@+id/bookmarkNoteTV"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/bookmark_list_item_note_width"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_vertical_margin"
-        android:layout_marginStart="@dimen/activity_vertical_margin"
         android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_vertical_margin"
+        android:maxLines="4"
         android:textColor="@android:color/white"
         android:visibility="visible" />
 
@@ -21,7 +23,7 @@
         android:layout_width="@dimen/bookmark_thumb_width"
         android:layout_height="match_parent" />
 
-    <TextView
+    <me.grantland.widget.AutofitTextView
         android:id="@+id/bookmarkNameTV"
         android:layout_width="@dimen/bookmark_list_item_bookmark_name_width"
         android:layout_height="wrap_content"
@@ -31,7 +33,7 @@
         android:layout_toEndOf="@+id/bookmarkIMG"
         android:layout_toRightOf="@+id/bookmarkIMG"
         android:ellipsize="end"
-        android:fontFamily="sans-serif-light"
+        android:maxLines="4"
         android:textColor="@android:color/black"
         android:textSize="@dimen/book_name_fsize" />
 
@@ -63,7 +65,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:fontFamily="sans-serif-light"
         android:paddingBottom="10dp"
         android:paddingEnd="10dp"
         android:paddingLeft="10dp"

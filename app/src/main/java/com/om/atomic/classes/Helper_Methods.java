@@ -126,6 +126,18 @@ public class Helper_Methods {
         return elementAnimator;
     }
 
+    //scrollDirection -> 1 == up --> 0 == down
+    public ObjectAnimator animateFabButton(final View view, int scrollDirection) {
+        int distanceToPushButton;
+
+        if (scrollDirection == 0)
+            distanceToPushButton = context.getResources().getDimensionPixelSize(R.dimen.push_fab_button_y_distance);
+        else
+            distanceToPushButton = context.getResources().getDimensionPixelSize(R.dimen.push_fab_button_y_distance_negative);
+
+        return ObjectAnimator.ofFloat(view, "y", view.getY(), view.getY() + distanceToPushButton);
+    }
+
     public int getCurrentapiVersion() {
         return currentapiVersion;
     }

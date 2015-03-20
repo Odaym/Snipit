@@ -6,12 +6,14 @@
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
     <string name="takeNote">Take a note</string>
-    <string name="writeSomething">Write something here...</string>
+    <string name="writeSomething">Write something here…</string>
 
     <!-- BOOKS_ACTIVITY -->
     <!--<string name="activity_books_hint">Add a new book to get started!</string>-->
     <string name="edit_book_option">Edit</string>
     <string name="remove_book_option">Remove</string>
+    <string name="navigation_drawer_open">Open</string>
+    <string name="navigation_drawer_closed">Closed</string>
 
     <!-- BOOKMARKS_ACTIVITY -->
     <!--<string name="activity_bookmarks_hint">Add a new bookmark to get started!</string>-->
@@ -21,6 +23,7 @@
     <string name="sort_action_by_page_number">Sort by Page</string>
     <string name="sort_action_by_name">Sort by Name</string>
     <string name="sort_action_by_date">Sort by Views</string>
+    <string name="sort_order_override">Sorting preference override. Restoring previous order.</string>
 
     <!-- CREATE_BOOKMARK_ACTIVITY -->
     <string name="create_bookmark_activity_title">New Bookmark</string>
@@ -42,6 +45,7 @@
     <string name="book_author_not_found_error">Couldn\'t find book author</string>
     <string name="book_title_not_found_error">Couldn\'t find book title</string>
     <string name="scan_no_internet_error">Scanning book barcodes needs an Internet connection!</string>
+    <string name="no_scan_data">No scan data received!</string>
 
     <!-- VIEW_BOOKMARKS_ACTIVITY -->
     <string name="rotate_left">Rotate Left</string>
@@ -60,4 +64,6 @@
     <string name="search_results_activity_title">Search Results</string>
     <string name="search_not_found">Couldn\'t find what you were looking for</string>
 
+    <!-- CROP_IMAGE_ACTIVITY -->
+    <string name="seems_out_of_memory">Please try that again with a lower resolution setting for the camera.</string>
 </resources>

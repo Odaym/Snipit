@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -29,8 +28,9 @@ import java.util.Locale;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import hugo.weaving.DebugLog;
 
-public class Crop_Image_Activity extends ActionBarActivity {
+public class Crop_Image_Activity extends BaseActivity {
     @InjectView(R.id.doneBTN)
     ImageView doneBTN;
     @InjectView(R.id.rotateImageBTN)
@@ -74,6 +74,7 @@ public class Crop_Image_Activity extends ActionBarActivity {
             @Override
             public void onClick(View view) {
                 String finalImagePath = create_CroppedImageFile(cropImageView.getCroppedImage());
+
                 delete_previous_uncropped_image(tempImagePath_fromIntent);
 
                 if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE || CALL_PURPOSE == Constants.EDIT_BOOKMARK_IMAGE_PURPOSE_VALUE) {
@@ -98,11 +99,13 @@ public class Crop_Image_Activity extends ActionBarActivity {
         });
     }
 
+    @DebugLog
     public void delete_previous_uncropped_image(String imagePath) {
         File file = new File(imagePath);
         file.delete();
     }
 
+    @DebugLog
     public String create_CroppedImageFile(Bitmap inImage) {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp;
@@ -122,7 +125,7 @@ public class Crop_Image_Activity extends ActionBarActivity {
             f.createNewFile();
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            inImage.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            inImage.compress(Bitmap.CompressFormat.JPEG, 50, bos);
             byte[] bitmapdata = bos.toByteArray();
 
             FileOutputStream fos;

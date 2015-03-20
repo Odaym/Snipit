@@ -6,16 +6,17 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.om.atomic.R;
@@ -48,8 +49,11 @@ import java.util.Random;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
+import hugo.weaving.DebugLog;
 
-public class Create_Book_Activity extends ActionBarActivity {
+public class Create_Book_Activity extends BaseActivity {
 
     @InjectView(R.id.titleET)
     EditText titleET;
@@ -74,6 +78,7 @@ public class Create_Book_Activity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_create_book);
 
         ButterKnife.inject(this);
@@ -84,6 +89,7 @@ public class Create_Book_Activity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.edit_book_activity_title));
+
         if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
             doneBTN.setElevation(15f);
             scanBTN.setElevation(15f);
@@ -93,10 +99,16 @@ public class Create_Book_Activity extends ActionBarActivity {
 
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_BOOK_PURPOSE_STRING, -1);
 
+        //If it's an edit operation
         if (CALL_PURPOSE == Constants.EDIT_BOOK_PURPOSE_VALUE) {
+
+            helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
+
             book_from_list = getIntent().getParcelableExtra("book");
+
             if (book_from_list != null) {
                 titleET.setText(book_from_list.getTitle());
+                titleET.setSelection(titleET.getText().length());
                 authorET.setText(book_from_list.getAuthor());
                 Picasso.with(Create_Book_Activity.this).load(book_from_list.getImagePath()).error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(bookIMG);
             }
@@ -105,7 +117,15 @@ public class Create_Book_Activity extends ActionBarActivity {
         doneBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!titleET.getText().toString().isEmpty()) {
+                if (titleET.getText().toString().isEmpty()) {
+                    YoYo.with(Techniques.Shake)
+                            .duration(700)
+                            .playOn(findViewById(R.id.titleET));
+                } else if (authorET.getText().toString().isEmpty()) {
+                    YoYo.with(Techniques.Shake)
+                            .duration(700)
+                            .playOn(findViewById(R.id.authorET));
+                } else {
                     if (CALL_PURPOSE != Constants.EDIT_BOOK_PURPOSE_VALUE) {
                         Random rand = new Random();
 
@@ -156,7 +176,7 @@ public class Create_Book_Activity extends ActionBarActivity {
                     IntentIntegrator scanIntegrator = new IntentIntegrator(Create_Book_Activity.this);
                     scanIntegrator.initiateScan();
                 } else {
-                    Toast.makeText(Create_Book_Activity.this, getString(R.string.scan_no_internet_error), Toast.LENGTH_LONG).show();
+                    Crouton.makeText(Create_Book_Activity.this, getString(R.string.scan_no_internet_error), Style.ALERT).show();
                 }
             }
         });
@@ -172,6 +192,7 @@ public class Create_Book_Activity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @DebugLog
     public void showScanBookHintShowcase() {
         if (!dbHelper.getSeensParam(null, 3)) {
 
@@ -208,6 +229,8 @@ public class Create_Book_Activity extends ActionBarActivity {
             });
             scanBookShowcase.setShouldCentreText(true);
             scanBookShowcase.show();
+        } else {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         }
     }
 
@@ -225,9 +248,7 @@ public class Create_Book_Activity extends ActionBarActivity {
                 new GetBookInfo().execute(bookSearchString);
             }
         } else {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "No scan data received!", Toast.LENGTH_SHORT);
-            toast.show();
+            Crouton.makeText(Create_Book_Activity.this, getString(R.string.no_scan_data), Style.ALERT).show();
         }
     }
 
@@ -284,12 +305,12 @@ public class Create_Book_Activity extends ActionBarActivity {
                         authorET.setText(authorBuild.toString());
                         loadingBookInfoDialog.dismiss();
                     } catch (JSONException jse) {
-                        Toast.makeText(Create_Book_Activity.this, getResources().getString(R.string.book_author_not_found_error), Toast.LENGTH_LONG);
+                        Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_author_not_found_error), Style.ALERT).show();
                         loadingBookInfoDialog.dismiss();
                         jse.printStackTrace();
                     }
                 } catch (JSONException jse) {
-                    Toast.makeText(Create_Book_Activity.this, getResources().getString(R.string.book_title_not_found_error), Toast.LENGTH_LONG);
+                    Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_title_not_found_error), Style.ALERT).show();
                     jse.printStackTrace();
                 }
                 try {
@@ -297,14 +318,15 @@ public class Create_Book_Activity extends ActionBarActivity {
                     Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("smallThumbnail")).error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(bookIMG);
                     bookImagePath = imageInfo.getString("smallThumbnail");
                 } catch (JSONException jse) {
-                    jse.printStackTrace();
-                    Toast.makeText(Create_Book_Activity.this, getResources().getString(R.string.book_image_not_found_error), Toast.LENGTH_LONG).show();
+                    Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_image_not_found_error), Style.ALERT).show();
                     loadingBookInfoDialog.dismiss();
+                    jse.printStackTrace();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Toast.makeText(Create_Book_Activity.this, getResources().getString(R.string.scan_result_error), Toast.LENGTH_LONG).show();
+                Crouton.makeText(Create_Book_Activity.this, getString(R.string.scan_result_error), Style.ALERT).show();
                 loadingBookInfoDialog.dismiss();
+                e.printStackTrace();
             }
         }
     }

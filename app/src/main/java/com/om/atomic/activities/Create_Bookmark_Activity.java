@@ -6,15 +6,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Toast;
 
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.om.atomic.R;
 import com.om.atomic.classes.Bookmark;
 import com.om.atomic.classes.Constants;
@@ -33,8 +33,11 @@ import java.util.Locale;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
+import hugo.weaving.DebugLog;
 
-public class Create_Bookmark_Activity extends ActionBarActivity {
+public class Create_Bookmark_Activity extends BaseActivity {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
@@ -68,6 +71,7 @@ public class Create_Bookmark_Activity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.edit_bookmark_activity_title));
+
         if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
             doneBTN.setElevation(15f);
             createNewBookmarkBTN.setElevation(15f);
@@ -93,6 +97,7 @@ public class Create_Bookmark_Activity extends ActionBarActivity {
             bookmark_from_list = getIntent().getParcelableExtra("bookmark");
 
             nameET.setText(bookmark_from_list.getName());
+            nameET.setSelection(nameET.getText().length());
             pageNumberET.setText(String.valueOf(bookmark_from_list.getPage_number()));
             try {
                 Picasso.with(this).load(new File(bookmark_from_list.getImage_path())).into(bookmarkIMG);
@@ -104,7 +109,15 @@ public class Create_Bookmark_Activity extends ActionBarActivity {
         doneBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!nameET.getText().toString().isEmpty()) {
+                if (nameET.getText().toString().isEmpty()) {
+                    YoYo.with(Techniques.Shake)
+                            .duration(700)
+                            .playOn(findViewById(R.id.nameET));
+                } else if (pageNumberET.getText().toString().isEmpty()) {
+                    YoYo.with(Techniques.Shake)
+                            .duration(700)
+                            .playOn(findViewById(R.id.pageNumberET));
+                } else {
                     if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
                         try {
                             bookmark_from_list.setName(nameET.getText().toString());
@@ -117,12 +130,12 @@ public class Create_Bookmark_Activity extends ActionBarActivity {
                             Log.d("PATH", bookmark_from_list.getImage_path());
                             dbHelper.updateBookmark(bookmark_from_list);
 
-                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_added"));
+                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
 
                             finish();
                         } catch (NumberFormatException e) {
                             pageNumberET.setText("");
-                            Toast.makeText(Create_Bookmark_Activity.this, getString(R.string.page_number_error), Toast.LENGTH_LONG).show();
+                            Crouton.makeText(Create_Bookmark_Activity.this, getString(R.string.page_number_error), Style.ALERT).show();
                         }
                     } else {
                         Date date = new Date();
@@ -142,12 +155,12 @@ public class Create_Bookmark_Activity extends ActionBarActivity {
 
                             dbHelper.createBookmark(bookmark, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
 
-                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_added"));
+                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed", "new_bookmark"));
 
                             finish();
                         } catch (NumberFormatException e) {
                             pageNumberET.setText("");
-                            Toast.makeText(Create_Bookmark_Activity.this, getString(R.string.page_number_error), Toast.LENGTH_LONG).show();
+                            Crouton.makeText(Create_Bookmark_Activity.this, getString(R.string.page_number_error), Style.ALERT).show();
                         }
                     }
                 }
@@ -218,6 +231,7 @@ public class Create_Bookmark_Activity extends ActionBarActivity {
         }
     }
 
+    @DebugLog
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";

@@ -5,7 +5,11 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
@@ -15,13 +19,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.atomic.classes.Book;
 import com.om.atomic.classes.Bookmark;
@@ -43,24 +47,49 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import hugo.weaving.DebugLog;
+import icepick.Icicle;
 import io.fabric.sdk.android.Fabric;
+import me.grantland.widget.AutofitTextView;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class Books_Activity extends ActionBarActivity {
+public class Books_Activity extends BaseActivity {
 
-    private Books_Adapter booksAdapter;
-
-    private DatabaseHelper dbHelper;
-    private ArrayList<Book> books;
-    private ShowcaseView createBookShowcase;
-    private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+    @Icicle
+    ArrayList<Book> books;
 
     @InjectView(R.id.booksList)
     DragSortListView listView;
     @InjectView(R.id.emptyListLayout)
     RelativeLayout emptyListLayout;
     @InjectView(R.id.createNewBookBTN)
-    ImageButton createNewBookBTN;
+    FloatingActionButton createNewBookBTN;
 
+    private Books_Adapter booksAdapter;
+    private DatabaseHelper dbHelper;
+    private Helper_Methods helperMethods;
+    private ShowcaseView createBookShowcase;
+    private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+
+    //First We Declare Titles And Icons For Our Navigation Drawer List View
+    //This Icons And Titles Are holded in an Array as you can see
+
+    String TITLES[] = {"Home", "Events", "Mail", "Shop", "Travel"};
+    int ICONS[] = {android.R.drawable.ic_btn_speak_now, android.R.drawable.ic_delete, android.R.drawable.ic_dialog_dialer, android.R.drawable.ic_menu_slideshow, android.R.drawable.ic_input_add};
+
+    //Similarly we Create a String Resource for the name and email in the header view
+    //And we also create a int resource for profile picture in the header view
+
+    String NAME = "Akash Bangad";
+    String EMAIL = "akash.bangad@android4devs.com";
+    int PROFILE = android.R.drawable.stat_sys_speakerphone;
+
+    RecyclerView mRecyclerView;                           // Declaring RecyclerView
+    RecyclerView.Adapter mAdapter;                        // Declaring Adapter For Recycler View
+    RecyclerView.LayoutManager mLayoutManager;            // Declaring Layout Manager as a linear layout manager
+    DrawerLayout Drawer;                                  // Declaring DrawerLayout
+
+    ActionBarDrawerToggle mDrawerToggle;
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
                 @Override
@@ -79,19 +108,58 @@ public class Books_Activity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_books);
 
         if (Constants.APPLICATION_CODE_STATE.equals("PRODUCTION"))
             Fabric.with(this, new Crashlytics());
 
         EventBus_Singleton.getInstance().register(this);
 
-        setContentView(R.layout.activity_books);
-
         ButterKnife.inject(this);
 
+        helperMethods = new Helper_Methods(this);
         dbHelper = new DatabaseHelper(this);
-
         books = dbHelper.getAllBooks(null);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView); // Assigning the RecyclerView Object to the xml View
+
+        mRecyclerView.setHasFixedSize(true);                            // Letting the system know that the list objects are of fixed size
+
+        mAdapter = new NavDrawer_Adapter(TITLES, ICONS, NAME, EMAIL, PROFILE);       // Creating the Adapter of MyAdapter class(which we are going to see in a bit)
+        // And passing the titles,icons,header view name, header view email,
+        // and header view profile picture
+
+        mRecyclerView.setAdapter(mAdapter);                              // Setting the adapter to RecyclerView
+
+        mLayoutManager = new LinearLayoutManager(this);                 // Creating a layout Manager
+
+        mRecyclerView.setLayoutManager(mLayoutManager);                 // Setting the layout Manager
+
+
+        Drawer = (DrawerLayout) findViewById(R.id.drawer_layout);        // Drawer object Assigned to the view
+        mDrawerToggle = new ActionBarDrawerToggle(this, Drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_closed) {
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                // code here will execute once the drawer is opened( As I dont want anything happened whe drawer is
+                // open I am not going to put anything here)
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                // Code here will execute once drawer is closed
+            }
+
+
+        }; // Drawer Toggle Object Made
+        Drawer.setDrawerListener(mDrawerToggle); // Drawer Listener set to the Drawer toggle
+        mDrawerToggle.syncState();
+
 
         handleEmptyOrPopulatedScreen(books);
 
@@ -121,6 +189,13 @@ public class Books_Activity extends ActionBarActivity {
                 startActivity(openBookmarksForBook);
             }
         });
+
+        createNewBookBTN.attachToListView(listView);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Subscribe
@@ -129,6 +204,7 @@ public class Books_Activity extends ActionBarActivity {
         booksAdapter.notifyDataSetChanged();
     }
 
+    @DebugLog
     public void prepareForNotifyDataChanged() {
         books = dbHelper.getAllBooks(null);
 
@@ -140,6 +216,7 @@ public class Books_Activity extends ActionBarActivity {
         }
     }
 
+    @DebugLog
     public void handleEmptyOrPopulatedScreen(List<Book> books) {
         if (books.isEmpty()) {
             emptyListLayout.setVisibility(View.VISIBLE);
@@ -155,6 +232,7 @@ public class Books_Activity extends ActionBarActivity {
         thisDragSortListView.setAdapter(booksAdapter);
     }
 
+    @DebugLog
     public void showCreateBookShowcase() {
         if (!dbHelper.getSeensParam(null, 2)) {
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -240,8 +318,8 @@ public class Books_Activity extends ActionBarActivity {
 
                 holder.list_item_book = (RelativeLayout) convertView.findViewById(R.id.list_item_book);
                 holder.bookDateAddedTV = (TextView) convertView.findViewById(R.id.bookDateAddedTV);
-                holder.bookTitleTV = (TextView) convertView.findViewById(R.id.bookTitleTV);
-                holder.bookAuthorTV = (TextView) convertView.findViewById(R.id.bookAuthorTV);
+                holder.bookTitleTV = (AutofitTextView) convertView.findViewById(R.id.bookTitleTV);
+                holder.bookAuthorTV = (AutofitTextView) convertView.findViewById(R.id.bookAuthorTV);
                 holder.bookThumbIMG = (ImageView) convertView.findViewById(R.id.bookThumbIMG);
                 holder.bookmarksNumberTV = (TextView) convertView.findViewById(R.id.bookmarksNumberTV);
                 holder.bookAction = (Button) convertView.findViewById(R.id.bookAction);
@@ -319,6 +397,7 @@ public class Books_Activity extends ActionBarActivity {
                                 case R.id.edit:
                                     Intent editBookIntent = new Intent(Books_Activity.this, Create_Book_Activity.class);
                                     editBookIntent.putExtra(Constants.EDIT_BOOK_PURPOSE_STRING, Constants.EDIT_BOOK_PURPOSE_VALUE);
+                                    editBookIntent.putExtra(Constants.EXTRAS_BOOK_COLOR, books.get(position).getColorCode());
                                     editBookIntent.putExtra("book", books.get(position));
                                     startActivity(editBookIntent);
                                     break;
@@ -347,6 +426,7 @@ public class Books_Activity extends ActionBarActivity {
             return convertView;
         }
 
+        @DebugLog
         public void swap(int from, int to) {
             if (to < books.size() && from < books.size()) {
                 Collections.swap(books, from, to);
@@ -361,8 +441,8 @@ public class Books_Activity extends ActionBarActivity {
         public class BooksViewHolder {
             RelativeLayout list_item_book;
             TextView bookDateAddedTV;
-            TextView bookTitleTV;
-            TextView bookAuthorTV;
+            AutofitTextView bookTitleTV;
+            AutofitTextView bookAuthorTV;
             ImageView bookThumbIMG;
             TextView bookmarksNumberTV;
             Button bookAction;

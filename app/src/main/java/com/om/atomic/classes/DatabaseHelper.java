@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
 
+import hugo.weaving.DebugLog;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String databaseName = "bookmarker.db";
     public static final int version = 1;
@@ -49,6 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.setForeignKeyConstraintsEnabled(true);
     }
 
+    @DebugLog
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         String CREATE_BOOK_TABLE = "CREATE TABLE IF NOT EXISTS " + BOOK_TABLE
@@ -73,12 +76,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         initializeParam(sqLiteDatabase, 3);
     }
 
+    @DebugLog
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i2) {
     }
 
     public ArrayList<Book> getAllBooks(String sortBy) {
-                SQLiteDatabase dbHandler = this.getReadableDatabase();
+        SQLiteDatabase dbHandler = this.getReadableDatabase();
 //        SQLiteDatabase dbHandler = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath() + File.separator + "bookmarker.db", null, 0);
 
         ArrayList<Book> books = new ArrayList<>();
@@ -111,6 +115,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return books;
     }
 
+    @DebugLog
     public int createBook(Book book) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
         ContentValues cv;
@@ -127,6 +132,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return (int) dbHandler.insert(BOOK_TABLE, null, cv);
     }
 
+    @DebugLog
     public void updateBook(Book book) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
 
@@ -142,7 +148,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         dbHandler.update(BOOK_TABLE, newValues, B_ID + "= ?", args);
     }
 
-
+    @DebugLog
     public void deleteBook(int book_id) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
 
@@ -187,6 +193,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return bookmarks;
     }
 
+    @DebugLog
     public ArrayList<Bookmark> searchAllBookmarks(int book_id, String likeText) {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
 
@@ -208,7 +215,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 bookmark.setOrder(cursor.getInt(6));
                 bookmark.setViews(cursor.getInt(7));
                 bookmark.setNote(cursor.getString(8));
-
                 bookmarkResults.add(bookmark);
             } while (cursor.moveToNext());
         }
@@ -218,6 +224,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return bookmarkResults;
     }
 
+    @DebugLog
     public void createBookmark(Bookmark bookmark, int book_id) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
         ContentValues cv;
@@ -236,6 +243,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         dbHandler.insert(BOOKMARK_TABLE, null, cv);
     }
 
+    @DebugLog
     public void updateBookmark(Bookmark bookmark) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
 
@@ -254,6 +262,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         dbHandler.update(BOOKMARK_TABLE, newValues, BM_ID + "= ?", args);
     }
 
+    @DebugLog
+    public void update_BookmarkNote(int bookmark_id, String note) {
+        SQLiteDatabase dbHandler = this.getWritableDatabase();
+        ContentValues newValues = new ContentValues();
+
+        String[] args = new String[]{String.valueOf(bookmark_id)};
+
+        newValues.put(BM_NOTE, note);
+
+        dbHandler.update(BOOKMARK_TABLE, newValues, BM_ID + " = ?", args);
+    }
+
+    @DebugLog
     public void deleteBookmark(int bookmark_id) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
 
@@ -263,6 +284,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         dbHandler.delete(table, whereClause, whereArgs);
     }
 
+    @DebugLog
     public int getMax_BookOrder(SQLiteDatabase dbHandler) {
         Cursor cursor = dbHandler.rawQuery("SELECT MAX(" + B_ORDER + ") FROM " + BOOK_TABLE, null);
 
@@ -276,6 +298,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return max_book_order;
     }
 
+    @DebugLog
     public int getMax_BookmarkOrder(SQLiteDatabase dbHandler) {
         Cursor cursor = dbHandler.rawQuery("SELECT MAX(" + BM_ORDER + ") FROM " + BOOKMARK_TABLE, null);
 
@@ -289,6 +312,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return max_bookmark_order;
     }
 
+    @DebugLog
     public int getBookmarkViews(int bookmark_id) {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
         Cursor cursor = dbHandler.rawQuery("SELECT " + BM_VIEWS + " FROM " + BOOKMARK_TABLE + " WHERE " + BM_ID + " = " + bookmark_id, null);
@@ -303,6 +327,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return views;
     }
 
+    @DebugLog
     public String getBookmarkNote(int bookmark_id) {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
         Cursor cursor = dbHandler.rawQuery("SELECT " + BM_NOTE + " FROM " + BOOKMARK_TABLE + " WHERE " + BM_ID + " = " + bookmark_id, null);
@@ -317,7 +342,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return note;
     }
 
-
+    @DebugLog
     public void initializeParam(SQLiteDatabase db, int paramNumber) {
         ContentValues newValues = new ContentValues();
 
@@ -328,6 +353,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.insert(PARAM_TABLE, null, newValues);
     }
 
+    @DebugLog
     public void updateParam(Param param) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
         ContentValues newValues = new ContentValues();
@@ -339,6 +365,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         dbHandler.update(PARAM_TABLE, newValues, PRM_NUMBER + " = ?", args);
     }
 
+    @DebugLog
     public boolean getSeensParam(SQLiteDatabase dbHandler, int paramNumber) {
         if (dbHandler == null)
             dbHandler = this.getReadableDatabase();

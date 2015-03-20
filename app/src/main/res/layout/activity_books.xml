@@ -1,49 +1,81 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/light_gray">
-
-    <com.om.atomic.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/booksList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/darker_gray"
-        android:drawSelectorOnTop="true"
-        dslv:drag_scroll_start="0.11"
-        dslv:drag_start_mode="onLongPress"
-        dslv:float_alpha="0.6"
-        dslv:float_background_color="@android:color/darker_gray"
-        dslv:max_drag_scroll_speed="0.9"
-        dslv:slide_shuffle_speed="0.2" />
+    android:layout_height="match_parent">
 
     <RelativeLayout
-        android:id="@+id/emptyListLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:alpha="0.5"
-        android:visibility="gone">
+        android:id="@+id/main_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/light_gray">
 
-        <ImageView
-            android:id="@+id/bookIMG"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/green"
+            android:theme="@style/ToolBarStyle"
+            app:theme="@style/ToolBarStyle" />
+
+        <com.om.atomic.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/booksList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/toolbar"
+            android:background="@android:color/darker_gray"
+            android:drawSelectorOnTop="true"
+            dslv:drag_scroll_start="0.11"
+            dslv:drag_start_mode="onLongPress"
+            dslv:float_alpha="0.6"
+            dslv:float_background_color="@android:color/darker_gray"
+            dslv:max_drag_scroll_speed="0.9"
+            dslv:slide_shuffle_speed="0.2" />
+
+        <RelativeLayout
+            android:id="@+id/emptyListLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:src="@drawable/book_outline" />
+            android:alpha="0.5"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/bookIMG"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/book_outline" />
+
+        </RelativeLayout>
+
+        <com.melnykov.fab.FloatingActionButton
+            android:id="@+id/createNewBookBTN"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:src="@drawable/create_book"
+            fab:fab_colorNormal="@color/green"
+            fab:fab_colorPressed="@color/yellow"
+            fab:fab_colorRipple="@color/yellow"/>
 
     </RelativeLayout>
 
-    <ImageButton
-        android:id="@+id/createNewBookBTN"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:background="@drawable/fab_picture"
-        android:src="@drawable/create_book" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/RecyclerView"
+        android:layout_width="320dp"
+        android:layout_below="@+id/main_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="#ffffff"
+        android:scrollbars="vertical">
 
-</RelativeLayout>
+    </android.support.v7.widget.RecyclerView>
+
+</android.support.v4.widget.DrawerLayout>

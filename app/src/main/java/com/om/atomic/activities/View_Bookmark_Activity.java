@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,7 +14,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
-import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -52,10 +52,11 @@ import java.util.ArrayList;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import hugo.weaving.DebugLog;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
-public class View_Bookmark_Activity extends ActionBarActivity {
+public class View_Bookmark_Activity extends BaseActivity {
 
     private static int currentapiVersion = android.os.Build.VERSION.SDK_INT;
     private ArrayList<Bookmark> bookmarks;
@@ -120,7 +121,7 @@ public class View_Bookmark_Activity extends ActionBarActivity {
         private Context context;
         private int rotation = 0;
         private String bookmark_imagepath, bookmark_name, bookmark_dateAdded;
-        private int bookmark_pagenumber, bookmark_order, bookmark_bookId, bookmark_id, bookmark_views;
+        private int bookmark_pagenumber, bookmark_id;
 
         private boolean clutterHidden = false;
 
@@ -208,9 +209,6 @@ public class View_Bookmark_Activity extends ActionBarActivity {
             bookmark_name = getArguments().getString(Constants.EXTRAS_BOOKMARK_NAME);
             bookmark_pagenumber = getArguments().getInt(Constants.EXTRAS_BOOKMARK_PAGENUMBER);
             bookmark_dateAdded = getArguments().getString(Constants.EXTRAS_BOOKMARK_DATE_ADDED);
-            bookmark_bookId = getArguments().getInt(Constants.EXTRAS_FOREIGN_BOOK_ID);
-            bookmark_order = getArguments().getInt(Constants.EXTRAS_BOOKMARK_ORDER);
-            bookmark_views = getArguments().getInt(Constants.EXTRAS_BOOKMARK_VIEWS);
         }
 
         @Override
@@ -271,25 +269,15 @@ public class View_Bookmark_Activity extends ActionBarActivity {
                     layoutParams.setMargins(30, 0, 30, 0);
                     alert.setView(input);
 
+                    Typeface type = Typeface.createFromAsset(context.getAssets(),"fonts/HelveticaNeue-Thin.otf");
+                    input.setTypeface(type);
                     input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
                     input.setText(dbHelper.getBookmarkNote(bookmark_id));
                     input.setSelection(input.getText().length());
 
                     alert.setPositiveButton(context.getResources().getString(R.string.OK), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            //Prepare the object with all of its previous and currently-updated properties before the object gets updated in the DB, otherwise all unset properties will null or zero.
-                            Bookmark bookmark = new Bookmark();
-                            bookmark.setId(bookmark_id);
-                            bookmark.setName(bookmark_name);
-                            bookmark.setImage_path(bookmark_imagepath);
-                            bookmark.setBookId(bookmark_bookId);
-                            bookmark.setDate_added(bookmark_dateAdded);
-                            bookmark.setOrder(bookmark_order);
-                            bookmark.setNote(input.getText().toString());
-                            bookmark.setPage_number(bookmark_pagenumber);
-                            bookmark.setViews(bookmark_views);
-
-                            dbHelper.updateBookmark(bookmark);
+                            dbHelper.update_BookmarkNote(bookmark_id, input.getText().toString());
 
                             EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_note_changed"));
                         }
@@ -317,6 +305,7 @@ public class View_Bookmark_Activity extends ActionBarActivity {
             return rootView;
         }
 
+        @DebugLog
         public void dealWithClutter(final boolean wasHidden, final View view) {
             ArrayList<ObjectAnimator> arrayListObjectAnimators = new ArrayList<ObjectAnimator>();
             Animator[] objectAnimators;
@@ -387,6 +376,7 @@ public class View_Bookmark_Activity extends ActionBarActivity {
             bundle.putString(Constants.EXTRAS_BOOKMARK_DATE_ADDED, bookmarks.get(position).getDate_added());
             bundle.putString(Constants.EXTRAS_BOOKMARK_NOTE, bookmarks.get(position).getNote());
             bundle.putInt(Constants.EXTRAS_BOOKMARK_VIEWS, bookmarks.get(position).getViews());
+            bundle.putInt(Constants.EXTRAS_BOOKMARK_ISNOTESHOWING, bookmarks.get(position).getIsNoteShowing());
             imageFragment.setArguments(bundle);
 
             return imageFragment;

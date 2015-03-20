@@ -10,28 +10,11 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin">
 
-        <TextView
-            android:id="@+id/nameTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/nameET"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="20dp"
-            android:layout_marginRight="20dp"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/bookmark_name"
-            android:textColor="@color/gray"
-            android:textSize="@dimen/books_bookmarks_activity_hint_fsize" />
-
         <EditText
             android:id="@+id/nameET"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@+id/nameTV"
-            android:layout_toRightOf="@+id/nameTV"
-            android:fontFamily="sans-serif-light"
+            android:hint="@string/bookmark_name"
             android:inputType="textCapWords"
             android:singleLine="true"
             android:textColor="@android:color/black"
@@ -47,27 +30,12 @@
             android:layout_marginTop="20dp"
             android:background="@android:color/black" />
 
-        <TextView
-            android:id="@+id/pageNumberTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/pageNumberET"
-            android:layout_below="@+id/separator"
-            android:layout_marginEnd="20dp"
-            android:layout_marginRight="20dp"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/bookmark_page"
-            android:textColor="@color/gray"
-            android:textSize="@dimen/books_bookmarks_activity_hint_fsize" />
-
         <EditText
             android:id="@+id/pageNumberET"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/separator"
-            android:layout_toEndOf="@+id/pageNumberTV"
-            android:layout_toRightOf="@+id/pageNumberTV"
-            android:fontFamily="sans-serif-light"
+            android:hint="@string/bookmark_page"
             android:inputType="numberSigned"
             android:singleLine="true"
             android:textColor="@android:color/black"

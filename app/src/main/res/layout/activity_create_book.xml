@@ -9,28 +9,12 @@
         android:paddingRight="@dimen/activity_vertical_margin"
         android:paddingTop="@dimen/activity_vertical_margin">
 
-        <TextView
-            android:id="@+id/titleTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/titleET"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/book_title"
-            android:textColor="@color/gray"
-            android:textSize="@dimen/books_bookmarks_activity_hint_fsize" />
 
         <EditText
             android:id="@+id/titleET"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginStart="20dp"
-            android:layout_toEndOf="@+id/titleTV"
-            android:layout_toRightOf="@+id/titleTV"
-            android:fontFamily="sans-serif-light"
+            android:hint="Book Title"
             android:inputType="textCapWords"
             android:singleLine="true"
             android:textColor="@android:color/black"
@@ -46,28 +30,13 @@
             android:layout_marginTop="20dp"
             android:background="@android:color/black" />
 
-        <TextView
-            android:id="@+id/authorTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/authorET"
-            android:layout_below="@+id/separator"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/book_author"
-            android:textColor="@color/gray"
-            android:textSize="@dimen/books_bookmarks_activity_hint_fsize" />
-
         <EditText
             android:id="@+id/authorET"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/separator"
             android:layout_marginBottom="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginStart="20dp"
-            android:layout_toEndOf="@+id/authorTV"
-            android:layout_toRightOf="@+id/authorTV"
-            android:fontFamily="sans-serif-light"
+            android:hint="Author"
             android:inputType="textCapWords"
             android:singleLine="true"
             android:textColor="@android:color/black"

@@ -9,6 +9,25 @@
         <item name="android:windowBackground">@color/light_gray</item>
     </style>
 
+    <style name="Main_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:actionBarStyle">@style/MyTheme.ActionBarStyle</item>
+        <item name="colorPrimary">@color/green</item>
+        <item name="colorPrimaryDark">@color/darker_green</item>
+        <item name="android:actionModeBackground">@color/transparent</item>
+        <item name="android:windowBackground">@color/light_gray</item>
+    </style>
+
+    <style name="ToolBarStyle" parent="Main_Activity_Theme">
+        <item name="colorPrimaryDark">@color/darker_green</item>
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+    </style>
+
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">false</item>
+        <item name="color">@android:color/white</item>
+    </style>
+
     <style name="View_Bookmark_Activity_Theme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@android:color/transparent</item>
         <item name="colorPrimaryDark">@android:color/transparent</item>

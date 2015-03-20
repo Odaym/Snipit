@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
@@ -20,6 +19,9 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.nineoldandroids.animation.Animator;
+import com.nineoldandroids.animation.AnimatorSet;
+import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
 import com.om.atomic.classes.Bookmark;
 import com.om.atomic.classes.Constants;
@@ -34,7 +36,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchResults_Activity extends ActionBarActivity {
+import hugo.weaving.DebugLog;
+
+public class SearchResults_Activity extends BaseActivity {
     private ArrayList<Bookmark> bookmarks;
     private DatabaseHelper dbHelper;
     private ListView listView;
@@ -45,6 +49,7 @@ public class SearchResults_Activity extends ActionBarActivity {
     private String book_title;
     private RelativeLayout emptyListLayout;
     private SearchResults_Adapter searchResultsAdapter;
+    private Helper_Methods helperMethods;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,7 +58,7 @@ public class SearchResults_Activity extends ActionBarActivity {
 
         EventBus_Singleton.getInstance().register(this);
 
-        Helper_Methods helperMethods = new Helper_Methods(this);
+        helperMethods = new Helper_Methods(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.search_results_activity_title));
@@ -77,19 +82,22 @@ public class SearchResults_Activity extends ActionBarActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Intent intent = new Intent(SearchResults_Activity.this, View_Bookmark_Activity.class);
-                intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
-                intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
-                intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position);
-                intent.putParcelableArrayListExtra("bookmarks", bookmarks);
-                startActivity(intent);
+                if (bookmarks.get(position).getIsNoteShowing() == 0) {
+                    Intent intent = new Intent(SearchResults_Activity.this, View_Bookmark_Activity.class);
+                    intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
+                    intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
+                    intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position);
+                    intent.putParcelableArrayListExtra("bookmarks", bookmarks);
+                    startActivity(intent);
 
-                int bookmarkViews = dbHelper.getBookmarkViews(bookmarks.get(position).getId());
-                bookmarks.get(position).setViews(bookmarkViews + 1);
-                dbHelper.updateBookmark(bookmarks.get(position));
-                searchResultsAdapter.notifyDataSetChanged();
+                    int bookmarkViews = dbHelper.getBookmarkViews(bookmarks.get(position).getId());
+                    bookmarks.get(position).setViews(bookmarkViews + 1);
+                    dbHelper.updateBookmark(bookmarks.get(position));
+                    searchResultsAdapter.notifyDataSetChanged();
 
-                EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_viewed"));
+                    //This tells Bookmarks Activity to update the views counter of all bookmarks
+                    EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_viewed"));
+                }
             }
         });
     }
@@ -107,15 +115,16 @@ public class SearchResults_Activity extends ActionBarActivity {
 
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
-        if (ebp.getMessage().equals("bookmark_added") || ebp.getMessage().equals("bookmark_note_changed")) {
+        if (ebp.getMessage().equals("bookmark_note_changed") || ebp.getMessage().equals("bookmark_changed")) {
             bookmarks = dbHelper.searchAllBookmarks(book_id, query);
             handleEmptyOrPopulatedScreen(bookmarks);
         }
     }
 
+    @DebugLog
     public void handleEmptyOrPopulatedScreen(List<Bookmark> bookmarks) {
         if (bookmarks.isEmpty()) {
-            emptyListLayout.setVisibility(View.VISIBLE);
+            finish();
         } else {
             emptyListLayout.setVisibility(View.GONE);
         }
@@ -179,7 +188,7 @@ public class SearchResults_Activity extends ActionBarActivity {
             if (!bookmarks.get(position).getNote().isEmpty())
                 holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
             else
-                holder.bookmarkNoteBTN.setVisibility(View.GONE);
+                holder.bookmarkNoteBTN.setVisibility(View.INVISIBLE);
 
             holder.bookmarkName.setText(bookmarks.get(position).getName());
             holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
@@ -215,10 +224,10 @@ public class SearchResults_Activity extends ActionBarActivity {
                                     startActivity(editBookmarkIntent);
                                     break;
                                 case R.id.delete:
-                                    EventBus_Singleton.getInstance().post("bookmark_deleted");
                                     dbHelper.deleteBookmark(bookmarks.get(position).getId());
                                     bookmarks = dbHelper.searchAllBookmarks(book_id, query);
                                     handleEmptyOrPopulatedScreen(bookmarks);
+                                    EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
                                     break;
                             }
 
@@ -236,21 +245,75 @@ public class SearchResults_Activity extends ActionBarActivity {
 
             holder.bookmarkNoteBTN.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
+                public void onClick(final View view) {
+                    ArrayList<ObjectAnimator> arrayListObjectAnimators = new ArrayList<ObjectAnimator>();
+                    Animator[] objectAnimators;
+
+                    RelativeLayout motherView = (RelativeLayout) view.getParent();
+                    TextView bookmarkNoteTV = (TextView) motherView.getChildAt(0);
+                    ImageView bookmarkIMG = (ImageView) motherView.getChildAt(1);
+                    TextView bookmarkName = (TextView) motherView.getChildAt(2);
+                    Button bookmarkAction = (Button) motherView.getChildAt(3);
+                    TextView bookmarkViews = (TextView) motherView.getChildAt(5);
+
                     int isNoteShowing = bookmarks.get(position).getIsNoteShowing();
 
+                    //Note was showing, hide
                     if (isNoteShowing == 1) {
-                        //Was on, turn off
                         view.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
+
+                        motherView.setBackgroundColor(Color.WHITE);
+
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkNoteTV));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkAction));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkIMG));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkViews));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkName));
+
                         bookmarks.get(position).setIsNoteShowing(0);
-                        notifyDataSetChanged();
                     } else {
-                        //Was off, turn on
                         view.setBackground(context.getResources().getDrawable(R.drawable.red_bookmark));
+
+                        motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                        bookmarkNoteTV.setText(bookmarks.get(position).getNote());
+
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkNoteTV));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkAction));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkIMG));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkViews));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkName));
+
                         bookmarks.get(position).setIsNoteShowing(1);
-                        notifyDataSetChanged();
                     }
 
+                    objectAnimators = arrayListObjectAnimators
+                            .toArray(new ObjectAnimator[arrayListObjectAnimators
+                                    .size()]);
+                    AnimatorSet hideClutterSet = new AnimatorSet();
+                    hideClutterSet.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animator) {
+                            view.setEnabled(false);
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animator) {
+                            view.setEnabled(true);
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animator) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animator) {
+
+                        }
+                    });
+                    hideClutterSet.playTogether(objectAnimators);
+                    hideClutterSet.setDuration(300);
+                    hideClutterSet.start();
                 }
             });
 
