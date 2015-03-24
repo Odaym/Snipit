@@ -6,48 +6,59 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingLeft="@dimen/activity_vertical_margin"
-        android:paddingRight="@dimen/activity_vertical_margin"
-        android:paddingTop="@dimen/activity_vertical_margin">
+        android:paddingRight="@dimen/activity_vertical_margin">
 
 
-        <EditText
-            android:id="@+id/titleET"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:hint="Book Title"
-            android:inputType="textCapWords"
-            android:singleLine="true"
-            android:textColor="@android:color/black"
-            android:textCursorDrawable="@null"
-            android:theme="@android:style/Theme.Holo" />
-
-        <View
-            android:id="@+id/separator"
+        <com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
-            android:layout_height="0.3dp"
-            android:layout_below="@id/titleET"
-            android:layout_marginBottom="20dp"
-            android:layout_marginTop="20dp"
-            android:background="@android:color/black" />
-
-        <EditText
-            android:id="@+id/authorET"
-            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/separator"
-            android:layout_marginBottom="20dp"
-            android:hint="Author"
-            android:inputType="textCapWords"
-            android:singleLine="true"
-            android:textColor="@android:color/black"
-            android:textCursorDrawable="@null"
-            android:theme="@android:style/Theme.Holo" />
+            android:id="@+id/titleETFloating"
+            float:fletPadding="10dp">
+
+            <EditText
+                android:id="@+id/titleET"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/book_title"
+                android:inputType="textCapWords"
+                android:singleLine="true"
+                android:textColor="@android:color/black"
+                android:textCursorDrawable="@null" />
+
+        </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+
+        <!--<View-->
+        <!--android:id="@+id/separator"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0.3dp"-->
+        <!--android:layout_below="@id/titleETFloating"-->
+        <!--android:layout_marginTop="20dp"-->
+        <!--android:background="@android:color/black" />-->
+
+        <com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/titleETFloating"
+            android:id="@+id/authorETFloating"
+            float:fletPadding="10dp">
+
+            <EditText
+                android:id="@+id/authorET"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:hint="@string/book_author"
+                android:inputType="textCapWords"
+                android:singleLine="true"
+                android:textColor="@android:color/black"
+                android:textCursorDrawable="@null"/>
+        </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 
         <ImageView
             android:id="@+id/bookIMG"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/authorET" />
+            android:layout_below="@+id/authorETFloating" />
     </RelativeLayout>
 
     <ImageView

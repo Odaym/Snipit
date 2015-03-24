@@ -14,7 +14,7 @@
         android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="visible"/>
+        android:visibility="visible" />
 
     <RelativeLayout
         android:id="@+id/bookmarkDetailsView"
@@ -76,6 +76,19 @@
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:background="@drawable/fab_take_note"
-        android:src="@drawable/pencil" />
+        android:src="@android:drawable/ic_menu_edit" />
+
+    <ImageButton
+        android:id="@+id/paintBookmarkBTN"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_above="@id/bookmarkDetailsView"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:background="@drawable/fab_paint"
+        android:src="@drawable/paint_view" />
 
 </RelativeLayout>

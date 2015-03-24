@@ -16,6 +16,7 @@ import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -127,6 +128,8 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
+
+        overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
         ButterKnife.inject(this);
 
@@ -247,6 +250,7 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
+                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
                 break;
             case R.id.search:
                 searchView.setIconified(false);
@@ -275,6 +279,16 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            super.onBackPressed();
+            overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -530,7 +544,7 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
             holder.bookmarkName.setText(bookmarks.get(position).getName());
             holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
 
-            Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(holder.bookmarkIMG);
+            Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
 
             holder.bookmarkAction.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -608,7 +622,7 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
 
                         bookmarks.get(position).setIsNoteShowing(0);
                     } else {
-                        view.setBackground(context.getResources().getDrawable(R.drawable.red_bookmark));
+                        view.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
 
                         motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
                         bookmarkNoteTV.setText(bookmarks.get(position).getNote());

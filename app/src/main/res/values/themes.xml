@@ -29,13 +29,11 @@
     </style>
 
     <style name="View_Bookmark_Activity_Theme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@android:color/transparent</item>
-        <item name="colorPrimaryDark">@android:color/transparent</item>
-        <item name="android:actionBarStyle">@style/MyTheme.ActionBarStyle</item>
+        <item name="colorPrimary">@color/black_transparent</item>
+        <item name="android:windowBackground">@color/black_transparent</item>
     </style>
 
-    <style name="Crop_Image_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar">
-    </style>
+    <style name="Crop_Image_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar"/>
 
     <style name="MyTheme.ActionBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar">
         <item name="android:titleTextStyle">@style/MyTheme.ActionBar.TitleTextStyle</item>

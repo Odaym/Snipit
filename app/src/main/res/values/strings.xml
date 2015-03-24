@@ -66,4 +66,11 @@
 
     <!-- CROP_IMAGE_ACTIVITY -->
     <string name="seems_out_of_memory">Please try that again with a lower resolution setting for the camera.</string>
+
+    <!-- PAINT_BOOKMARK_ACTIVITY -->
+    <string name="paint_bookmark_activity_title">Draw and Highlight</string>
+    <string name="fab_action_clear">Clear</string>
+    <string name="fab_action_color">Color</string>
+    <string name="fab_action_undo">Undo</string>
+    <string name="fab_action_thickness">Thickness</string>
 </resources>

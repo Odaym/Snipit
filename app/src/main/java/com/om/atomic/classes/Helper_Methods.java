@@ -2,6 +2,7 @@ package com.om.atomic.classes;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
@@ -14,6 +15,8 @@ import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
+
+import java.util.Random;
 
 public class Helper_Methods {
     private Context context;
@@ -126,19 +129,16 @@ public class Helper_Methods {
         return elementAnimator;
     }
 
-    //scrollDirection -> 1 == up --> 0 == down
-    public ObjectAnimator animateFabButton(final View view, int scrollDirection) {
-        int distanceToPushButton;
-
-        if (scrollDirection == 0)
-            distanceToPushButton = context.getResources().getDimensionPixelSize(R.dimen.push_fab_button_y_distance);
-        else
-            distanceToPushButton = context.getResources().getDimensionPixelSize(R.dimen.push_fab_button_y_distance_negative);
-
-        return ObjectAnimator.ofFloat(view, "y", view.getY(), view.getY() + distanceToPushButton);
-    }
-
     public int getCurrentapiVersion() {
         return currentapiVersion;
+    }
+
+    public Drawable getNotFoundImage(Context c) {
+        Random r = new Random();
+        int i = r.nextInt(44 - 1) + 1;
+
+        String imageName = "notfound_" + i;
+
+        return c.getResources().getDrawable(c.getResources().getIdentifier(imageName, "drawable", c.getPackageName()));
     }
 }

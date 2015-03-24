@@ -5,10 +5,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -51,7 +47,6 @@ import hugo.weaving.DebugLog;
 import icepick.Icicle;
 import io.fabric.sdk.android.Fabric;
 import me.grantland.widget.AutofitTextView;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class Books_Activity extends BaseActivity {
 
@@ -65,31 +60,15 @@ public class Books_Activity extends BaseActivity {
     @InjectView(R.id.createNewBookBTN)
     FloatingActionButton createNewBookBTN;
 
+    private Helper_Methods helperMethods;
     private Books_Adapter booksAdapter;
     private DatabaseHelper dbHelper;
-    private Helper_Methods helperMethods;
     private ShowcaseView createBookShowcase;
     private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 
-    //First We Declare Titles And Icons For Our Navigation Drawer List View
-    //This Icons And Titles Are holded in an Array as you can see
+//    private String TITLES[] = {"Home", "Events", "Mail", "Shop", "Travel"};
+//    int ICONS[] = {android.R.drawable.ic_btn_speak_now, android.R.drawable.ic_delete, android.R.drawable.ic_dialog_dialer, android.R.drawable.ic_menu_slideshow, android.R.drawable.ic_input_add};
 
-    String TITLES[] = {"Home", "Events", "Mail", "Shop", "Travel"};
-    int ICONS[] = {android.R.drawable.ic_btn_speak_now, android.R.drawable.ic_delete, android.R.drawable.ic_dialog_dialer, android.R.drawable.ic_menu_slideshow, android.R.drawable.ic_input_add};
-
-    //Similarly we Create a String Resource for the name and email in the header view
-    //And we also create a int resource for profile picture in the header view
-
-    String NAME = "Akash Bangad";
-    String EMAIL = "akash.bangad@android4devs.com";
-    int PROFILE = android.R.drawable.stat_sys_speakerphone;
-
-    RecyclerView mRecyclerView;                           // Declaring RecyclerView
-    RecyclerView.Adapter mAdapter;                        // Declaring Adapter For Recycler View
-    RecyclerView.LayoutManager mLayoutManager;            // Declaring Layout Manager as a linear layout manager
-    DrawerLayout Drawer;                                  // Declaring DrawerLayout
-
-    ActionBarDrawerToggle mDrawerToggle;
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
                 @Override
@@ -117,55 +96,54 @@ public class Books_Activity extends BaseActivity {
 
         ButterKnife.inject(this);
 
-        helperMethods = new Helper_Methods(this);
         dbHelper = new DatabaseHelper(this);
         books = dbHelper.getAllBooks(null);
+        helperMethods = new Helper_Methods(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView); // Assigning the RecyclerView Object to the xml View
-
-        mRecyclerView.setHasFixedSize(true);                            // Letting the system know that the list objects are of fixed size
-
-        mAdapter = new NavDrawer_Adapter(TITLES, ICONS, NAME, EMAIL, PROFILE);       // Creating the Adapter of MyAdapter class(which we are going to see in a bit)
-        // And passing the titles,icons,header view name, header view email,
-        // and header view profile picture
-
-        mRecyclerView.setAdapter(mAdapter);                              // Setting the adapter to RecyclerView
-
-        mLayoutManager = new LinearLayoutManager(this);                 // Creating a layout Manager
-
-        mRecyclerView.setLayoutManager(mLayoutManager);                 // Setting the layout Manager
-
-
-        Drawer = (DrawerLayout) findViewById(R.id.drawer_layout);        // Drawer object Assigned to the view
-        mDrawerToggle = new ActionBarDrawerToggle(this, Drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_closed) {
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                // code here will execute once the drawer is opened( As I dont want anything happened whe drawer is
-                // open I am not going to put anything here)
-            }
-
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-                // Code here will execute once drawer is closed
-            }
-
-
-        }; // Drawer Toggle Object Made
-        Drawer.setDrawerListener(mDrawerToggle); // Drawer Listener set to the Drawer toggle
-        mDrawerToggle.syncState();
-
-
-        handleEmptyOrPopulatedScreen(books);
-
         if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
             createNewBookBTN.setElevation(15f);
+            toolbar.setElevation(25f);
         }
+
+//        String USER_FULL_NAME = getIntent().getExtras().getString(Constants.USER_FULL_NAME);
+//        String USER_EMAIL_ADDRESS = getIntent().getExtras().getString(Constants.USER_EMAIL_ADDRESS);
+//        String USER_PHOTO_URL = getIntent().getExtras().getString(Constants.USER_PHOTO_URL);
+//
+//        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
+//        mRecyclerView.setHasFixedSize(true);
+//
+//        RecyclerView.Adapter mAdapter = new NavDrawer_Adapter(this, TITLES, ICONS, USER_FULL_NAME, USER_EMAIL_ADDRESS, USER_PHOTO_URL);
+//
+//        mRecyclerView.setAdapter(mAdapter);
+//
+//        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
+//
+//        mRecyclerView.setLayoutManager(mLayoutManager);
+//
+//
+//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_closed) {
+//
+//            @Override
+//            public void onDrawerOpened(View drawerView) {
+//                super.onDrawerOpened(drawerView);
+//            }
+//
+//            @Override
+//            public void onDrawerClosed(View drawerView) {
+//                super.onDrawerClosed(drawerView);
+//            }
+//        };
+//
+//        drawer.setDrawerListener(mDrawerToggle);
+//        mDrawerToggle.syncState();
+//
+//        drawer.openDrawer(Gravity.START);
+
+        handleEmptyOrPopulatedScreen(books);
 
         createNewBookBTN.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -191,11 +169,6 @@ public class Books_Activity extends BaseActivity {
         });
 
         createNewBookBTN.attachToListView(listView);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Subscribe
@@ -347,7 +320,7 @@ public class Books_Activity extends BaseActivity {
             holder.bookTitleTV.setText(books.get(position).getTitle());
             holder.bookAuthorTV.setText(books.get(position).getAuthor());
 
-            Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(holder.bookThumbIMG);
+            Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(helperMethods.getNotFoundImage(context)).into(holder.bookThumbIMG);
 
             String[] bookDateAdded = books.get(position).getDate_added().split(" ");
             holder.bookDateAddedTV.setText(bookDateAdded[0] + " " + bookDateAdded[1] + ", " + bookDateAdded[2]);

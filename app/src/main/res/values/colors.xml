@@ -5,6 +5,8 @@
     <color name="light_gray">#EEEEEE</color>
     <color name="transparent">#00000000</color>
     <color name="mokhmal">#7C6C65</color>
+    <color name="black_transparent">#4D000000</color>
+    <color name="black_less_transparent">#99000000</color>
 
     <color name="green">#44A048</color>
     <color name="darker_green">#36803A</color>

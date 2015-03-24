@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,6 +82,8 @@ public class Create_Book_Activity extends BaseActivity {
 
         setContentView(R.layout.activity_create_book);
 
+        overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
+
         ButterKnife.inject(this);
 
         dbHelper = new DatabaseHelper(this);
@@ -88,7 +91,6 @@ public class Create_Book_Activity extends BaseActivity {
         Helper_Methods helperMethods = new Helper_Methods(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(getString(R.string.edit_book_activity_title));
 
         if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
             doneBTN.setElevation(15f);
@@ -101,6 +103,7 @@ public class Create_Book_Activity extends BaseActivity {
 
         //If it's an edit operation
         if (CALL_PURPOSE == Constants.EDIT_BOOK_PURPOSE_VALUE) {
+            getSupportActionBar().setTitle(getString(R.string.edit_book_activity_title));
 
             helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
 
@@ -112,6 +115,8 @@ public class Create_Book_Activity extends BaseActivity {
                 authorET.setText(book_from_list.getAuthor());
                 Picasso.with(Create_Book_Activity.this).load(book_from_list.getImagePath()).error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(bookIMG);
             }
+        } else {
+            getSupportActionBar().setTitle(getString(R.string.create_book_activity_title));
         }
 
         doneBTN.setOnClickListener(new View.OnClickListener() {
@@ -187,9 +192,20 @@ public class Create_Book_Activity extends BaseActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
+                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            super.onBackPressed();
+            overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @DebugLog

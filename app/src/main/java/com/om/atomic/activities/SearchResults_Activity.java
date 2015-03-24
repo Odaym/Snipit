@@ -193,7 +193,7 @@ public class SearchResults_Activity extends BaseActivity {
             holder.bookmarkName.setText(bookmarks.get(position).getName());
             holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
 
-            Picasso.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(holder.bookmarkIMG);
+            Picasso.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
 
             holder.bookmarkAction.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -272,7 +272,7 @@ public class SearchResults_Activity extends BaseActivity {
 
                         bookmarks.get(position).setIsNoteShowing(0);
                     } else {
-                        view.setBackground(context.getResources().getDrawable(R.drawable.red_bookmark));
+                        view.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
 
                         motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
                         bookmarkNoteTV.setText(bookmarks.get(position).getNote());

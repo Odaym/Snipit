@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
     <application
         android:name=".classes.Atomic_Application"
@@ -17,8 +19,14 @@
         android:theme="@style/AppTheme">
 
         <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <meta-data
             android:name="com.crashlytics.ApiKey"
             android:value="36e136351325660be3ac92f428de565fcbdc3033" />
+
+        <!--<activity android:name=".activities.Login_Activity"></activity>-->
 
         <activity
             android:name=".activities.Books_Activity"
@@ -67,6 +75,10 @@
         <activity
             android:name=".activities.Crop_Image_Activity"
             android:theme="@style/Crop_Image_Activity_Theme" />
+
+        <activity
+            android:name=".activities.Paint_Bookmark_Activity"
+            android:theme="@style/View_Bookmark_Activity_Theme" />
 
     </application>
 

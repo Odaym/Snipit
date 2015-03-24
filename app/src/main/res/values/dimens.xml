@@ -56,4 +56,7 @@
     <dimen name="push_fab_button_y_distance">100dp</dimen>
     <dimen name="push_fab_button_y_distance_negative">-100dp</dimen>
 
+    <!-- BOOKS ACTIVITY -->
+    <dimen name="toolbar_top_padding">0dp</dimen>
+
 </resources>

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -55,13 +56,15 @@ public class Create_Bookmark_Activity extends BaseActivity {
     private DatabaseHelper dbHelper;
     private int CALL_PURPOSE;
     private Bookmark bookmark_from_list;
-    private String finalImagePath;
+    private String tempImagePath, finalImagePath;
     private EventBus_Poster ebpFromEditBookmark;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_bookmark);
+
+        overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
         ButterKnife.inject(this);
 
@@ -70,7 +73,6 @@ public class Create_Bookmark_Activity extends BaseActivity {
         EventBus_Singleton.getInstance().register(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(getString(R.string.edit_bookmark_activity_title));
 
         if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
             doneBTN.setElevation(15f);
@@ -83,17 +85,20 @@ public class Create_Bookmark_Activity extends BaseActivity {
 
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, -1);
 
-        finalImagePath = getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH);
+        tempImagePath = getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH);
+        finalImagePath = tempImagePath;
 
         //If it is a create operation, the path to the bookmark image is inside the extras that were sent to this activity (from Camera intent)
         try {
-            Picasso.with(this).load(new File(finalImagePath)).into(bookmarkIMG);
+            Picasso.with(this).load(new File(tempImagePath)).into(bookmarkIMG);
         } catch (NullPointerException NPE) {
             NPE.printStackTrace();
         }
 
         //If it's an edit operation, the path to the bookmark image is inside the object being sent to this activity
         if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
+            getSupportActionBar().setTitle(getString(R.string.edit_bookmark_activity_title));
+
             bookmark_from_list = getIntent().getParcelableExtra("bookmark");
 
             nameET.setText(bookmark_from_list.getName());
@@ -104,6 +109,8 @@ public class Create_Bookmark_Activity extends BaseActivity {
             } catch (NullPointerException NPE) {
                 NPE.printStackTrace();
             }
+        } else {
+            getSupportActionBar().setTitle(getString(R.string.create_bookmark_activity_title));
         }
 
         doneBTN.setOnClickListener(new View.OnClickListener() {
@@ -151,6 +158,7 @@ public class Create_Bookmark_Activity extends BaseActivity {
                                 bookmark.setImage_path(ebpFromEditBookmark.getExtra());
                             else
                                 bookmark.setImage_path(finalImagePath);
+
                             bookmark.setDate_added(month + " " + day + ", " + year);
 
                             dbHelper.createBookmark(bookmark, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
@@ -205,9 +213,20 @@ public class Create_Bookmark_Activity extends BaseActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
+                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            super.onBackPressed();
+            overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -225,7 +244,7 @@ public class Create_Bookmark_Activity extends BaseActivity {
                 openCropImageActivity.putExtra(Constants.EXTRAS_BOOK_ID, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
                 openCropImageActivity.putExtra(Constants.EXTRAS_BOOK_COLOR, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
                 openCropImageActivity.putExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, CALL_PURPOSE);
-                openCropImageActivity.putExtra(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, finalImagePath);
+                openCropImageActivity.putExtra(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, tempImagePath);
                 startActivity(openCropImageActivity);
                 break;
         }
@@ -234,7 +253,7 @@ public class Create_Bookmark_Activity extends BaseActivity {
     @DebugLog
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String imageFileName = "JPEG_" + timeStamp;
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), "Atomic");
 
@@ -247,7 +266,7 @@ public class Create_Bookmark_Activity extends BaseActivity {
 
         File image = new File(mediaStorageDir.getPath() + File.separator + imageFileName);
 
-        finalImagePath = image.getAbsolutePath();
+        tempImagePath = image.getAbsolutePath();
 
         return image;
     }

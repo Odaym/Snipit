@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,9 +13,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
-import android.text.InputType;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,7 +25,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -67,6 +65,8 @@ public class View_Bookmark_Activity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_bookmarks);
 
+        overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
+
         String book_title = getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
         int current_bookmark_position = getIntent().getExtras().getInt(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION);
         bookmarks = getIntent().getExtras().getParcelableArrayList("bookmarks");
@@ -90,9 +90,20 @@ public class View_Bookmark_Activity extends BaseActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
+                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            super.onBackPressed();
+            overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     /**
@@ -113,6 +124,8 @@ public class View_Bookmark_Activity extends BaseActivity {
         RelativeLayout bookmarkDetailsView;
         @InjectView(R.id.createNewNoteBTN)
         ImageButton createNewNoteBTN;
+        @InjectView(R.id.paintBookmarkBTN)
+        ImageButton paintBookmarkBTN;
         @InjectView(R.id.imageProgressBar)
         ProgressBar imageProgressBar;
 
@@ -166,6 +179,7 @@ public class View_Bookmark_Activity extends BaseActivity {
 
                         @Override
                         public void onError() {
+                            imageProgressBar.setVisibility(View.INVISIBLE);
                         }
                     });
                     break;
@@ -180,7 +194,7 @@ public class View_Bookmark_Activity extends BaseActivity {
 
                         @Override
                         public void onError() {
-
+                            imageProgressBar.setVisibility(View.INVISIBLE);
                         }
                     });
                     break;
@@ -215,7 +229,7 @@ public class View_Bookmark_Activity extends BaseActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
-            ViewGroup rootView = (ViewGroup) inflater.inflate(
+            final ViewGroup rootView = (ViewGroup) inflater.inflate(
                     R.layout.fragment_bookmarks, container, false);
 
             ButterKnife.inject(this, rootView);
@@ -227,9 +241,10 @@ public class View_Bookmark_Activity extends BaseActivity {
 
             if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
                 createNewNoteBTN.setElevation(15f);
+                paintBookmarkBTN.setElevation(15f);
             }
 
-            Picasso.with(context).load(new File(bookmark_imagepath)).error(context.getResources().getDrawable(R.drawable.sad_image_not_found)).resize(1500, 1500).centerInside().into(bookmarkIMG, new Callback() {
+            Picasso.with(context).load(new File(bookmark_imagepath)).error(helperMethods.getNotFoundImage(context)).resize(1500, 1500).centerInside().into(bookmarkIMG, new Callback() {
                 @Override
                 public void onSuccess() {
                     imageProgressBar.setVisibility(View.INVISIBLE);
@@ -237,6 +252,9 @@ public class View_Bookmark_Activity extends BaseActivity {
 
                 @Override
                 public void onError() {
+                    imageProgressBar.setVisibility(View.INVISIBLE);
+                    createNewNoteBTN.setEnabled(false);
+                    paintBookmarkBTN.setEnabled(false);
                 }
             });
 
@@ -259,25 +277,17 @@ public class View_Bookmark_Activity extends BaseActivity {
                 public void onClick(View view) {
                     AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
-                    alert.setTitle(context.getResources().getString(R.string.takeNote));
-                    alert.setMessage("");
+                    LayoutInflater inflater = (LayoutInflater) context
+                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    View alertCreateNoteView = inflater.inflate(R.layout.alert_create_bookmark_note, rootView, false);
 
-                    final EditText input = new EditText(context);
-                    input.setHint(context.getResources().getString(R.string.writeSomething));
-                    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-                    layoutParams.setMargins(30, 0, 30, 0);
-                    alert.setView(input);
-
-                    Typeface type = Typeface.createFromAsset(context.getAssets(),"fonts/HelveticaNeue-Thin.otf");
-                    input.setTypeface(type);
-                    input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-                    input.setText(dbHelper.getBookmarkNote(bookmark_id));
-                    input.setSelection(input.getText().length());
+                    final EditText inputNoteET = (EditText) alertCreateNoteView.findViewById(R.id.bookmarkNoteET);
+                    inputNoteET.setText(dbHelper.getBookmarkNote(bookmark_id));
+                    inputNoteET.setSelection(inputNoteET.getText().length());
 
                     alert.setPositiveButton(context.getResources().getString(R.string.OK), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            dbHelper.update_BookmarkNote(bookmark_id, input.getText().toString());
+                            dbHelper.update_BookmarkNote(bookmark_id, inputNoteET.getText().toString());
 
                             EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_note_changed"));
                         }
@@ -288,17 +298,28 @@ public class View_Bookmark_Activity extends BaseActivity {
                         }
                     });
 
-                    alert.show();
-                    input.setLayoutParams(layoutParams);
-
-                    input.postDelayed(new Runnable() {
+                    inputNoteET.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             InputMethodManager keyboard = (InputMethodManager)
                                     context.getSystemService(Context.INPUT_METHOD_SERVICE);
-                            keyboard.showSoftInput(input, 0);
+                            keyboard.showSoftInput(inputNoteET, 0);
                         }
                     }, 0);
+
+                    alert.setTitle(context.getResources().getString(R.string.takeNote));
+                    alert.setView(alertCreateNoteView);
+                    alert.setMessage("");
+                    alert.show();
+                }
+            });
+
+            paintBookmarkBTN.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent openPaintActivity = new Intent(context, Paint_Bookmark_Activity.class);
+                    openPaintActivity.putExtra(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, bookmark_imagepath);
+                    startActivity(openPaintActivity);
                 }
             });
 
@@ -315,6 +336,7 @@ public class View_Bookmark_Activity extends BaseActivity {
 
                 arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkDetailsView));
                 arrayListObjectAnimators.add(helperMethods.showViewElement(createNewNoteBTN));
+                arrayListObjectAnimators.add(helperMethods.showViewElement(paintBookmarkBTN));
 
                 ((View_Bookmark_Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             } else {
@@ -322,6 +344,7 @@ public class View_Bookmark_Activity extends BaseActivity {
 
                 arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkDetailsView));
                 arrayListObjectAnimators.add(helperMethods.hideViewElement(createNewNoteBTN));
+                arrayListObjectAnimators.add(helperMethods.hideViewElement(paintBookmarkBTN));
 
                 ((View_Bookmark_Activity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                         WindowManager.LayoutParams.FLAG_FULLSCREEN);

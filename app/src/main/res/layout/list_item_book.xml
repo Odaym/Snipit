@@ -27,7 +27,7 @@
             android:layout_marginRight="20dp"
             android:gravity="center"
             android:textColor="@color/white"
-            android:textSize="@dimen/number_of_bookmarks_fsize"/>
+            android:textSize="@dimen/number_of_bookmarks_fsize" />
 
         <me.grantland.widget.AutofitTextView
             android:id="@+id/bookTitleTV"

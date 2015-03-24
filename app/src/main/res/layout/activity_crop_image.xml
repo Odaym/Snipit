@@ -25,7 +25,6 @@
         android:background="@drawable/fab_done"
         android:src="@drawable/check_done" />
 
-
     <ImageButton
         android:id="@+id/rotateImageBTN"
         android:layout_width="60dp"
