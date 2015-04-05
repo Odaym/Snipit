@@ -10,9 +10,9 @@
         android:paddingRight="@dimen/activity_horizontal_margin">
 
         <com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/nameETFloating"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/nameETFloating"
             float:fletPadding="10dp">
 
             <EditText
@@ -37,10 +37,10 @@
         <!--android:background="@android:color/black" />-->
 
         <com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/pageNumberETFloating"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/nameETFloating"
-            android:id="@+id/pageNumberETFloating"
             float:fletPadding="10dp">
 
             <EditText
@@ -63,7 +63,7 @@
             android:layout_marginTop="20dp" />
     </RelativeLayout>
 
-    <ImageView
+    <com.melnykov.fab.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
         android:id="@+id/doneBTN"
         android:layout_width="60dp"
         android:layout_height="60dp"
@@ -73,10 +73,13 @@
         android:layout_marginBottom="@dimen/activity_horizontal_margin"
         android:layout_marginEnd="@dimen/activity_vertical_margin"
         android:layout_marginRight="@dimen/activity_vertical_margin"
-        android:background="@drawable/fab_done"
-        android:src="@drawable/check_done" />
+        android:src="@drawable/check_done"
+        fab:fab_colorNormal="@color/white"
+        fab:fab_colorPressed="@color/yellow"
+        fab:fab_colorRipple="@color/yellow" />
 
-    <ImageButton
+
+    <com.melnykov.fab.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
         android:id="@+id/createNewBookmarkBTN"
         android:layout_width="60dp"
         android:layout_height="60dp"
@@ -86,7 +89,9 @@
         android:layout_marginBottom="@dimen/activity_horizontal_margin"
         android:layout_marginLeft="@dimen/activity_vertical_margin"
         android:layout_marginStart="@dimen/activity_vertical_margin"
-        android:background="@drawable/fab_picture"
-        android:src="@android:drawable/ic_menu_camera" />
+        android:src="@drawable/create_bookmark_camera"
+        fab:fab_colorNormal="@color/green"
+        fab:fab_colorPressed="@color/yellow"
+        fab:fab_colorRipple="@color/yellow" />
 
 </RelativeLayout>

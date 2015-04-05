@@ -3,15 +3,13 @@ package com.om.atomic.activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import com.edmodo.cropper.CropImageView;
+import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.EventBus_Poster;
@@ -32,9 +30,9 @@ import hugo.weaving.DebugLog;
 
 public class Crop_Image_Activity extends BaseActivity {
     @InjectView(R.id.doneBTN)
-    ImageView doneBTN;
+    FloatingActionButton doneBTN;
     @InjectView(R.id.rotateImageBTN)
-    ImageButton rotateImageBTN;
+    FloatingActionButton rotateImageBTN;
     @InjectView(R.id.cropImageView)
     CropImageView cropImageView;
 
@@ -50,17 +48,12 @@ public class Crop_Image_Activity extends BaseActivity {
 
         Helper_Methods helperMethods = new Helper_Methods(this);
 
-        if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
-            doneBTN.setElevation(15f);
-            rotateImageBTN.setElevation(15f);
-        }
-
         helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
 
         tempImagePath_fromIntent = getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH);
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, -1);
 
-        cropImageView.setAspectRatio(5, 10);
+        cropImageView.setAspectRatio(1, 2);
         cropImageView.setGuidelines(1);
 
         File imgFile = new File(tempImagePath_fromIntent);

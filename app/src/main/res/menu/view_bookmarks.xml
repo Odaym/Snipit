@@ -15,7 +15,7 @@
     <item
         android:id="@+id/share_picture"
         android:icon="@android:drawable/ic_menu_share"
-        android:title=""
+        android:title="@string/share_bookmark"
         app:showAsAction="always" />
 
 </menu>

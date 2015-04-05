@@ -10,9 +10,9 @@
 
 
         <com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/titleETFloating"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/titleETFloating"
             float:fletPadding="10dp">
 
             <EditText
@@ -36,10 +36,10 @@
         <!--android:background="@android:color/black" />-->
 
         <com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/authorETFloating"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/titleETFloating"
-            android:id="@+id/authorETFloating"
             float:fletPadding="10dp">
 
             <EditText
@@ -51,7 +51,7 @@
                 android:inputType="textCapWords"
                 android:singleLine="true"
                 android:textColor="@android:color/black"
-                android:textCursorDrawable="@null"/>
+                android:textCursorDrawable="@null" />
         </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 
         <ImageView
@@ -61,7 +61,7 @@
             android:layout_below="@+id/authorETFloating" />
     </RelativeLayout>
 
-    <ImageView
+    <com.melnykov.fab.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
         android:id="@+id/doneBTN"
         android:layout_width="60dp"
         android:layout_height="60dp"
@@ -71,8 +71,10 @@
         android:layout_marginBottom="@dimen/activity_horizontal_margin"
         android:layout_marginEnd="@dimen/activity_vertical_margin"
         android:layout_marginRight="@dimen/activity_vertical_margin"
-        android:background="@drawable/fab_done"
-        android:src="@drawable/check_done" />
+        android:src="@drawable/check_done"
+        fab:fab_colorNormal="@color/white"
+        fab:fab_colorPressed="@color/yellow"
+        fab:fab_colorRipple="@color/yellow" />
 
     <ImageView
         android:id="@+id/scanBTN"

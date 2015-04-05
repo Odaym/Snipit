@@ -8,21 +8,22 @@
     <ImageView
         android:id="@+id/bookmarkIMG"
         android:layout_width="match_parent"
-        android:layout_centerInParent="true"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
 
     <me.panavtec.drawableview.DrawableView
         android:id="@+id/drawable_view"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_height="wrap_content" />
+        android:layout_marginTop="@dimen/average_screen_height" />
 
     <ProgressBar
         android:id="@+id/imageProgressBar"
-        android:indeterminate="false"
-        android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:indeterminate="false"
         android:visibility="visible" />
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
@@ -30,27 +31,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="50dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="10dp"
         fab:fab_addButtonColorNormal="@color/blue"
         fab:fab_expandDirection="up"
-        fab:fab_labelsPosition="left"
         fab:fab_labelStyle="@style/fab_labels_style"
-        android:layout_marginBottom="105dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginEnd="16dp">
+        fab:fab_labelsPosition="left">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_clear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/fab_actions_menu_buttons_bottom_padding"
+            android:src="@drawable/paint_bookmark_clear"
             fab:fab_colorNormal="@color/red"
-            fab:fab_title="@string/fab_action_clear" />
+            fab:fab_title="@string/fab_action_clear"
+            fab:fab_type="mini" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_undo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/fab_actions_menu_buttons_bottom_padding"
+            android:src="@drawable/paint_bookmark_undo"
             fab:fab_colorNormal="@color/green"
             fab:fab_title="@string/fab_action_undo" />
 
@@ -58,16 +64,89 @@
             android:id="@+id/fab_action_color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/fab_actions_menu_buttons_bottom_padding"
+            android:src="@drawable/paint_bookmark_color"
             fab:fab_colorNormal="@color/yellow"
-            android:src="@android:drawable/ic_notification_clear_all"
             fab:fab_title="@string/fab_action_color" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_thickness"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/fab_actions_menu_buttons_bottom_padding"
+            android:src="@drawable/paint_bookmark_thickness"
             fab:fab_colorNormal="@color/purple"
             fab:fab_title="@string/fab_action_thickness" />
+
+    </com.getbase.floatingactionbutton.FloatingActionsMenu>
+
+    <com.getbase.floatingactionbutton.FloatingActionsMenu
+        android:id="@+id/color_actions_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="50dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="10dp"
+        android:visibility="gone"
+        fab:fab_addButtonColorNormal="@color/blue"
+        fab:fab_addButtonSize="mini"
+        fab:fab_expandDirection="up"
+        fab:fab_labelStyle="@style/fab_labels_style"
+        fab:fab_labelsPosition="left">
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_back_to_options"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onFabColorButtonClicked"
+            android:paddingBottom="@dimen/fab_actions_menu_buttons_bottom_padding"
+            android:src="@drawable/paint_bookmark_cancel"
+            fab:fab_colorNormal="@color/gray"
+            fab:fab_size="mini"
+            fab:fab_title="@string/fab_action_back" />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_color_red"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onFabColorButtonClicked"
+            fab:fab_colorNormal="@color/red"
+            fab:fab_size="mini" />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_color_green"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onFabColorButtonClicked"
+            fab:fab_colorNormal="@color/green"
+            fab:fab_size="mini" />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_color_blue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onFabColorButtonClicked"
+            fab:fab_colorNormal="@color/blue"
+            fab:fab_size="mini" />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_color_yellow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onFabColorButtonClicked"
+            fab:fab_colorNormal="@color/yellow"
+            fab:fab_size="mini" />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_color_white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onFabColorButtonClicked"
+            fab:fab_colorNormal="@android:color/white"
+            fab:fab_size="mini" />
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 

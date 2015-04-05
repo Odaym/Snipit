@@ -10,10 +10,10 @@
 
     <ProgressBar
         android:id="@+id/imageProgressBar"
-        android:indeterminate="false"
-        android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:indeterminate="false"
         android:visibility="visible" />
 
     <RelativeLayout
@@ -65,30 +65,34 @@
             android:textSize="@dimen/book_date_added_fsize" />
     </RelativeLayout>
 
-    <ImageButton
+    <com.melnykov.fab.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
         android:id="@+id/createNewNoteBTN"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_above="@id/bookmarkDetailsView"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:background="@drawable/fab_take_note"
-        android:src="@android:drawable/ic_menu_edit" />
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_vertical_margin"
+        android:layout_marginRight="@dimen/activity_vertical_margin"
+        android:src="@android:drawable/ic_menu_edit"
+        fab:fab_colorNormal="@color/red"
+        fab:fab_colorPressed="@color/darker_red"
+        fab:fab_colorRipple="@color/darker_red" />
 
-    <ImageButton
+    <com.melnykov.fab.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
         android:id="@+id/paintBookmarkBTN"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_above="@id/bookmarkDetailsView"
-        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:background="@drawable/fab_paint"
-        android:src="@drawable/paint_view" />
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:layout_marginLeft="@dimen/activity_vertical_margin"
+        android:layout_marginStart="@dimen/activity_vertical_margin"
+        android:src="@drawable/paint_bookmark"
+        fab:fab_colorNormal="@color/blue"
+        fab:fab_colorPressed="@color/yellow"
+        fab:fab_colorRipple="@color/yellow" />
 
 </RelativeLayout>

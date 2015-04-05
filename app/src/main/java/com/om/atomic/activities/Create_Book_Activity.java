@@ -20,6 +20,7 @@ import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.atomic.classes.Book;
 import com.om.atomic.classes.Constants;
@@ -63,7 +64,7 @@ public class Create_Book_Activity extends BaseActivity {
     @InjectView(R.id.bookIMG)
     ImageView bookIMG;
     @InjectView(R.id.doneBTN)
-    ImageView doneBTN;
+    FloatingActionButton doneBTN;
     @InjectView(R.id.scanBTN)
     ImageView scanBTN;
 
@@ -71,6 +72,8 @@ public class Create_Book_Activity extends BaseActivity {
     private DatabaseHelper dbHelper;
 
     private ShowcaseView scanBookShowcase;
+
+    private Helper_Methods helperMethods;
 
     private int CALL_PURPOSE;
     private Book book_from_list;
@@ -88,12 +91,11 @@ public class Create_Book_Activity extends BaseActivity {
 
         dbHelper = new DatabaseHelper(this);
 
-        Helper_Methods helperMethods = new Helper_Methods(this);
+        helperMethods = new Helper_Methods(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
-            doneBTN.setElevation(15f);
             scanBTN.setElevation(15f);
         }
 
@@ -113,7 +115,7 @@ public class Create_Book_Activity extends BaseActivity {
                 titleET.setText(book_from_list.getTitle());
                 titleET.setSelection(titleET.getText().length());
                 authorET.setText(book_from_list.getAuthor());
-                Picasso.with(Create_Book_Activity.this).load(book_from_list.getImagePath()).error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(bookIMG);
+                Picasso.with(Create_Book_Activity.this).load(book_from_list.getImagePath()).error(helperMethods.getNotFoundImage(this)).into(bookIMG);
             }
         } else {
             getSupportActionBar().setTitle(getString(R.string.create_book_activity_title));
@@ -331,7 +333,7 @@ public class Create_Book_Activity extends BaseActivity {
                 }
                 try {
                     JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
-                    Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("smallThumbnail")).error(getResources().getDrawable(R.drawable.sad_image_not_found)).into(bookIMG);
+                    Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("smallThumbnail")).error(helperMethods.getNotFoundImage(Create_Book_Activity.this)).into(bookIMG);
                     bookImagePath = imageInfo.getString("smallThumbnail");
                 } catch (JSONException jse) {
                     Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_image_not_found_error), Style.ALERT).show();

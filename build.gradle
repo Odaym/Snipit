@@ -12,8 +12,28 @@ buildscript {
     }
 }
 
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == true
+}
+
 allprojects {
     repositories {
         jcenter()
+    }
+
+    version = VERSION_NAME
+    group = GROUP
+
+    ext {
+        // Android config
+        androidBuildToolsVersion = '22.0.0'
+        androidMinSdkVersion = 9
+        androidTargetSdkVersion = 21
+        androidCompileSdkVersion = 21
+        androidVersionCode = VERSION_CODE.toInteger()
+        androidVersionName = VERSION_NAME
+
+        // Libraries
+        libSupportv4 = 'com.android.support:support-v4:21.0.3'
     }
 }

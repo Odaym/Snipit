@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" />
 
-    <ImageView
+    <com.melnykov.fab.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
         android:id="@+id/doneBTN"
         android:layout_width="60dp"
         android:layout_height="60dp"
@@ -22,10 +22,12 @@
         android:layout_marginBottom="@dimen/activity_horizontal_margin"
         android:layout_marginEnd="@dimen/activity_vertical_margin"
         android:layout_marginRight="@dimen/activity_vertical_margin"
-        android:background="@drawable/fab_done"
-        android:src="@drawable/check_done" />
+        android:src="@drawable/check_done"
+        fab:fab_colorNormal="@color/white"
+        fab:fab_colorPressed="@color/yellow"
+        fab:fab_colorRipple="@color/yellow" />
 
-    <ImageButton
+    <com.melnykov.fab.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
         android:id="@+id/rotateImageBTN"
         android:layout_width="60dp"
         android:layout_height="60dp"
@@ -35,6 +37,8 @@
         android:layout_marginBottom="@dimen/activity_horizontal_margin"
         android:layout_marginLeft="@dimen/activity_vertical_margin"
         android:layout_marginStart="@dimen/activity_vertical_margin"
-        android:background="@drawable/fab_picture"
-        android:src="@android:drawable/ic_menu_rotate" />
+        android:src="@drawable/rotate_bookmark"
+        fab:fab_colorNormal="@color/green"
+        fab:fab_colorPressed="@color/yellow"
+        fab:fab_colorRipple="@color/yellow" />
 </RelativeLayout>

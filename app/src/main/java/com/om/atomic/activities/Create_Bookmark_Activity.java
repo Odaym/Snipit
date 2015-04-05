@@ -2,7 +2,6 @@ package com.om.atomic.activities;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -11,11 +10,11 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.atomic.classes.Bookmark;
 import com.om.atomic.classes.Constants;
@@ -49,9 +48,9 @@ public class Create_Bookmark_Activity extends BaseActivity {
     @InjectView(R.id.bookmarkIMG)
     ImageView bookmarkIMG;
     @InjectView(R.id.doneBTN)
-    ImageView doneBTN;
+    FloatingActionButton doneBTN;
     @InjectView(R.id.createNewBookmarkBTN)
-    ImageButton createNewBookmarkBTN;
+    FloatingActionButton createNewBookmarkBTN;
 
     private DatabaseHelper dbHelper;
     private int CALL_PURPOSE;
@@ -73,11 +72,6 @@ public class Create_Bookmark_Activity extends BaseActivity {
         EventBus_Singleton.getInstance().register(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
-            doneBTN.setElevation(15f);
-            createNewBookmarkBTN.setElevation(15f);
-        }
 
         helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
 

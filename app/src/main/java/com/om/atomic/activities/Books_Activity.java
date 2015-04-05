@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -104,7 +105,6 @@ public class Books_Activity extends BaseActivity {
         setSupportActionBar(toolbar);
 
         if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
-            createNewBookBTN.setElevation(15f);
             toolbar.setElevation(25f);
         }
 
@@ -320,7 +320,10 @@ public class Books_Activity extends BaseActivity {
             holder.bookTitleTV.setText(books.get(position).getTitle());
             holder.bookAuthorTV.setText(books.get(position).getAuthor());
 
-            Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(helperMethods.getNotFoundImage(context)).into(holder.bookThumbIMG);
+            if (books.get(position).getImagePath() != null) {
+                Log.d("Book", "Book image path in Books Activity : " + books.get(position).getImagePath());
+                Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(helperMethods.getNotFoundImage(context)).into(holder.bookThumbIMG);
+            }
 
             String[] bookDateAdded = books.get(position).getDate_added().split(" ");
             holder.bookDateAddedTV.setText(bookDateAdded[0] + " " + bookDateAdded[1] + ", " + bookDateAdded[2]);

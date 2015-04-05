@@ -60,6 +60,7 @@
     <dimen name="toolbar_top_padding">0dp</dimen>
 
     <!-- PAINT_BOOKMARK_ACTIVITY -->
-    <dimen name="fab_actions_menu_buttons_bottom_padding">15dp</dimen>
+    <dimen name="fab_actions_menu_buttons_bottom_padding">20dp</dimen>
 
+    <dimen name="average_screen_height">150dp</dimen>
 </resources>

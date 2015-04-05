@@ -51,14 +51,9 @@
     <string name="rotate_left">Rotate Left</string>
     <string name="rotate_right">Rotate Right</string>
     <string name="page">page:</string>
-
-    <string name="create_book_showcase_title">No books yet!</string>
-    <string name="create_book_showcase_description">\nAdd a new book to get started</string>
-
-    <string name="create_bookmark_showcase_title">No bookmarks yet!</string>
-    <string name="create_bookmark_showcase_description">\nAdd a new bookmark to get started</string>
-
-    <string name="scan_books_showcase">You can also add a book by scanning its barcode</string>
+    <string name="image_not_found">Picture was removed!</string>
+    <string name="share_bookmark">Share!</string>
+    <string name="set_brush_thickness">Set brush thickness</string>
 
     <!-- SEARCH_RESULTS_ACTIVITY -->
     <string name="search_results_activity_title">Search Results</string>
@@ -73,4 +68,13 @@
     <string name="fab_action_color">Color</string>
     <string name="fab_action_undo">Undo</string>
     <string name="fab_action_thickness">Thickness</string>
+    <string name="fab_action_back">Back</string>
+
+    <string name="create_book_showcase_title">No books yet!</string>
+    <string name="create_book_showcase_description">\nAdd a new book to get started</string>
+
+    <string name="create_bookmark_showcase_title">No bookmarks yet!</string>
+    <string name="create_bookmark_showcase_description">\nAdd a new bookmark to get started</string>
+
+    <string name="scan_books_showcase">You can also add a book by scanning its barcode</string>
 </resources>

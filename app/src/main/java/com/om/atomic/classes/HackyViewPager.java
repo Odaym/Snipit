@@ -51,5 +51,4 @@ public class HackyViewPager extends ViewPager {
     public void setLocked(boolean isLocked) {
         this.isLocked = isLocked;
     }
-
 }

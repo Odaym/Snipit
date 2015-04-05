@@ -2,6 +2,7 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url 'https://maven.fabric.io/public' }
+        dependencies { classpath 'org.ajoberstar:gradle-git:0.2.3' }
     }
 
     dependencies {
@@ -72,9 +73,11 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:21.0.+'
     compile 'me.grantland:autofittextview:0.2.+'
     compile 'com.wrapp.floatlabelededittext:library:0.0.6'
-    compile 'me.panavtec:drawableview:0.5.0'
+//    compile 'me.panavtec:drawableview:0.5.0'
     compile 'com.melnykov:floatingactionbutton:1.2.0'
     compile 'com.getbase:floatingactionbutton:1.9.0'
     compile 'com.github.bumptech.glide:glide:3.5.2'
     compile 'com.android.support:support-v4:22.0.0'
+    compile 'com.facebook.fresco:fresco:0.1.0+'
+    compile project(":libs/DrawableViewLibrary")
 }

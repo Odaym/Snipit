@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -152,10 +151,12 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
         book_color_code = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR);
 
         String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-        if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-            bookmarks = dbHelper.getAllBookmarks(book_id, null);
-        } else {
-            bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
+        if (sorting_type_pref != null) {
+            if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+                bookmarks = dbHelper.getAllBookmarks(book_id, null);
+            } else {
+                bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
+            }
         }
 
         handleEmptyOrPopulatedScreen(bookmarks);
@@ -163,10 +164,6 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(book_title);
         helperMethods.setUpActionbarColors(this, book_color_code);
-
-        if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
-            createNewBookmarkBTN.setElevation(15f);
-        }
 
         createNewBookmarkBTN.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -309,17 +306,22 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
 
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
-        if (ebp.getMessage().equals("bookmark_viewed")) {
-            String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-            if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-                bookmarks = dbHelper.getAllBookmarks(book_id, null);
-            } else {
-                bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
-            }
-            bookmarksAdapter.notifyDataSetChanged();
-        } else if (ebp.getMessage().equals("bookmark_changed") || ebp.getMessage().equals("bookmark_note_changed")) {
-            prepareForNotifyDataChanged(book_id);
-            bookmarksAdapter.notifyDataSetChanged();
+        switch (ebp.getMessage()) {
+            case "bookmark_viewed":
+                String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
+                if (sorting_type_pref != null) {
+                    if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+                        bookmarks = dbHelper.getAllBookmarks(book_id, null);
+                    } else {
+                        bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
+                    }
+                }
+                bookmarksAdapter.notifyDataSetChanged();
+                break;
+            case "bookmark_changed":
+            case "bookmark_note_changed":
+                prepareForNotifyDataChanged(book_id);
+                bookmarksAdapter.notifyDataSetChanged();
 //            if (ebp.getExtra() != null) {
 //                if (ebp.getExtra().equals("new_bookmark")) {
 //                    listView.smoothScrollToPosition(bookmarksAdapter.getCount() + 1, 0, 500);
@@ -329,11 +331,13 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
 //                                    .getView(bookmarksAdapter.getCount() - 1, null, null));
 //                }
 //            }
-        } else if (ebp.getMessage().equals("reset_bookmark_notes_showing")) {
-            for (Bookmark bookmark : bookmarks) {
-                bookmark.setIsNoteShowing(0);
-            }
-            bookmarksAdapter.notifyDataSetChanged();
+                break;
+            case "reset_bookmark_notes_showing":
+                for (Bookmark bookmark : bookmarks) {
+                    bookmark.setIsNoteShowing(0);
+                }
+                bookmarksAdapter.notifyDataSetChanged();
+                break;
         }
     }
 
@@ -526,9 +530,8 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
                 holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
             }
 
-            //If one of the elements of the rows has an alpha of 0, this means that there was a note being shown here
-            // hide that note
-            if (holder.bookmarkIMG.getAlpha() == 0) {
+//            if (holder.bookmarkIMG.getAlpha() == 0) {
+            if (bookmarks.get(position).getIsNoteShowing() == 0) {
                 holder.motherView.setBackgroundColor(Color.WHITE);
                 holder.bookmarkAction.setAlpha(1f);
                 holder.bookmarkAction.setVisibility(View.VISIBLE);

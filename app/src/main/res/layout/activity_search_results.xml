@@ -22,8 +22,7 @@
             android:id="@+id/bookmarkIMG"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:layout_centerInParent="true"
-            android:src="@drawable/sad_image_not_found" />
+            android:layout_centerInParent="true" />
 
     </RelativeLayout>
 
