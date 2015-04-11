@@ -7,6 +7,8 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.view.MenuItemCompat;
@@ -111,6 +113,8 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
             }
         }
     };
+
+    private final static int SHOW_CREATE_BOOKMARK_SHOWCASE = 1;
     private String book_title;
     private int book_color_code;
     private ShowcaseView createBookmarkShowcase;
@@ -122,6 +126,7 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
     private SharedPreferences.Editor prefsEditor;
     private Helper_Methods helperMethods;
     private boolean activityVisible = true;
+    private Handler UIHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +136,18 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
         ButterKnife.inject(this);
+
+        UIHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case SHOW_CREATE_BOOKMARK_SHOWCASE:
+                        showCreateBookmarkShowcase();
+                        break;
+                }
+                super.handleMessage(msg);
+            }
+        };
 
         EventBus_Singleton.getInstance().register(this);
 
@@ -333,10 +350,10 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
 //            }
                 break;
             case "reset_bookmark_notes_showing":
-                for (Bookmark bookmark : bookmarks) {
-                    bookmark.setIsNoteShowing(0);
-                }
-                bookmarksAdapter.notifyDataSetChanged();
+//                for (Bookmark bookmark : bookmarks) {
+//                    bookmark.setIsNoteShowing(0);
+//                }
+//                bookmarksAdapter.notifyDataSetChanged();
                 break;
         }
     }
@@ -379,7 +396,7 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
 
         if (bookmarks.isEmpty()) {
             emptyListLayout.setVisibility(View.VISIBLE);
-            showCreateBookShowcase();
+            showCreateBookmarkShowcase();
             invalidateOptionsMenu();
         } else {
             emptyListLayout.setVisibility(View.GONE);
@@ -391,7 +408,7 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
     public void handleEmptyOrPopulatedScreen(List<Bookmark> bookmarks) {
         if (bookmarks.isEmpty()) {
             emptyListLayout.setVisibility(View.VISIBLE);
-            showCreateBookShowcase();
+            UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOKMARK_SHOWCASE, 500);
         } else {
             emptyListLayout.setVisibility(View.GONE);
         }
@@ -405,44 +422,42 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
     }
 
     @DebugLog
-    public void showCreateBookShowcase() {
+    public void showCreateBookmarkShowcase() {
         //When a bookmark is deleted from inside Search Results Activity, leading up to this Activity having zero bookmarks and causing the coachmark to appear when the activity is not in focus. So make sure it is in focus first
-        if (activityVisible) {
-            if (!dbHelper.getSeensParam(null, 1)) {
+        if (!dbHelper.getSeensParam(null, 1)) {
 
-                RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                lps.setMargins(getResources().getDimensionPixelOffset(R.dimen.button_margin_left), 0, 0, getResources().getDimensionPixelOffset(R.dimen.button_margin_bottom));
+            RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            lps.setMargins(getResources().getDimensionPixelOffset(R.dimen.button_margin_left), 0, 0, getResources().getDimensionPixelOffset(R.dimen.button_margin_bottom));
 
-                ViewTarget target = new ViewTarget(R.id.createNewBookmarkBTN, Bookmarks_Activity.this);
+            ViewTarget target = new ViewTarget(R.id.createNewBookmarkBTN, Bookmarks_Activity.this);
 
-                String showcaseTitle = getString(R.string.create_bookmark_showcase_title);
-                String showcaseDescription = getString(R.string.create_bookmark_showcase_description);
+            String showcaseTitle = getString(R.string.create_bookmark_showcase_title);
+            String showcaseDescription = getString(R.string.create_bookmark_showcase_description);
 
-                createBookmarkShowcase = new ShowcaseView.Builder(Bookmarks_Activity.this, getResources().getDimensionPixelSize(R.dimen.create_bookmark_showcase_inner_rad), getResources().getDimensionPixelSize(R.dimen.create_bookmark_showcase_outer_rad))
-                        .setTarget(target)
-                        .setContentTitle(Helper_Methods.fontifyString(showcaseTitle))
-                        .setContentText(Helper_Methods.fontifyString(showcaseDescription))
-                        .setStyle(R.style.CustomShowcaseTheme)
-                        .hasManualPosition(true)
-                        .xPostion(getResources().getDimensionPixelSize(R.dimen.create_bookmark_text_x))
-                        .yPostion(getResources().getDimensionPixelSize(R.dimen.create_bookmark_text_y))
-                        .build();
-                createBookmarkShowcase.setButtonPosition(lps);
-                createBookmarkShowcase.findViewById(R.id.showcase_button).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        createBookmarkShowcase.hide();
+            createBookmarkShowcase = new ShowcaseView.Builder(Bookmarks_Activity.this, getResources().getDimensionPixelSize(R.dimen.create_bookmark_showcase_inner_rad), getResources().getDimensionPixelSize(R.dimen.create_bookmark_showcase_outer_rad))
+                    .setTarget(target)
+                    .setContentTitle(Helper_Methods.fontifyString(showcaseTitle))
+                    .setContentText(Helper_Methods.fontifyString(showcaseDescription))
+                    .setStyle(R.style.CustomShowcaseTheme)
+                    .hasManualPosition(true)
+                    .xPostion(getResources().getDimensionPixelSize(R.dimen.create_bookmark_text_x))
+                    .yPostion(getResources().getDimensionPixelSize(R.dimen.create_bookmark_text_y))
+                    .build();
+            createBookmarkShowcase.setButtonPosition(lps);
+            createBookmarkShowcase.findViewById(R.id.showcase_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    createBookmarkShowcase.hide();
 
-                        Param param = new Param();
-                        param.setNumber(1);
-                        param.setValue("True");
-                        dbHelper.updateParam(param);
-                    }
-                });
-                createBookmarkShowcase.show();
-            }
+                    Param param = new Param();
+                    param.setNumber(1);
+                    param.setValue("True");
+                    dbHelper.updateParam(param);
+                }
+            });
+            createBookmarkShowcase.show();
         }
     }
 
@@ -462,7 +477,7 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
         openSearchActivity.putExtra(Constants.EXTRAS_SEARCH_TERM, searchTerm);
         startActivity(openSearchActivity);
 
-        EventBus_Singleton.getInstance().post(new EventBus_Poster("reset_bookmark_notes_showing"));
+//        EventBus_Singleton.getInstance().post(new EventBus_Poster("reset_bookmark_notes_showing"));
 
         return true;
     }
@@ -542,12 +557,26 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
                 holder.bookmarkName.setVisibility(View.VISIBLE);
                 holder.bookmarkName.setAlpha(1f);
                 holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
+            } else {
+                holder.motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                holder.bookmarkNoteTV.setText(bookmarks.get(position).getNote());
+
+//                holder.bookmarkAction.setAlpha(1f);
+                holder.bookmarkAction.setVisibility(View.INVISIBLE);
+//                holder.bookmarkIMG.setAlpha(1f);
+                holder.bookmarkIMG.setVisibility(View.INVISIBLE);
+//                holder.bookmarkViews.setAlpha(1f);
+                holder.bookmarkViews.setVisibility(View.INVISIBLE);
+                holder.bookmarkName.setVisibility(View.INVISIBLE);
+                holder.bookmarkNoteTV.setVisibility(View.VISIBLE);
+//                holder.bookmarkName.setAlpha(1f);
+                holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
             }
 
             holder.bookmarkName.setText(bookmarks.get(position).getName());
             holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
 
-            Glide.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
+            Glide.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
 
 //            Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
 
@@ -667,7 +696,7 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
                         }
                     });
                     hideClutterSet.playTogether(objectAnimators);
-                    hideClutterSet.setDuration(300);
+                    hideClutterSet.setDuration(200);
                     hideClutterSet.start();
                 }
             });
@@ -686,15 +715,15 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
                 dbHelper.updateBookmark(bookmarks.get(to));
             }
         }
+    }
 
-        public class BookmarksViewHolder {
-            RelativeLayout motherView;
-            AutofitTextView bookmarkName;
-            ImageView bookmarkIMG;
-            Button bookmarkAction;
-            TextView bookmarkViews;
-            Button bookmarkNoteBTN;
-            AutofitTextView bookmarkNoteTV;
-        }
+    public static class BookmarksViewHolder {
+        RelativeLayout motherView;
+        AutofitTextView bookmarkName;
+        ImageView bookmarkIMG;
+        Button bookmarkAction;
+        TextView bookmarkViews;
+        Button bookmarkNoteBTN;
+        AutofitTextView bookmarkNoteTV;
     }
 }

@@ -216,7 +216,7 @@ public class View_Bookmark_Activity extends BaseActivity {
                 case R.id.rotate_right:
                     rotation += 90;
                     imageProgressBar.setVisibility(View.VISIBLE);
-                    Picasso.with(context).load(new File(bookmark_imagepath)).error(helperMethods.getNotFoundImage(context)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG, new Callback() {
+                    Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG, new Callback() {
                         @Override
                         public void onSuccess() {
                             imageProgressBar.setVisibility(View.INVISIBLE);
@@ -231,7 +231,7 @@ public class View_Bookmark_Activity extends BaseActivity {
                 case R.id.rotate_left:
                     imageProgressBar.setVisibility(View.VISIBLE);
                     rotation -= 90;
-                    Picasso.with(context).load(new File(bookmark_imagepath)).error(helperMethods.getNotFoundImage(context)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG, new Callback() {
+                    Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG, new Callback() {
                         @Override
                         public void onSuccess() {
                             imageProgressBar.setVisibility(View.INVISIBLE);
@@ -287,7 +287,7 @@ public class View_Bookmark_Activity extends BaseActivity {
             bookmarkPageNumberTV.setText(" " + String.valueOf(bookmark_pagenumber));
             bookmarkDateAddedTV.setText(bookmark_dateAdded);
 
-            Picasso.with(context).load(new File(bookmark_imagepath)).error(helperMethods.getNotFoundImage(context)).resize(1500, 1500).centerInside().into(bookmarkIMG, new Callback() {
+            Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().into(bookmarkIMG, new Callback() {
                 @Override
                 public void onSuccess() {
                     imageProgressBar.setVisibility(View.INVISIBLE);
@@ -378,7 +378,6 @@ public class View_Bookmark_Activity extends BaseActivity {
                     clutterHidden = !clutterHidden;
                 }
             });
-
 
             return rootView;
         }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hugo.weaving.DebugLog;
+import me.grantland.widget.AutofitTextView;
 
 public class SearchResults_Activity extends BaseActivity {
     private ArrayList<Bookmark> bookmarks;
@@ -193,21 +195,50 @@ public class SearchResults_Activity extends BaseActivity {
                 holder.bookmarkIMG = (ImageView) convertView.findViewById(R.id.bookmarkIMG);
                 holder.bookmarkViews = (TextView) convertView.findViewById(R.id.bookmarkViewsTV);
                 holder.bookmarkNoteBTN = (Button) convertView.findViewById(R.id.bookmarkNoteBTN);
+                holder.bookmarkNoteTV = (AutofitTextView) convertView.findViewById(R.id.bookmarkNoteTV);
+                holder.motherView = (RelativeLayout) convertView.findViewById(R.id.list_item_bookmark);
 
                 convertView.setTag(holder);
             } else {
                 holder = (BookmarksViewHolder) convertView.getTag();
             }
 
-            if (!bookmarks.get(position).getNote().isEmpty())
-                holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
-            else
+            if (TextUtils.isEmpty(bookmarks.get(position).getNote()))
                 holder.bookmarkNoteBTN.setVisibility(View.INVISIBLE);
+            else
+                holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
+
+            if (bookmarks.get(position).getIsNoteShowing() == 0) {
+                holder.motherView.setBackgroundColor(Color.WHITE);
+                holder.bookmarkAction.setAlpha(1f);
+                holder.bookmarkAction.setVisibility(View.VISIBLE);
+                holder.bookmarkIMG.setAlpha(1f);
+                holder.bookmarkIMG.setVisibility(View.VISIBLE);
+                holder.bookmarkViews.setAlpha(1f);
+                holder.bookmarkViews.setVisibility(View.VISIBLE);
+                holder.bookmarkName.setVisibility(View.VISIBLE);
+                holder.bookmarkName.setAlpha(1f);
+                holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
+            } else {
+                holder.motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                holder.bookmarkNoteTV.setText(bookmarks.get(position).getNote());
+
+//                holder.bookmarkAction.setAlpha(1f);
+                holder.bookmarkAction.setVisibility(View.INVISIBLE);
+//                holder.bookmarkIMG.setAlpha(1f);
+                holder.bookmarkIMG.setVisibility(View.INVISIBLE);
+//                holder.bookmarkViews.setAlpha(1f);
+                holder.bookmarkViews.setVisibility(View.INVISIBLE);
+                holder.bookmarkName.setVisibility(View.INVISIBLE);
+                holder.bookmarkNoteTV.setVisibility(View.VISIBLE);
+//                holder.bookmarkName.setAlpha(1f);
+                holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
+            }
 
             holder.bookmarkName.setText(bookmarks.get(position).getName());
             holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
 
-            Glide.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
+            Glide.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
 
 //            Picasso.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
 
@@ -246,7 +277,6 @@ public class SearchResults_Activity extends BaseActivity {
                                     EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
                                     break;
                             }
-
                             return true;
                         }
                     });
@@ -335,13 +365,15 @@ public class SearchResults_Activity extends BaseActivity {
 
             return convertView;
         }
+    }
 
-        private class BookmarksViewHolder {
-            TextView bookmarkName;
-            ImageView bookmarkIMG;
-            Button bookmarkAction;
-            TextView bookmarkViews;
-            Button bookmarkNoteBTN;
-        }
+    public static class BookmarksViewHolder {
+        RelativeLayout motherView;
+        TextView bookmarkName;
+        ImageView bookmarkIMG;
+        Button bookmarkAction;
+        TextView bookmarkViews;
+        Button bookmarkNoteBTN;
+        AutofitTextView bookmarkNoteTV;
     }
 }

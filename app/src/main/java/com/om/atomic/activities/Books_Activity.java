@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,8 +22,12 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.heinrichreimersoftware.materialdrawer.DrawerFrameLayout;
+import com.heinrichreimersoftware.materialdrawer.structure.DrawerItem;
+import com.heinrichreimersoftware.materialdrawer.structure.DrawerProfile;
 import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.atomic.classes.Book;
@@ -60,15 +66,17 @@ public class Books_Activity extends BaseActivity {
     RelativeLayout emptyListLayout;
     @InjectView(R.id.createNewBookBTN)
     FloatingActionButton createNewBookBTN;
+    @InjectView(R.id.navDrawer)
+    DrawerFrameLayout navDrawer;
+
+    private final static int SHOW_CREATE_BOOK_SHOWCASE = 1;
+    private static Handler UIHandler = new Handler();
 
     private Helper_Methods helperMethods;
     private Books_Adapter booksAdapter;
     private DatabaseHelper dbHelper;
     private ShowcaseView createBookShowcase;
     private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-
-//    private String TITLES[] = {"Home", "Events", "Mail", "Shop", "Travel"};
-//    int ICONS[] = {android.R.drawable.ic_btn_speak_now, android.R.drawable.ic_delete, android.R.drawable.ic_dialog_dialer, android.R.drawable.ic_menu_slideshow, android.R.drawable.ic_input_add};
 
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
@@ -97,6 +105,18 @@ public class Books_Activity extends BaseActivity {
 
         ButterKnife.inject(this);
 
+        UIHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case SHOW_CREATE_BOOK_SHOWCASE:
+                        showCreateBookShowcase();
+                        break;
+                }
+                super.handleMessage(msg);
+            }
+        };
+
         dbHelper = new DatabaseHelper(this);
         books = dbHelper.getAllBooks(null);
         helperMethods = new Helper_Methods(this);
@@ -107,6 +127,46 @@ public class Books_Activity extends BaseActivity {
         if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
             toolbar.setElevation(25f);
         }
+
+        navDrawer.setProfile(
+                new DrawerProfile()
+                        .setAvatar(getResources().getDrawable(R.drawable.fuckyou))
+                        .setBackground(getResources().getDrawable(R.drawable.navdrawer_background))
+                        .setName("Oday Maleh")
+                        .setDescription("Motherfucker")
+                        .setOnProfileClickListener(new DrawerProfile.OnProfileClickListener() {
+                            @Override
+                            public void onClick(DrawerProfile drawerProfile) {
+                                Toast.makeText(Books_Activity.this, "Clicked profile", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+        );
+
+        navDrawer.addItem(
+                new DrawerItem()
+                        .setImage(getResources().getDrawable(R.drawable.notfound_1))
+                        .setTextPrimary("Title 1")
+                        .setTextSecondary("Description 1")
+                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
+                            @Override
+                            public void onClick(DrawerItem drawerItem, int id, int position) {
+                                Toast.makeText(Books_Activity.this, "Clicked 1st item", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+        );
+        navDrawer.addDivider();
+        navDrawer.addItem(
+                new DrawerItem()
+                        .setImage(getResources().getDrawable(R.drawable.notfound_1))
+                        .setTextPrimary("Title 2")
+                        .setTextSecondary("Description 2")
+                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
+                            @Override
+                            public void onClick(DrawerItem drawerItem, int id, int position) {
+                                Toast.makeText(Books_Activity.this, "Clicked 2nd item", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+        );
 
 //        String USER_FULL_NAME = getIntent().getExtras().getString(Constants.USER_FULL_NAME);
 //        String USER_EMAIL_ADDRESS = getIntent().getExtras().getString(Constants.USER_EMAIL_ADDRESS);
@@ -125,23 +185,21 @@ public class Books_Activity extends BaseActivity {
 //
 //
 //        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_closed) {
-//
-//            @Override
-//            public void onDrawerOpened(View drawerView) {
-//                super.onDrawerOpened(drawerView);
-//            }
-//
-//            @Override
-//            public void onDrawerClosed(View drawerView) {
-//                super.onDrawerClosed(drawerView);
-//            }
-//        };
-//
-//        drawer.setDrawerListener(mDrawerToggle);
-//        mDrawerToggle.syncState();
-//
-//        drawer.openDrawer(Gravity.START);
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, navDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_closed) {
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+            }
+        };
+
+        navDrawer.setDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
 
         handleEmptyOrPopulatedScreen(books);
 
@@ -193,7 +251,7 @@ public class Books_Activity extends BaseActivity {
     public void handleEmptyOrPopulatedScreen(List<Book> books) {
         if (books.isEmpty()) {
             emptyListLayout.setVisibility(View.VISIBLE);
-            showCreateBookShowcase();
+            UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOK_SHOWCASE, 500);
         } else {
             emptyListLayout.setVisibility(View.GONE);
         }
@@ -320,10 +378,9 @@ public class Books_Activity extends BaseActivity {
             holder.bookTitleTV.setText(books.get(position).getTitle());
             holder.bookAuthorTV.setText(books.get(position).getAuthor());
 
-            if (books.get(position).getImagePath() != null) {
-                Log.d("Book", "Book image path in Books Activity : " + books.get(position).getImagePath());
-                Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(helperMethods.getNotFoundImage(context)).into(holder.bookThumbIMG);
-            }
+//            if (books.get(position).getImagePath() != null) {
+                Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookThumbIMG);
+//            }
 
             String[] bookDateAdded = books.get(position).getDate_added().split(" ");
             holder.bookDateAddedTV.setText(bookDateAdded[0] + " " + bookDateAdded[1] + ", " + bookDateAdded[2]);
@@ -413,15 +470,15 @@ public class Books_Activity extends BaseActivity {
                 dbHelper.updateBook(books.get(to));
             }
         }
+    }
 
-        public class BooksViewHolder {
-            RelativeLayout list_item_book;
-            TextView bookDateAddedTV;
-            AutofitTextView bookTitleTV;
-            AutofitTextView bookAuthorTV;
-            ImageView bookThumbIMG;
-            TextView bookmarksNumberTV;
-            Button bookAction;
-        }
+    public static class BooksViewHolder {
+        RelativeLayout list_item_book;
+        TextView bookDateAddedTV;
+        AutofitTextView bookTitleTV;
+        AutofitTextView bookAuthorTV;
+        ImageView bookThumbIMG;
+        TextView bookmarksNumberTV;
+        Button bookAction;
     }
 }

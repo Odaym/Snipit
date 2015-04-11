@@ -86,7 +86,7 @@ public class Paint_Bookmark_Activity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.paint_bookmark_activity_title));
 
-        Picasso.with(Paint_Bookmark_Activity.this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH))).into(bookmarkIMG, new Callback() {
+        Picasso.with(Paint_Bookmark_Activity.this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH))).resize(2000, 2000).centerInside().into(bookmarkIMG, new Callback() {
             @Override
             public void onSuccess() {
                 imageProgressBar.setVisibility(View.INVISIBLE);
@@ -105,7 +105,7 @@ public class Paint_Bookmark_Activity extends BaseActivity {
 
         config = new DrawableViewConfig();
         config.setStrokeColor(getResources().getColor(R.color.white_transparent));
-        config.setStrokeWidth(20.0f);
+        config.setStrokeWidth(prefs.getInt(Constants.BRUSH_THICKNESS_PREF, 20));
         config.setMinZoom(1.0f);
         config.setMaxZoom(1.0f);
         config.setCanvasWidth(getResources().getDisplayMetrics().widthPixels);
@@ -157,8 +157,6 @@ public class Paint_Bookmark_Activity extends BaseActivity {
         /***
          * Save functionality for Bookmark Image and Drawing ontop of it
          */
-
-
         fabActionColor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

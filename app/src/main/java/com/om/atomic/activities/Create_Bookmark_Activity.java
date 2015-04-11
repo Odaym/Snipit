@@ -84,7 +84,7 @@ public class Create_Bookmark_Activity extends BaseActivity {
 
         //If it is a create operation, the path to the bookmark image is inside the extras that were sent to this activity (from Camera intent)
         try {
-            Picasso.with(this).load(new File(tempImagePath)).into(bookmarkIMG);
+            Picasso.with(this).load(new File(tempImagePath)).resize(2000, 2000).centerInside().into(bookmarkIMG);
         } catch (NullPointerException NPE) {
             NPE.printStackTrace();
         }

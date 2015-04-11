@@ -32,7 +32,7 @@
             android:name="com.crashlytics.ApiKey"
             android:value="36e136351325660be3ac92f428de565fcbdc3033" />
 
-        <!--<activity android:name=".activities.Login_Activity"></activity>-->
+        <!--<activity android:name=".activities.Login_Activity"/>-->
 
         <activity
             android:name=".activities.Books_Activity"

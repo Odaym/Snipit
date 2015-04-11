@@ -132,13 +132,4 @@ public class Helper_Methods {
     public int getCurrentapiVersion() {
         return currentapiVersion;
     }
-
-    public Drawable getNotFoundImage(Context c) {
-        Random r = new Random();
-        int i = r.nextInt(44 - 1) + 1;
-
-        String imageName = "notfound_" + i;
-
-        return c.getResources().getDrawable(c.getResources().getIdentifier(imageName, "drawable", c.getPackageName()));
-    }
 }

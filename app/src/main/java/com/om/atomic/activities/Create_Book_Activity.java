@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -79,6 +81,9 @@ public class Create_Book_Activity extends BaseActivity {
     private Book book_from_list;
     private ProgressDialog loadingBookInfoDialog;
 
+    private Handler UIHandler;
+    private static final int SHOW_SCAN_BOOK_SHOWCASE = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,6 +93,18 @@ public class Create_Book_Activity extends BaseActivity {
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
         ButterKnife.inject(this);
+
+        UIHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case SHOW_SCAN_BOOK_SHOWCASE:
+                        showScanBookHintShowcase();
+                        break;
+                }
+                super.handleMessage(msg);
+            }
+        };
 
         dbHelper = new DatabaseHelper(this);
 
@@ -99,7 +116,7 @@ public class Create_Book_Activity extends BaseActivity {
             scanBTN.setElevation(15f);
         }
 
-        showScanBookHintShowcase();
+        UIHandler.sendEmptyMessageDelayed(SHOW_SCAN_BOOK_SHOWCASE, 500);
 
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_BOOK_PURPOSE_STRING, -1);
 
@@ -115,7 +132,7 @@ public class Create_Book_Activity extends BaseActivity {
                 titleET.setText(book_from_list.getTitle());
                 titleET.setSelection(titleET.getText().length());
                 authorET.setText(book_from_list.getAuthor());
-                Picasso.with(Create_Book_Activity.this).load(book_from_list.getImagePath()).error(helperMethods.getNotFoundImage(this)).into(bookIMG);
+                Picasso.with(Create_Book_Activity.this).load(book_from_list.getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
             }
         } else {
             getSupportActionBar().setTitle(getString(R.string.create_book_activity_title));
@@ -249,6 +266,8 @@ public class Create_Book_Activity extends BaseActivity {
             scanBookShowcase.show();
         } else {
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+//            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//            inputMethodManager.toggleSoftInputFromWindow(scanBookShowcase.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 1);
         }
     }
 
@@ -333,7 +352,7 @@ public class Create_Book_Activity extends BaseActivity {
                 }
                 try {
                     JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
-                    Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("smallThumbnail")).error(helperMethods.getNotFoundImage(Create_Book_Activity.this)).into(bookIMG);
+                    Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("smallThumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
                     bookImagePath = imageInfo.getString("smallThumbnail");
                 } catch (JSONException jse) {
                     Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_image_not_found_error), Style.ALERT).show();

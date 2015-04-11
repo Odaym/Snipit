@@ -3,6 +3,8 @@ package com.om.atomic.activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -60,7 +62,11 @@ public class Crop_Image_Activity extends BaseActivity {
 
         if (imgFile.exists()) {
             Bitmap myBitmap = BitmapFactory.decodeFile(tempImagePath_fromIntent);
-            cropImageView.setImageBitmap(myBitmap);
+//            Picasso.with(this).load(tempImagePath_fromIntent).into((ImageView) cropImageView.getRootView());
+//            cropImageView.setImageBitmap(myBitmap);
+            Matrix m = new Matrix();
+            m.setRectToRect(new RectF(0, 0, myBitmap.getWidth(), myBitmap.getHeight()), new RectF(0, 0, 2000, 2000), Matrix.ScaleToFit.CENTER);
+            cropImageView.setImageBitmap(Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.getWidth(), myBitmap.getHeight(), m, true));
         }
 
         doneBTN.setOnClickListener(new View.OnClickListener() {
