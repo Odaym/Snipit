@@ -8,12 +8,20 @@
         android:id="@+id/bookmarksList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@android:color/darker_gray"
+        android:background="@color/less_lighter_gray"
+        android:clipToPadding="false"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="@dimen/listview_padding_between"
         android:drawSelectorOnTop="true"
+        android:paddingBottom="@dimen/listview_padding_between"
+        android:paddingLeft="@dimen/listview_padding_left_right"
+        android:paddingRight="@dimen/listview_padding_left_right"
+        android:paddingTop="@dimen/listview_padding_between"
+        android:scrollbarStyle="outsideInset"
         dslv:drag_scroll_start="0.11"
         dslv:drag_start_mode="onLongPress"
         dslv:float_alpha="0.6"
-        dslv:float_background_color="@android:color/darker_gray"
+        dslv:float_background_color="@color/light_gray"
         dslv:max_drag_scroll_speed="0.9"
         dslv:slide_shuffle_speed="0.2" />
 
@@ -47,6 +55,6 @@
         android:src="@drawable/create_bookmark_camera"
         fab:fab_colorNormal="@color/green"
         fab:fab_colorPressed="@color/yellow"
-        fab:fab_colorRipple="@color/yellow"/>
+        fab:fab_colorRipple="@color/yellow" />
 
 </RelativeLayout>

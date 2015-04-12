@@ -1,6 +1,7 @@
 <!--<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"--><!--xmlns:app="http://schemas.android.com/apk/res-auto"--><!--android:id="@+id/drawer_layout"--><!--android:layout_width="match_parent"--><!--android:layout_height="match_parent">-->
 
 <com.heinrichreimersoftware.materialdrawer.DrawerFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navDrawer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -25,12 +26,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/toolbar"
-            android:background="@android:color/darker_gray"
+            android:background="@color/less_lighter_gray"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="@dimen/listview_padding_between"
             android:drawSelectorOnTop="true"
+            android:clipToPadding="false"
+            android:paddingLeft="@dimen/listview_padding_left_right"
+            android:paddingRight="@dimen/listview_padding_left_right"
+            android:paddingTop="@dimen/listview_padding_between"
+            android:paddingBottom="@dimen/listview_padding_between"
+            android:scrollbarStyle="outsideInset"
             dslv:drag_scroll_start="0.11"
             dslv:drag_start_mode="onLongPress"
             dslv:float_alpha="0.6"
-            dslv:float_background_color="@android:color/darker_gray"
+            dslv:float_background_color="@color/light_gray"
             dslv:max_drag_scroll_speed="0.9"
             dslv:slide_shuffle_speed="0.2" />
 

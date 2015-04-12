@@ -4,16 +4,16 @@
     android:id="@+id/list_item_bookmark"
     android:layout_width="match_parent"
     android:layout_height="@dimen/bookmark_list_item_height"
-    android:background="@color/white">
+    android:background="@drawable/listview_items_shape">
 
     <me.grantland.widget.AutofitTextView
         android:id="@+id/bookmarkNoteTV"
         android:layout_width="@dimen/bookmark_list_item_note_width"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/activity_vertical_margin"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:layout_marginLeft="@dimen/activity_vertical_margin"
         android:layout_marginStart="@dimen/activity_vertical_margin"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:maxLines="4"
         android:textColor="@android:color/white"
         android:visibility="visible" />

@@ -547,7 +547,7 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
 
 //            if (holder.bookmarkIMG.getAlpha() == 0) {
             if (bookmarks.get(position).getIsNoteShowing() == 0) {
-                holder.motherView.setBackgroundColor(Color.WHITE);
+                holder.motherView.setBackground(context.getResources().getDrawable(R.drawable.listview_items_shape));
                 holder.bookmarkAction.setAlpha(1f);
                 holder.bookmarkAction.setVisibility(View.VISIBLE);
                 holder.bookmarkIMG.setAlpha(1f);
@@ -646,7 +646,7 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
                     if (isNoteShowing == 1) {
                         view.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
 
-                        motherView.setBackgroundColor(Color.WHITE);
+                        motherView.setBackground(context.getResources().getDrawable(R.drawable.listview_items_shape));
 
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkNoteTV));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkAction));
