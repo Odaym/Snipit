@@ -8,7 +8,7 @@
         android:id="@+id/bookmarksList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/less_lighter_gray"
+        android:background="@color/light_gray"
         android:clipToPadding="false"
         android:divider="@android:color/transparent"
         android:dividerHeight="@dimen/listview_padding_between"
@@ -17,7 +17,6 @@
         android:paddingLeft="@dimen/listview_padding_left_right"
         android:paddingRight="@dimen/listview_padding_left_right"
         android:paddingTop="@dimen/listview_padding_between"
-        android:scrollbarStyle="outsideInset"
         dslv:drag_scroll_start="0.11"
         dslv:drag_start_mode="onLongPress"
         dslv:float_alpha="0.6"
@@ -39,6 +38,15 @@
             android:layout_height="200dp"
             android:layout_centerInParent="true"
             android:src="@drawable/bookmark_outline" />
+
+        <me.grantland.widget.AutofitTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/bookmarkIMG"
+            android:layout_centerHorizontal="true"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_marginTop="@dimen/listview_padding_between"
+            android:text="@string/empty_bookmarks_layout_hint" />
 
     </RelativeLayout>
 

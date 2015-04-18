@@ -15,3 +15,23 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keep class butterknife.** { *; }
+-dontwarn butterknife.internal.**
+-dontwarn com.squareup.okhttp.**
+-dontwarn me.panavtec.drawableview.**
+
+-keep class **$$ViewInjector { *; }
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <fields>;
+}
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <methods>;
+}
+
+-keepclassmembers class ** {
+    @com.squareup.otto.Subscribe public *;
+    @com.squareup.otto.Produce public *;
+}

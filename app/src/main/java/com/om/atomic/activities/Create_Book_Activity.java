@@ -8,11 +8,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -75,13 +75,10 @@ public class Create_Book_Activity extends BaseActivity {
 
     private ShowcaseView scanBookShowcase;
 
-    private Helper_Methods helperMethods;
-
     private int CALL_PURPOSE;
     private Book book_from_list;
     private ProgressDialog loadingBookInfoDialog;
 
-    private Handler UIHandler;
     private static final int SHOW_SCAN_BOOK_SHOWCASE = 1;
 
     @Override
@@ -94,7 +91,7 @@ public class Create_Book_Activity extends BaseActivity {
 
         ButterKnife.inject(this);
 
-        UIHandler = new Handler() {
+        Handler UIHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
@@ -108,7 +105,7 @@ public class Create_Book_Activity extends BaseActivity {
 
         dbHelper = new DatabaseHelper(this);
 
-        helperMethods = new Helper_Methods(this);
+        Helper_Methods helperMethods = new Helper_Methods(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -199,6 +196,7 @@ public class Create_Book_Activity extends BaseActivity {
                 if (Helper_Methods.isInternetAvailable(Create_Book_Activity.this)) {
                     IntentIntegrator scanIntegrator = new IntentIntegrator(Create_Book_Activity.this);
                     scanIntegrator.initiateScan();
+                    Log.d("BOOKSCAN", "just started scan process");
                 } else {
                     Crouton.makeText(Create_Book_Activity.this, getString(R.string.scan_no_internet_error), Style.ALERT).show();
                 }
@@ -212,6 +210,10 @@ public class Create_Book_Activity extends BaseActivity {
             case android.R.id.home:
                 super.onBackPressed();
                 overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
+                if (getCurrentFocus() != null) {
+                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -265,9 +267,8 @@ public class Create_Book_Activity extends BaseActivity {
             scanBookShowcase.setShouldCentreText(true);
             scanBookShowcase.show();
         } else {
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-//            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-//            inputMethodManager.toggleSoftInputFromWindow(scanBookShowcase.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 1);
+            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                    .showSoftInput(titleET, InputMethodManager.SHOW_FORCED);
         }
     }
 
@@ -277,12 +278,17 @@ public class Create_Book_Activity extends BaseActivity {
 
         IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanningResult != null) {
+
             String scanContent = scanningResult.getContents();
             String scanFormat = scanningResult.getFormatName();
+
             if (scanContent != null && scanFormat != null && scanFormat.equalsIgnoreCase("EAN_13")) {
                 String bookSearchString = "https://www.googleapis.com/books/v1/volumes?" +
                         "q=isbn:" + scanContent + "&key=" + Constants.GOOGLE_BOOKS_API_KEY;
+
                 new GetBookInfo().execute(bookSearchString);
+            } else {
+                Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_not_found), Style.ALERT).show();
             }
         } else {
             Crouton.makeText(Create_Book_Activity.this, getString(R.string.no_scan_data), Style.ALERT).show();

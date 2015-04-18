@@ -27,14 +27,6 @@
 
         </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 
-        <!--<View-->
-        <!--android:id="@+id/separator"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="0.3dp"-->
-        <!--android:layout_below="@id/titleETFloating"-->
-        <!--android:layout_marginTop="20dp"-->
-        <!--android:background="@android:color/black" />-->
-
         <com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"
             android:id="@+id/authorETFloating"
             android:layout_width="match_parent"
@@ -53,6 +45,16 @@
                 android:textColor="@android:color/black"
                 android:textCursorDrawable="@null" />
         </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+
+        <ImageView
+            android:id="@+id/poweredByGoogleBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/powered_by_google" />
 
         <ImageView
             android:id="@+id/bookIMG"

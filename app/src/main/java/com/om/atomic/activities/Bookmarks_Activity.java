@@ -394,24 +394,12 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
             bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
         }
 
-        if (bookmarks.isEmpty()) {
-            emptyListLayout.setVisibility(View.VISIBLE);
-            showCreateBookmarkShowcase();
-            invalidateOptionsMenu();
-        } else {
-            emptyListLayout.setVisibility(View.GONE);
-            invalidateOptionsMenu();
-        }
+        handleEmptyUI(bookmarks);
     }
 
     @DebugLog
     public void handleEmptyOrPopulatedScreen(List<Bookmark> bookmarks) {
-        if (bookmarks.isEmpty()) {
-            emptyListLayout.setVisibility(View.VISIBLE);
-            UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOKMARK_SHOWCASE, 500);
-        } else {
-            emptyListLayout.setVisibility(View.GONE);
-        }
+        handleEmptyUI(bookmarks);
 
         bookmarksAdapter = new Bookmarks_Adapter(this);
         DragSortListView thisDragSortListView = listView;
@@ -455,10 +443,25 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
                     param.setNumber(1);
                     param.setValue("True");
                     dbHelper.updateParam(param);
+
+                    handleEmptyUI(bookmarks);
                 }
             });
             createBookmarkShowcase.show();
         }
+    }
+
+    public void handleEmptyUI(List<Bookmark> bookmarks) {
+        //Books are empty and the coachmark has been dismissed
+        if (bookmarks.isEmpty() && dbHelper.getSeensParam(null, 1)) {
+            emptyListLayout.setVisibility(View.VISIBLE);
+        } else if (bookmarks.isEmpty()) {
+            emptyListLayout.setVisibility(View.GONE);
+            UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOKMARK_SHOWCASE, 200);
+        } else {
+            emptyListLayout.setVisibility(View.INVISIBLE);
+        }
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -545,7 +548,6 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
                 holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
             }
 
-//            if (holder.bookmarkIMG.getAlpha() == 0) {
             if (bookmarks.get(position).getIsNoteShowing() == 0) {
                 holder.motherView.setBackground(context.getResources().getDrawable(R.drawable.listview_items_shape));
                 holder.bookmarkAction.setAlpha(1f);
@@ -560,23 +562,18 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
             } else {
                 holder.motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
                 holder.bookmarkNoteTV.setText(bookmarks.get(position).getNote());
-
-//                holder.bookmarkAction.setAlpha(1f);
                 holder.bookmarkAction.setVisibility(View.INVISIBLE);
-//                holder.bookmarkIMG.setAlpha(1f);
                 holder.bookmarkIMG.setVisibility(View.INVISIBLE);
-//                holder.bookmarkViews.setAlpha(1f);
                 holder.bookmarkViews.setVisibility(View.INVISIBLE);
                 holder.bookmarkName.setVisibility(View.INVISIBLE);
                 holder.bookmarkNoteTV.setVisibility(View.VISIBLE);
-//                holder.bookmarkName.setAlpha(1f);
                 holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
             }
 
             holder.bookmarkName.setText(bookmarks.get(position).getName());
             holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
 
-            Glide.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+            Glide.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
 
 //            Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
 

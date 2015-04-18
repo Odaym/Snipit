@@ -209,7 +209,7 @@ public class SearchResults_Activity extends BaseActivity {
                 holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
 
             if (bookmarks.get(position).getIsNoteShowing() == 0) {
-                holder.motherView.setBackgroundColor(Color.WHITE);
+                holder.motherView.setBackground(context.getResources().getDrawable(R.drawable.listview_items_shape));
                 holder.bookmarkAction.setAlpha(1f);
                 holder.bookmarkAction.setVisibility(View.VISIBLE);
                 holder.bookmarkIMG.setAlpha(1f);
@@ -222,16 +222,11 @@ public class SearchResults_Activity extends BaseActivity {
             } else {
                 holder.motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
                 holder.bookmarkNoteTV.setText(bookmarks.get(position).getNote());
-
-//                holder.bookmarkAction.setAlpha(1f);
                 holder.bookmarkAction.setVisibility(View.INVISIBLE);
-//                holder.bookmarkIMG.setAlpha(1f);
                 holder.bookmarkIMG.setVisibility(View.INVISIBLE);
-//                holder.bookmarkViews.setAlpha(1f);
                 holder.bookmarkViews.setVisibility(View.INVISIBLE);
                 holder.bookmarkName.setVisibility(View.INVISIBLE);
                 holder.bookmarkNoteTV.setVisibility(View.VISIBLE);
-//                holder.bookmarkName.setAlpha(1f);
                 holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
             }
 
@@ -308,7 +303,7 @@ public class SearchResults_Activity extends BaseActivity {
                     if (isNoteShowing == 1) {
                         view.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
 
-                        motherView.setBackgroundColor(Color.WHITE);
+                        motherView.setBackground(context.getResources().getDrawable(R.drawable.listview_items_shape));
 
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkNoteTV));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkAction));

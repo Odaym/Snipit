@@ -14,6 +14,7 @@
     <string name="remove_book_option">Remove</string>
     <string name="navigation_drawer_open">Open</string>
     <string name="navigation_drawer_closed">Closed</string>
+    <string name="empty_books_layout_hint">Books you add appear here</string>
 
     <!-- BOOKMARKS_ACTIVITY -->
     <!--<string name="activity_bookmarks_hint">Add a new bookmark to get started!</string>-->
@@ -24,6 +25,7 @@
     <string name="sort_action_by_name">Sort by Name</string>
     <string name="sort_action_by_date">Sort by Views</string>
     <string name="sort_order_override">Sorting preference override. Restoring previous order.</string>
+    <string name="empty_bookmarks_layout_hint">Bookmarks you add appear here</string>
 
     <!-- CREATE_BOOKMARK_ACTIVITY -->
     <string name="create_bookmark_activity_title">New Bookmark</string>
@@ -41,6 +43,7 @@
     <string name="loading_book_info_title">Hang on</string>
     <string name="loading_book_info_msg">Gathering book data</string>
     <string name="scan_result_error">Scan result was not a book</string>
+    <string name="book_not_found">Couldn\'t find that book</string>
     <string name="book_image_not_found_error">Couldn\'t find book image</string>
     <string name="book_author_not_found_error">Couldn\'t find book author</string>
     <string name="book_title_not_found_error">Couldn\'t find book title</string>

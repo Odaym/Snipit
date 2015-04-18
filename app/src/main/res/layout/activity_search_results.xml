@@ -7,8 +7,15 @@
         android:id="@+id/searchResultsList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@android:color/darker_gray"
-        android:drawSelectorOnTop="true" />
+        android:background="@color/light_gray"
+        android:clipToPadding="false"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="@dimen/listview_padding_between"
+        android:drawSelectorOnTop="true"
+        android:paddingBottom="@dimen/listview_padding_between"
+        android:paddingLeft="@dimen/listview_padding_left_right"
+        android:paddingRight="@dimen/listview_padding_left_right"
+        android:paddingTop="@dimen/listview_padding_between" />
 
     <RelativeLayout
         android:id="@+id/emptyListLayout"

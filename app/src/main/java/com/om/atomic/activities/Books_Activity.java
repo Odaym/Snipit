@@ -130,7 +130,6 @@ public class Books_Activity extends BaseActivity {
 
         navDrawer.setProfile(
                 new DrawerProfile()
-                        .setAvatar(getResources().getDrawable(R.drawable.fuckyou))
                         .setBackground(getResources().getDrawable(R.drawable.navdrawer_background))
                         .setName("Oday Maleh")
                         .setDescription("Motherfucker")
@@ -239,22 +238,12 @@ public class Books_Activity extends BaseActivity {
     public void prepareForNotifyDataChanged() {
         books = dbHelper.getAllBooks(null);
 
-        if (books.isEmpty()) {
-            emptyListLayout.setVisibility(View.VISIBLE);
-            showCreateBookShowcase();
-        } else {
-            emptyListLayout.setVisibility(View.GONE);
-        }
+        handleEmptyUI(books);
     }
 
     @DebugLog
     public void handleEmptyOrPopulatedScreen(List<Book> books) {
-        if (books.isEmpty()) {
-            emptyListLayout.setVisibility(View.VISIBLE);
-            UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOK_SHOWCASE, 500);
-        } else {
-            emptyListLayout.setVisibility(View.GONE);
-        }
+        handleEmptyUI(books);
 
         booksAdapter = new Books_Adapter(this);
         DragSortListView thisDragSortListView = listView;
@@ -296,9 +285,23 @@ public class Books_Activity extends BaseActivity {
                     param.setNumber(2);
                     param.setValue("True");
                     dbHelper.updateParam(param);
+
+                    handleEmptyUI(books);
                 }
             });
             createBookShowcase.show();
+        }
+    }
+
+    public void handleEmptyUI(List<Book> books) {
+        //Books are empty and the coachmark has been dismissed
+        if (books.isEmpty() && dbHelper.getSeensParam(null, 2)) {
+            emptyListLayout.setVisibility(View.VISIBLE);
+        } else if (books.isEmpty()) {
+            emptyListLayout.setVisibility(View.GONE);
+            UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOK_SHOWCASE, 200);
+        } else {
+            emptyListLayout.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -306,6 +309,11 @@ public class Books_Activity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         EventBus_Singleton.getInstance().unregister(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     public class Books_Adapter extends BaseAdapter {
@@ -379,7 +387,7 @@ public class Books_Activity extends BaseActivity {
             holder.bookAuthorTV.setText(books.get(position).getAuthor());
 
 //            if (books.get(position).getImagePath() != null) {
-                Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookThumbIMG);
+            Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookThumbIMG);
 //            }
 
             String[] bookDateAdded = books.get(position).getDate_added().split(" ");
