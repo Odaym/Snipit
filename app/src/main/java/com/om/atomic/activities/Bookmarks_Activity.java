@@ -349,12 +349,6 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
 //                }
 //            }
                 break;
-            case "reset_bookmark_notes_showing":
-//                for (Bookmark bookmark : bookmarks) {
-//                    bookmark.setIsNoteShowing(0);
-//                }
-//                bookmarksAdapter.notifyDataSetChanged();
-                break;
         }
     }
 
@@ -479,8 +473,6 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
         openSearchActivity.putExtra(Constants.EXTRAS_BOOK_COLOR, book_color_code);
         openSearchActivity.putExtra(Constants.EXTRAS_SEARCH_TERM, searchTerm);
         startActivity(openSearchActivity);
-
-//        EventBus_Singleton.getInstance().post(new EventBus_Poster("reset_bookmark_notes_showing"));
 
         return true;
     }
