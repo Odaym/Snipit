@@ -64,7 +64,7 @@
 
     <dimen name="average_screen_height">150dp</dimen>
 
-    <dimen name="padding_books_activity_hint_above_image">100dp</dimen>
+    <dimen name="padding_books_activity_hint_above_image">50dp</dimen>
 
     <dimen name="listview_padding_left_right">5dp</dimen>
     <dimen name="listview_padding_between">10dp</dimen>

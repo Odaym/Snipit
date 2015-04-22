@@ -7,7 +7,7 @@ import android.support.v7.app.ActionBarActivity;
 import icepick.Icepick;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class BaseActivity extends ActionBarActivity {
+public class Base_Activity extends ActionBarActivity {
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));

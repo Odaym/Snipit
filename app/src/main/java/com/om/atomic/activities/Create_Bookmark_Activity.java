@@ -37,7 +37,7 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 
-public class Create_Bookmark_Activity extends BaseActivity {
+public class Create_Bookmark_Activity extends Base_Activity {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 

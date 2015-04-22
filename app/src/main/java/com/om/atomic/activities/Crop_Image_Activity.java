@@ -30,7 +30,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import hugo.weaving.DebugLog;
 
-public class Crop_Image_Activity extends BaseActivity {
+public class Crop_Image_Activity extends Base_Activity {
     @InjectView(R.id.doneBTN)
     FloatingActionButton doneBTN;
     @InjectView(R.id.rotateImageBTN)

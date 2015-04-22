@@ -57,7 +57,7 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 
-public class Create_Book_Activity extends BaseActivity {
+public class Create_Book_Activity extends Base_Activity {
 
     @InjectView(R.id.titleET)
     EditText titleET;
@@ -196,7 +196,6 @@ public class Create_Book_Activity extends BaseActivity {
                 if (Helper_Methods.isInternetAvailable(Create_Book_Activity.this)) {
                     IntentIntegrator scanIntegrator = new IntentIntegrator(Create_Book_Activity.this);
                     scanIntegrator.initiateScan();
-                    Log.d("BOOKSCAN", "just started scan process");
                 } else {
                     Crouton.makeText(Create_Book_Activity.this, getString(R.string.scan_no_internet_error), Style.ALERT).show();
                 }
@@ -359,6 +358,7 @@ public class Create_Book_Activity extends BaseActivity {
                 try {
                     JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
                     Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("smallThumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
+                    Log.d("Dummy", "Book thumbnail path: " + imageInfo.getString("smallThumbnail"));
                     bookImagePath = imageInfo.getString("smallThumbnail");
                 } catch (JSONException jse) {
                     Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_image_not_found_error), Style.ALERT).show();

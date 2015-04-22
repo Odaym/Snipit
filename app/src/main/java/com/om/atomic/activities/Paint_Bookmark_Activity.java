@@ -32,6 +32,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -42,7 +44,7 @@ import hugo.weaving.DebugLog;
 import me.panavtec.drawableview.DrawableView;
 import me.panavtec.drawableview.DrawableViewConfig;
 
-public class Paint_Bookmark_Activity extends BaseActivity {
+public class Paint_Bookmark_Activity extends Base_Activity {
     @InjectView(R.id.drawable_view)
     DrawableView drawableView;
     @InjectView(R.id.bookmarkIMG)
@@ -65,6 +67,8 @@ public class Paint_Bookmark_Activity extends BaseActivity {
     private DrawableViewConfig config;
     private SharedPreferences prefs;
     private SharedPreferences.Editor prefsEditor;
+    private Bitmap bmp;
+    private int bitmapWidth, bitmapHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +90,7 @@ public class Paint_Bookmark_Activity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.paint_bookmark_activity_title));
 
-        Picasso.with(Paint_Bookmark_Activity.this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH))).resize(2000, 2000).centerInside().into(bookmarkIMG, new Callback() {
+        Callback picassoCallback = new Callback() {
             @Override
             public void onSuccess() {
                 imageProgressBar.setVisibility(View.INVISIBLE);
@@ -96,9 +100,23 @@ public class Paint_Bookmark_Activity extends BaseActivity {
             public void onError() {
                 imageProgressBar.setVisibility(View.INVISIBLE);
             }
-        });
+        };
 
-        Bitmap bmp = BitmapFactory.decodeFile(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH));
+        try {
+            //If the String was a URL then this bookmark is a sample
+            URL imageURL = new URL(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH));
+            Picasso.with(Paint_Bookmark_Activity.this).load(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
+             bmp = BitmapFactory.decodeStream(imageURL.openConnection().getInputStream());
+            bitmapWidth = bmp.getWidth();
+            bitmapHeight = bmp.getHeight();
+        } catch (MalformedURLException e) {
+            //Else it's on disk
+            Picasso.with(Paint_Bookmark_Activity.this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH))).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
+             bmp = BitmapFactory.decodeFile(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH));
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d("Paint_Bookmark_Activity", "Couldn't get bitmap from URL");
+        }
 
         final float scale = getResources().getDisplayMetrics().density;
         int height = (int) (480 * scale + 0.5f);
@@ -111,9 +129,6 @@ public class Paint_Bookmark_Activity extends BaseActivity {
         config.setCanvasWidth(getResources().getDisplayMetrics().widthPixels);
         config.setCanvasHeight(height);
         drawableView.setConfig(config);
-
-        final int bitmapWidth = bmp.getWidth();
-        final int bitmapHeight = bmp.getHeight();
 
         fabActionClear.setOnClickListener(new View.OnClickListener() {
             @Override

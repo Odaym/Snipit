@@ -52,6 +52,8 @@ import com.squareup.otto.Subscribe;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,7 +68,7 @@ import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 
-public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQueryTextListener {
+public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQueryTextListener {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
@@ -565,7 +567,14 @@ public class Bookmarks_Activity extends BaseActivity implements SearchView.OnQue
             holder.bookmarkName.setText(bookmarks.get(position).getName());
             holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
 
+            try {
+                //If the String was a URL then this bookmark is a sample
+                new URL(bookmarks.get(position).getImage_path());
+                Glide.with(Bookmarks_Activity.this).load(bookmarks.get(position).getImage_path()).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+            } catch (MalformedURLException e) {
+                //Else it's on disk
             Glide.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+            }
 
 //            Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
 

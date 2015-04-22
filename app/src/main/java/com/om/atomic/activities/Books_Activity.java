@@ -7,11 +7,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,12 +24,8 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.heinrichreimersoftware.materialdrawer.DrawerFrameLayout;
-import com.heinrichreimersoftware.materialdrawer.structure.DrawerItem;
-import com.heinrichreimersoftware.materialdrawer.structure.DrawerProfile;
 import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.atomic.classes.Book;
@@ -41,12 +39,18 @@ import com.om.atomic.classes.Param;
 import com.om.atomic.dragsort_listview.DragSortListView;
 import com.om.atomic.showcaseview.ShowcaseView;
 import com.om.atomic.showcaseview.ViewTarget;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -55,7 +59,7 @@ import icepick.Icicle;
 import io.fabric.sdk.android.Fabric;
 import me.grantland.widget.AutofitTextView;
 
-public class Books_Activity extends BaseActivity {
+public class Books_Activity extends Base_Activity {
 
     @Icicle
     ArrayList<Book> books;
@@ -66,8 +70,8 @@ public class Books_Activity extends BaseActivity {
     RelativeLayout emptyListLayout;
     @InjectView(R.id.createNewBookBTN)
     FloatingActionButton createNewBookBTN;
-    @InjectView(R.id.navDrawer)
-    DrawerFrameLayout navDrawer;
+//    @InjectView(R.id.navDrawer)
+//    DrawerFrameLayout navDrawer;
 
     private final static int SHOW_CREATE_BOOK_SHOWCASE = 1;
     private static Handler UIHandler = new Handler();
@@ -128,77 +132,70 @@ public class Books_Activity extends BaseActivity {
             toolbar.setElevation(25f);
         }
 
-        navDrawer.setProfile(
-                new DrawerProfile()
-                        .setBackground(getResources().getDrawable(R.drawable.navdrawer_background))
-                        .setName("Oday Maleh")
-                        .setDescription("Motherfucker")
-                        .setOnProfileClickListener(new DrawerProfile.OnProfileClickListener() {
-                            @Override
-                            public void onClick(DrawerProfile drawerProfile) {
-                                Toast.makeText(Books_Activity.this, "Clicked profile", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-        );
-
-        navDrawer.addItem(
-                new DrawerItem()
-                        .setImage(getResources().getDrawable(R.drawable.notfound_1))
-                        .setTextPrimary("Title 1")
-                        .setTextSecondary("Description 1")
-                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
-                            @Override
-                            public void onClick(DrawerItem drawerItem, int id, int position) {
-                                Toast.makeText(Books_Activity.this, "Clicked 1st item", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-        );
-        navDrawer.addDivider();
-        navDrawer.addItem(
-                new DrawerItem()
-                        .setImage(getResources().getDrawable(R.drawable.notfound_1))
-                        .setTextPrimary("Title 2")
-                        .setTextSecondary("Description 2")
-                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
-                            @Override
-                            public void onClick(DrawerItem drawerItem, int id, int position) {
-                                Toast.makeText(Books_Activity.this, "Clicked 2nd item", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-        );
+        /**
+         * Navigation Drawer code
+         */
+//        navDrawer.setProfile(
+//                new DrawerProfile()
+//                        .setBackground(getResources().getDrawable(R.drawable.navdrawer_background))
+//                        .setName("Oday Maleh")
+//                        .setDescription("Motherfucker")
+//                        .setOnProfileClickListener(new DrawerProfile.OnProfileClickListener() {
+//                            @Override
+//                            public void onClick(DrawerProfile drawerProfile) {
+//                                Toast.makeText(Books_Activity.this, "Clicked profile", Toast.LENGTH_SHORT).show();
+//                            }
+//                        })
+//        );
+//
+//        navDrawer.addItem(
+//                new DrawerItem()
+//                        .setImage(getResources().getDrawable(R.drawable.notfound_1))
+//                        .setTextPrimary("Title 1")
+//                        .setTextSecondary("Description 1")
+//                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
+//                            @Override
+//                            public void onClick(DrawerItem drawerItem, int id, int position) {
+//                                Toast.makeText(Books_Activity.this, "Clicked 1st item", Toast.LENGTH_SHORT).show();
+//                            }
+//                        })
+//        );
+//        navDrawer.addDivider();
+//        navDrawer.addItem(
+//                new DrawerItem()
+//                        .setImage(getResources().getDrawable(R.drawable.notfound_1))
+//                        .setTextPrimary("Title 2")
+//                        .setTextSecondary("Description 2")
+//                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
+//                            @Override
+//                            public void onClick(DrawerItem drawerItem, int id, int position) {
+//                                Toast.makeText(Books_Activity.this, "Clicked 2nd item", Toast.LENGTH_SHORT).show();
+//                            }
+//                        })
+//        );
 
 //        String USER_FULL_NAME = getIntent().getExtras().getString(Constants.USER_FULL_NAME);
 //        String USER_EMAIL_ADDRESS = getIntent().getExtras().getString(Constants.USER_EMAIL_ADDRESS);
 //        String USER_PHOTO_URL = getIntent().getExtras().getString(Constants.USER_PHOTO_URL);
 //
-//        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
-//        mRecyclerView.setHasFixedSize(true);
+//        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, navDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_closed) {
 //
-//        RecyclerView.Adapter mAdapter = new NavDrawer_Adapter(this, TITLES, ICONS, USER_FULL_NAME, USER_EMAIL_ADDRESS, USER_PHOTO_URL);
+//            @Override
+//            public void onDrawerOpened(View drawerView) {
+//                super.onDrawerOpened(drawerView);
+//            }
 //
-//        mRecyclerView.setAdapter(mAdapter);
+//            @Override
+//            public void onDrawerClosed(View drawerView) {
+//                super.onDrawerClosed(drawerView);
+//            }
+//        };
 //
-//        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
-//
-//        mRecyclerView.setLayoutManager(mLayoutManager);
-//
-//
-//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, navDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_closed) {
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-            }
-
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-            }
-        };
-
-        navDrawer.setDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
+//        navDrawer.setDrawerListener(mDrawerToggle);
+//        mDrawerToggle.syncState();
+        /**
+         * END OF NAVIGATION DRAWER CODE
+         */
 
         handleEmptyOrPopulatedScreen(books);
 
@@ -226,6 +223,123 @@ public class Books_Activity extends BaseActivity {
         });
 
         createNewBookBTN.attachToListView(listView);
+
+        populateWithSampleData();
+    }
+
+//    public void uploadBookDataToParse(List<Book> books) {
+//        for (Book book : books) {
+//            ParseObject bookObject = new ParseObject("Bookmark");
+//            bookObject.put("title", book.getTitle());
+//            bookObject.put("author", book.getAuthor());
+//            bookObject.saveInBackground();
+//        }
+//    }
+//
+//    public void uploadBookmarkDataToParse() {
+//        List<Book> books = dbHelper.getAllBooks(null);
+//        List<Bookmark> bookmarks;
+//
+//        for (Book book : books) {
+//            bookmarks = dbHelper.getAllBookmarks(book.getId(), null);
+//            for (Bookmark bookmark : bookmarks) {
+//                ParseObject bookmarkObject = new ParseObject("Bookmark");
+//                bookmarkObject.put("book_id", bookmark.getBookId());
+//                bookmarkObject.put("title", bookmark.getName());
+//                bookmarkObject.put("page_number", bookmark.getPage_number());
+//                bookmarkObject.saveInBackground();
+//            }
+//        }
+//    }
+
+    public void populateWithSampleData() {
+        final List<Book> booksToInsert = new ArrayList<Book>();
+        final List<Bookmark> bookmarksToInsert = new ArrayList<Bookmark>();
+
+        Date date = new Date();
+        final String day = (String) android.text.format.DateFormat.format("dd", date);
+        final String month = (String) android.text.format.DateFormat.format("MMM", date);
+        final String year = (String) android.text.format.DateFormat.format("yyyy", date);
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Book");
+        query.findInBackground(new FindCallback<ParseObject>() {
+                                   public void done(final List<ParseObject> parseObjects, ParseException e) {
+                                       if (e == null) {
+                                           // object will be your game score
+                                           for (ParseObject parseObject : parseObjects) {
+                                               Random rand = new Random();
+
+                                               Book book = new Book();
+                                               book.setId(Integer.parseInt(parseObject.get("book_id").toString()));
+                                               book.setTitle(parseObject.get("title").toString());
+                                               book.setAuthor(parseObject.get("author").toString());
+                                               book.setImagePath(parseObject.get("thumb").toString());
+                                               book.setDate_added(month + " " + day + " " + year);
+                                               book.setColorCode(rand.nextInt(7 - 1));
+
+                                               booksToInsert.add(book);
+                                           }
+
+                                           ParseQuery<ParseObject> query = ParseQuery.getQuery("Bookmark");
+                                           query.findInBackground(new FindCallback<ParseObject>() {
+                                               @Override
+                                               public void done(List<ParseObject> parseObjects, ParseException e) {
+                                                   if (e == null) {
+                                                       for (ParseObject parseObject : parseObjects) {
+                                                           Bookmark bookmark = new Bookmark();
+                                                           bookmark.setBookId(Integer.parseInt(parseObject.get("book_id").toString()));
+                                                           bookmark.setName(parseObject.get("title").toString());
+                                                           bookmark.setPage_number(Integer.parseInt(parseObject.get("page_number").toString()));
+                                                           bookmark.setImage_path(parseObject.get("image").toString());
+
+                                                           bookmark.setDate_added(month + " " + day + ", " + year);
+
+                                                           bookmarksToInsert.add(bookmark);
+                                                       }
+
+                                                       for (int i = 0; i < booksToInsert.size(); i++) {
+                                                           dbHelper.createSampleBook(booksToInsert.get(i));
+                                                       }
+
+                                                       for (int j = 0; j < bookmarksToInsert.size(); j++) {
+                                                           switch (bookmarksToInsert.get(j).getBookId()) {
+                                                               case 3:
+                                                                   dbHelper.createBookmark(bookmarksToInsert.get(j), 3);
+                                                                   break;
+                                                               case 4:
+                                                                   dbHelper.createBookmark(bookmarksToInsert.get(j), 4);
+                                                                   break;
+                                                               case 5:
+                                                                   dbHelper.createBookmark(bookmarksToInsert.get(j), 5);
+                                                                   break;
+                                                           }
+                                                       }
+                                                       EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
+                                                   }
+                                               }
+                                           });
+                                       } else {
+                                           // something went wrong
+                                       }
+                                   }
+                               }
+        );
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.books_menu, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent openSettingsIntent = new Intent(this, Settings_Activity.class);
+        startActivity(openSettingsIntent);
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Subscribe

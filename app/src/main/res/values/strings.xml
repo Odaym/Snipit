@@ -7,6 +7,15 @@
     <string name="OK">OK</string>
     <string name="takeNote">Take a note</string>
     <string name="writeSomething">Write something here…</string>
+    <string name="about">About</string>
+    <string name="settings">Settings</string>
+
+    <!-- PREFERENCE ACTIVITY-->
+    <string name="pref_tutorial_section_title">Tutorial</string>
+    <string name="pref_tutorial_title">Tutorial Mode</string>
+    <string name="pref_about_section_title">About</string>
+    <string name="pref_about_title">About Atomic</string>
+    <string name="pref_open_source">Open Source Libraries</string>
 
     <!-- BOOKS_ACTIVITY -->
     <!--<string name="activity_books_hint">Add a new book to get started!</string>-->

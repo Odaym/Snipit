@@ -46,6 +46,8 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import butterknife.ButterKnife;
@@ -54,7 +56,7 @@ import hugo.weaving.DebugLog;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
-public class View_Bookmark_Activity extends BaseActivity {
+public class View_Bookmark_Activity extends Base_Activity {
 
     private ArrayList<Bookmark> bookmarks;
     private int NUM_PAGES;
@@ -287,7 +289,8 @@ public class View_Bookmark_Activity extends BaseActivity {
             bookmarkPageNumberTV.setText(" " + String.valueOf(bookmark_pagenumber));
             bookmarkDateAddedTV.setText(bookmark_dateAdded);
 
-            Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().into(bookmarkIMG, new Callback() {
+
+            Callback picassoCallback = new Callback() {
                 @Override
                 public void onSuccess() {
                     imageProgressBar.setVisibility(View.INVISIBLE);
@@ -363,7 +366,16 @@ public class View_Bookmark_Activity extends BaseActivity {
                         }
                     });
                 }
-            });
+            };
+
+            try {
+                //If the String was a URL then this bookmark is a sample
+                new URL(bookmark_imagepath);
+                Picasso.with(context).load(bookmark_imagepath).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().into(bookmarkIMG, picassoCallback);
+            } catch (MalformedURLException e) {
+                //Else it's on disk
+                Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().into(bookmarkIMG, picassoCallback);
+            }
 
             PhotoViewAttacher mAttacher = new PhotoViewAttacher(bookmarkIMG);
             mAttacher.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {

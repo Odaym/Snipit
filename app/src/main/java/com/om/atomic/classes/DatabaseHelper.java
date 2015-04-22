@@ -133,6 +133,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @DebugLog
+    public int createSampleBook(Book book) {
+        SQLiteDatabase dbHandler = this.getWritableDatabase();
+        ContentValues cv;
+
+        cv = new ContentValues();
+        cv.put(B_ID, book.getId());
+        cv.put(B_TITLE, book.getTitle());
+        cv.put(B_AUTHOR, book.getAuthor());
+        cv.put(B_IMAGE, book.getImagePath());
+        cv.put(B_DATE_ADDED, book.getDate_added());
+        cv.put(B_COLOR_CODE, book.getColorCode());
+        cv.put(B_ORDER, getMax_BookOrder(dbHandler));
+
+        return (int) dbHandler.insert(BOOK_TABLE, null, cv);
+    }
+
+    @DebugLog
     public void updateBook(Book book) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
 
@@ -351,6 +368,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         newValues.putNull(PRM_STRINGVALUE);
 
         db.insert(PARAM_TABLE, null, newValues);
+    }
+
+    @DebugLog
+    public void switchCoachmarksSeenParam(int paramNumber, String paramValue){
+        SQLiteDatabase dbHandler = this.getWritableDatabase();
+        ContentValues newValues = new ContentValues();
+
+        String[] args = new String[]{String.valueOf(paramNumber)};
+
+        newValues.put(PRM_STRINGVALUE, paramValue);
+
+        dbHandler.update(PARAM_TABLE, newValues, PRM_NUMBER + " = ?", args);
     }
 
     @DebugLog

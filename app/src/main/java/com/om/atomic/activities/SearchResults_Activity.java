@@ -41,7 +41,7 @@ import java.util.List;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 
-public class SearchResults_Activity extends BaseActivity {
+public class SearchResults_Activity extends Base_Activity {
     private ArrayList<Bookmark> bookmarks;
     private DatabaseHelper dbHelper;
     private ListView listView;

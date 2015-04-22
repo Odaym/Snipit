@@ -85,7 +85,10 @@
 
         <activity
             android:name=".activities.Paint_Bookmark_Activity"
+            android:screenOrientation="portrait"
             android:theme="@style/View_Bookmark_Activity_Theme" />
+
+        <activity android:name=".activities.Settings_Activity" />
 
     </application>
 
