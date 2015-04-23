@@ -13,6 +13,7 @@
     <!-- PREFERENCE ACTIVITY-->
     <string name="pref_tutorial_section_title">Tutorial</string>
     <string name="pref_tutorial_title">Tutorial Mode</string>
+    <string name="pref_tutorial_summary">When you don\'t have any books or bookmarks, hint screens will be displayed.</string>
     <string name="pref_about_section_title">About</string>
     <string name="pref_about_title">About Atomic</string>
     <string name="pref_open_source">Open Source Libraries</string>

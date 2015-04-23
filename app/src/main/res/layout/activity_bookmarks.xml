@@ -44,8 +44,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/bookmarkIMG"
             android:layout_centerHorizontal="true"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:layout_marginTop="@dimen/listview_padding_between"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginTop="@dimen/padding_bookmarks_activity_hint_above_image"
             android:text="@string/empty_bookmarks_layout_hint" />
 
     </RelativeLayout>
