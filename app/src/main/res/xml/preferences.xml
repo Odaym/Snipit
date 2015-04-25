@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:key="pref_key_tutorial"
-        android:title="@string/pref_tutorial_section_title">
+        android:title="@string/pref_tutorial_section_title"
+        android:key="pref_key_tutorial">
         <CheckBoxPreference
-            android:defaultValue="false"
             android:key="pref_key_tutorial_mode"
-            android:title="@string/pref_tutorial_title" />
+            android:title="@string/pref_tutorial_title"
+            android:defaultValue="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="pref_key_about"
-        android:title="@string/pref_about_section_title">
-        <Preference android:title="@string/pref_about_title" />
+        android:title="@string/pref_about_section_title"
+        android:key="pref_key_about">
+        <CheckBoxPreference
+            android:title="@string/pref_about_title"
+            android:defaultValue="false"/>
     </PreferenceCategory>
 </PreferenceScreen>
