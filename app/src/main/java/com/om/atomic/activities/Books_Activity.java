@@ -224,7 +224,7 @@ public class Books_Activity extends Base_Activity {
 
         createNewBookBTN.attachToListView(listView);
 
-        populateWithSampleData();
+//        populateWithSampleData();
     }
 
 //    public void uploadBookDataToParse(List<Book> books) {
