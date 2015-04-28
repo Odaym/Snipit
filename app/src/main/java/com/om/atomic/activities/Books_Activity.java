@@ -1,5 +1,6 @@
 package com.om.atomic.activities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -10,7 +11,6 @@ import android.os.Message;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -75,8 +75,8 @@ public class Books_Activity extends Base_Activity {
 
     private final static int SHOW_CREATE_BOOK_SHOWCASE = 1;
     private static Handler UIHandler = new Handler();
+    private ProgressDialog downloadingBookDataLoader;
 
-    private Helper_Methods helperMethods;
     private Books_Adapter booksAdapter;
     private DatabaseHelper dbHelper;
     private ShowcaseView createBookShowcase;
@@ -123,7 +123,6 @@ public class Books_Activity extends Base_Activity {
 
         dbHelper = new DatabaseHelper(this);
         books = dbHelper.getAllBooks(null);
-        helperMethods = new Helper_Methods(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -223,36 +222,17 @@ public class Books_Activity extends Base_Activity {
         });
 
         createNewBookBTN.attachToListView(listView);
-
-//        populateWithSampleData();
     }
 
-//    public void uploadBookDataToParse(List<Book> books) {
-//        for (Book book : books) {
-//            ParseObject bookObject = new ParseObject("Bookmark");
-//            bookObject.put("title", book.getTitle());
-//            bookObject.put("author", book.getAuthor());
-//            bookObject.saveInBackground();
-//        }
-//    }
-//
-//    public void uploadBookmarkDataToParse() {
-//        List<Book> books = dbHelper.getAllBooks(null);
-//        List<Bookmark> bookmarks;
-//
-//        for (Book book : books) {
-//            bookmarks = dbHelper.getAllBookmarks(book.getId(), null);
-//            for (Bookmark bookmark : bookmarks) {
-//                ParseObject bookmarkObject = new ParseObject("Bookmark");
-//                bookmarkObject.put("book_id", bookmark.getBookId());
-//                bookmarkObject.put("title", bookmark.getName());
-//                bookmarkObject.put("page_number", bookmark.getPage_number());
-//                bookmarkObject.saveInBackground();
-//            }
-//        }
-//    }
-
-    public void populateWithSampleData() {
+    /**
+     * The algorithm is:
+     * 1. Download books from Parse
+     * 2. Download bookmarks from Parse
+     * 3. For every book being added, if it exists, go through its bookmarks and add those
+     * <p/>
+     * Outcome: Non-replicable set of sample books. If some are missing by virtue of having been deleted, they will be replaced but never replicated.
+     */
+    public void populateSampleData() {
         final List<Book> booksToInsert = new ArrayList<Book>();
         final List<Bookmark> bookmarksToInsert = new ArrayList<Bookmark>();
 
@@ -263,67 +243,59 @@ public class Books_Activity extends Base_Activity {
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Book");
         query.findInBackground(new FindCallback<ParseObject>() {
-                                   public void done(final List<ParseObject> parseObjects, ParseException e) {
-                                       if (e == null) {
-                                           // object will be your game score
-                                           for (ParseObject parseObject : parseObjects) {
-                                               Random rand = new Random();
+            public void done(final List<ParseObject> parseObjects, ParseException e) {
+                if (e == null) {
+                    for (ParseObject parseObject : parseObjects) {
+                        Random rand = new Random();
 
-                                               Book book = new Book();
-                                               book.setId(Integer.parseInt(parseObject.get("book_id").toString()));
-                                               book.setTitle(parseObject.get("title").toString());
-                                               book.setAuthor(parseObject.get("author").toString());
-                                               book.setImagePath(parseObject.get("thumb").toString());
-                                               book.setDate_added(month + " " + day + " " + year);
-                                               book.setColorCode(rand.nextInt(7 - 1));
+                        Book book = new Book();
+                        book.setId(Integer.parseInt(parseObject.get("book_id").toString()));
+                        book.setTitle(parseObject.get("title").toString());
+                        book.setAuthor(parseObject.get("author").toString());
+                        book.setImagePath(parseObject.get("thumb").toString());
+                        book.setDate_added(month + " " + day + " " + year);
+                        book.setColorCode(rand.nextInt(7 - 1));
 
-                                               booksToInsert.add(book);
-                                           }
+                        booksToInsert.add(book);
+                    }
 
-                                           ParseQuery<ParseObject> query = ParseQuery.getQuery("Bookmark");
-                                           query.findInBackground(new FindCallback<ParseObject>() {
-                                               @Override
-                                               public void done(List<ParseObject> parseObjects, ParseException e) {
-                                                   if (e == null) {
-                                                       for (ParseObject parseObject : parseObjects) {
-                                                           Bookmark bookmark = new Bookmark();
-                                                           bookmark.setBookId(Integer.parseInt(parseObject.get("book_id").toString()));
-                                                           bookmark.setName(parseObject.get("title").toString());
-                                                           bookmark.setPage_number(Integer.parseInt(parseObject.get("page_number").toString()));
-                                                           bookmark.setImage_path(parseObject.get("image").toString());
+                    ParseQuery<ParseObject> query = ParseQuery.getQuery("Bookmark");
+                    query.findInBackground(new FindCallback<ParseObject>() {
+                        @Override
+                        public void done(List<ParseObject> parseObjects, ParseException e) {
+                            if (e == null) {
+                                for (ParseObject parseObject : parseObjects) {
+                                    Bookmark bookmark = new Bookmark();
+                                    bookmark.setBookId(Integer.parseInt(parseObject.get("book_id").toString()));
+                                    bookmark.setName(parseObject.get("title").toString());
+                                    bookmark.setPage_number(Integer.parseInt(parseObject.get("page_number").toString()));
+                                    bookmark.setImage_path(parseObject.get("image").toString());
+                                    bookmark.setDate_added(month + " " + day + ", " + year);
 
-                                                           bookmark.setDate_added(month + " " + day + ", " + year);
+                                    bookmarksToInsert.add(bookmark);
+                                }
 
-                                                           bookmarksToInsert.add(bookmark);
-                                                       }
+                                for (int i = 0; i < booksToInsert.size(); i++) {
+                                    int db_insert_success_status =
+                                            dbHelper.createSampleBook(booksToInsert.get(i));
 
-                                                       for (int i = 0; i < booksToInsert.size(); i++) {
-                                                           dbHelper.createSampleBook(booksToInsert.get(i));
-                                                       }
-
-                                                       for (int j = 0; j < bookmarksToInsert.size(); j++) {
-                                                           switch (bookmarksToInsert.get(j).getBookId()) {
-                                                               case 3:
-                                                                   dbHelper.createBookmark(bookmarksToInsert.get(j), 3);
-                                                                   break;
-                                                               case 4:
-                                                                   dbHelper.createBookmark(bookmarksToInsert.get(j), 4);
-                                                                   break;
-                                                               case 5:
-                                                                   dbHelper.createBookmark(bookmarksToInsert.get(j), 5);
-                                                                   break;
-                                                           }
-                                                       }
-                                                       EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
-                                                   }
-                                               }
-                                           });
-                                       } else {
-                                           // something went wrong
-                                       }
-                                   }
-                               }
-        );
+                                    //If the book did not already exist, go ahead and insert its bookmarks
+                                    if (db_insert_success_status == 0)
+                                        for (int j = 0; j < bookmarksToInsert.size(); j++) {
+                                            if (bookmarksToInsert.get(j).getBookId() == booksToInsert.get(i).getId())
+                                                dbHelper.createSampleBookmark(bookmarksToInsert.get(j), booksToInsert.get(i).getId());
+                                        }
+                                    downloadingBookDataLoader.dismiss();
+                                    EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    //Something went wrong while getting data from Parse
+                }
+            }
+        });
     }
 
     @Override
@@ -344,6 +316,12 @@ public class Books_Activity extends Base_Activity {
 
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
+        if (ebp.getMessage().equals("populate_sample_data")) {
+            downloadingBookDataLoader = ProgressDialog.show(this, getResources().getString(R.string.downloading_books_loader_title),
+                    getResources().getString(R.string.downloading_books_loader_message), true);
+            populateSampleData();
+        }
+
         prepareForNotifyDataChanged();
         booksAdapter.notifyDataSetChanged();
     }

@@ -41,6 +41,8 @@ public class Crop_Image_Activity extends Base_Activity {
     private String tempImagePath_fromIntent;
     private int CALL_PURPOSE;
 
+    private Helper_Methods helperMethods;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +50,7 @@ public class Crop_Image_Activity extends Base_Activity {
 
         ButterKnife.inject(this);
 
-        Helper_Methods helperMethods = new Helper_Methods(this);
+        helperMethods = new Helper_Methods(this);
 
         helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
 
@@ -74,7 +76,7 @@ public class Crop_Image_Activity extends Base_Activity {
             public void onClick(View view) {
                 String finalImagePath = create_CroppedImageFile(cropImageView.getCroppedImage());
 
-                delete_previous_uncropped_image(tempImagePath_fromIntent);
+            Helper_Methods.delete_image_from_disk(tempImagePath_fromIntent);
 
                 if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE || CALL_PURPOSE == Constants.EDIT_BOOKMARK_IMAGE_PURPOSE_VALUE) {
                     EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_picture_changed", finalImagePath));
@@ -96,12 +98,6 @@ public class Crop_Image_Activity extends Base_Activity {
                 cropImageView.rotateImage(90);
             }
         });
-    }
-
-    @DebugLog
-    public void delete_previous_uncropped_image(String imagePath) {
-        File file = new File(imagePath);
-        file.delete();
     }
 
     @DebugLog

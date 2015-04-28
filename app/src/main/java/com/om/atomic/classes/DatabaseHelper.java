@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import hugo.weaving.DebugLog;
 
@@ -137,16 +138,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
         ContentValues cv;
 
-        cv = new ContentValues();
-        cv.put(B_ID, book.getId());
-        cv.put(B_TITLE, book.getTitle());
-        cv.put(B_AUTHOR, book.getAuthor());
-        cv.put(B_IMAGE, book.getImagePath());
-        cv.put(B_DATE_ADDED, book.getDate_added());
-        cv.put(B_COLOR_CODE, book.getColorCode());
-        cv.put(B_ORDER, getMax_BookOrder(dbHandler));
+        int db_insert_success_status = 0;
 
-        return (int) dbHandler.insert(BOOK_TABLE, null, cv);
+        if (checkIfDataExists(dbHandler, BOOK_TABLE, B_ID, String.valueOf(book.getId()))) {
+            //Data does exist
+            db_insert_success_status = 1;
+        } else {
+            //Data does not exist
+            cv = new ContentValues();
+            cv.put(B_ID, book.getId());
+            cv.put(B_TITLE, book.getTitle());
+            cv.put(B_AUTHOR, book.getAuthor());
+            cv.put(B_IMAGE, book.getImagePath());
+            cv.put(B_DATE_ADDED, book.getDate_added());
+            cv.put(B_COLOR_CODE, book.getColorCode());
+            cv.put(B_ORDER, getMax_BookOrder(dbHandler));
+
+            dbHandler.insert(BOOK_TABLE, null, cv);
+        }
+
+        return db_insert_success_status;
+    }
+
+    public static boolean checkIfDataExists(SQLiteDatabase db, String tableName,
+                                            String dbField, String fieldValue) {
+        String Query = "SELECT "+ dbField +" FROM " + tableName + " WHERE " + dbField + " = " + fieldValue;
+        Cursor cursor = db.rawQuery(Query, null);
+        return cursor.getCount() > 0;
     }
 
     @DebugLog
@@ -169,10 +187,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void deleteBook(int book_id) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
 
+        //Remove all the bookmarks that belonged to this book and are still stored on disk as images
+        //Do this BEFORE deleting the books because ON DELETE CASCADE
+        List<Bookmark> bookmarks = getAllBookmarks(book_id, null);
+        for (Bookmark bookmark : bookmarks) {
+            Helper_Methods.delete_image_from_disk(bookmark.getImage_path());
+        }
+
         String table = BOOK_TABLE;
         String whereClause = B_ID + " = ?";
         String[] whereArgs = new String[]{String.valueOf(book_id)};
         dbHandler.delete(table, whereClause, whereArgs);
+
     }
 
     public ArrayList<Bookmark> getAllBookmarks(int book_id, String sortBy) {
@@ -258,6 +284,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(BM_NOTE, "");
 
         dbHandler.insert(BOOKMARK_TABLE, null, cv);
+    }
+
+    @DebugLog
+    public void createSampleBookmark(Bookmark bookmark, int book_id) {
+        SQLiteDatabase dbHandler = this.getWritableDatabase();
+        ContentValues cv;
+
+        if (!checkIfDataExists(dbHandler, BOOKMARK_TABLE, BM_ID, String.valueOf(bookmark.getId()))) {
+            cv = new ContentValues();
+            cv.putNull(BM_ID);
+            cv.put(BM_BOOK_FOREIGN_KEY, book_id);
+            cv.put(BM_NAME, bookmark.getName());
+            cv.put(BM_PAGENUMBER, bookmark.getPage_number());
+            cv.put(BM_IMAGEPATH, bookmark.getImage_path());
+            cv.put(BM_DATE_ADDED, bookmark.getDate_added());
+            cv.put(BM_ORDER, getMax_BookmarkOrder(dbHandler));
+            cv.put(BM_VIEWS, 0);
+            cv.put(BM_NOTE, "");
+
+            dbHandler.insert(BOOKMARK_TABLE, null, cv);
+        }
     }
 
     @DebugLog
@@ -371,7 +418,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @DebugLog
-    public void switchCoachmarksSeenParam(int paramNumber, String paramValue){
+    public void switchCoachmarksSeenParam(int paramNumber, String paramValue) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
         ContentValues newValues = new ContentValues();
 

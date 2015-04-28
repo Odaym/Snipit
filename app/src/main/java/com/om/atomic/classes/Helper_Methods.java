@@ -2,7 +2,6 @@ package com.om.atomic.classes;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
@@ -15,8 +14,12 @@ import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
+import com.parse.ParseObject;
 
-import java.util.Random;
+import java.io.File;
+import java.util.List;
+
+import hugo.weaving.DebugLog;
 
 public class Helper_Methods {
     private Context context;
@@ -24,6 +27,41 @@ public class Helper_Methods {
 
     public Helper_Methods(Context context) {
         this.context = context;
+    }
+
+    @DebugLog
+    public static void delete_image_from_disk(String imagePath) {
+        File file = new File(imagePath);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    public void uploadBookDataToParse(DatabaseHelper dbHelper) {
+        List<Book> books = dbHelper.getAllBooks(null);
+
+        for (Book book : books) {
+            ParseObject bookObject = new ParseObject("Book");
+            bookObject.put("title", book.getTitle());
+            bookObject.put("author", book.getAuthor());
+            bookObject.saveInBackground();
+        }
+    }
+
+    public void uploadBookmarkDataToParse(DatabaseHelper dbHelper) {
+        List<Book> books = dbHelper.getAllBooks(null);
+        List<Bookmark> bookmarks;
+
+        for (Book book : books) {
+            bookmarks = dbHelper.getAllBookmarks(book.getId(), null);
+            for (Bookmark bookmark : bookmarks) {
+                ParseObject bookmarkObject = new ParseObject("Bookmark");
+                bookmarkObject.put("book_id", bookmark.getBookId());
+                bookmarkObject.put("title", bookmark.getName());
+                bookmarkObject.put("page_number", bookmark.getPage_number());
+                bookmarkObject.saveInBackground();
+            }
+        }
     }
 
     //Used to determine whether to allow scanning of Book Barcodes

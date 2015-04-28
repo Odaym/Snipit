@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/about_app"
-        android:icon="@drawable/about_img"
+        android:icon="@drawable/about_menu_img"
         android:title="@string/about"
         app:showAsAction="always" />
 

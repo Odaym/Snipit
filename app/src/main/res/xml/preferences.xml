@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:title="@string/pref_tutorial_section_title"
-        android:key="pref_key_tutorial">
+        android:key="pref_key_tutorial"
+        android:title="@string/pref_tutorial_section_title">
         <CheckBoxPreference
+            android:defaultValue="false"
             android:key="pref_key_tutorial_mode"
-            android:title="@string/pref_tutorial_title"
-            android:defaultValue="false"/>
+            android:summary="Hint screens will show up to help you get started"
+            android:title="@string/pref_tutorial_title" />
+        <Preference
+            android:key="pref_key_populate_sample_data"
+            android:title="Test drive Atomic"
+            android:summary="Jump right in by adding 4 sample books!"/>
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/pref_about_section_title"
-        android:key="pref_key_about">
-        <CheckBoxPreference
-            android:title="@string/pref_about_title"
-            android:defaultValue="false"/>
+        android:key="pref_key_about"
+        android:title="@string/pref_about_section_title">
+        <Preference
+            android:title="@string/pref_about_title" />
     </PreferenceCategory>
 </PreferenceScreen>

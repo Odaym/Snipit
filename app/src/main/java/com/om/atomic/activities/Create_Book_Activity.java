@@ -147,6 +147,7 @@ public class Create_Book_Activity extends Base_Activity {
                             .duration(700)
                             .playOn(findViewById(R.id.authorET));
                 } else {
+                    //If you're not editing
                     if (CALL_PURPOSE != Constants.EDIT_BOOK_PURPOSE_VALUE) {
                         Random rand = new Random();
 
@@ -175,6 +176,7 @@ public class Create_Book_Activity extends Base_Activity {
 
                         startActivity(takeToBookmarks);
                     } else {
+                        //If you are editing an existing book
                         book_from_list.setTitle(titleET.getText().toString());
                         book_from_list.setAuthor(authorET.getText().toString());
                         dbHelper.updateBook(book_from_list);
@@ -182,6 +184,11 @@ public class Create_Book_Activity extends Base_Activity {
                         EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
 
                         finish();
+
+                        if (getCurrentFocus() != null) {
+                            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                        }
                     }
                 }
             }
@@ -197,7 +204,7 @@ public class Create_Book_Activity extends Base_Activity {
                     IntentIntegrator scanIntegrator = new IntentIntegrator(Create_Book_Activity.this);
                     scanIntegrator.initiateScan();
                 } else {
-                    Crouton.makeText(Create_Book_Activity.this, getString(R.string.scan_no_internet_error), Style.ALERT).show();
+                    Crouton.makeText(Create_Book_Activity.this, getString(R.string.action_needs_internet), Style.ALERT).show();
                 }
             }
         });
