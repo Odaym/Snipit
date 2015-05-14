@@ -1,6 +1,8 @@
 package com.om.atomic.activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,6 +14,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -35,16 +39,28 @@ import com.om.atomic.classes.Helper_Methods;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 
 public class SearchResults_Activity extends Base_Activity {
+    static final int DELETE_BOOKMARK_ANIMATION_DURATION = 500;
+
     private ArrayList<Bookmark> bookmarks;
     private DatabaseHelper dbHelper;
-    private ListView listView;
+
+    @InjectView(R.id.searchResultsList)
+    ListView listView;
+    @InjectView(R.id.searchNotFoundTV)
+    TextView searchNotFoundTV;
 
     private String query;
     private int book_color_code;
@@ -59,9 +75,15 @@ public class SearchResults_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
 
+//        Tracker t = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
+//        t.setScreenName("Search_Results");
+//        t.send(new HitBuilders.ScreenViewBuilder().build());
+
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
         EventBus_Singleton.getInstance().register(this);
+
+        ButterKnife.inject(this);
 
         helperMethods = new Helper_Methods(this);
 
@@ -131,22 +153,84 @@ public class SearchResults_Activity extends Base_Activity {
 
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
-        if (ebp.getMessage().equals("bookmark_note_changed") || ebp.getMessage().equals("bookmark_changed")) {
-            bookmarks = dbHelper.searchAllBookmarks(book_id, query);
-            handleEmptyOrPopulatedScreen(bookmarks);
+        switch (ebp.getMessage()) {
+            case "bookmark_image_updated":
+                Helper_Methods.delete_image_from_disk(ebp.getExtra());
+                Crouton.makeText(SearchResults_Activity.this, getResources().getString(R.string.bookmark_updated_successfully), Style.INFO).show();
+            case "bookmark_changed":
+            case "bookmark_note_changed":
+                bookmarks = dbHelper.searchAllBookmarks(book_id, query);
+                handleEmptyOrPopulatedScreen(bookmarks);
+                break;
         }
     }
 
     @DebugLog
     public void handleEmptyOrPopulatedScreen(List<Bookmark> bookmarks) {
         if (bookmarks.isEmpty()) {
-            finish();
+            emptyListLayout.setVisibility(View.VISIBLE);
+            searchNotFoundTV.setText(searchNotFoundTV.getText() + "\"" + query + "\"");
         } else {
             emptyListLayout.setVisibility(View.GONE);
         }
 
         searchResultsAdapter = new SearchResults_Adapter(this);
         listView.setAdapter(searchResultsAdapter);
+    }
+
+    private void deleteCell(final View v, final int index) {
+        Animation.AnimationListener al = new Animation.AnimationListener() {
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+
+                BookmarksViewHolder vh = (BookmarksViewHolder) v.getTag();
+                vh.needInflate = true;
+
+                dbHelper.deleteBookmark(bookmarks.get(index).getId());
+
+                Helper_Methods.delete_image_from_disk(bookmarks.get(index).getImage_path());
+
+                EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+        };
+
+        collapse(v, al);
+    }
+
+    private void collapse(final View v, Animation.AnimationListener al) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation anim = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if (interpolatedTime == 1) {
+                    v.setVisibility(View.GONE);
+                } else {
+                    v.getLayoutParams().height = initialHeight - (int) (initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        if (al != null) {
+            anim.setAnimationListener(al);
+        }
+
+        anim.setDuration(DELETE_BOOKMARK_ANIMATION_DURATION);
+        v.startAnimation(anim);
     }
 
     @Override
@@ -164,6 +248,8 @@ public class SearchResults_Activity extends Base_Activity {
         public SearchResults_Adapter(Context context) {
             super();
             this.context = context;
+            this.inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
@@ -183,25 +269,27 @@ public class SearchResults_Activity extends Base_Activity {
 
         @Override
         public View getView(final int position, View convertView, final ViewGroup parent) {
-            if (convertView == null) {
-                inflater = (LayoutInflater) context
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.list_item_bookmark, parent, false);
+            final View parentView;
+
+            if (convertView == null || ((BookmarksViewHolder) convertView.getTag()).needInflate) {
+                parentView = inflater.inflate(R.layout.list_item_bookmark, parent, false);
 
                 holder = new BookmarksViewHolder();
 
-                holder.bookmarkName = (TextView) convertView.findViewById(R.id.bookmarkNameTV);
-                holder.bookmarkAction = (Button) convertView.findViewById(R.id.bookmarkAction);
-                holder.bookmarkIMG = (ImageView) convertView.findViewById(R.id.bookmarkIMG);
-                holder.bookmarkViews = (TextView) convertView.findViewById(R.id.bookmarkViewsTV);
-                holder.bookmarkNoteBTN = (Button) convertView.findViewById(R.id.bookmarkNoteBTN);
-                holder.bookmarkNoteTV = (AutofitTextView) convertView.findViewById(R.id.bookmarkNoteTV);
-                holder.motherView = (RelativeLayout) convertView.findViewById(R.id.list_item_bookmark);
+                holder.bookmarkName = (TextView) parentView.findViewById(R.id.bookmarkNameTV);
+                holder.bookmarkAction = (Button) parentView.findViewById(R.id.bookmarkAction);
+                holder.bookmarkIMG = (ImageView) parentView.findViewById(R.id.bookmarkIMG);
+                holder.bookmarkViews = (TextView) parentView.findViewById(R.id.bookmarkViewsTV);
+                holder.bookmarkNoteBTN = (Button) parentView.findViewById(R.id.bookmarkNoteBTN);
+                holder.bookmarkNoteTV = (AutofitTextView) parentView.findViewById(R.id.bookmarkNoteTV);
+                holder.motherView = (RelativeLayout) parentView.findViewById(R.id.list_item_bookmark);
 
-                convertView.setTag(holder);
+                parentView.setTag(holder);
             } else {
-                holder = (BookmarksViewHolder) convertView.getTag();
+                parentView = convertView;
             }
+
+            holder = (BookmarksViewHolder) parentView.getTag();
 
             if (TextUtils.isEmpty(bookmarks.get(position).getNote()))
                 holder.bookmarkNoteBTN.setVisibility(View.INVISIBLE);
@@ -231,9 +319,16 @@ public class SearchResults_Activity extends Base_Activity {
             }
 
             holder.bookmarkName.setText(bookmarks.get(position).getName());
-            holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
+            holder.bookmarkViews.setText(context.getResources().getText(R.string.bookmark_views_label) + " " + bookmarks.get(position).getViews());
 
-            Glide.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+            try {
+                //If the String was a URL then this bookmark is a sample
+                new URL(bookmarks.get(position).getImage_path());
+                Glide.with(SearchResults_Activity.this).load(bookmarks.get(position).getImage_path()).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+            } catch (MalformedURLException e) {
+                //Else it's on disk
+                Glide.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+            }
 
 //            Picasso.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
 
@@ -244,7 +339,7 @@ public class SearchResults_Activity extends Base_Activity {
                     overflowButton.setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
 
                     PopupMenu popup = new PopupMenu(context, view);
-                    popup.getMenuInflater().inflate(R.menu.bookmark_edit_delete,
+                    popup.getMenuInflater().inflate(R.menu.bookmark_list_item,
                             popup.getMenu());
                     for (int i = 0; i < popup.getMenu().size(); i++) {
                         MenuItem item = popup.getMenu().getItem(i);
@@ -266,10 +361,19 @@ public class SearchResults_Activity extends Base_Activity {
                                     startActivity(editBookmarkIntent);
                                     break;
                                 case R.id.delete:
-                                    dbHelper.deleteBookmark(bookmarks.get(position).getId());
-                                    bookmarks = dbHelper.searchAllBookmarks(book_id, query);
-                                    handleEmptyOrPopulatedScreen(bookmarks);
-                                    EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
+                                    new AlertDialog.Builder(SearchResults_Activity.this)
+                                            .setTitle(bookmarks.get(position).getName())
+                                            .setMessage(R.string.delete_bookmark_confirmation_message)
+                                            .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    deleteCell(parentView, position);
+                                                }
+
+                                            })
+                                            .setNegativeButton(R.string.cancel, null)
+                                            .show();
                                     break;
                             }
                             return true;
@@ -358,7 +462,7 @@ public class SearchResults_Activity extends Base_Activity {
                 }
             });
 
-            return convertView;
+            return parentView;
         }
     }
 
@@ -370,5 +474,6 @@ public class SearchResults_Activity extends Base_Activity {
         TextView bookmarkViews;
         Button bookmarkNoteBTN;
         AutofitTextView bookmarkNoteTV;
+        boolean needInflate;
     }
 }

@@ -17,6 +17,8 @@ import com.om.atomic.R;
 import com.parse.ParseObject;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import hugo.weaving.DebugLog;
@@ -35,6 +37,18 @@ public class Helper_Methods {
         if (file.exists()) {
             file.delete();
         }
+    }
+
+    public boolean isBookmarkOnDisk (String bookmarkImagePath){
+        try {
+            //If the String was a URL then this bookmark is a sample
+            new URL(bookmarkImagePath);
+        } catch (MalformedURLException e) {
+            //Else it's on disk
+            return true;
+        }
+
+        return false;
     }
 
     public void uploadBookDataToParse(DatabaseHelper dbHelper) {

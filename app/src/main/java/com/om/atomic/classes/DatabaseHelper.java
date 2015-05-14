@@ -327,6 +327,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @DebugLog
+    public void update_BookmarkImage(int bookmark_id, String bookmarkImage) {
+        SQLiteDatabase dbHandler = this.getWritableDatabase();
+        ContentValues newValues = new ContentValues();
+
+        String[] args = new String[]{String.valueOf(bookmark_id)};
+
+        newValues.put(BM_IMAGEPATH, bookmarkImage);
+
+        dbHandler.update(BOOKMARK_TABLE, newValues, BM_ID + " = ?", args);
+    }
+
+    @DebugLog
     public void update_BookmarkNote(int bookmark_id, String note) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
         ContentValues newValues = new ContentValues();

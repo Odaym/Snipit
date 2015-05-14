@@ -1,7 +1,9 @@
 package com.om.atomic.activities;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
@@ -17,6 +19,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -26,6 +31,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.atomic.classes.Book;
@@ -54,6 +61,8 @@ import java.util.Random;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import icepick.Icicle;
 import io.fabric.sdk.android.Fabric;
@@ -73,6 +82,7 @@ public class Books_Activity extends Base_Activity {
 //    @InjectView(R.id.navDrawer)
 //    DrawerFrameLayout navDrawer;
 
+    static final int DELETE_BOOK_ANIMATION_DURATION = 300;
     private final static int SHOW_CREATE_BOOK_SHOWCASE = 1;
     private static Handler UIHandler = new Handler();
     private ProgressDialog downloadingBookDataLoader;
@@ -101,6 +111,10 @@ public class Books_Activity extends Base_Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_books);
+
+//        Tracker t = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
+//        t.setScreenName("Books");
+//        t.send(new HitBuilders.ScreenViewBuilder().build());
 
         if (Constants.APPLICATION_CODE_STATE.equals("PRODUCTION"))
             Fabric.with(this, new Crashlytics());
@@ -209,11 +223,19 @@ public class Books_Activity extends Base_Activity {
             }
         });
 
+
+        View listViewHeaderAd = View.inflate(this, R.layout.books_list_adview_header, null);
+        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
+        listView.addFooterView(listViewHeaderAd);
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Intent openBookmarksForBook = new Intent(Books_Activity.this, Bookmarks_Activity.class);
-                Book book = (Book) listView.getAdapter().getItem(position);
+                Book book = (Book) listView.getItemAtPosition(position);
                 openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
                 openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
                 openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
@@ -280,19 +302,22 @@ public class Books_Activity extends Base_Activity {
                                             dbHelper.createSampleBook(booksToInsert.get(i));
 
                                     //If the book did not already exist, go ahead and insert its bookmarks
-                                    if (db_insert_success_status == 0)
+                                    if (db_insert_success_status == 0) {
                                         for (int j = 0; j < bookmarksToInsert.size(); j++) {
                                             if (bookmarksToInsert.get(j).getBookId() == booksToInsert.get(i).getId())
                                                 dbHelper.createSampleBookmark(bookmarksToInsert.get(j), booksToInsert.get(i).getId());
                                         }
-                                    downloadingBookDataLoader.dismiss();
-                                    EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
+
+                                        EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
+                                    }
                                 }
+                                downloadingBookDataLoader.dismiss();
                             }
                         }
                     });
                 } else {
                     //Something went wrong while getting data from Parse
+                    Crouton.makeText(Books_Activity.this, "Something went wrong! Please check your Internet connection", Style.ALERT).show();
                 }
             }
         });
@@ -301,7 +326,7 @@ public class Books_Activity extends Base_Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.books_menu, menu);
+        inflater.inflate(R.menu.books_activity, menu);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -320,16 +345,15 @@ public class Books_Activity extends Base_Activity {
             downloadingBookDataLoader = ProgressDialog.show(this, getResources().getString(R.string.downloading_books_loader_title),
                     getResources().getString(R.string.downloading_books_loader_message), true);
             populateSampleData();
+        } else if (ebp.getMessage().equals("book_added") || ebp.getMessage().equals("bookmark_changed")) {
+            prepareForNotifyDataChanged();
+            booksAdapter.notifyDataSetChanged();
         }
-
-        prepareForNotifyDataChanged();
-        booksAdapter.notifyDataSetChanged();
     }
 
     @DebugLog
     public void prepareForNotifyDataChanged() {
         books = dbHelper.getAllBooks(null);
-
         handleEmptyUI(books);
     }
 
@@ -397,6 +421,59 @@ public class Books_Activity extends Base_Activity {
         }
     }
 
+    private void deleteCell(final View v, final int index) {
+        Animation.AnimationListener al = new Animation.AnimationListener() {
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+
+                BooksViewHolder vh = (BooksViewHolder) v.getTag();
+                vh.needInflate = true;
+
+                dbHelper.deleteBook(books.get(index).getId());
+
+                prepareForNotifyDataChanged();
+                booksAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+        };
+
+        collapse(v, al);
+    }
+
+    private void collapse(final View v, AnimationListener al) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation anim = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if (interpolatedTime == 1) {
+                    v.setVisibility(View.GONE);
+                } else {
+                    v.getLayoutParams().height = initialHeight - (int) (initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        if (al != null) {
+            anim.setAnimationListener(al);
+        }
+        anim.setDuration(DELETE_BOOK_ANIMATION_DURATION);
+        v.startAnimation(anim);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -420,7 +497,10 @@ public class Books_Activity extends Base_Activity {
             super();
             this.context = context;
 
-            dbHelper = new DatabaseHelper(context);
+            this.dbHelper = new DatabaseHelper(context);
+
+            this.inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
@@ -440,25 +520,28 @@ public class Books_Activity extends Base_Activity {
 
         @Override
         public View getView(final int position, View convertView, final ViewGroup parent) {
-            if (convertView == null) {
-                inflater = (LayoutInflater) context
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.list_item_book, parent, false);
+            final View parentView;
+
+            if (convertView == null || ((BooksViewHolder) convertView.getTag()).needInflate) {
+                parentView = inflater.inflate(R.layout.list_item_book, parent, false);
 
                 holder = new BooksViewHolder();
 
-                holder.list_item_book = (RelativeLayout) convertView.findViewById(R.id.list_item_book);
-                holder.bookDateAddedTV = (TextView) convertView.findViewById(R.id.bookDateAddedTV);
-                holder.bookTitleTV = (AutofitTextView) convertView.findViewById(R.id.bookTitleTV);
-                holder.bookAuthorTV = (AutofitTextView) convertView.findViewById(R.id.bookAuthorTV);
-                holder.bookThumbIMG = (ImageView) convertView.findViewById(R.id.bookThumbIMG);
-                holder.bookmarksNumberTV = (TextView) convertView.findViewById(R.id.bookmarksNumberTV);
-                holder.bookAction = (Button) convertView.findViewById(R.id.bookAction);
+                holder.list_item_book = (RelativeLayout) parentView.findViewById(R.id.list_item_book);
+                holder.bookDateAddedTV = (TextView) parentView.findViewById(R.id.bookDateAddedTV);
+                holder.bookTitleTV = (AutofitTextView) parentView.findViewById(R.id.bookTitleTV);
+                holder.bookAuthorTV = (AutofitTextView) parentView.findViewById(R.id.bookAuthorTV);
+                holder.bookThumbIMG = (ImageView) parentView.findViewById(R.id.bookThumbIMG);
+                holder.bookmarksNumberTV = (TextView) parentView.findViewById(R.id.bookmarksNumberTV);
+                holder.bookAction = (Button) parentView.findViewById(R.id.bookAction);
+                holder.needInflate = false;
 
-                convertView.setTag(holder);
+                parentView.setTag(holder);
             } else {
-                holder = (BooksViewHolder) convertView.getTag();
+                parentView = convertView;
             }
+
+            holder = (BooksViewHolder) parentView.getTag();
 
             if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
                 holder.bookmarksNumberTV.setElevation(5f);
@@ -478,9 +561,7 @@ public class Books_Activity extends Base_Activity {
             holder.bookTitleTV.setText(books.get(position).getTitle());
             holder.bookAuthorTV.setText(books.get(position).getAuthor());
 
-//            if (books.get(position).getImagePath() != null) {
             Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookThumbIMG);
-//            }
 
             String[] bookDateAdded = books.get(position).getDate_added().split(" ");
             holder.bookDateAddedTV.setText(bookDateAdded[0] + " " + bookDateAdded[1] + ", " + bookDateAdded[2]);
@@ -508,12 +589,11 @@ public class Books_Activity extends Base_Activity {
 
             holder.bookAction.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
-                    final View overflowButton = view;
-                    overflowButton.setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
+                public void onClick(final View view) {
+                    view.setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
 
                     PopupMenu popup = new PopupMenu(context, view);
-                    popup.getMenuInflater().inflate(R.menu.book_edit_delete,
+                    popup.getMenuInflater().inflate(R.menu.book_list_item,
                             popup.getMenu());
                     for (int i = 0; i < popup.getMenu().size(); i++) {
                         MenuItem item = popup.getMenu().getItem(i);
@@ -534,10 +614,20 @@ public class Books_Activity extends Base_Activity {
                                     editBookIntent.putExtra("book", books.get(position));
                                     startActivity(editBookIntent);
                                     break;
-                                case R.id.remove:
-                                    dbHelper.deleteBook(books.get(position).getId());
-                                    prepareForNotifyDataChanged();
-                                    notifyDataSetChanged();
+                                case R.id.delete:
+                                    new AlertDialog.Builder(Books_Activity.this)
+                                            .setTitle(books.get(position).getTitle())
+                                            .setMessage(R.string.delete_book_confirmation_message)
+                                            .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    deleteCell(parentView, position);
+                                                }
+
+                                            })
+                                            .setNegativeButton(R.string.cancel, null)
+                                            .show();
                                     break;
                             }
 
@@ -547,7 +637,7 @@ public class Books_Activity extends Base_Activity {
                     popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
                         @Override
                         public void onDismiss(PopupMenu popupMenu) {
-                            overflowButton.setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_fade));
+                            view.setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_fade));
                         }
                     });
                 }
@@ -556,7 +646,7 @@ public class Books_Activity extends Base_Activity {
             bookmarks = dbHelper.getAllBookmarks(books.get(position).getId(), null);
             holder.bookmarksNumberTV.setText(bookmarks.size() + "");
 
-            return convertView;
+            return parentView;
         }
 
         @DebugLog
@@ -580,5 +670,6 @@ public class Books_Activity extends Base_Activity {
         ImageView bookThumbIMG;
         TextView bookmarksNumberTV;
         Button bookAction;
+        boolean needInflate;
     }
 }

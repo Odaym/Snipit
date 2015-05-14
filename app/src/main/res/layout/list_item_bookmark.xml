@@ -21,7 +21,7 @@
     <ImageView
         android:id="@+id/bookmarkIMG"
         android:layout_width="@dimen/bookmark_thumb_width"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 
     <me.grantland.widget.AutofitTextView
         android:id="@+id/bookmarkNameTV"

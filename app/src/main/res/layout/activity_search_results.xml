@@ -25,11 +25,13 @@
         android:alpha="0.8"
         android:visibility="gone">
 
-        <ImageView
-            android:id="@+id/bookmarkIMG"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_centerInParent="true" />
+        <TextView
+            android:id="@+id/searchNotFoundTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/search_not_found"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
     </RelativeLayout>
 

@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,10 +19,13 @@ import android.widget.RelativeLayout;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
+import com.om.atomic.classes.Atomic_Application;
 import com.om.atomic.classes.Book;
 import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.DatabaseHelper;
@@ -78,14 +80,18 @@ public class Create_Book_Activity extends Base_Activity {
     private int CALL_PURPOSE;
     private Book book_from_list;
     private ProgressDialog loadingBookInfoDialog;
+    private Tracker tracker;
 
     private static final int SHOW_SCAN_BOOK_SHOWCASE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_create_book);
+
+        tracker = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
+//        tracker.setScreenName("Create_Book");
+//        tracker.send(new HitBuilders.ScreenViewBuilder().build());
 
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
@@ -147,7 +153,7 @@ public class Create_Book_Activity extends Base_Activity {
                             .duration(700)
                             .playOn(findViewById(R.id.authorET));
                 } else {
-                    //If you're not editing
+                    //If you are creating a new book
                     if (CALL_PURPOSE != Constants.EDIT_BOOK_PURPOSE_VALUE) {
                         Random rand = new Random();
 
@@ -163,6 +169,7 @@ public class Create_Book_Activity extends Base_Activity {
                         book.setDate_added(month + " " + day + " " + year);
                         book.setColorCode(rand.nextInt(7 - 1));
 
+
                         int last_insert_book_id = dbHelper.createBook(book);
 
                         EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
@@ -175,6 +182,20 @@ public class Create_Book_Activity extends Base_Activity {
                         takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
 
                         startActivity(takeToBookmarks);
+
+                        if (bookImagePath == null) {
+                            tracker.send(new HitBuilders.EventBuilder()
+                                    .setCategory("Core")
+                                    .setAction("Create Book")
+                                    .setLabel("Raw")
+                                    .build());
+                        } else {
+                            tracker.send(new HitBuilders.EventBuilder()
+                                    .setCategory("Core")
+                                    .setAction("Create Book")
+                                    .setLabel("Scanned")
+                                    .build());
+                        }
                     } else {
                         //If you are editing an existing book
                         book_from_list.setTitle(titleET.getText().toString());
@@ -365,7 +386,6 @@ public class Create_Book_Activity extends Base_Activity {
                 try {
                     JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
                     Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("smallThumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
-                    Log.d("Dummy", "Book thumbnail path: " + imageInfo.getString("smallThumbnail"));
                     bookImagePath = imageInfo.getString("smallThumbnail");
                 } catch (JSONException jse) {
                     Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_image_not_found_error), Style.ALERT).show();

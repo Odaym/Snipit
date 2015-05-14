@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -13,12 +14,18 @@ import com.google.android.gms.plus.model.people.Person;
 import com.om.atomic.R;
 import com.om.atomic.classes.Constants;
 
+import butterknife.InjectView;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class Login_Activity extends Activity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
+
+    @InjectView(R.id.sign_in_button)
+    Button signInBTN;
+    @InjectView(R.id.sign_out_button)
+    Button signOutBTN;
 
     /* Request code used to invoke sign in user interactions. */
     private static final int RC_SIGN_IN = 0;
@@ -43,6 +50,11 @@ public class Login_Activity extends Activity implements
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+//        Tracker t = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
+//        t.setScreenName("Login");
+//        t.send(new HitBuilders.ScreenViewBuilder().build());
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -51,10 +63,9 @@ public class Login_Activity extends Activity implements
                 .addScope(Plus.SCOPE_PLUS_PROFILE)
                 .build();
 
-        setContentView(R.layout.activity_login);
 
-        findViewById(R.id.sign_in_button).setOnClickListener(this);
-        findViewById(R.id.sign_out_button).setOnClickListener(this);
+        signInBTN.setOnClickListener(this);
+        signOutBTN.setOnClickListener(this);
     }
 
     protected void onStart() {

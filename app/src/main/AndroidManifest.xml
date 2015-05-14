@@ -49,6 +49,7 @@
         <activity
             android:name=".activities.Create_Book_Activity"
             android:label="@string/create_book_activity_title"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
         <activity
@@ -89,6 +90,14 @@
             android:theme="@style/View_Bookmark_Activity_Theme" />
 
         <activity android:name=".activities.Settings_Activity" />
+
+        <activity
+            android:name=".activities.Open_Source_Libs_Activity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:theme="@android:style/Theme.Translucent" />
 
     </application>
 

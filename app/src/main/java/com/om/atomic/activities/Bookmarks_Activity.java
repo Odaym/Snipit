@@ -1,6 +1,8 @@
 package com.om.atomic.activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -24,6 +26,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -33,6 +38,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.melnykov.fab.FloatingActionButton;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
@@ -116,6 +123,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         }
     };
 
+    static final int DELETE_BOOKMARK_ANIMATION_DURATION = 300;
     private final static int SHOW_CREATE_BOOKMARK_SHOWCASE = 1;
     private String book_title;
     private int book_color_code;
@@ -127,13 +135,16 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
     private SharedPreferences prefs;
     private SharedPreferences.Editor prefsEditor;
     private Helper_Methods helperMethods;
-    private boolean activityVisible = true;
     private Handler UIHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
+
+//        Tracker t = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
+//        t.setScreenName("Bookmarks");
+//        t.send(new HitBuilders.ScreenViewBuilder().build());
 
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
@@ -208,19 +219,26 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             }
         });
 
+        View listViewHeaderAd = View.inflate(this, R.layout.bookmarks_list_adview_header, null);
+        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
+        listView.addHeaderView(listViewHeaderAd);
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                if (bookmarks.get(position).getIsNoteShowing() == 0) {
-                    int bookmarkViews = dbHelper.getBookmarkViews(bookmarks.get(position).getId());
-                    bookmarks.get(position).setViews(bookmarkViews + 1);
-                    dbHelper.updateBookmark(bookmarks.get(position));
+                if (((Bookmark)listView.getItemAtPosition(position)).getIsNoteShowing() == 0) {
+                    int bookmarkViews = dbHelper.getBookmarkViews(((Bookmark)listView.getItemAtPosition(position)).getId());
+                    ((Bookmark)listView.getItemAtPosition(position)).setViews(bookmarkViews + 1);
+                    dbHelper.updateBookmark(((Bookmark)listView.getItemAtPosition(position)));
                     bookmarksAdapter.notifyDataSetChanged();
 
                     Intent intent = new Intent(Bookmarks_Activity.this, View_Bookmark_Activity.class);
                     intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
                     intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
-                    intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position);
+                    intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position - 1);
                     intent.putParcelableArrayListExtra("bookmarks", bookmarks);
                     startActivity(intent);
                 }
@@ -234,7 +252,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         if (!bookmarks.isEmpty()) {
-            inflater.inflate(R.menu.bookmarks_sort_by_actions, menu);
+            inflater.inflate(R.menu.bookmarks_activity, menu);
 
             MenuItem byNumber = menu.getItem(1);
             SpannableString numberString = new SpannableString(byNumber.getTitle().toString());
@@ -267,6 +285,10 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             case android.R.id.home:
                 super.onBackPressed();
                 overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
+                if (getCurrentFocus() != null) {
+                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                }
                 break;
             case R.id.search:
                 searchView.setIconified(false);
@@ -337,6 +359,9 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 }
                 bookmarksAdapter.notifyDataSetChanged();
                 break;
+            case "bookmark_image_updated":
+                Helper_Methods.delete_image_from_disk(ebp.getExtra());
+                Crouton.makeText(Bookmarks_Activity.this, getResources().getString(R.string.bookmark_updated_successfully), Style.INFO).show();
             case "bookmark_changed":
             case "bookmark_note_changed":
                 prepareForNotifyDataChanged(book_id);
@@ -384,10 +409,12 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
          */
         String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
 
-        if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-            bookmarks = dbHelper.getAllBookmarks(book_id, null);
-        } else {
-            bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
+        if (sorting_type_pref != null) {
+            if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+                bookmarks = dbHelper.getAllBookmarks(book_id, null);
+            } else {
+                bookmarks = dbHelper.getAllBookmarks(book_id, sorting_type_pref);
+            }
         }
 
         handleEmptyUI(bookmarks);
@@ -460,6 +487,60 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         invalidateOptionsMenu();
     }
 
+    private void deleteCell(final View v, final int index) {
+        Animation.AnimationListener al = new Animation.AnimationListener() {
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+
+                BookmarksViewHolder vh = (BookmarksViewHolder) v.getTag();
+                vh.needInflate = true;
+
+                dbHelper.deleteBookmark(bookmarks.get(index).getId());
+
+                Helper_Methods.delete_image_from_disk(bookmarks.get(index).getImage_path());
+
+                EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+        };
+
+        collapse(v, al);
+    }
+
+    private void collapse(final View v, Animation.AnimationListener al) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation anim = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if (interpolatedTime == 1) {
+                    v.setVisibility(View.GONE);
+                } else {
+                    v.getLayoutParams().height = initialHeight - (int) (initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        if (al != null) {
+            anim.setAnimationListener(al);
+        }
+        anim.setDuration(DELETE_BOOKMARK_ANIMATION_DURATION);
+        v.startAnimation(anim);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -468,7 +549,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 
     @Override
     public boolean onQueryTextSubmit(String searchTerm) {
-        activityVisible = false;
         Intent openSearchActivity = new Intent(Bookmarks_Activity.this, SearchResults_Activity.class);
         openSearchActivity.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
         openSearchActivity.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
@@ -495,7 +575,9 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             super();
             this.context = context;
 
-            dbHelper = new DatabaseHelper(context);
+            this.dbHelper = new DatabaseHelper(context);
+            this.inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
@@ -515,25 +597,28 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 
         @Override
         public View getView(final int position, View convertView, final ViewGroup parent) {
-            if (convertView == null) {
-                inflater = (LayoutInflater) context
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.list_item_bookmark, parent, false);
+            final View parentView;
+
+            if (convertView == null || ((BookmarksViewHolder) convertView.getTag()).needInflate) {
+                parentView = inflater.inflate(R.layout.list_item_bookmark, parent, false);
 
                 holder = new BookmarksViewHolder();
 
-                holder.bookmarkName = (AutofitTextView) convertView.findViewById(R.id.bookmarkNameTV);
-                holder.bookmarkAction = (Button) convertView.findViewById(R.id.bookmarkAction);
-                holder.bookmarkIMG = (ImageView) convertView.findViewById(R.id.bookmarkIMG);
-                holder.bookmarkViews = (TextView) convertView.findViewById(R.id.bookmarkViewsTV);
-                holder.bookmarkNoteBTN = (Button) convertView.findViewById(R.id.bookmarkNoteBTN);
-                holder.bookmarkNoteTV = (AutofitTextView) convertView.findViewById(R.id.bookmarkNoteTV);
-                holder.motherView = (RelativeLayout) convertView.findViewById(R.id.list_item_bookmark);
+                holder.bookmarkName = (AutofitTextView) parentView.findViewById(R.id.bookmarkNameTV);
+                holder.bookmarkAction = (Button) parentView.findViewById(R.id.bookmarkAction);
+                holder.bookmarkIMG = (ImageView) parentView.findViewById(R.id.bookmarkIMG);
+                holder.bookmarkViews = (TextView) parentView.findViewById(R.id.bookmarkViewsTV);
+                holder.bookmarkNoteBTN = (Button) parentView.findViewById(R.id.bookmarkNoteBTN);
+                holder.bookmarkNoteTV = (AutofitTextView) parentView.findViewById(R.id.bookmarkNoteTV);
+                holder.motherView = (RelativeLayout) parentView.findViewById(R.id.list_item_bookmark);
+                holder.needInflate = false;
 
-                convertView.setTag(holder);
+                parentView.setTag(holder);
             } else {
-                holder = (BookmarksViewHolder) convertView.getTag();
+                parentView = convertView;
             }
+
+            holder = (BookmarksViewHolder) parentView.getTag();
 
             //If the bookmark doesn't have a note
             if (TextUtils.isEmpty(bookmarks.get(position).getNote())) {
@@ -565,7 +650,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             }
 
             holder.bookmarkName.setText(bookmarks.get(position).getName());
-            holder.bookmarkViews.setText("Views: " + bookmarks.get(position).getViews());
+            holder.bookmarkViews.setText(context.getResources().getText(R.string.bookmark_views_label) + " " + bookmarks.get(position).getViews());
 
             try {
                 //If the String was a URL then this bookmark is a sample
@@ -573,7 +658,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 Glide.with(Bookmarks_Activity.this).load(bookmarks.get(position).getImage_path()).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
             } catch (MalformedURLException e) {
                 //Else it's on disk
-            Glide.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+                Glide.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
             }
 
 //            Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
@@ -585,7 +670,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                     overflowButton.setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
 
                     PopupMenu popup = new PopupMenu(context, view);
-                    popup.getMenuInflater().inflate(R.menu.bookmark_edit_delete,
+                    popup.getMenuInflater().inflate(R.menu.bookmark_list_item,
                             popup.getMenu());
                     for (int i = 0; i < popup.getMenu().size(); i++) {
                         MenuItem item = popup.getMenu().getItem(i);
@@ -606,10 +691,19 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                                     startActivity(editBookmarkIntent);
                                     break;
                                 case R.id.delete:
-                                    EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
-                                    dbHelper.deleteBookmark(bookmarks.get(position).getId());
-                                    prepareForNotifyDataChanged(book_id);
-                                    notifyDataSetChanged();
+                                    new AlertDialog.Builder(Bookmarks_Activity.this)
+                                            .setTitle(bookmarks.get(position).getName())
+                                            .setMessage(R.string.delete_bookmark_confirmation_message)
+                                            .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    deleteCell(parentView, position);
+                                                }
+
+                                            })
+                                            .setNegativeButton(R.string.cancel, null)
+                                            .show();
                                     break;
                             }
 
@@ -699,7 +793,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 }
             });
 
-            return convertView;
+            return parentView;
         }
 
         @DebugLog
@@ -723,5 +817,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         TextView bookmarkViews;
         Button bookmarkNoteBTN;
         AutofitTextView bookmarkNoteTV;
+        boolean needInflate;
     }
 }

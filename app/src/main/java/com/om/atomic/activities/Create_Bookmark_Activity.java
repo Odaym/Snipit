@@ -12,10 +12,14 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
+import com.om.atomic.classes.Atomic_Application;
 import com.om.atomic.classes.Bookmark;
 import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.DatabaseHelper;
@@ -27,6 +31,8 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -57,11 +63,16 @@ public class Create_Bookmark_Activity extends Base_Activity {
     private Bookmark bookmark_from_list;
     private String tempImagePath, finalImagePath;
     private EventBus_Poster ebpFromEditBookmark;
+    private Tracker tracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_bookmark);
+
+        tracker = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
+//        tracker.setScreenName("Create_Bookmark");
+//        tracker.send(new HitBuilders.ScreenViewBuilder().build());
 
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
@@ -99,9 +110,12 @@ public class Create_Bookmark_Activity extends Base_Activity {
             nameET.setSelection(nameET.getText().length());
             pageNumberET.setText(String.valueOf(bookmark_from_list.getPage_number()));
             try {
+                //If the String was a URL then this bookmark is a sample
+                new URL(bookmark_from_list.getImage_path());
+                Glide.with(Create_Bookmark_Activity.this).load(bookmark_from_list.getImage_path()).centerCrop().error(getResources().getDrawable(R.drawable.notfound_1)).into(bookmarkIMG);
+            } catch (MalformedURLException e) {
+                //Else it's on disk
                 Picasso.with(this).load(new File(bookmark_from_list.getImage_path())).into(bookmarkIMG);
-            } catch (NullPointerException NPE) {
-                NPE.printStackTrace();
             }
         } else {
             getSupportActionBar().setTitle(getString(R.string.create_bookmark_activity_title));
@@ -119,6 +133,7 @@ public class Create_Bookmark_Activity extends Base_Activity {
                             .duration(700)
                             .playOn(findViewById(R.id.pageNumberET));
                 } else {
+                    //If you are editing an existing bookmark
                     if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
                         try {
                             bookmark_from_list.setName(nameET.getText().toString());
@@ -128,7 +143,6 @@ public class Create_Bookmark_Activity extends Base_Activity {
                             else
                                 bookmark_from_list.setImage_path(bookmark_from_list.getImage_path());
 
-                            Log.d("PATH", bookmark_from_list.getImage_path());
                             dbHelper.updateBookmark(bookmark_from_list);
 
                             EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
@@ -139,6 +153,7 @@ public class Create_Bookmark_Activity extends Base_Activity {
                             Crouton.makeText(Create_Bookmark_Activity.this, getString(R.string.page_number_error), Style.ALERT).show();
                         }
                     } else {
+                        //If you are creating a new bookmark
                         Date date = new Date();
                         String month = (String) android.text.format.DateFormat.format("MMM", date);
                         String day = (String) android.text.format.DateFormat.format("dd", date);
@@ -160,6 +175,11 @@ public class Create_Bookmark_Activity extends Base_Activity {
                             EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed", "new_bookmark"));
 
                             finish();
+
+                            tracker.send(new HitBuilders.EventBuilder()
+                                    .setCategory("Core")
+                                    .setAction("Create Bookmark")
+                                    .build());
                         } catch (NumberFormatException e) {
                             pageNumberET.setText("");
                             Crouton.makeText(Create_Bookmark_Activity.this, getString(R.string.page_number_error), Style.ALERT).show();

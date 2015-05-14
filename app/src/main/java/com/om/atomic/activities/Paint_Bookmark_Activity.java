@@ -7,14 +7,15 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -23,8 +24,14 @@ import android.widget.SeekBar;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.om.atomic.R;
+import com.om.atomic.classes.Atomic_Application;
 import com.om.atomic.classes.Constants;
+import com.om.atomic.classes.DatabaseHelper;
+import com.om.atomic.classes.EventBus_Poster;
+import com.om.atomic.classes.EventBus_Singleton;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -40,6 +47,8 @@ import java.util.Locale;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import me.panavtec.drawableview.DrawableView;
 import me.panavtec.drawableview.DrawableViewConfig;
@@ -67,20 +76,25 @@ public class Paint_Bookmark_Activity extends Base_Activity {
     private DrawableViewConfig config;
     private SharedPreferences prefs;
     private SharedPreferences.Editor prefsEditor;
-    private Bitmap bmp;
-    private int bitmapWidth, bitmapHeight;
+    private DatabaseHelper dbHelper;
+    private Tracker tracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_paint_bookmark);
+
+        tracker = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
+//        tracker.setScreenName("Paint_Bookmark");
+//        tracker.send(new HitBuilders.ScreenViewBuilder().build());
 
         overridePendingTransition(R.anim.slide_up, R.anim.no_change);
-
-        setContentView(R.layout.activity_paint_bookmark);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefsEditor = prefs.edit();
         prefsEditor.apply();
+
+        dbHelper = new DatabaseHelper(this);
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
@@ -104,18 +118,11 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
         try {
             //If the String was a URL then this bookmark is a sample
-            URL imageURL = new URL(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH));
+            new URL(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH));
             Picasso.with(Paint_Bookmark_Activity.this).load(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
-             bmp = BitmapFactory.decodeStream(imageURL.openConnection().getInputStream());
-            bitmapWidth = bmp.getWidth();
-            bitmapHeight = bmp.getHeight();
         } catch (MalformedURLException e) {
             //Else it's on disk
             Picasso.with(Paint_Bookmark_Activity.this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH))).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
-             bmp = BitmapFactory.decodeFile(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH));
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.d("Paint_Bookmark_Activity", "Couldn't get bitmap from URL");
         }
 
         final float scale = getResources().getDisplayMetrics().density;
@@ -134,31 +141,6 @@ public class Paint_Bookmark_Activity extends Base_Activity {
             @Override
             public void onClick(View view) {
                 drawableView.clear();
-                Bitmap finalBitmap = null;
-
-                try {
-
-                    finalBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-                    Canvas c = new Canvas(finalBitmap);
-
-                    BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-
-                    Bitmap originalBitmap = BitmapFactory.decodeFile(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH), bmOptions);
-
-                    Drawable drawable1 = new BitmapDrawable(originalBitmap);
-                    Drawable drawable2 = new BitmapDrawable(drawableView.obtainBitmap());
-
-
-                    drawable1.setBounds(900, 150, 500, 600);
-                    drawable2.setBounds(150, 150, 350, 350);
-
-                    drawable1.draw(c);
-                    drawable2.draw(c);
-
-                } catch (Exception e) {
-                }
-
-                Picasso.with(Paint_Bookmark_Activity.this).load(new File(storeImage(finalBitmap))).into(bookmarkIMG);
             }
         });
 
@@ -278,12 +260,38 @@ public class Paint_Bookmark_Activity extends Base_Activity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.paint_bookmark, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
                 overridePendingTransition(R.anim.no_change, R.anim.slide_down);
                 return true;
+            case R.id.menu_action_save:
+                new AlertDialog.Builder(Paint_Bookmark_Activity.this)
+                        .setTitle(R.string.alert_dialog_save_title)
+                        .setMessage(R.string.bookmark_update_message)
+                        .setPositiveButton(R.string.alert_dialog_save_action, new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                savePaintedBookmark();
+                                tracker.send(new HitBuilders.EventBuilder()
+                                        .setCategory("Core")
+                                        .setAction("Create Painted Bookmark")
+                                        .build());
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -305,17 +313,16 @@ public class Paint_Bookmark_Activity extends Base_Activity {
                     "Error creating media file, check storage permissions: ");
             return "";
         }
+
         try {
             FileOutputStream fos = new FileOutputStream(pictureFile);
-            image.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            image.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.close();
         } catch (FileNotFoundException e) {
             Log.d("TAG", "File not found: " + e.getMessage());
         } catch (IOException e) {
             Log.d("TAG", "Error accessing file: " + e.getMessage());
         }
-
-        Log.d("IMAGE", "PATH OF DRAWABLE VIEW IS : " + pictureFile.getAbsoluteFile());
 
         return pictureFile.getAbsolutePath();
     }
@@ -335,5 +342,39 @@ public class Paint_Bookmark_Activity extends Base_Activity {
         }
 
         return new File(mediaStorageDir.getPath() + File.separator + imageFileName);
+    }
+
+    public void savePaintedBookmark() {
+        try {
+            Paint mPaint1 = new Paint();
+            Paint mPaint2 = new Paint();
+
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+
+            Bitmap mBitmap1 = BitmapFactory.decodeFile(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH), bmOptions);;
+            Bitmap mBitmap2 = drawableView.obtainBitmap();
+
+            Bitmap mCBitmap = Bitmap.createBitmap(mBitmap1.getWidth(), mBitmap1.getHeight(), mBitmap1.getConfig());
+
+            Canvas tCanvas = new Canvas(mCBitmap);
+
+            tCanvas.drawBitmap(mBitmap1, 0, 0, mPaint1);
+
+            tCanvas.drawBitmap(mBitmap2, 0, 0, mPaint2);
+
+            drawableView.clear();
+
+            String finalImagePathAfterPaint = storeImage(mCBitmap);
+
+            dbHelper.update_BookmarkImage(getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1), finalImagePathAfterPaint);
+
+            //also send the path of the previous image to be deleted
+            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_image_updated", getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH)));
+
+            finish();
+        } catch (Exception e) {
+            Crouton.makeText(Paint_Bookmark_Activity.this, getResources().getString(R.string.bookmark_failed_update), Style.ALERT).show();
+            Log.e("error!", e.getMessage());
+        }
     }
 }

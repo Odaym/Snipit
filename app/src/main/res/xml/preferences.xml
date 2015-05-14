@@ -10,14 +10,21 @@
             android:title="@string/pref_tutorial_title" />
         <Preference
             android:key="pref_key_populate_sample_data"
-            android:title="Test drive Atomic"
-            android:summary="Jump right in by adding 4 sample books!"/>
+            android:summary="Jump right in by adding 4 sample books!"
+            android:title="Test drive Atomic" />
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="pref_key_about"
         android:title="@string/pref_about_section_title">
         <Preference
-            android:title="@string/pref_about_title" />
+            android:summary="@string/pref_rate_google_play_summary"
+            android:title="@string/pref_rate_google_play">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://play.google.com/store/apps/details?id=com.cura"/>
+            </Preference>
+        <Preference
+            android:key="pref_key_open_source_libs"
+            android:title="@string/pref_open_source_libraries_title" />
     </PreferenceCategory>
 </PreferenceScreen>

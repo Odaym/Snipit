@@ -41,16 +41,18 @@ public class Crop_Image_Activity extends Base_Activity {
     private String tempImagePath_fromIntent;
     private int CALL_PURPOSE;
 
-    private Helper_Methods helperMethods;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crop_image);
 
+//        Tracker t = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
+//        t.setScreenName("Crop_Image");
+//        t.send(new HitBuilders.ScreenViewBuilder().build());
+
         ButterKnife.inject(this);
 
-        helperMethods = new Helper_Methods(this);
+        Helper_Methods helperMethods = new Helper_Methods(this);
 
         helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
 
@@ -64,8 +66,6 @@ public class Crop_Image_Activity extends Base_Activity {
 
         if (imgFile.exists()) {
             Bitmap myBitmap = BitmapFactory.decodeFile(tempImagePath_fromIntent);
-//            Picasso.with(this).load(tempImagePath_fromIntent).into((ImageView) cropImageView.getRootView());
-//            cropImageView.setImageBitmap(myBitmap);
             Matrix m = new Matrix();
             m.setRectToRect(new RectF(0, 0, myBitmap.getWidth(), myBitmap.getHeight()), new RectF(0, 0, 2000, 2000), Matrix.ScaleToFit.CENTER);
             cropImageView.setImageBitmap(Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.getWidth(), myBitmap.getHeight(), m, true));

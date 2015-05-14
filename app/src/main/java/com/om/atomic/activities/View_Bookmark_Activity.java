@@ -28,13 +28,15 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.melnykov.fab.FloatingActionButton;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
+import com.om.atomic.classes.Atomic_Application;
 import com.om.atomic.classes.Bookmark;
 import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.DatabaseHelper;
@@ -46,28 +48,30 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
 public class View_Bookmark_Activity extends Base_Activity {
 
+    private Tracker tracker;
     private ArrayList<Bookmark> bookmarks;
     private int NUM_PAGES;
-    private Helper_Methods helperMethods;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_bookmarks);
 
-        helperMethods = new Helper_Methods(this);
+        tracker = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
+        tracker.setScreenName("View_Bookmark");
+        tracker.send(new HitBuilders.ScreenViewBuilder().build());
 
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
@@ -88,48 +92,6 @@ public class View_Bookmark_Activity extends Base_Activity {
 
         mPager.setAdapter(mPagerAdapter);
         mPager.setCurrentItem(current_bookmark_position);
-
-//        mPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-//            @Override
-//            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-//                Fragment selectedFragment = mPagerAdapter.getRegisteredFragment(position);
-//
-//                if (selectedFragment != null && selectedFragment.getView() != null) {
-//                    FloatingActionButton createNewNoteBTN = (FloatingActionButton) selectedFragment.getView().findViewById(R.id.createNewNoteBTN);
-//                    FloatingActionButton paintBookmarkBTN = (FloatingActionButton) selectedFragment.getView().findViewById(R.id.paintBookmarkBTN);
-//                    RelativeLayout bookmarkDetailsView = (RelativeLayout) findViewById(R.id.bookmarkDetailsView);
-//
-////                            ((View_Bookmark_Fragment) mPagerAdapter.getItem(position)).dealWithClutter(View_Bookmark_Activity.this, true, selectedFragment.getView(), helperMethods);
-//
-//                    //Actionbar - status bar - createNewNoteBTN - paintBookmarkBTN <-- all were invisible
-////                    if (createNewNoteBTN.getVisibility() == View.INVISI
-//                    createNewNoteBTN.setAlpha(1f);
-//                    paintBookmarkBTN.setAlpha(1f);
-//                    bookmarkDetailsView.setAlpha(1f);
-//                    createNewNoteBTN.setVisibility(View.VISIBLE);
-//                    paintBookmarkBTN.setVisibility(View.VISIBLE);
-//                    bookmarkDetailsView.setVisibility(View.VISIBLE);
-//
-////                    } else {
-////                        View_Bookmark_Activity.this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-////                                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-////                        View_Bookmark_Activity.this.getSupportActionBar().hide();
-////
-////                        tempBTN_1.setVisibility(View.INVISIBLE);
-////                        tempBTN_2.setVisibility(View.INVISIBLE);
-////                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onPageSelected(int position) {
-//            }
-//
-//            @Override
-//            public void onPageScrollStateChanged(int state) {
-//
-//            }
-//        });
     }
 
     @Override
@@ -182,6 +144,7 @@ public class View_Bookmark_Activity extends Base_Activity {
         private int rotation = 0;
         private String bookmark_imagepath, bookmark_name, bookmark_dateAdded;
         private int bookmark_pagenumber, bookmark_id;
+        private Tracker tracker;
 
         private boolean clutterHidden = false;
 
@@ -192,11 +155,12 @@ public class View_Bookmark_Activity extends Base_Activity {
 
             dbHelper = new DatabaseHelper(context);
             helperMethods = new Helper_Methods(context);
+            tracker = ((Atomic_Application) getActivity().getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
         }
 
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.view_bookmarks, menu);
+            inflater.inflate(R.menu.view_bookmark, menu);
 
             MenuItem rotate_left_item = menu.getItem(0);
             MenuItem rotate_right_item = menu.getItem(1);
@@ -246,6 +210,11 @@ public class View_Bookmark_Activity extends Base_Activity {
                     });
                     break;
                 case R.id.share_picture:
+                    tracker.send(new HitBuilders.EventBuilder()
+                            .setCategory("Core")
+                            .setAction("Share Bookmark")
+                            .build());
+
                     String book_title = getActivity().getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
                     Uri imageURI = Uri.parse("file://" + bookmark_imagepath);
                     Intent sendIntent = new Intent();
@@ -289,6 +258,11 @@ public class View_Bookmark_Activity extends Base_Activity {
             bookmarkPageNumberTV.setText(" " + String.valueOf(bookmark_pagenumber));
             bookmarkDateAddedTV.setText(bookmark_dateAdded);
 
+            if (helperMethods.isBookmarkOnDisk(bookmark_imagepath)) {
+                paintBookmarkBTN.setVisibility(View.VISIBLE);
+            } else {
+                paintBookmarkBTN.setVisibility(View.GONE);
+            }
 
             Callback picassoCallback = new Callback() {
                 @Override
@@ -341,6 +315,8 @@ public class View_Bookmark_Activity extends Base_Activity {
                         public void onClick(View view) {
                             Intent openPaintActivity = new Intent(context, Paint_Bookmark_Activity.class);
                             openPaintActivity.putExtra(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, bookmark_imagepath);
+                            //Send the ID of the bookmark to be used in case the bookmark image needs to be updated
+                            openPaintActivity.putExtra(Constants.EXTRAS_BOOKMARK_ID, bookmark_id);
                             startActivity(openPaintActivity);
                         }
                     });
@@ -356,24 +332,22 @@ public class View_Bookmark_Activity extends Base_Activity {
                     createNewNoteBTN.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            Toast.makeText(getActivity(), getResources().getString(R.string.image_not_found), Toast.LENGTH_SHORT).show();
+                            Crouton.makeText(getActivity(), getResources().getString(R.string.image_not_found), Style.ALERT).show();
                         }
                     });
+
                     paintBookmarkBTN.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            Toast.makeText(getActivity(), getResources().getString(R.string.image_not_found), Toast.LENGTH_SHORT).show();
+                            Crouton.makeText(getActivity(), getResources().getString(R.string.image_not_found), Style.ALERT).show();
                         }
                     });
                 }
             };
 
-            try {
-                //If the String was a URL then this bookmark is a sample
-                new URL(bookmark_imagepath);
+            if (!helperMethods.isBookmarkOnDisk(bookmark_imagepath)) {
                 Picasso.with(context).load(bookmark_imagepath).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().into(bookmarkIMG, picassoCallback);
-            } catch (MalformedURLException e) {
-                //Else it's on disk
+            } else {
                 Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().into(bookmarkIMG, picassoCallback);
             }
 
@@ -382,9 +356,9 @@ public class View_Bookmark_Activity extends Base_Activity {
                 @Override
                 public void onPhotoTap(View view, float v, float v2) {
                     if (!clutterHidden) {
-                        dealWithClutter(clutterHidden, view);
+                        dealWithClutter(clutterHidden, view, bookmark_imagepath);
                     } else {
-                        dealWithClutter(clutterHidden, view);
+                        dealWithClutter(clutterHidden, view, bookmark_imagepath);
                     }
 
                     clutterHidden = !clutterHidden;
@@ -395,7 +369,7 @@ public class View_Bookmark_Activity extends Base_Activity {
         }
 
         @DebugLog
-        public void dealWithClutter(final boolean wasHidden, final View view) {
+        public void dealWithClutter(final boolean wasHidden, final View view, String bookmark_imagepath) {
             ArrayList<ObjectAnimator> arrayListObjectAnimators = new ArrayList<ObjectAnimator>();
             Animator[] objectAnimators;
 
@@ -405,7 +379,10 @@ public class View_Bookmark_Activity extends Base_Activity {
 
                 arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkDetailsView));
                 arrayListObjectAnimators.add(helperMethods.showViewElement(createNewNoteBTN));
-                arrayListObjectAnimators.add(helperMethods.showViewElement(paintBookmarkBTN));
+
+                if (helperMethods.isBookmarkOnDisk(bookmark_imagepath))
+                    arrayListObjectAnimators.add(helperMethods.showViewElement(paintBookmarkBTN));
+
             } else {
                 ((View_Bookmark_Activity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                         WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -413,7 +390,9 @@ public class View_Bookmark_Activity extends Base_Activity {
 
                 arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkDetailsView));
                 arrayListObjectAnimators.add(helperMethods.hideViewElement(createNewNoteBTN));
-                arrayListObjectAnimators.add(helperMethods.hideViewElement(paintBookmarkBTN));
+
+                if (helperMethods.isBookmarkOnDisk(bookmark_imagepath))
+                    arrayListObjectAnimators.add(helperMethods.hideViewElement(paintBookmarkBTN));
             }
 
             objectAnimators = arrayListObjectAnimators
