@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
+import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -86,6 +87,7 @@ public class Books_Activity extends Base_Activity {
     private final static int SHOW_CREATE_BOOK_SHOWCASE = 1;
     private static Handler UIHandler = new Handler();
     private ProgressDialog downloadingBookDataLoader;
+    private LayoutAnimationController controller;
 
     private Books_Adapter booksAdapter;
     private DatabaseHelper dbHelper;
@@ -223,14 +225,6 @@ public class Books_Activity extends Base_Activity {
             }
         });
 
-
-        View listViewHeaderAd = View.inflate(this, R.layout.books_list_adview_header, null);
-        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-
-        listView.addFooterView(listViewHeaderAd);
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -363,6 +357,13 @@ public class Books_Activity extends Base_Activity {
 
         booksAdapter = new Books_Adapter(this);
         DragSortListView thisDragSortListView = listView;
+
+        View listViewHeaderAd = View.inflate(this, R.layout.books_list_adview_header, null);
+        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
+        thisDragSortListView.addFooterView(listViewHeaderAd);
         thisDragSortListView.setDropListener(onDrop);
         thisDragSortListView.setDragListener(onDrag);
         thisDragSortListView.setAdapter(booksAdapter);

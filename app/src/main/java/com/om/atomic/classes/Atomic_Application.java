@@ -9,6 +9,8 @@ import com.parse.Parse;
 
 import java.util.HashMap;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+
 public class Atomic_Application extends Application {
     /**
      * Enum used to identify the tracker that needs to be used for tracking.
@@ -34,10 +36,10 @@ public class Atomic_Application extends Application {
 
         Parse.initialize(this, "0DrXCFgecw0uwqBxryaFSBVWEVeoqH0OFCN6KWnT", "Ur0tf0ORJ4pzAwvsHijIPLACCool19b38p8C4iQk");
 
-//        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-//                .setDefaultFontPath("fonts/HelveticaNeue-Thin.otf")
-//                .setFontAttrId(R.attr.fontPath)
-//                .build());
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/Bookman-OldStyle.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build());
     }
 
     synchronized public Tracker getTracker(TrackerName trackerId) {

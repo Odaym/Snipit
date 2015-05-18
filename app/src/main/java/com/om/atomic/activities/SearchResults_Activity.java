@@ -169,7 +169,7 @@ public class SearchResults_Activity extends Base_Activity {
     public void handleEmptyOrPopulatedScreen(List<Bookmark> bookmarks) {
         if (bookmarks.isEmpty()) {
             emptyListLayout.setVisibility(View.VISIBLE);
-            searchNotFoundTV.setText(searchNotFoundTV.getText() + "\"" + query + "\"");
+            searchNotFoundTV.setText(searchNotFoundTV.getText() + " \"" + query + "\"");
         } else {
             emptyListLayout.setVisibility(View.GONE);
         }

@@ -219,13 +219,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             }
         });
 
-        View listViewHeaderAd = View.inflate(this, R.layout.bookmarks_list_adview_header, null);
-        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-
-        listView.addHeaderView(listViewHeaderAd);
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -429,6 +422,14 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         thisDragSortListView.setDropListener(onDrop);
         thisDragSortListView.setDragListener(onDrag);
         thisDragSortListView.setRemoveListener(onRemove);
+
+        View listViewHeaderAd = View.inflate(this, R.layout.bookmarks_list_adview_header, null);
+        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
+        listView.addHeaderView(listViewHeaderAd);
+
         listView.setAdapter(bookmarksAdapter);
     }
 
