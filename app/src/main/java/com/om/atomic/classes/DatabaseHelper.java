@@ -75,6 +75,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         initializeParam(sqLiteDatabase, 1);
         initializeParam(sqLiteDatabase, 2);
         initializeParam(sqLiteDatabase, 3);
+
+        /**
+         * Initialize the Enable Layout Animations value
+         * Values other than the Coachmark Seens will start from 10 onwards
+         */
+        initializeParam(sqLiteDatabase, 10);
     }
 
     @DebugLog
@@ -162,7 +168,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static boolean checkIfDataExists(SQLiteDatabase db, String tableName,
                                             String dbField, String fieldValue) {
-        String Query = "SELECT "+ dbField +" FROM " + tableName + " WHERE " + dbField + " = " + fieldValue;
+        String Query = "SELECT " + dbField + " FROM " + tableName + " WHERE " + dbField + " = " + fieldValue;
         Cursor cursor = db.rawQuery(Query, null);
         return cursor.getCount() > 0;
     }
@@ -430,7 +436,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @DebugLog
-    public void switchCoachmarksSeenParam(int paramNumber, String paramValue) {
+    public void reverseParamsTruths(int paramNumber, String paramValue) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
         ContentValues newValues = new ContentValues();
 
@@ -454,7 +460,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @DebugLog
-    public boolean getSeensParam(SQLiteDatabase dbHandler, int paramNumber) {
+    public boolean getParam(SQLiteDatabase dbHandler, int paramNumber) {
         if (dbHandler == null)
             dbHandler = this.getReadableDatabase();
 

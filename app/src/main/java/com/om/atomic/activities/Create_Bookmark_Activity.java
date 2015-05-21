@@ -15,11 +15,8 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
-import com.om.atomic.classes.Atomic_Application;
 import com.om.atomic.classes.Bookmark;
 import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.DatabaseHelper;
@@ -63,16 +60,11 @@ public class Create_Bookmark_Activity extends Base_Activity {
     private Bookmark bookmark_from_list;
     private String tempImagePath, finalImagePath;
     private EventBus_Poster ebpFromEditBookmark;
-    private Tracker tracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_bookmark);
-
-        tracker = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
-//        tracker.setScreenName("Create_Bookmark");
-//        tracker.send(new HitBuilders.ScreenViewBuilder().build());
 
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
@@ -175,11 +167,6 @@ public class Create_Bookmark_Activity extends Base_Activity {
                             EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed", "new_bookmark"));
 
                             finish();
-
-                            tracker.send(new HitBuilders.EventBuilder()
-                                    .setCategory("Core")
-                                    .setAction("Create Bookmark")
-                                    .build());
                         } catch (NumberFormatException e) {
                             pageNumberET.setText("");
                             Crouton.makeText(Create_Bookmark_Activity.this, getString(R.string.page_number_error), Style.ALERT).show();

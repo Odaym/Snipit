@@ -27,7 +27,6 @@
         android:divider="@android:color/transparent"
         android:dividerHeight="@dimen/listview_padding_between"
         android:drawSelectorOnTop="true"
-        android:layoutAnimation="@anim/list_layout_controller"
         android:paddingBottom="@dimen/listview_padding_between"
         android:paddingLeft="@dimen/listview_padding_left_right"
         android:paddingRight="@dimen/listview_padding_left_right"

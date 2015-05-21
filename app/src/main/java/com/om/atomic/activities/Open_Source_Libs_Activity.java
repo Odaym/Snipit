@@ -14,10 +14,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.om.atomic.R;
-import com.om.atomic.classes.Atomic_Application;
 import com.om.atomic.classes.Helper_Methods;
 import com.om.atomic.classes.Open_Source_Library;
 
@@ -35,10 +32,6 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_source_libs);
 
-//        Tracker t = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
-//        t.setScreenName("Open_Source_Libs");
-//        t.send(new HitBuilders.ScreenViewBuilder().build());
-
         ButterKnife.inject(this);
 
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
@@ -48,7 +41,7 @@ public class Open_Source_Libs_Activity extends Base_Activity {
 
         Helper_Methods helperMethods = new Helper_Methods(this);
 
-        if (helperMethods.getCurrentapiVersion()  >= Build.VERSION_CODES.LOLLIPOP)
+        if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP)
             getWindow().setStatusBarColor(getResources().getColor(R.color.darker_purple));
         getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.color.purple));
 
@@ -63,6 +56,7 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         libraries.add(new Open_Source_Library("PhotoView", "https://github.com/chrisbanes/PhotoView", "PhotoView aims to help produce an easily usable implementation of a zooming Android ImageView. It is currently being used in photup."));
         libraries.add(new Open_Source_Library("Cropper", "https://github.com/edmodo/cropper", "The Cropper is an image cropping tool. It provides a way to set an image in XML and programmatically, and displays a resizable crop window on top of the image."));
         libraries.add(new Open_Source_Library("Crouton", "https://github.com/keyboardsurfer/Crouton", "Context sensitive notifications for Android."));
+        libraries.add(new Open_Source_Library("SmoothProgressBar", "https://github.com/castorflex/SmoothProgressBar", "Small library allowing you to make a smooth indeterminate progress bar."));
         libraries.add(new Open_Source_Library("Autofit TextView", "https://github.com/grantland/android-autofittextview", "A TextView that automatically resizes text to fit perfectly within its bounds."));
         libraries.add(new Open_Source_Library("Glide", "https://github.com/bumptech/glide", "Glide is a fast and efficient open source media management and image loading framework for Android that wraps media decoding, memory and disk caching, and resource pooling into a simple and easy to use interface."));
         libraries.add(new Open_Source_Library("Float Labeled EditText", "https://github.com/wrapp/floatlabelededittext", "Simple implementation of a Float Labeled EditText: An Android ViewGroup which uses a child EditText and puts the hint on top of the EditText when it is populated with text."));

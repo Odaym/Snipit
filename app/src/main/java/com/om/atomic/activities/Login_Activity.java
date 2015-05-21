@@ -52,10 +52,6 @@ public class Login_Activity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-//        Tracker t = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
-//        t.setScreenName("Login");
-//        t.send(new HitBuilders.ScreenViewBuilder().build());
-
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)

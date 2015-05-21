@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 import android.widget.AdapterView;
@@ -83,11 +84,12 @@ public class Books_Activity extends Base_Activity {
 //    @InjectView(R.id.navDrawer)
 //    DrawerFrameLayout navDrawer;
 
+    private LayoutAnimationController controller;
+
     static final int DELETE_BOOK_ANIMATION_DURATION = 300;
     private final static int SHOW_CREATE_BOOK_SHOWCASE = 1;
     private static Handler UIHandler = new Handler();
     private ProgressDialog downloadingBookDataLoader;
-    private LayoutAnimationController controller;
 
     private Books_Adapter booksAdapter;
     private DatabaseHelper dbHelper;
@@ -114,10 +116,6 @@ public class Books_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_books);
 
-//        Tracker t = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
-//        t.setScreenName("Books");
-//        t.send(new HitBuilders.ScreenViewBuilder().build());
-
         if (Constants.APPLICATION_CODE_STATE.equals("PRODUCTION"))
             Fabric.with(this, new Crashlytics());
 
@@ -139,6 +137,8 @@ public class Books_Activity extends Base_Activity {
 
         dbHelper = new DatabaseHelper(this);
         books = dbHelper.getAllBooks(null);
+
+        handleEmptyOrPopulatedScreen(books);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -212,7 +212,6 @@ public class Books_Activity extends Base_Activity {
          * END OF NAVIGATION DRAWER CODE
          */
 
-        handleEmptyOrPopulatedScreen(books);
 
         createNewBookBTN.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -341,7 +340,18 @@ public class Books_Activity extends Base_Activity {
             populateSampleData();
         } else if (ebp.getMessage().equals("book_added") || ebp.getMessage().equals("bookmark_changed")) {
             prepareForNotifyDataChanged();
-            booksAdapter.notifyDataSetChanged();
+            //If animations are disabled
+            if (!dbHelper.getParam(null, 10)) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        listView.setLayoutAnimation(controller);
+                        booksAdapter.notifyDataSetChanged();
+                    }
+                }, 100);
+            } else {
+                        booksAdapter.notifyDataSetChanged();
+            }
         }
     }
 
@@ -356,22 +366,39 @@ public class Books_Activity extends Base_Activity {
         handleEmptyUI(books);
 
         booksAdapter = new Books_Adapter(this);
-        DragSortListView thisDragSortListView = listView;
+//        DragSortListView thisDragSortListView = listView;
 
-        View listViewHeaderAd = View.inflate(this, R.layout.books_list_adview_header, null);
+        listView.setDropListener(onDrop);
+        listView.setDragListener(onDrag);
+
+        final View listViewHeaderAd = View.inflate(this, R.layout.books_list_adview_header, null);
         AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
-        thisDragSortListView.addFooterView(listViewHeaderAd);
-        thisDragSortListView.setDropListener(onDrop);
-        thisDragSortListView.setDragListener(onDrag);
-        thisDragSortListView.setAdapter(booksAdapter);
+        controller
+                = AnimationUtils.loadLayoutAnimation(
+                this, R.anim.books_list_layout_controller);
+
+        //If animations are disabled
+        if (!dbHelper.getParam(null, 10)) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    listView.setAdapter(booksAdapter);
+                    listView.addFooterView(listViewHeaderAd);
+                    listView.setLayoutAnimation(controller);
+                }
+            }, 100);
+        } else {
+            listView.setAdapter(booksAdapter);
+            listView.addFooterView(listViewHeaderAd);
+        }
     }
 
     @DebugLog
     public void showCreateBookShowcase() {
-        if (!dbHelper.getSeensParam(null, 2)) {
+        if (!dbHelper.getParam(null, 2)) {
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
@@ -412,7 +439,7 @@ public class Books_Activity extends Base_Activity {
 
     public void handleEmptyUI(List<Book> books) {
         //Books are empty and the coachmark has been dismissed
-        if (books.isEmpty() && dbHelper.getSeensParam(null, 2)) {
+        if (books.isEmpty() && dbHelper.getParam(null, 2)) {
             emptyListLayout.setVisibility(View.VISIBLE);
         } else if (books.isEmpty()) {
             emptyListLayout.setVisibility(View.GONE);

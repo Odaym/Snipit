@@ -46,10 +46,6 @@ public class Crop_Image_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crop_image);
 
-//        Tracker t = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
-//        t.setScreenName("Crop_Image");
-//        t.send(new HitBuilders.ScreenViewBuilder().build());
-
         ButterKnife.inject(this);
 
         Helper_Methods helperMethods = new Helper_Methods(this);

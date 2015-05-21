@@ -27,6 +27,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -141,10 +143,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
-
-//        Tracker t = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
-//        t.setScreenName("Bookmarks");
-//        t.send(new HitBuilders.ScreenViewBuilder().build());
 
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
@@ -354,7 +352,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 break;
             case "bookmark_image_updated":
                 Helper_Methods.delete_image_from_disk(ebp.getExtra());
-                Crouton.makeText(Bookmarks_Activity.this, getResources().getString(R.string.bookmark_updated_successfully), Style.INFO).show();
             case "bookmark_changed":
             case "bookmark_note_changed":
                 prepareForNotifyDataChanged(book_id);
@@ -418,25 +415,35 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         handleEmptyUI(bookmarks);
 
         bookmarksAdapter = new Bookmarks_Adapter(this);
-        DragSortListView thisDragSortListView = listView;
-        thisDragSortListView.setDropListener(onDrop);
-        thisDragSortListView.setDragListener(onDrag);
-        thisDragSortListView.setRemoveListener(onRemove);
+//        DragSortListView thisDragSortListView = listView;
 
-        View listViewHeaderAd = View.inflate(this, R.layout.bookmarks_list_adview_header, null);
+        listView.setDropListener(onDrop);
+        listView.setDragListener(onDrag);
+        listView.setRemoveListener(onRemove);
+
+        final View listViewHeaderAd = View.inflate(this, R.layout.bookmarks_list_adview_header, null);
         AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
-        listView.addHeaderView(listViewHeaderAd);
+        final LayoutAnimationController controller
+                = AnimationUtils.loadLayoutAnimation(
+                this, R.anim.bookmarks_list_layout_controller);
 
-        listView.setAdapter(bookmarksAdapter);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+                listView.setAdapter(bookmarksAdapter);
+                listView.addHeaderView(listViewHeaderAd);
+//                listView.setLayoutAnimation(controller);
+//            }
+//        }, 100);
     }
 
     @DebugLog
     public void showCreateBookmarkShowcase() {
         //When a bookmark is deleted from inside Search Results Activity, leading up to this Activity having zero bookmarks and causing the coachmark to appear when the activity is not in focus. So make sure it is in focus first
-        if (!dbHelper.getSeensParam(null, 1)) {
+        if (!dbHelper.getParam(null, 1)) {
 
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -477,7 +484,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 
     public void handleEmptyUI(List<Bookmark> bookmarks) {
         //Books are empty and the coachmark has been dismissed
-        if (bookmarks.isEmpty() && dbHelper.getSeensParam(null, 1)) {
+        if (bookmarks.isEmpty() && dbHelper.getParam(null, 1)) {
             emptyListLayout.setVisibility(View.VISIBLE);
         } else if (bookmarks.isEmpty()) {
             emptyListLayout.setVisibility(View.GONE);

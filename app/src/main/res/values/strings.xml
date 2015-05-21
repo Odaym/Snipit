@@ -7,8 +7,8 @@
     <string name="banner_ad_unit_id_books">ca-app-pub-7047539644799809/6004168294</string>
     <string name="banner_ad_unit_id_bookmarks">ca-app-pub-7047539644799809/8957634697</string>
 
-
     <string name="app_name">Atomic</string>
+    <string name="app_version">1.0.0</string>
     <string name="gotit">Got it</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
@@ -21,9 +21,13 @@
     <string name="action_needs_internet">This action needs an Internet connection</string>
 
     <!-- PREFERENCE ACTIVITY-->
+    <string name="pref_display_section_title">Display</string>
+    <string name="pref_display_animations_title">Layout Animations</string>
     <string name="pref_tutorial_section_title">Tutorial</string>
     <string name="pref_tutorial_title">Tutorial Mode</string>
-    <string name="pref_tutorial_summary">When you don\'t have any books or bookmarks, hint screens will be displayed.</string>
+    <string name="pref_tutorial_summary">Hint screens will show up to help you get started</string>
+    <string name="pref_populate_sample_data_title">Test drive Atomic</string>
+    <string name="pref_populate_sample_data_summary">Jump right in by adding 4 sample books!</string>
     <string name="pref_about_section_title">About</string>
     <string name="pref_about_title">About Atomic</string>
     <string name="pref_open_source_libraries_title">Open Source Libraries</string>

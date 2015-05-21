@@ -75,10 +75,6 @@ public class SearchResults_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
 
-//        Tracker t = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
-//        t.setScreenName("Search_Results");
-//        t.send(new HitBuilders.ScreenViewBuilder().build());
-
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
         EventBus_Singleton.getInstance().register(this);

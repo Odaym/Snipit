@@ -19,13 +19,10 @@ import android.widget.RelativeLayout;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
-import com.om.atomic.classes.Atomic_Application;
 import com.om.atomic.classes.Book;
 import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.DatabaseHelper;
@@ -80,7 +77,6 @@ public class Create_Book_Activity extends Base_Activity {
     private int CALL_PURPOSE;
     private Book book_from_list;
     private ProgressDialog loadingBookInfoDialog;
-    private Tracker tracker;
 
     private static final int SHOW_SCAN_BOOK_SHOWCASE = 1;
 
@@ -88,10 +84,6 @@ public class Create_Book_Activity extends Base_Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_book);
-
-        tracker = ((Atomic_Application) getApplication()).getTracker(Atomic_Application.TrackerName.APP_TRACKER);
-//        tracker.setScreenName("Create_Book");
-//        tracker.send(new HitBuilders.ScreenViewBuilder().build());
 
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
@@ -182,20 +174,6 @@ public class Create_Book_Activity extends Base_Activity {
                         takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
 
                         startActivity(takeToBookmarks);
-
-                        if (bookImagePath == null) {
-                            tracker.send(new HitBuilders.EventBuilder()
-                                    .setCategory("Core")
-                                    .setAction("Create Book")
-                                    .setLabel("Raw")
-                                    .build());
-                        } else {
-                            tracker.send(new HitBuilders.EventBuilder()
-                                    .setCategory("Core")
-                                    .setAction("Create Book")
-                                    .setLabel("Scanned")
-                                    .build());
-                        }
                     } else {
                         //If you are editing an existing book
                         book_from_list.setTitle(titleET.getText().toString());
@@ -258,7 +236,7 @@ public class Create_Book_Activity extends Base_Activity {
 
     @DebugLog
     public void showScanBookHintShowcase() {
-        if (!dbHelper.getSeensParam(null, 3)) {
+        if (!dbHelper.getParam(null, 3)) {
 
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
