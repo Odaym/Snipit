@@ -26,6 +26,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
@@ -46,8 +48,6 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import de.keyboardsurfer.android.widget.crouton.Crouton;
-import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 
@@ -105,17 +105,18 @@ public class SearchResults_Activity extends Base_Activity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                if (bookmarks.get(position).getIsNoteShowing() == 0) {
+                if (((Bookmark) listView.getItemAtPosition(position)).getIsNoteShowing() == 0) {
                     Intent intent = new Intent(SearchResults_Activity.this, View_Bookmark_Activity.class);
                     intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
                     intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
-                    intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position);
+                    intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position - 1);
+                    intent.putExtra(Constants.EXTRAS_SEARCH_TERM, query);
                     intent.putParcelableArrayListExtra("bookmarks", bookmarks);
                     startActivity(intent);
 
-                    int bookmarkViews = dbHelper.getBookmarkViews(bookmarks.get(position).getId());
-                    bookmarks.get(position).setViews(bookmarkViews + 1);
-                    dbHelper.updateBookmark(bookmarks.get(position));
+                    int bookmarkViews = dbHelper.getBookmarkViews(((Bookmark) listView.getItemAtPosition(position)).getId());
+                    ((Bookmark) listView.getItemAtPosition(position)).setViews(bookmarkViews + 1);
+                    dbHelper.updateBookmark(((Bookmark) listView.getItemAtPosition(position)));
                     searchResultsAdapter.notifyDataSetChanged();
 
                     //This tells Bookmarks Activity to update the views counter of all bookmarks
@@ -152,11 +153,10 @@ public class SearchResults_Activity extends Base_Activity {
         switch (ebp.getMessage()) {
             case "bookmark_image_updated":
                 Helper_Methods.delete_image_from_disk(ebp.getExtra());
-                Crouton.makeText(SearchResults_Activity.this, getResources().getString(R.string.bookmark_updated_successfully), Style.INFO).show();
             case "bookmark_changed":
             case "bookmark_note_changed":
-                bookmarks = dbHelper.searchAllBookmarks(book_id, query);
-                handleEmptyOrPopulatedScreen(bookmarks);
+                prepareForNotifyDataChanged(book_id, query);
+                searchResultsAdapter.notifyDataSetChanged();
                 break;
         }
     }
@@ -171,7 +171,22 @@ public class SearchResults_Activity extends Base_Activity {
         }
 
         searchResultsAdapter = new SearchResults_Adapter(this);
+
+        final View listViewHeaderAd = View.inflate(this, R.layout.bookmarks_list_adview_header, null);
+        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
+        listView.addHeaderView(listViewHeaderAd);
         listView.setAdapter(searchResultsAdapter);
+    }
+
+    @DebugLog
+    public void prepareForNotifyDataChanged(int book_id, String searchQuery) {
+        bookmarks = dbHelper.searchAllBookmarks(book_id, searchQuery);
+        if (bookmarks.isEmpty()) {
+            finish();
+        }
     }
 
     private void deleteCell(final View v, final int index) {

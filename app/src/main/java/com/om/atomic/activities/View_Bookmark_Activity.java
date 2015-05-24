@@ -95,7 +95,14 @@ public class View_Bookmark_Activity extends Base_Activity {
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
         if (ebp.getMessage().equals("bookmark_image_needs_reload")) {
-            bookmarks = dbHelper.getAllBookmarks(bookmarks.get(current_bookmark_position).getBookId(), null);
+            //If at the end of this whole operation we discover that this was being done on a search result list
+            // change the query that will get the updated version of the bookmark that needs reloading
+            String extras_search_term = getIntent().getExtras().getString(Constants.EXTRAS_SEARCH_TERM);
+
+            if (extras_search_term != null)
+                bookmarks = dbHelper.searchAllBookmarks(bookmarks.get(current_bookmark_position).getBookId(), extras_search_term);
+            else
+                bookmarks = dbHelper.getAllBookmarks(bookmarks.get(current_bookmark_position).getBookId(), null);
 
             mPagerAdapter.notifyDataSetChanged();
         }

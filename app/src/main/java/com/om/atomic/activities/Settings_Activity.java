@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.flurry.android.FlurryAgent;
 import com.om.atomic.R;
 import com.om.atomic.classes.DatabaseHelper;
 import com.om.atomic.classes.EventBus_Poster;
@@ -62,10 +63,11 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 if (Helper_Methods.isInternetAvailable(Settings_Activity.this)) {
-                    finish();
+                    FlurryAgent.logEvent("Test_Drive");
                     EventBus_Singleton.getInstance().post(new EventBus_Poster("populate_sample_data"));
+                    finish();
                 } else {
-                    Crouton.makeText(Settings_Activity.this, getString(R.string.action_needs_internet), Style.ALERT).show();
+                    Crouton.makeText(Settings_Activity.this, getString(R.string.action_needs_internet), Style.INFO).show();
                 }
                 return false;
             }
@@ -90,20 +92,29 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
 
         if (key.equals("pref_key_tutorial_mode")) {
             if (sharedPreferences.getBoolean("pref_key_tutorial_mode", true)) {
+                FlurryAgent.logEvent("Tutorial_Mode_ON");
+
                 //Set all coachmarks to Unseen
                 dbHelper.reverseParamsTruths(1, "False");
                 dbHelper.reverseParamsTruths(2, "False");
                 dbHelper.reverseParamsTruths(3, "False");
             } else {
+                FlurryAgent.logEvent("Tutorial_Mode_OFF");
+
                 //Set all coachmarks to Seen
                 dbHelper.reverseParamsTruths(1, "True");
                 dbHelper.reverseParamsTruths(2, "True");
                 dbHelper.reverseParamsTruths(3, "True");
             }
         } else if (key.equals("pref_key_animations_mode")) {
+
             if (sharedPreferences.getBoolean("pref_key_animations_mode", true)) {
+                FlurryAgent.logEvent("Layout_Animations_ON");
+
                 dbHelper.reverseParamsTruths(10, "False");
             } else {
+                FlurryAgent.logEvent("Layout_Animations_ON");
+
                 dbHelper.reverseParamsTruths(10, "True");
             }
         }

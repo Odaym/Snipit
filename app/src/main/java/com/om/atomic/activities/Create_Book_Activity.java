@@ -19,6 +19,7 @@ import android.widget.RelativeLayout;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.flurry.android.FlurryAgent;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.melnykov.fab.FloatingActionButton;
@@ -161,8 +162,9 @@ public class Create_Book_Activity extends Base_Activity {
                         book.setDate_added(month + " " + day + " " + year);
                         book.setColorCode(rand.nextInt(7 - 1));
 
-
                         int last_insert_book_id = dbHelper.createBook(book);
+
+                        FlurryAgent.logEvent("Book_Create");
 
                         EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
 

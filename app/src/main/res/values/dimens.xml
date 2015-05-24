@@ -21,12 +21,12 @@
     <dimen name="bookmark_thumb_width">100dp</dimen>
 
     <!-- FONT SIZES -->
-    <dimen name="book_name_fsize">18sp</dimen>
-    <dimen name="book_author_fsize">15sp</dimen>
-    <dimen name="book_date_added_fsize">12sp</dimen>
-    <dimen name="number_of_bookmarks_fsize">25sp</dimen>
-    <dimen name="books_bookmarks_activity_hint_fsize">20sp</dimen>
-    <dimen name="bookmark_list_item_bookmark_page_fsize">13sp</dimen>
+    <dimen name="book_name_fsize">18dp</dimen>
+    <dimen name="book_author_fsize">15dp</dimen>
+    <dimen name="book_date_added_fsize">12dp</dimen>
+    <dimen name="number_of_bookmarks_fsize">25dp</dimen>
+    <dimen name="books_bookmarks_activity_hint_fsize">20dp</dimen>
+    <dimen name="bookmark_list_item_bookmark_page_fsize">13dp</dimen>
 
     <!-- SHOWCASE VIEW -->
     <dimen name="button_margin_left">50dp</dimen>

@@ -21,12 +21,13 @@
         app:spb_colors="@array/saveBookmarkProgressBarColors"
         app:spb_mirror_mode="false"
         app:spb_progressiveStart_activated="true"
-        app:spb_progressiveStart_speed="1.5"
+        app:spb_progressiveStart_speed="2.0"
         app:spb_progressiveStop_speed="3.4"
         app:spb_reversed="false"
         app:spb_sections_count="4"
-        app:spb_speed="2.0"
-        app:spb_stroke_separator_length="4dp"
+        app:spb_speed="3.0"
+        app:spb_interpolator="spb_interpolator_accelerate"
+        app:spb_stroke_separator_length="7dp"
         app:spb_stroke_width="4dp" />
 
     <me.panavtec.drawableview.DrawableView

@@ -433,8 +433,8 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 //        new Handler().postDelayed(new Runnable() {
 //            @Override
 //            public void run() {
-                listView.setAdapter(bookmarksAdapter);
                 listView.addHeaderView(listViewHeaderAd);
+                listView.setAdapter(bookmarksAdapter);
 //                listView.setLayoutAnimation(controller);
 //            }
 //        }, 100);

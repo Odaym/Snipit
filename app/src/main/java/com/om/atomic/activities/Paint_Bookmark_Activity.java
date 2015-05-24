@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
+import com.flurry.android.FlurryAgent;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.om.atomic.R;
@@ -343,6 +344,11 @@ public class Paint_Bookmark_Activity extends Base_Activity {
         protected void onPreExecute() {
             super.onPreExecute();
             savingBookmarkProgressBar.setVisibility(View.VISIBLE);
+
+            if (floatingActionsMenu.isExpanded())
+                floatingActionsMenu.collapse();
+            if (floatingColorsMenu.isExpanded())
+                floatingColorsMenu.collapse();
         }
 
         @Override
@@ -383,6 +389,8 @@ public class Paint_Bookmark_Activity extends Base_Activity {
             if (errorSaving)
                 Crouton.makeText(Paint_Bookmark_Activity.this, getResources().getString(R.string.bookmark_failed_update), Style.ALERT).show();
             else {
+                FlurryAgent.logEvent("Bookmark_Paint");
+
                 savingBookmarkProgressBar.setVisibility(View.INVISIBLE);
                 finish();
             }
@@ -395,6 +403,7 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
             //Notify View Bookmarks Activity to update the newly-painted image - send new path
             EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_image_needs_reload", values[1]));
+
             super.onProgressUpdate(values);
         }
     }

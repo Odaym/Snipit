@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.flurry.android.FlurryAgent;
 import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.atomic.classes.Bookmark;
@@ -163,6 +164,8 @@ public class Create_Bookmark_Activity extends Base_Activity {
                             bookmark.setDate_added(month + " " + day + ", " + year);
 
                             dbHelper.createBookmark(bookmark, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
+
+                            FlurryAgent.logEvent("Bookmark_Create");
 
                             EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed", "new_bookmark"));
 
