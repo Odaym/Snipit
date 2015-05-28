@@ -105,22 +105,27 @@ public class SearchResults_Activity extends Base_Activity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                if (((Bookmark) listView.getItemAtPosition(position)).getIsNoteShowing() == 0) {
-                    Intent intent = new Intent(SearchResults_Activity.this, View_Bookmark_Activity.class);
-                    intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
-                    intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
-                    intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position - 1);
-                    intent.putExtra(Constants.EXTRAS_SEARCH_TERM, query);
-                    intent.putParcelableArrayListExtra("bookmarks", bookmarks);
-                    startActivity(intent);
+                Bookmark bookmark = ((Bookmark) listView.getItemAtPosition(position));
 
-                    int bookmarkViews = dbHelper.getBookmarkViews(((Bookmark) listView.getItemAtPosition(position)).getId());
-                    ((Bookmark) listView.getItemAtPosition(position)).setViews(bookmarkViews + 1);
-                    dbHelper.updateBookmark(((Bookmark) listView.getItemAtPosition(position)));
-                    searchResultsAdapter.notifyDataSetChanged();
+                //Clicking on an adview when there's no Internet connection will cause this condition to be satisfied because no Book will be found at the index of that adview
+                if (bookmark != null) {
+                    if (bookmark.getIsNoteShowing() == 0) {
+                        Intent intent = new Intent(SearchResults_Activity.this, View_Bookmark_Activity.class);
+                        intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
+                        intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
+                        intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position - 1);
+                        intent.putExtra(Constants.EXTRAS_SEARCH_TERM, query);
+                        intent.putParcelableArrayListExtra("bookmarks", bookmarks);
+                        startActivity(intent);
 
-                    //This tells Bookmarks Activity to update the views counter of all bookmarks
-                    EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_viewed"));
+                        int bookmarkViews = dbHelper.getBookmarkViews(bookmark.getId());
+                        bookmark.setViews(bookmarkViews + 1);
+                        dbHelper.updateBookmark(bookmark);
+                        searchResultsAdapter.notifyDataSetChanged();
+
+                        //This tells Bookmarks Activity to update the views counter of all bookmarks
+                        EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_viewed"));
+                    }
                 }
             }
         });

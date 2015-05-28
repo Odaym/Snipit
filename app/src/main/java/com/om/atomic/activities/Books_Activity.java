@@ -78,6 +78,8 @@ public class Books_Activity extends Base_Activity {
     @Icicle
     ArrayList<Book> books;
 
+    Book tempBook;
+
     @InjectView(R.id.booksList)
     DragSortListView listView;
     @InjectView(R.id.emptyListLayout)
@@ -90,7 +92,6 @@ public class Books_Activity extends Base_Activity {
     private LayoutAnimationController controller;
 
     static final int DELETE_BOOK_ANIMATION_DURATION = 300;
-    static final int UNDELETE_BOOK_ANIMATION_DURATION = 1000;
 
     private final static int SHOW_CREATE_BOOK_SHOWCASE = 1;
     private static Handler UIHandler = new Handler();
@@ -102,7 +103,6 @@ public class Books_Activity extends Base_Activity {
     private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 
     private Snackbar undoDeleteBookSB;
-    private int bookIndexForFinalDeletion;
     private boolean itemPendingDeleteDecision = false;
 
     private DragSortListView.DropListener onDrop =
@@ -238,10 +238,14 @@ public class Books_Activity extends Base_Activity {
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Intent openBookmarksForBook = new Intent(Books_Activity.this, Bookmarks_Activity.class);
                 Book book = (Book) listView.getItemAtPosition(position);
-                openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
-                openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
-                openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
-                startActivity(openBookmarksForBook);
+
+                //Clicking on an adview when there's no Internet connection will cause this condition to be satisfied because no Book will be found at the index of that adview
+                if (book != null) {
+                    openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
+                    openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
+                    openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
+                    startActivity(openBookmarksForBook);
+                }
             }
         });
 
@@ -462,16 +466,21 @@ public class Books_Activity extends Base_Activity {
         BooksViewHolder vh = (BooksViewHolder) bookView.getTag();
         vh.needInflate = true;
 
-        itemPendingDeleteDecision = true;
-        bookIndexForFinalDeletion = index;
+        tempBook = books.get(index);
 
-        Animation.AnimationListener al = new Animation.AnimationListener() {
+        itemPendingDeleteDecision = true;
+
+        Animation.AnimationListener collapseAL = new Animation.AnimationListener() {
             @Override
             public void onAnimationEnd(Animation arg0) {
 
                 Spannable sentenceToSpan = new SpannableString(getResources().getString(R.string.delete_book_confirmation_message) + " " + books.get(index).getTitle());
 
                 sentenceToSpan.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, 7, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                books.remove(index);
+                handleEmptyUI(books);
+                booksAdapter.notifyDataSetChanged();
 
                 undoDeleteBookSB =
                         Snackbar.with(getApplicationContext())
@@ -497,7 +506,7 @@ public class Books_Activity extends Base_Activity {
                                     @Override
                                     public void onDismiss(Snackbar snackbar) {
                                         if (itemPendingDeleteDecision) {
-                                            finalizeBookDeletion();
+                                            finalizeBookDeletion(tempBook);
                                         }
                                     }
 
@@ -511,9 +520,12 @@ public class Books_Activity extends Base_Activity {
                                 }).actionListener(new ActionClickListener() {
                             @Override
                             public void onActionClicked(Snackbar snackbar) {
-                                expand(bookView);
+                                prepareForNotifyDataChanged();
+                                booksAdapter.notifyDataSetChanged();
+
                                 itemPendingDeleteDecision = false;
                                 undoDeleteBookSB.dismiss();
+
                             }
                         });
 
@@ -529,7 +541,7 @@ public class Books_Activity extends Base_Activity {
             }
         };
 
-        collapse(bookView, al);
+        collapse(bookView, collapseAL);
     }
 
     private void collapse(final View v, AnimationListener al) {
@@ -560,30 +572,12 @@ public class Books_Activity extends Base_Activity {
         v.startAnimation(anim);
     }
 
-    public static void expand(final View v) {
-        v.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        Animation anim = new Animation() {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if (interpolatedTime == 1) {
-                    v.setVisibility(View.VISIBLE);
-                } else {
-                    v.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                    v.requestLayout();
-                }
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        anim.setDuration(UNDELETE_BOOK_ANIMATION_DURATION);
-        v.startAnimation(anim);
+    public void finalizeBookDeletion(Book tempBook) {
+        dbHelper.deleteBook(tempBook.getId());
+        prepareForNotifyDataChanged();
+        booksAdapter.notifyDataSetChanged();
+        itemPendingDeleteDecision = false;
     }
-
 
     @Override
     protected void onPause() {
@@ -591,7 +585,7 @@ public class Books_Activity extends Base_Activity {
 
         if (itemPendingDeleteDecision) {
 
-            finalizeBookDeletion();
+            finalizeBookDeletion(tempBook);
 
             if (undoDeleteBookSB.isShowing()) {
                 undoDeleteBookSB.dismiss();
@@ -605,12 +599,6 @@ public class Books_Activity extends Base_Activity {
         EventBus_Singleton.getInstance().unregister(this);
     }
 
-    public void finalizeBookDeletion() {
-        dbHelper.deleteBook(books.get(bookIndexForFinalDeletion).getId());
-        prepareForNotifyDataChanged();
-        booksAdapter.notifyDataSetChanged();
-        itemPendingDeleteDecision = false;
-    }
 
     @Override
     protected void onResume() {
@@ -747,7 +735,16 @@ public class Books_Activity extends Base_Activity {
                                     startActivity(editBookIntent);
                                     break;
                                 case R.id.delete:
+                                    //Dissmiss the UNDO Snackbar and handle the deletion of the previously awaiting item yourself
+                                    if (undoDeleteBookSB != null && undoDeleteBookSB.isShowing()) {
+                                        //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
+                                        dbHelper.deleteBook((tempBook).getId());
+                                        itemPendingDeleteDecision = false;
+                                        undoDeleteBookSB.dismiss();
+                                    }
+
                                     deleteCell(parentView, position);
+
                                     break;
                             }
 

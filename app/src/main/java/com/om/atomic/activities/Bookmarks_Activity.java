@@ -220,18 +220,23 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                if (((Bookmark)listView.getItemAtPosition(position)).getIsNoteShowing() == 0) {
-                    int bookmarkViews = dbHelper.getBookmarkViews(((Bookmark)listView.getItemAtPosition(position)).getId());
-                    ((Bookmark)listView.getItemAtPosition(position)).setViews(bookmarkViews + 1);
-                    dbHelper.updateBookmark(((Bookmark)listView.getItemAtPosition(position)));
-                    bookmarksAdapter.notifyDataSetChanged();
+                Bookmark bookmark = ((Bookmark)listView.getItemAtPosition(position));
 
-                    Intent intent = new Intent(Bookmarks_Activity.this, View_Bookmark_Activity.class);
-                    intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
-                    intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
-                    intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position - 1);
-                    intent.putParcelableArrayListExtra("bookmarks", bookmarks);
-                    startActivity(intent);
+                //Clicking on an adview when there's no Internet connection will cause this condition to be satisfied because no Book will be found at the index of that adview
+                if (bookmark != null) {
+                    if (bookmark.getIsNoteShowing() == 0) {
+                        int bookmarkViews = dbHelper.getBookmarkViews(bookmark.getId());
+                        bookmark.setViews(bookmarkViews + 1);
+                        dbHelper.updateBookmark(bookmark);
+                        bookmarksAdapter.notifyDataSetChanged();
+
+                        Intent intent = new Intent(Bookmarks_Activity.this, View_Bookmark_Activity.class);
+                        intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
+                        intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
+                        intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position - 1);
+                        intent.putParcelableArrayListExtra("bookmarks", bookmarks);
+                        startActivity(intent);
+                    }
                 }
             }
         });
