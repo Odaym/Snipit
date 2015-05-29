@@ -9,7 +9,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/light_gray"
-        android:clipToPadding="false"
         android:divider="@android:color/transparent"
         android:dividerHeight="@dimen/listview_padding_between"
         android:drawSelectorOnTop="true"
@@ -40,6 +39,7 @@
             android:src="@drawable/bookmark_outline" />
 
         <me.grantland.widget.AutofitTextView
+            android:id="@+id/emptyLayoutMessageTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/bookmarkIMG"

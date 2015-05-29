@@ -58,6 +58,8 @@ import com.parse.ParseQuery;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
+import net.frakbot.jumpingbeans.JumpingBeans;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -78,7 +80,7 @@ public class Books_Activity extends Base_Activity {
     @Icicle
     ArrayList<Book> books;
 
-    Book tempBook;
+    private Book tempBook;
 
     @InjectView(R.id.booksList)
     DragSortListView listView;
@@ -454,6 +456,7 @@ public class Books_Activity extends Base_Activity {
         //Books are empty and the coachmark has been dismissed
         if (books.isEmpty() && dbHelper.getParam(null, 2)) {
             emptyListLayout.setVisibility(View.VISIBLE);
+            JumpingBeans.with((TextView) emptyListLayout.findViewById(R.id.emptyLayoutMessageTV)).appendJumpingDots().build();
         } else if (books.isEmpty()) {
             emptyListLayout.setVisibility(View.GONE);
             UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOK_SHOWCASE, 200);
@@ -738,7 +741,7 @@ public class Books_Activity extends Base_Activity {
                                     //Dissmiss the UNDO Snackbar and handle the deletion of the previously awaiting item yourself
                                     if (undoDeleteBookSB != null && undoDeleteBookSB.isShowing()) {
                                         //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
-                                        dbHelper.deleteBook((tempBook).getId());
+                                        dbHelper.deleteBook(tempBook.getId());
                                         itemPendingDeleteDecision = false;
                                         undoDeleteBookSB.dismiss();
                                     }

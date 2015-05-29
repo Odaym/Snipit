@@ -53,6 +53,7 @@
             android:src="@drawable/book_outline" />
 
         <me.grantland.widget.AutofitTextView
+            android:id="@+id/emptyLayoutMessageTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/bookIMG"

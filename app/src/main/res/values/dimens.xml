@@ -43,6 +43,9 @@
     <dimen name="create_book_showcase_inner_rad">50dp</dimen>
     <dimen name="create_book_showcase_outer_rad">70dp</dimen>
 
+    <dimen name="bookmark_image_shape_corners_radius">3dp</dimen>
+    <dimen name="bookmark_image_shape_corners_padding_bottom">3dp</dimen>
+
     <dimen name="create_bookmark_text_y">150dp</dimen>
     <dimen name="create_bookmark_text_x">50dp</dimen>
     <dimen name="create_bookmark_showcase_inner_rad">50dp</dimen>

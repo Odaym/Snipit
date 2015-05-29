@@ -1,8 +1,6 @@
 package com.om.atomic.activities;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -15,9 +13,11 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -39,13 +39,15 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.melnykov.fab.FloatingActionButton;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.listeners.ActionClickListener;
+import com.nispok.snackbar.listeners.EventListener;
 import com.om.atomic.R;
 import com.om.atomic.classes.Bookmark;
 import com.om.atomic.classes.Constants;
@@ -54,15 +56,17 @@ import com.om.atomic.classes.EventBus_Poster;
 import com.om.atomic.classes.EventBus_Singleton;
 import com.om.atomic.classes.Helper_Methods;
 import com.om.atomic.classes.Param;
+import com.om.atomic.classes.RoundedTransform;
 import com.om.atomic.dragsort_listview.DragSortListView;
 import com.om.atomic.showcaseview.ShowcaseView;
 import com.om.atomic.showcaseview.ViewTarget;
 import com.squareup.otto.Subscribe;
+import com.squareup.picasso.Picasso;
+
+import net.frakbot.jumpingbeans.JumpingBeans;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,6 +91,8 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
     RelativeLayout emptyListLayout;
     @InjectView(R.id.bookmarksList)
     DragSortListView listView;
+
+    private Bookmark tempBookmark;
 
     private SearchView searchView;
 
@@ -126,7 +132,12 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
     };
 
     static final int DELETE_BOOKMARK_ANIMATION_DURATION = 300;
+
+    private Snackbar undoDeleteBookmarkSB;
+    private boolean itemPendingDeleteDecision = false;
+
     private final static int SHOW_CREATE_BOOKMARK_SHOWCASE = 1;
+
     private String book_title;
     private int book_color_code;
     private ShowcaseView createBookmarkShowcase;
@@ -220,7 +231,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Bookmark bookmark = ((Bookmark)listView.getItemAtPosition(position));
+                Bookmark bookmark = ((Bookmark) listView.getItemAtPosition(position));
 
                 //Clicking on an adview when there's no Internet connection will cause this condition to be satisfied because no Book will be found at the index of that adview
                 if (bookmark != null) {
@@ -438,8 +449,8 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 //        new Handler().postDelayed(new Runnable() {
 //            @Override
 //            public void run() {
-                listView.addHeaderView(listViewHeaderAd);
-                listView.setAdapter(bookmarksAdapter);
+        listView.addHeaderView(listViewHeaderAd);
+        listView.setAdapter(bookmarksAdapter);
 //                listView.setLayoutAnimation(controller);
 //            }
 //        }, 100);
@@ -491,6 +502,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         //Books are empty and the coachmark has been dismissed
         if (bookmarks.isEmpty() && dbHelper.getParam(null, 1)) {
             emptyListLayout.setVisibility(View.VISIBLE);
+            JumpingBeans.with((TextView) emptyListLayout.findViewById(R.id.emptyLayoutMessageTV)).appendJumpingDots().build();
         } else if (bookmarks.isEmpty()) {
             emptyListLayout.setVisibility(View.GONE);
             UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOKMARK_SHOWCASE, 200);
@@ -501,18 +513,76 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
     }
 
     private void deleteCell(final View v, final int index) {
-        Animation.AnimationListener al = new Animation.AnimationListener() {
+        BookmarksViewHolder vh = (BookmarksViewHolder) v.getTag();
+        vh.needInflate = true;
+
+        tempBookmark = bookmarks.get(index);
+
+        itemPendingDeleteDecision = true;
+
+        Animation.AnimationListener collapseAL = new Animation.AnimationListener() {
             @Override
             public void onAnimationEnd(Animation arg0) {
 
-                BookmarksViewHolder vh = (BookmarksViewHolder) v.getTag();
-                vh.needInflate = true;
-
-                dbHelper.deleteBookmark(bookmarks.get(index).getId());
-
-                Helper_Methods.delete_image_from_disk(bookmarks.get(index).getImage_path());
+//                dbHelper.deleteBookmark(bookmarks.get(index).getId());
 
                 EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
+
+                Spannable sentenceToSpan = new SpannableString(getResources().getString(R.string.delete_book_confirmation_message) + " " + bookmarks.get(index).getName());
+
+                sentenceToSpan.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, 7, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                bookmarks.remove(index);
+                handleEmptyUI(bookmarks);
+                bookmarksAdapter.notifyDataSetChanged();
+
+                undoDeleteBookmarkSB =
+                        Snackbar.with(getApplicationContext())
+                                .actionLabel(R.string.undo_deletion_title)
+                                        //So that we differentiate between explicitly dismissing the snackbar and having it go away due to pressing UNDO
+                                .dismissOnActionClicked(false)
+                                .duration(8000)
+                                .actionColor(getResources().getColor(R.color.yellow))
+                                .text(sentenceToSpan)
+                                .eventListener(new EventListener() {
+                                    @Override
+                                    public void onShow(Snackbar snackbar) {
+                                    }
+
+                                    @Override
+                                    public void onShowByReplace(Snackbar snackbar) {
+                                    }
+
+                                    @Override
+                                    public void onShown(Snackbar snackbar) {
+                                    }
+
+                                    @Override
+                                    public void onDismiss(Snackbar snackbar) {
+                                        if (itemPendingDeleteDecision) {
+                                            finalizeBookmarkDeletion(tempBookmark);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onDismissByReplace(Snackbar snackbar) {
+                                    }
+
+                                    @Override
+                                    public void onDismissed(Snackbar snackbar) {
+                                    }
+                                }).actionListener(new ActionClickListener() {
+                            @Override
+                            public void onActionClicked(Snackbar snackbar) {
+                                prepareForNotifyDataChanged(book_id);
+                                bookmarksAdapter.notifyDataSetChanged();
+
+                                itemPendingDeleteDecision = false;
+                                undoDeleteBookmarkSB.dismiss();
+                            }
+                        });
+
+                undoDeleteBookmarkSB.show(Bookmarks_Activity.this);
             }
 
             @Override
@@ -524,7 +594,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             }
         };
 
-        collapse(v, al);
+        collapse(v, collapseAL);
     }
 
     private void collapse(final View v, Animation.AnimationListener al) {
@@ -552,6 +622,28 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         }
         anim.setDuration(DELETE_BOOKMARK_ANIMATION_DURATION);
         v.startAnimation(anim);
+    }
+
+    public void finalizeBookmarkDeletion(Bookmark tempBookmark) {
+        Helper_Methods.delete_image_from_disk(tempBookmark.getImage_path());
+        dbHelper.deleteBookmark(tempBookmark.getId());
+        prepareForNotifyDataChanged(tempBookmark.getBookId());
+        bookmarksAdapter.notifyDataSetChanged();
+        itemPendingDeleteDecision = false;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (itemPendingDeleteDecision) {
+
+            finalizeBookmarkDeletion(tempBookmark);
+
+            if (undoDeleteBookmarkSB.isShowing()) {
+                undoDeleteBookmarkSB.dismiss();
+            }
+        }
     }
 
     @Override
@@ -665,16 +757,19 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             holder.bookmarkName.setText(bookmarks.get(position).getName());
             holder.bookmarkViews.setText(context.getResources().getText(R.string.bookmark_views_label) + " " + bookmarks.get(position).getViews());
 
-            try {
-                //If the String was a URL then this bookmark is a sample
-                new URL(bookmarks.get(position).getImage_path());
-                Glide.with(Bookmarks_Activity.this).load(bookmarks.get(position).getImage_path()).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
-            } catch (MalformedURLException e) {
-                //Else it's on disk
-                Glide.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
-            }
+//            try {
+//                //If the String was a URL then this bookmark is a sample
+//                new URL(bookmarks.get(position).getImage_path());
+//                Glide.with(Bookmarks_Activity.this).load(bookmarks.get(position).getImage_path()).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+//            } catch (MalformedURLException e) {
+//                //Else it's on disk
+//                Glide.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+//            }
 
-//            Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
+            if (bookmarks.get(position).getImage_path().contains("http")) {
+                Picasso.with(Bookmarks_Activity.this).load(bookmarks.get(position).getImage_path()).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+            } else
+                Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
 
             holder.bookmarkAction.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -704,19 +799,26 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                                     startActivity(editBookmarkIntent);
                                     break;
                                 case R.id.delete:
-                                    new AlertDialog.Builder(Bookmarks_Activity.this)
-                                            .setTitle(bookmarks.get(position).getName())
-                                            .setMessage(R.string.delete_bookmark_confirmation_message)
-                                            .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                                    //Dissmiss the UNDO Snackbar and handle the deletion of the previously awaiting item yourself
+                                    if (undoDeleteBookmarkSB != null && undoDeleteBookmarkSB.isShowing()) {
+                                        //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
+                                        dbHelper.deleteBookmark(tempBookmark.getId());
+                                        itemPendingDeleteDecision = false;
+                                        undoDeleteBookmarkSB.dismiss();
+                                    }
 
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    deleteCell(parentView, position);
-                                                }
-
-                                            })
-                                            .setNegativeButton(R.string.cancel, null)
-                                            .show();
+//                                    new AlertDialog.Builder(Bookmarks_Activity.this)
+//                                            .setMessage(R.string.delete_bookmark_confirmation_message)
+//                                            .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+//
+//                                                @Override
+//                                                public void onClick(DialogInterface dialog, int which) {
+                                    deleteCell(parentView, position);
+//                                                }
+//
+//                                            })
+//                                            .setNegativeButton(R.string.cancel, null)
+//                                            .show();
                                     break;
                             }
 

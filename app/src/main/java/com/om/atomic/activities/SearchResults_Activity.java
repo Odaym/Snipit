@@ -25,7 +25,6 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.nineoldandroids.animation.Animator;
@@ -38,11 +37,11 @@ import com.om.atomic.classes.DatabaseHelper;
 import com.om.atomic.classes.EventBus_Poster;
 import com.om.atomic.classes.EventBus_Singleton;
 import com.om.atomic.classes.Helper_Methods;
+import com.om.atomic.classes.RoundedTransform;
 import com.squareup.otto.Subscribe;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -337,16 +336,19 @@ public class SearchResults_Activity extends Base_Activity {
             holder.bookmarkName.setText(bookmarks.get(position).getName());
             holder.bookmarkViews.setText(context.getResources().getText(R.string.bookmark_views_label) + " " + bookmarks.get(position).getViews());
 
-            try {
-                //If the String was a URL then this bookmark is a sample
-                new URL(bookmarks.get(position).getImage_path());
-                Glide.with(SearchResults_Activity.this).load(bookmarks.get(position).getImage_path()).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
-            } catch (MalformedURLException e) {
-                //Else it's on disk
-                Glide.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
-            }
+//            try {
+//                //If the String was a URL then this bookmark is a sample
+//                new URL(bookmarks.get(position).getImage_path());
+//                Glide.with(SearchResults_Activity.this).load(bookmarks.get(position).getImage_path()).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+//            } catch (MalformedURLException e) {
+//                //Else it's on disk
+//                Glide.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+//            }
 
-//            Picasso.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().error(helperMethods.getNotFoundImage(context)).into(holder.bookmarkIMG);
+            if (bookmarks.get(position).getImage_path().contains("http")) {
+                Picasso.with(SearchResults_Activity.this).load(bookmarks.get(position).getImage_path()).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+            } else
+                Picasso.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
 
             holder.bookmarkAction.setOnClickListener(new View.OnClickListener() {
                 @Override
