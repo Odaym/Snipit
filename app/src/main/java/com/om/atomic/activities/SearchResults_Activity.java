@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -74,8 +73,6 @@ public class SearchResults_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
 
-        overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
-
         EventBus_Singleton.getInstance().register(this);
 
         ButterKnife.inject(this);
@@ -128,28 +125,6 @@ public class SearchResults_Activity extends Base_Activity {
                 }
             }
         });
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
-                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            super.onBackPressed();
-            overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     @Subscribe

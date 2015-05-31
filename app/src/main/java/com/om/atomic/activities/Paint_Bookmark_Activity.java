@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -84,8 +83,6 @@ public class Paint_Bookmark_Activity extends Base_Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_paint_bookmark);
-
-        overridePendingTransition(R.anim.slide_up, R.anim.no_change);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefsEditor = prefs.edit();
@@ -268,10 +265,6 @@ public class Paint_Bookmark_Activity extends Base_Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
-                overridePendingTransition(R.anim.no_change, R.anim.slide_down);
-                return true;
             case R.id.menu_action_save:
                 new AlertDialog.Builder(Paint_Bookmark_Activity.this)
                         .setTitle(R.string.alert_dialog_save_title)
@@ -288,16 +281,6 @@ public class Paint_Bookmark_Activity extends Base_Activity {
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            super.onBackPressed();
-            overridePendingTransition(R.anim.no_change, R.anim.slide_down);
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     private String storeImage(Bitmap image) {

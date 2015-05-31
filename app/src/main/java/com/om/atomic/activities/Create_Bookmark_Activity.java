@@ -6,15 +6,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.andreabaccega.widget.FormEditText;
 import com.bumptech.glide.Glide;
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
 import com.flurry.android.FlurryAgent;
 import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
@@ -32,6 +29,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -46,7 +44,7 @@ public class Create_Bookmark_Activity extends Base_Activity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
     @InjectView(R.id.nameET)
-    EditText nameET;
+    FormEditText nameET;
     @InjectView(R.id.pageNumberET)
     EditText pageNumberET;
     @InjectView(R.id.bookmarkIMG)
@@ -55,6 +53,8 @@ public class Create_Bookmark_Activity extends Base_Activity {
     FloatingActionButton doneBTN;
     @InjectView(R.id.createNewBookmarkBTN)
     FloatingActionButton createNewBookmarkBTN;
+
+    private ArrayList<FormEditText> allFields = new ArrayList<>();
 
     private DatabaseHelper dbHelper;
     private int CALL_PURPOSE;
@@ -67,11 +67,11 @@ public class Create_Bookmark_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_bookmark);
 
-        overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
-
         ButterKnife.inject(this);
 
-        Helper_Methods helperMethods = new Helper_Methods(this);
+        allFields.add(nameET);
+
+        final Helper_Methods helperMethods = new Helper_Methods(this);
 
         EventBus_Singleton.getInstance().register(this);
 
@@ -101,7 +101,10 @@ public class Create_Bookmark_Activity extends Base_Activity {
 
             nameET.setText(bookmark_from_list.getName());
             nameET.setSelection(nameET.getText().length());
-            pageNumberET.setText(String.valueOf(bookmark_from_list.getPage_number()));
+
+            if (bookmark_from_list.getPage_number() != Constants.NO_BOOKMARK_PAGE_NUMBER)
+                pageNumberET.setText(String.valueOf(bookmark_from_list.getPage_number()));
+
             try {
                 //If the String was a URL then this bookmark is a sample
                 new URL(bookmark_from_list.getImage_path());
@@ -117,20 +120,18 @@ public class Create_Bookmark_Activity extends Base_Activity {
         doneBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (nameET.getText().toString().isEmpty()) {
-                    YoYo.with(Techniques.Shake)
-                            .duration(700)
-                            .playOn(findViewById(R.id.nameET));
-                } else if (pageNumberET.getText().toString().isEmpty()) {
-                    YoYo.with(Techniques.Shake)
-                            .duration(700)
-                            .playOn(findViewById(R.id.pageNumberET));
-                } else {
+                if (helperMethods.validateFields(allFields)) {
                     //If you are editing an existing bookmark
                     if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
                         try {
                             bookmark_from_list.setName(nameET.getText().toString());
-                            bookmark_from_list.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
+
+                            //Only try to parse if there was a number given
+                            if (!pageNumberET.getText().toString().isEmpty())
+                                bookmark_from_list.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
+                            else
+                                bookmark_from_list.setPage_number(Constants.NO_BOOKMARK_PAGE_NUMBER);
+
                             if (ebpFromEditBookmark != null)
                                 bookmark_from_list.setImage_path(ebpFromEditBookmark.getExtra());
                             else
@@ -155,7 +156,13 @@ public class Create_Bookmark_Activity extends Base_Activity {
                         try {
                             Bookmark bookmark = new Bookmark();
                             bookmark.setName(nameET.getText().toString());
-                            bookmark.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
+
+                            //Only try to parse if there was a number given
+                            if (!pageNumberET.getText().toString().isEmpty())
+                                bookmark.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
+                            else
+                                bookmark_from_list.setPage_number(Constants.NO_BOOKMARK_PAGE_NUMBER);
+
                             if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_IMAGE_PURPOSE_VALUE)
                                 bookmark.setImage_path(ebpFromEditBookmark.getExtra());
                             else
@@ -210,27 +217,6 @@ public class Create_Bookmark_Activity extends Base_Activity {
                 NPE.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
-                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            super.onBackPressed();
-            overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     @Override

@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:validator="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -15,15 +16,17 @@
             android:layout_height="wrap_content"
             float:fletPadding="10dp">
 
-            <EditText
+            <com.andreabaccega.widget.FormEditText
                 android:id="@+id/titleET"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/book_title"
                 android:inputType="textCapWords"
                 android:singleLine="true"
                 android:textColor="@android:color/black"
-                android:textCursorDrawable="@null" />
+                android:textColorHint="@color/edittext_hint_color"
+                android:textCursorDrawable="@null"
+                validator:emptyErrorString="@string/empty_book_title_error" />
 
         </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 
@@ -34,16 +37,19 @@
             android:layout_below="@+id/titleETFloating"
             float:fletPadding="10dp">
 
-            <EditText
+            <com.andreabaccega.widget.FormEditText
                 android:id="@+id/authorET"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 android:hint="@string/book_author"
                 android:inputType="textCapWords"
                 android:singleLine="true"
                 android:textColor="@android:color/black"
-                android:textCursorDrawable="@null" />
+                android:textColorHint="@color/edittext_hint_color"
+                android:textCursorDrawable="@null"
+                validator:emptyErrorString="@string/empty_author_name_error" />
+
         </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 
         <ImageView
@@ -54,7 +60,8 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_marginTop="10dp"
-            android:src="@drawable/powered_by_google" />
+            android:src="@drawable/powered_by_google"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/bookIMG"

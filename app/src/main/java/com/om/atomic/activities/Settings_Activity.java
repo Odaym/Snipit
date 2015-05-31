@@ -8,14 +8,14 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.flurry.android.FlurryAgent;
 import com.om.atomic.R;
+import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.DatabaseHelper;
 import com.om.atomic.classes.EventBus_Poster;
 import com.om.atomic.classes.EventBus_Singleton;
@@ -31,8 +31,6 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
         super.onCreate(savedInstanceState);
 
         Helper_Methods helperMethods = new Helper_Methods(this);
-
-        overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
         LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
 
@@ -90,56 +88,37 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
 
         DatabaseHelper dbHelper = new DatabaseHelper(this);
 
-        if (key.equals("pref_key_tutorial_mode")) {
-            if (sharedPreferences.getBoolean("pref_key_tutorial_mode", true)) {
-                FlurryAgent.logEvent("Tutorial_Mode_ON");
+        switch (key) {
+            case "pref_key_tutorial_mode":
+                if (sharedPreferences.getBoolean("pref_key_tutorial_mode", true)) {
+                    FlurryAgent.logEvent("Tutorial_Mode_ON");
 
-                //Set all coachmarks to Unseen
-                dbHelper.reverseParamsTruths(1, "False");
-                dbHelper.reverseParamsTruths(2, "False");
-                dbHelper.reverseParamsTruths(3, "False");
-            } else {
-                FlurryAgent.logEvent("Tutorial_Mode_OFF");
+                    //Set all coachmarks to Unseen
+                    dbHelper.reverseParamsTruths(1, "False");
+                    dbHelper.reverseParamsTruths(2, "False");
+                    dbHelper.reverseParamsTruths(3, "False");
+                } else {
+                    FlurryAgent.logEvent("Tutorial_Mode_OFF");
 
-                //Set all coachmarks to Seen
-                dbHelper.reverseParamsTruths(1, "True");
-                dbHelper.reverseParamsTruths(2, "True");
-                dbHelper.reverseParamsTruths(3, "True");
-            }
-        } else if (key.equals("pref_key_animations_mode")) {
+                    //Set all coachmarks to Seen
+                    dbHelper.reverseParamsTruths(1, "True");
+                    dbHelper.reverseParamsTruths(2, "True");
+                    dbHelper.reverseParamsTruths(3, "True");
+                }
+                break;
+            case "pref_key_animations_mode":
+                //Reflect the change in the database because this preference has already changed
+                if (sharedPreferences.getBoolean("pref_key_animations_mode", true)) {
+                    FlurryAgent.logEvent("Layout_Animations_ON");
 
-            if (sharedPreferences.getBoolean("pref_key_animations_mode", true)) {
-                FlurryAgent.logEvent("Layout_Animations_ON");
+                    dbHelper.reverseParamsTruths(10, "True");
+                } else {
+                    FlurryAgent.logEvent("Layout_Animations_OFF");
 
-                dbHelper.reverseParamsTruths(10, "False");
-            } else {
-                FlurryAgent.logEvent("Layout_Animations_ON");
+                    dbHelper.reverseParamsTruths(10, "False");
+                }
 
-                dbHelper.reverseParamsTruths(10, "True");
-            }
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
-                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
                 break;
         }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            super.onBackPressed();
-            overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
     }
 }

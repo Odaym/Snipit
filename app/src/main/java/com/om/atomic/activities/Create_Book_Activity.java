@@ -13,12 +13,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
+import com.andreabaccega.widget.FormEditText;
 import com.flurry.android.FlurryAgent;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -48,6 +46,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
 
@@ -60,20 +59,24 @@ import hugo.weaving.DebugLog;
 public class Create_Book_Activity extends Base_Activity {
 
     @InjectView(R.id.titleET)
-    EditText titleET;
+    FormEditText titleET;
     @InjectView(R.id.authorET)
-    EditText authorET;
+    FormEditText authorET;
     @InjectView(R.id.bookIMG)
     ImageView bookIMG;
     @InjectView(R.id.doneBTN)
     FloatingActionButton doneBTN;
     @InjectView(R.id.scanBTN)
     ImageView scanBTN;
+    @InjectView(R.id.poweredByGoogleBadge)
+    ImageView poweredByGoogleBadge;
 
     private String bookImagePath;
     private DatabaseHelper dbHelper;
 
     private ShowcaseView scanBookShowcase;
+
+    private ArrayList<FormEditText> allFields = new ArrayList<>();
 
     private int CALL_PURPOSE;
     private Book book_from_list;
@@ -86,9 +89,10 @@ public class Create_Book_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_book);
 
-        overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
-
         ButterKnife.inject(this);
+
+        allFields.add(titleET);
+        allFields.add(authorET);
 
         Handler UIHandler = new Handler() {
             @Override
@@ -104,7 +108,7 @@ public class Create_Book_Activity extends Base_Activity {
 
         dbHelper = new DatabaseHelper(this);
 
-        Helper_Methods helperMethods = new Helper_Methods(this);
+        final Helper_Methods helperMethods = new Helper_Methods(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -137,15 +141,7 @@ public class Create_Book_Activity extends Base_Activity {
         doneBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (titleET.getText().toString().isEmpty()) {
-                    YoYo.with(Techniques.Shake)
-                            .duration(700)
-                            .playOn(findViewById(R.id.titleET));
-                } else if (authorET.getText().toString().isEmpty()) {
-                    YoYo.with(Techniques.Shake)
-                            .duration(700)
-                            .playOn(findViewById(R.id.authorET));
-                } else {
+                if (helperMethods.validateFields(allFields)){
                     //If you are creating a new book
                     if (CALL_PURPOSE != Constants.EDIT_BOOK_PURPOSE_VALUE) {
                         Random rand = new Random();
@@ -216,7 +212,6 @@ public class Create_Book_Activity extends Base_Activity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
-                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
                 if (getCurrentFocus() != null) {
                     InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                     inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
@@ -224,16 +219,6 @@ public class Create_Book_Activity extends Base_Activity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            super.onBackPressed();
-            overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     @DebugLog
@@ -354,6 +339,9 @@ public class Create_Book_Activity extends Base_Activity {
                         }
                         authorET.setText(authorBuild.toString());
                         loadingBookInfoDialog.dismiss();
+
+                        //Only show Powered By Google when the result was due to looking up the book in Google Books API
+                        poweredByGoogleBadge.setVisibility(View.VISIBLE);
                     } catch (JSONException jse) {
                         Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_author_not_found_error), Style.ALERT).show();
                         loadingBookInfoDialog.dismiss();

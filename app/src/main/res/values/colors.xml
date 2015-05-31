@@ -24,6 +24,8 @@
     <color name="brown">#795548</color>
     <color name="darker_brown">#61443A</color>
 
+    <color name="edittext_hint_color">#401E1E1E</color>
+
     <color name="settings_toolbar_orange">#D77E47</color>
 
     <color name="red_transparent">#99DA4336</color>

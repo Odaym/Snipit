@@ -25,7 +25,7 @@
 
     <!-- PREFERENCE ACTIVITY-->
     <string name="pref_display_section_title">Display</string>
-    <string name="pref_display_animations_title">Layout Animations</string>
+    <string name="pref_display_animations_title">Enable Animations</string>
     <string name="pref_tutorial_section_title">Tutorial</string>
     <string name="pref_tutorial_title">Tutorial Mode</string>
     <string name="pref_tutorial_summary">Hint screens will show up to help you get started</string>
@@ -63,6 +63,8 @@
     <string name="bookmark_name">Bookmark Name</string>
     <string name="bookmark_page">Page</string>
     <string name="page_number_error">Invalid page number</string>
+    <string name="empty_bookmark_name_error">Give it a good name</string>
+
 
     <!-- CREATE_BOOK_ACTIVITY -->
     <string name="create_book_activity_title">New Book</string>
@@ -79,6 +81,8 @@
     <string name="book_title_not_found_error">Couldn\'t find book title</string>
     <string name="no_scan_data">No scan data received!</string>
     <string name="scan_books_showcase">You can also add a book by scanning its barcode</string>
+    <string name="empty_book_title_error">The title of the book is required</string>
+    <string name="empty_author_name_error">The name of the author is required</string>
 
     <!-- VIEW_BOOKMARKS_ACTIVITY -->
     <string name="rotate_left">Rotate Left</string>

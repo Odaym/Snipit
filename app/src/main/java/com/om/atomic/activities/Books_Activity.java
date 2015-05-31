@@ -31,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.AdRequest;
@@ -381,7 +382,6 @@ public class Books_Activity extends Base_Activity {
         handleEmptyUI(books);
 
         booksAdapter = new Books_Adapter(this);
-//        DragSortListView thisDragSortListView = listView;
 
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
@@ -395,8 +395,9 @@ public class Books_Activity extends Base_Activity {
                 = AnimationUtils.loadLayoutAnimation(
                 this, R.anim.books_list_layout_controller);
 
-        //If animations are disabled
-        if (!dbHelper.getParam(null, 10)) {
+        //If animations are enabled
+        Toast.makeText(this, "Animations enabled? " + dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE), Toast.LENGTH_LONG).show();
+        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {

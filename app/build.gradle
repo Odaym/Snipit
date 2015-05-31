@@ -87,4 +87,5 @@ dependencies {
     compile 'com.heinrichreimersoftware.materialdrawer:library:1.4.2'
     compile 'com.github.castorflex.smoothprogressbar:library:1.0.0'
     compile 'net.frakbot:jumpingbeans:1.2.0'
+    compile 'com.andreabaccega:android-form-edittext:1.1.0@aar'
 }

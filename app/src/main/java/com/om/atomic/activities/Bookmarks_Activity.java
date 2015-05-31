@@ -19,7 +19,6 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -155,8 +154,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
 
-        overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
-
         ButterKnife.inject(this);
 
         UIHandler = new Handler() {
@@ -291,7 +288,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
-                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
                 if (getCurrentFocus() != null) {
                     InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                     inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
@@ -324,16 +320,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            super.onBackPressed();
-            overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -431,7 +417,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         handleEmptyUI(bookmarks);
 
         bookmarksAdapter = new Bookmarks_Adapter(this);
-//        DragSortListView thisDragSortListView = listView;
 
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
@@ -446,14 +431,20 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 = AnimationUtils.loadLayoutAnimation(
                 this, R.anim.bookmarks_list_layout_controller);
 
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-        listView.addHeaderView(listViewHeaderAd);
-        listView.setAdapter(bookmarksAdapter);
-//                listView.setLayoutAnimation(controller);
-//            }
-//        }, 100);
+        //If animations are enabled
+        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    listView.addHeaderView(listViewHeaderAd);
+                    listView.setAdapter(bookmarksAdapter);
+                    listView.setLayoutAnimation(controller);
+                }
+            }, 100);
+        } else {
+            listView.addHeaderView(listViewHeaderAd);
+            listView.setAdapter(bookmarksAdapter);
+        }
     }
 
     @DebugLog

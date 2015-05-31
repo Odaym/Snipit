@@ -14,7 +14,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -71,8 +70,6 @@ public class View_Bookmark_Activity extends Base_Activity {
 
         dbHelper = new DatabaseHelper(this);
 
-        overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
-
         String book_title = getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
         current_bookmark_position = getIntent().getExtras().getInt(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION);
         bookmarks = getIntent().getExtras().getParcelableArrayList("bookmarks");
@@ -109,30 +106,8 @@ public class View_Bookmark_Activity extends Base_Activity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
-                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            super.onBackPressed();
-            overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
     protected void onDestroy() {
         EventBus_Singleton.getInstance().unregister(this);
-
         super.onDestroy();
     }
 
@@ -270,8 +245,15 @@ public class View_Bookmark_Activity extends Base_Activity {
             ((View_Bookmark_Activity) context).getSupportActionBar().show();
 
             bookmarkNameTV.setText(bookmark_name);
-            bookmarkPageNumberLabelTV.setText(getString(R.string.page));
-            bookmarkPageNumberTV.setText(" " + String.valueOf(bookmark_pagenumber));
+
+            if (bookmark_pagenumber == Constants.NO_BOOKMARK_PAGE_NUMBER) {
+                bookmarkPageNumberLabelTV.setVisibility(View.GONE);
+                bookmarkPageNumberTV.setVisibility(View.GONE);
+            } else {
+                bookmarkPageNumberLabelTV.setText(getString(R.string.page));
+                bookmarkPageNumberTV.setText(" " + String.valueOf(bookmark_pagenumber));
+            }
+
             bookmarkDateAddedTV.setText(bookmark_dateAdded);
 
             if (helperMethods.isBookmarkOnDisk(bookmark_imagepath)) {
@@ -305,6 +287,7 @@ public class View_Bookmark_Activity extends Base_Activity {
                             View alertCreateNoteView = inflater.inflate(R.layout.alert_create_bookmark_note, rootView, false);
 
                             final EditText inputNoteET = (EditText) alertCreateNoteView.findViewById(R.id.bookmarkNoteET);
+                            inputNoteET.setHintTextColor(getActivity().getResources().getColor(R.color.edittext_hint_color));
                             inputNoteET.setText(dbHelper.getBookmarkNote(bookmark_id));
                             inputNoteET.setSelection(inputNoteET.getText().length());
 

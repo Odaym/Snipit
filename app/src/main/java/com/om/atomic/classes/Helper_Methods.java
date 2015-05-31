@@ -10,6 +10,7 @@ import android.text.SpannableString;
 import android.text.style.TypefaceSpan;
 import android.view.View;
 
+import com.andreabaccega.widget.FormEditText;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.ObjectAnimator;
@@ -19,6 +20,7 @@ import com.parse.ParseObject;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import hugo.weaving.DebugLog;
@@ -51,6 +53,16 @@ public class Helper_Methods {
         return false;
     }
 
+    public boolean validateFields(ArrayList<FormEditText> allFields) {
+        boolean allValid = true;
+
+        for (FormEditText field : allFields) {
+            allValid = field.testValidity() && allValid;
+        }
+
+        return allValid;
+    }
+
     public void uploadBookDataToParse(DatabaseHelper dbHelper) {
         List<Book> books = dbHelper.getAllBooks(null);
 
@@ -77,6 +89,8 @@ public class Helper_Methods {
             }
         }
     }
+
+
 
     //Used to determine whether to allow scanning of Book Barcodes
     public static boolean isInternetAvailable(Context context) {

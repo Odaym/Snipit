@@ -72,15 +72,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         /**
          * Initilize the Seen Books, Bookmarks and Create Book params (for Showcase Views in each)
          */
-        initializeParam(sqLiteDatabase, 1);
-        initializeParam(sqLiteDatabase, 2);
-        initializeParam(sqLiteDatabase, 3);
+        initializeParam_ForNullness(sqLiteDatabase, 1);
+        initializeParam_ForNullness(sqLiteDatabase, 2);
+        initializeParam_ForNullness(sqLiteDatabase, 3);
 
         /**
          * Initialize the Enable Layout Animations value
          * Values other than the Coachmark Seens will start from 10 onwards
          */
-        initializeParam(sqLiteDatabase, 10);
+        initializeParamToTrue(sqLiteDatabase, 10);
     }
 
     @DebugLog
@@ -425,12 +425,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @DebugLog
-    public void initializeParam(SQLiteDatabase db, int paramNumber) {
+    public void initializeParam_ForNullness(SQLiteDatabase db, int paramNumber) {
         ContentValues newValues = new ContentValues();
 
         newValues.putNull("id");
         newValues.put(PRM_NUMBER, paramNumber);
         newValues.putNull(PRM_STRINGVALUE);
+
+        db.insert(PARAM_TABLE, null, newValues);
+    }
+
+    @DebugLog
+    public void initializeParamToTrue(SQLiteDatabase db, int paramNumber) {
+        ContentValues newValues = new ContentValues();
+
+        newValues.putNull("id");
+        newValues.put(PRM_NUMBER, paramNumber);
+        newValues.put(PRM_STRINGVALUE, "True");
 
         db.insert(PARAM_TABLE, null, newValues);
     }
