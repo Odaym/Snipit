@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,7 +21,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.flurry.android.FlurryAgent;
 import com.getbase.floatingactionbutton.FloatingActionButton;
@@ -53,8 +56,7 @@ import me.panavtec.drawableview.DrawableView;
 import me.panavtec.drawableview.DrawableViewConfig;
 
 public class Paint_Bookmark_Activity extends Base_Activity {
-    @InjectView(R.id.drawable_view)
-    DrawableView drawableView;
+
     @InjectView(R.id.bookmarkIMG)
     ImageView bookmarkIMG;
     @InjectView(R.id.imageProgressBar)
@@ -74,15 +76,22 @@ public class Paint_Bookmark_Activity extends Base_Activity {
     @InjectView(R.id.savingBookmarkProgressBar)
     SmoothProgressBar savingBookmarkProgressBar;
 
+    private DrawableView drawableView;
     private DrawableViewConfig config;
     private SharedPreferences prefs;
     private SharedPreferences.Editor prefsEditor;
     private DatabaseHelper dbHelper;
 
+    private int bookmarkIMG_finalHeight;
+    private int bookmarkIMG_finalWidth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_paint_bookmark);
+
+        ButterKnife.inject(Paint_Bookmark_Activity.this);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefsEditor = prefs.edit();
@@ -93,15 +102,46 @@ public class Paint_Bookmark_Activity extends Base_Activity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
 
-        ButterKnife.inject(this);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.paint_bookmark_activity_title));
+        getSupportActionBar().hide();
 
         Callback picassoCallback = new Callback() {
             @Override
             public void onSuccess() {
                 imageProgressBar.setVisibility(View.INVISIBLE);
+                Bitmap bitmap = ((BitmapDrawable) bookmarkIMG.getDrawable()).getBitmap();
+
+                final TextView edt = new TextView(Paint_Bookmark_Activity.this);
+                edt.setText("ASODIJASODIJASODIJAOSIDJA\nasiodjasidjaoisjdasoidjaosid\naosjdaoidjaosijd");
+
+                drawableView = new DrawableView(Paint_Bookmark_Activity.this);
+                config = new DrawableViewConfig();
+                config.setStrokeColor(getResources().getColor(R.color.white_transparent));
+                config.setStrokeWidth(prefs.getInt(Constants.BRUSH_THICKNESS_PREF, 20));
+                config.setMinZoom(1.0f);
+                config.setMaxZoom(1.0f);
+                config.setCanvasWidth(2000);
+                config.setCanvasHeight(2000);
+                drawableView.setConfig(config);
+
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+                params.addRule(RelativeLayout.CENTER_IN_PARENT);
+
+                drawableView.setLayoutParams(params);
+                edt.setLayoutParams(params);
+
+                final RelativeLayout parentView = (RelativeLayout) findViewById(R.id.activityLayout);
+                parentView.addView(edt);
+                setContentView(parentView);
+
+                parentView.post(new Runnable() {
+                    @Override
+                    public void run() {
+//                        parentView.addView(drawableView);
+//                        parentView.invalidate();
+                    }
+                });
             }
 
             @Override
@@ -118,19 +158,6 @@ public class Paint_Bookmark_Activity extends Base_Activity {
             //Else it's on disk
             Picasso.with(Paint_Bookmark_Activity.this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH))).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
         }
-
-        final float scale = getResources().getDisplayMetrics().density;
-        //formula for dp
-        int height = (int) (480 * scale + 0.5f);
-
-        config = new DrawableViewConfig();
-        config.setStrokeColor(getResources().getColor(R.color.white_transparent));
-        config.setStrokeWidth(prefs.getInt(Constants.BRUSH_THICKNESS_PREF, 20));
-        config.setMinZoom(1.0f);
-        config.setMaxZoom(1.0f);
-        config.setCanvasWidth(getResources().getDisplayMetrics().widthPixels);
-        config.setCanvasHeight(height);
-        drawableView.setConfig(config);
 
         fabActionClear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -344,9 +371,9 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
                 Bitmap mBitmap1 = BitmapFactory.decodeFile(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH), bmOptions);
 
-                Bitmap mBitmap2 = drawableView.obtainBitmap();
-
                 Bitmap mCBitmap = Bitmap.createBitmap(mBitmap1.getWidth(), mBitmap1.getHeight(), mBitmap1.getConfig());
+
+                Bitmap mBitmap2 = drawableView.obtainBitmap();
 
                 Canvas tCanvas = new Canvas(mCBitmap);
 

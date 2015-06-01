@@ -161,7 +161,7 @@ public class Create_Bookmark_Activity extends Base_Activity {
                             if (!pageNumberET.getText().toString().isEmpty())
                                 bookmark.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
                             else
-                                bookmark_from_list.setPage_number(Constants.NO_BOOKMARK_PAGE_NUMBER);
+                                bookmark.setPage_number(Constants.NO_BOOKMARK_PAGE_NUMBER);
 
                             if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_IMAGE_PURPOSE_VALUE)
                                 bookmark.setImage_path(ebpFromEditBookmark.getExtra());

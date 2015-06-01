@@ -344,9 +344,9 @@ public class View_Bookmark_Activity extends Base_Activity {
             };
 
             if (!helperMethods.isBookmarkOnDisk(bookmark_imagepath)) {
-                Picasso.with(context).load(bookmark_imagepath).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().into(bookmarkIMG, picassoCallback);
+                Picasso.with(context).load(bookmark_imagepath).error(getResources().getDrawable(R.drawable.notfound_1)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
             } else {
-                Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().into(bookmarkIMG, picassoCallback);
+                Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.notfound_1)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
             }
 
             PhotoViewAttacher mAttacher = new PhotoViewAttacher(bookmarkIMG);
@@ -354,9 +354,9 @@ public class View_Bookmark_Activity extends Base_Activity {
                 @Override
                 public void onPhotoTap(View view, float v, float v2) {
                     if (!clutterHidden) {
-                        dealWithClutter(clutterHidden, view, bookmark_imagepath);
+                        dealWithClutter(false, view, bookmark_imagepath);
                     } else {
-                        dealWithClutter(clutterHidden, view, bookmark_imagepath);
+                        dealWithClutter(true, view, bookmark_imagepath);
                     }
 
                     clutterHidden = !clutterHidden;
@@ -365,7 +365,6 @@ public class View_Bookmark_Activity extends Base_Activity {
 
             return rootView;
         }
-
 
         @DebugLog
         public void dealWithClutter(final boolean wasHidden, final View view, String bookmark_imagepath) {

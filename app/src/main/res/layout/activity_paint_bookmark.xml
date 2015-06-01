@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activityLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black">
@@ -30,12 +31,12 @@
         app:spb_stroke_separator_length="7dp"
         app:spb_stroke_width="4dp" />
 
-    <me.panavtec.drawableview.DrawableView
-        android:id="@+id/drawable_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="@dimen/average_screen_height" />
+    <!--<me.panavtec.drawableview.DrawableView-->
+        <!--android:id="@+id/drawable_view"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_centerInParent="true"-->
+        <!--android:layout_marginTop="@dimen/average_screen_height" />-->
 
     <ProgressBar
         android:id="@+id/imageProgressBar"

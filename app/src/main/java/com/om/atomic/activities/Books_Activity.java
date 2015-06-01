@@ -396,7 +396,6 @@ public class Books_Activity extends Base_Activity {
                 this, R.anim.books_list_layout_controller);
 
         //If animations are enabled
-        Toast.makeText(this, "Animations enabled? " + dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE), Toast.LENGTH_LONG).show();
         if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
             new Handler().postDelayed(new Runnable() {
                 @Override
