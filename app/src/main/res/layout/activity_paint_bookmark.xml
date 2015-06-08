@@ -1,16 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/activityLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
-    <ImageView
-        android:id="@+id/bookmarkIMG"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true" />
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true">
+
+        <ImageView
+            android:id="@+id/bookmarkIMG"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:adjustViewBounds="true" />
+
+        <com.om.atomic.classes.CanvasView
+            android:id="@+id/canvasView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/bookmarkIMG"
+            android:layout_alignTop="@+id/bookmarkIMG" />
+    </RelativeLayout>
 
     <fr.castorflex.android.smoothprogressbar.SmoothProgressBar xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/savingBookmarkProgressBar"
@@ -20,6 +34,7 @@
         android:indeterminate="true"
         android:visibility="gone"
         app:spb_colors="@array/saveBookmarkProgressBarColors"
+        app:spb_interpolator="spb_interpolator_accelerate"
         app:spb_mirror_mode="false"
         app:spb_progressiveStart_activated="true"
         app:spb_progressiveStart_speed="2.0"
@@ -27,16 +42,8 @@
         app:spb_reversed="false"
         app:spb_sections_count="4"
         app:spb_speed="3.0"
-        app:spb_interpolator="spb_interpolator_accelerate"
         app:spb_stroke_separator_length="7dp"
         app:spb_stroke_width="4dp" />
-
-    <!--<me.panavtec.drawableview.DrawableView-->
-        <!--android:id="@+id/drawable_view"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_centerInParent="true"-->
-        <!--android:layout_marginTop="@dimen/average_screen_height" />-->
 
     <ProgressBar
         android:id="@+id/imageProgressBar"
@@ -62,41 +69,32 @@
         fab:fab_labelsPosition="left">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_action_clear"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="@dimen/fab_actions_menu_buttons_bottom_padding"
-            android:src="@drawable/paint_bookmark_clear"
-            fab:fab_colorNormal="@color/red"
-            fab:fab_title="@string/fab_action_clear"
-            fab:fab_type="mini" />
-
-        <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_undo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="@dimen/fab_actions_menu_buttons_bottom_padding"
-            android:src="@drawable/paint_bookmark_undo"
+            fab:fab_colorNormal="@color/red"
+            fab:fab_icon="@drawable/paint_bookmark_undo" />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_action_drawing_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/green"
-            fab:fab_title="@string/fab_action_undo" />
+            fab:fab_icon="@drawable/paint_bookmark_rectangle" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="@dimen/fab_actions_menu_buttons_bottom_padding"
-            android:src="@drawable/paint_bookmark_color"
             fab:fab_colorNormal="@color/yellow"
-            fab:fab_title="@string/fab_action_color" />
+            fab:fab_icon="@drawable/paint_bookmark_color" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_thickness"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="@dimen/fab_actions_menu_buttons_bottom_padding"
-            android:src="@drawable/paint_bookmark_thickness"
             fab:fab_colorNormal="@color/purple"
-            fab:fab_title="@string/fab_action_thickness" />
+            fab:fab_icon="@drawable/paint_bookmark_thickness" />
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
@@ -122,11 +120,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onFabColorButtonClicked"
-            android:paddingBottom="@dimen/fab_actions_menu_buttons_bottom_padding"
-            android:src="@drawable/paint_bookmark_cancel"
             fab:fab_colorNormal="@color/gray"
-            fab:fab_size="mini"
-            fab:fab_title="@string/fab_action_back" />
+            fab:fab_icon="@drawable/paint_bookmark_cancel"
+            fab:fab_size="mini"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_color_red"

@@ -1,14 +1,16 @@
 package com.om.atomic.activities;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +31,9 @@ import com.google.android.gms.ads.AdView;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.listeners.ActionClickListener;
+import com.nispok.snackbar.listeners.EventListener;
 import com.om.atomic.R;
 import com.om.atomic.classes.Bookmark;
 import com.om.atomic.classes.Constants;
@@ -59,6 +64,11 @@ public class SearchResults_Activity extends Base_Activity {
     ListView listView;
     @InjectView(R.id.searchNotFoundTV)
     TextView searchNotFoundTV;
+
+    private Snackbar undoDeleteBookmarkSB;
+    private boolean itemPendingDeleteDecision = false;
+
+    private Bookmark tempBookmark;
 
     private String query;
     private int book_color_code;
@@ -169,18 +179,71 @@ public class SearchResults_Activity extends Base_Activity {
     }
 
     private void deleteCell(final View v, final int index) {
-        Animation.AnimationListener al = new Animation.AnimationListener() {
+        BookmarksViewHolder vh = (BookmarksViewHolder) v.getTag();
+        vh.needInflate = true;
+
+        tempBookmark = bookmarks.get(index);
+
+        itemPendingDeleteDecision = true;
+
+        Animation.AnimationListener collapseAL = new Animation.AnimationListener() {
             @Override
             public void onAnimationEnd(Animation arg0) {
 
-                BookmarksViewHolder vh = (BookmarksViewHolder) v.getTag();
-                vh.needInflate = true;
+                Spannable sentenceToSpan = new SpannableString(getResources().getString(R.string.delete_book_confirmation_message) + " " + bookmarks.get(index).getName());
 
-                dbHelper.deleteBookmark(bookmarks.get(index).getId());
+                sentenceToSpan.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, 7, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-                Helper_Methods.delete_image_from_disk(bookmarks.get(index).getImage_path());
+                bookmarks.remove(index);
+                searchResultsAdapter.notifyDataSetChanged();
 
-                EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
+                undoDeleteBookmarkSB =
+                        Snackbar.with(getApplicationContext())
+                                .actionLabel(R.string.undo_deletion_title)
+                                        //So that we differentiate between explicitly dismissing the snackbar and having it go away due to pressing UNDO
+                                .dismissOnActionClicked(false)
+                                .duration(8000)
+                                .actionColor(getResources().getColor(R.color.yellow))
+                                .text(sentenceToSpan)
+                                .eventListener(new EventListener() {
+                                    @Override
+                                    public void onShow(Snackbar snackbar) {
+                                    }
+
+                                    @Override
+                                    public void onShowByReplace(Snackbar snackbar) {
+                                    }
+
+                                    @Override
+                                    public void onShown(Snackbar snackbar) {
+                                    }
+
+                                    @Override
+                                    public void onDismiss(Snackbar snackbar) {
+                                        if (itemPendingDeleteDecision) {
+                                            finalizeBookmarkDeletion(tempBookmark);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onDismissByReplace(Snackbar snackbar) {
+                                    }
+
+                                    @Override
+                                    public void onDismissed(Snackbar snackbar) {
+                                    }
+                                }).actionListener(new ActionClickListener() {
+                            @Override
+                            public void onActionClicked(Snackbar snackbar) {
+                                prepareForNotifyDataChanged(book_id, query);
+                                searchResultsAdapter.notifyDataSetChanged();
+
+                                itemPendingDeleteDecision = false;
+                                undoDeleteBookmarkSB.dismiss();
+                            }
+                        });
+
+                undoDeleteBookmarkSB.show(SearchResults_Activity.this);
             }
 
             @Override
@@ -192,7 +255,7 @@ public class SearchResults_Activity extends Base_Activity {
             }
         };
 
-        collapse(v, al);
+        collapse(v, collapseAL);
     }
 
     private void collapse(final View v, Animation.AnimationListener al) {
@@ -221,6 +284,30 @@ public class SearchResults_Activity extends Base_Activity {
 
         anim.setDuration(DELETE_BOOKMARK_ANIMATION_DURATION);
         v.startAnimation(anim);
+    }
+
+    public void finalizeBookmarkDeletion(Bookmark tempBookmark) {
+        Helper_Methods.delete_image_from_disk(tempBookmark.getImage_path());
+        dbHelper.deleteBookmark(tempBookmark.getId());
+        prepareForNotifyDataChanged(tempBookmark.getBookId(), query);
+        searchResultsAdapter.notifyDataSetChanged();
+        itemPendingDeleteDecision = false;
+
+        EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (itemPendingDeleteDecision) {
+
+            finalizeBookmarkDeletion(tempBookmark);
+
+            if (undoDeleteBookmarkSB.isShowing()) {
+                undoDeleteBookmarkSB.dismiss();
+            }
+        }
     }
 
     @Override
@@ -287,7 +374,7 @@ public class SearchResults_Activity extends Base_Activity {
                 holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
 
             if (bookmarks.get(position).getIsNoteShowing() == 0) {
-                holder.motherView.setBackground(context.getResources().getDrawable(R.drawable.listview_items_shape));
+                ((GradientDrawable) ((LayerDrawable) holder.motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(R.color.white));
                 holder.bookmarkAction.setAlpha(1f);
                 holder.bookmarkAction.setVisibility(View.VISIBLE);
                 holder.bookmarkIMG.setAlpha(1f);
@@ -298,7 +385,7 @@ public class SearchResults_Activity extends Base_Activity {
                 holder.bookmarkName.setAlpha(1f);
                 holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
             } else {
-                holder.motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                ((GradientDrawable) ((LayerDrawable) holder.motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
                 holder.bookmarkNoteTV.setText(bookmarks.get(position).getNote());
                 holder.bookmarkAction.setVisibility(View.INVISIBLE);
                 holder.bookmarkIMG.setVisibility(View.INVISIBLE);
@@ -321,9 +408,9 @@ public class SearchResults_Activity extends Base_Activity {
 //            }
 
             if (bookmarks.get(position).getImage_path().contains("http")) {
-                Picasso.with(SearchResults_Activity.this).load(bookmarks.get(position).getImage_path()).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+                Picasso.with(SearchResults_Activity.this).load(bookmarks.get(position).getImage_path()).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.bookmark_not_found)).noPlaceholder().into(holder.bookmarkIMG);
             } else
-                Picasso.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+                Picasso.with(SearchResults_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.bookmark_not_found)).noPlaceholder().into(holder.bookmarkIMG);
 
             holder.bookmarkAction.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -354,19 +441,16 @@ public class SearchResults_Activity extends Base_Activity {
                                     startActivity(editBookmarkIntent);
                                     break;
                                 case R.id.delete:
-                                    new AlertDialog.Builder(SearchResults_Activity.this)
-                                            .setTitle(bookmarks.get(position).getName())
-                                            .setMessage(R.string.delete_bookmark_confirmation_message)
-                                            .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                                    //Dissmiss the UNDO Snackbar and handle the deletion of the previously awaiting item yourself
+                                    if (undoDeleteBookmarkSB != null && undoDeleteBookmarkSB.isShowing()) {
+                                        //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
+                                        dbHelper.deleteBookmark(tempBookmark.getId());
+                                        itemPendingDeleteDecision = false;
+                                        undoDeleteBookmarkSB.dismiss();
+                                    }
 
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    deleteCell(parentView, position);
-                                                }
+                                    deleteCell(parentView, position);
 
-                                            })
-                                            .setNegativeButton(R.string.cancel, null)
-                                            .show();
                                     break;
                             }
                             return true;
@@ -400,7 +484,7 @@ public class SearchResults_Activity extends Base_Activity {
                     if (isNoteShowing == 1) {
                         view.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
 
-                        motherView.setBackground(context.getResources().getDrawable(R.drawable.listview_items_shape));
+                        ((GradientDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(R.color.white));
 
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkNoteTV));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkAction));
@@ -412,7 +496,8 @@ public class SearchResults_Activity extends Base_Activity {
                     } else {
                         view.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
 
-                        motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                        ((GradientDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+
                         bookmarkNoteTV.setText(bookmarks.get(position).getNote());
 
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkNoteTV));

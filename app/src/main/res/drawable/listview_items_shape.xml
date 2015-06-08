@@ -7,6 +7,7 @@
         </shape>
     </item>
     <item
+        android:id="@+id/innerView"
         android:bottom="3dp"
         android:right="1dp">
         <shape android:shape="rectangle">
@@ -14,4 +15,5 @@
             <corners android:radius="3dp" />
         </shape>
     </item>
+
 </layer-list>

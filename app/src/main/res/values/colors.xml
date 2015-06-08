@@ -28,12 +28,6 @@
 
     <color name="settings_toolbar_orange">#D77E47</color>
 
-    <color name="red_transparent">#99DA4336</color>
-    <color name="green_transparent">#9944A048</color>
-    <color name="blue_transparent">#994285F4</color>
-    <color name="yellow_transparent">#99FFb300</color>
-    <color name="white_transparent">#99FFFFFF</color>
-
     <color name="background_list_back">#e3e3e3</color>
 
     <array name="saveBookmarkProgressBarColors">

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -26,8 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -427,24 +427,24 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
-        final LayoutAnimationController controller
-                = AnimationUtils.loadLayoutAnimation(
-                this, R.anim.bookmarks_list_layout_controller);
+//        final LayoutAnimationController controller
+//                = AnimationUtils.loadLayoutAnimation(
+//                this, R.anim.bookmarks_list_layout_controller);
 
         //If animations are enabled
-        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    listView.addHeaderView(listViewHeaderAd);
-                    listView.setAdapter(bookmarksAdapter);
-                    listView.setLayoutAnimation(controller);
-                }
-            }, 100);
-        } else {
-            listView.addHeaderView(listViewHeaderAd);
-            listView.setAdapter(bookmarksAdapter);
-        }
+//        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
+//            new Handler().postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    listView.addHeaderView(listViewHeaderAd);
+//                    listView.setAdapter(bookmarksAdapter);
+//                    listView.setLayoutAnimation(controller);
+//                }
+//            }, 100);
+//        } else {
+        listView.addHeaderView(listViewHeaderAd);
+        listView.setAdapter(bookmarksAdapter);
+//        }
     }
 
     @DebugLog
@@ -514,9 +514,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         Animation.AnimationListener collapseAL = new Animation.AnimationListener() {
             @Override
             public void onAnimationEnd(Animation arg0) {
-
-//                dbHelper.deleteBookmark(bookmarks.get(index).getId());
-
                 EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
 
                 Spannable sentenceToSpan = new SpannableString(getResources().getString(R.string.delete_book_confirmation_message) + " " + bookmarks.get(index).getName());
@@ -611,6 +608,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         if (al != null) {
             anim.setAnimationListener(al);
         }
+
         anim.setDuration(DELETE_BOOKMARK_ANIMATION_DURATION);
         v.startAnimation(anim);
     }
@@ -724,7 +722,8 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             }
 
             if (bookmarks.get(position).getIsNoteShowing() == 0) {
-                holder.motherView.setBackground(context.getResources().getDrawable(R.drawable.listview_items_shape));
+                ((GradientDrawable) ((LayerDrawable) holder.motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(R.color.white));
+
                 holder.bookmarkAction.setAlpha(1f);
                 holder.bookmarkAction.setVisibility(View.VISIBLE);
                 holder.bookmarkIMG.setAlpha(1f);
@@ -735,7 +734,8 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 holder.bookmarkName.setAlpha(1f);
                 holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
             } else {
-                holder.motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                ((GradientDrawable) ((LayerDrawable) holder.motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+
                 holder.bookmarkNoteTV.setText(bookmarks.get(position).getNote());
                 holder.bookmarkAction.setVisibility(View.INVISIBLE);
                 holder.bookmarkIMG.setVisibility(View.INVISIBLE);
@@ -748,19 +748,10 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             holder.bookmarkName.setText(bookmarks.get(position).getName());
             holder.bookmarkViews.setText(context.getResources().getText(R.string.bookmark_views_label) + " " + bookmarks.get(position).getViews());
 
-//            try {
-//                //If the String was a URL then this bookmark is a sample
-//                new URL(bookmarks.get(position).getImage_path());
-//                Glide.with(Bookmarks_Activity.this).load(bookmarks.get(position).getImage_path()).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
-//            } catch (MalformedURLException e) {
-//                //Else it's on disk
-//                Glide.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).centerCrop().error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
-//            }
-
             if (bookmarks.get(position).getImage_path().contains("http")) {
-                Picasso.with(Bookmarks_Activity.this).load(bookmarks.get(position).getImage_path()).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+                Picasso.with(Bookmarks_Activity.this).load(bookmarks.get(position).getImage_path()).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.bookmark_not_found)).noPlaceholder().into(holder.bookmarkIMG);
             } else
-                Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookmarkIMG);
+                Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.bookmark_not_found)).noPlaceholder().into(holder.bookmarkIMG);
 
             holder.bookmarkAction.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -798,18 +789,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                                         undoDeleteBookmarkSB.dismiss();
                                     }
 
-//                                    new AlertDialog.Builder(Bookmarks_Activity.this)
-//                                            .setMessage(R.string.delete_bookmark_confirmation_message)
-//                                            .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-//
-//                                                @Override
-//                                                public void onClick(DialogInterface dialog, int which) {
                                     deleteCell(parentView, position);
-//                                                }
-//
-//                                            })
-//                                            .setNegativeButton(R.string.cancel, null)
-//                                            .show();
                                     break;
                             }
 
@@ -844,7 +824,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                     if (isNoteShowing == 1) {
                         view.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
 
-                        motherView.setBackground(context.getResources().getDrawable(R.drawable.listview_items_shape));
+                        ((GradientDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(R.color.white));
 
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkNoteTV));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkAction));
@@ -856,7 +836,8 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                     } else {
                         view.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
 
-                        motherView.setBackgroundColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                        ((GradientDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+
                         bookmarkNoteTV.setText(bookmarks.get(position).getNote());
 
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkNoteTV));

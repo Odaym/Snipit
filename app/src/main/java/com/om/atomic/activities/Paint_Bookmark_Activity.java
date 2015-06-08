@@ -5,9 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,14 +21,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.TextView;
 
 import com.flurry.android.FlurryAgent;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.om.atomic.R;
+import com.om.atomic.classes.CanvasView;
 import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.DatabaseHelper;
 import com.om.atomic.classes.EventBus_Poster;
@@ -40,8 +39,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -52,11 +49,10 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import hugo.weaving.DebugLog;
-import me.panavtec.drawableview.DrawableView;
-import me.panavtec.drawableview.DrawableViewConfig;
 
 public class Paint_Bookmark_Activity extends Base_Activity {
-
+    @InjectView(R.id.canvasView)
+    CanvasView canvasView;
     @InjectView(R.id.bookmarkIMG)
     ImageView bookmarkIMG;
     @InjectView(R.id.imageProgressBar)
@@ -67,31 +63,23 @@ public class Paint_Bookmark_Activity extends Base_Activity {
     FloatingActionsMenu floatingColorsMenu;
     @InjectView(R.id.fab_action_color)
     FloatingActionButton fabActionColor;
+    @InjectView(R.id.fab_action_drawing_mode)
+    FloatingActionButton fabActionDrawingMode;
     @InjectView(R.id.fab_action_undo)
     FloatingActionButton fabActionUndo;
-    @InjectView(R.id.fab_action_clear)
-    FloatingActionButton fabActionClear;
     @InjectView(R.id.fab_action_thickness)
     FloatingActionButton fabActionThickness;
     @InjectView(R.id.savingBookmarkProgressBar)
     SmoothProgressBar savingBookmarkProgressBar;
 
-    private DrawableView drawableView;
-    private DrawableViewConfig config;
     private SharedPreferences prefs;
     private SharedPreferences.Editor prefsEditor;
     private DatabaseHelper dbHelper;
 
-    private int bookmarkIMG_finalHeight;
-    private int bookmarkIMG_finalWidth;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_paint_bookmark);
-
-        ButterKnife.inject(Paint_Bookmark_Activity.this);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefsEditor = prefs.edit();
@@ -99,83 +87,64 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
         dbHelper = new DatabaseHelper(this);
 
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        ButterKnife.inject(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.paint_bookmark_activity_title));
-        getSupportActionBar().hide();
+
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
 
         Callback picassoCallback = new Callback() {
             @Override
             public void onSuccess() {
                 imageProgressBar.setVisibility(View.INVISIBLE);
-                Bitmap bitmap = ((BitmapDrawable) bookmarkIMG.getDrawable()).getBitmap();
 
-                final TextView edt = new TextView(Paint_Bookmark_Activity.this);
-                edt.setText("ASODIJASODIJASODIJAOSIDJA\nasiodjasidjaoisjdasoidjaosid\naosjdaoidjaosijd");
+                int canvasDrawingMode = prefs.getInt(Constants.CANVAS_DRAWING_MODE, 0);
 
-                drawableView = new DrawableView(Paint_Bookmark_Activity.this);
-                config = new DrawableViewConfig();
-                config.setStrokeColor(getResources().getColor(R.color.white_transparent));
-                config.setStrokeWidth(prefs.getInt(Constants.BRUSH_THICKNESS_PREF, 20));
-                config.setMinZoom(1.0f);
-                config.setMaxZoom(1.0f);
-                config.setCanvasWidth(2000);
-                config.setCanvasHeight(2000);
-                drawableView.setConfig(config);
+                //If no drawing mode existed or drawing mode was set to PEN
+                if (canvasDrawingMode == 0 || canvasDrawingMode == CanvasView.Drawer.PEN.ordinal())
+                    canvasView.setDrawer(CanvasView.Drawer.PEN);
+                else {
+                    fabActionDrawingMode.setIconDrawable(getResources().getDrawable(R.drawable.paint_bookmark_pen));
+                    canvasView.setDrawer(CanvasView.Drawer.RECTANGLE);
+                }
 
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-                params.addRule(RelativeLayout.CENTER_IN_PARENT);
-
-                drawableView.setLayoutParams(params);
-                edt.setLayoutParams(params);
-
-                final RelativeLayout parentView = (RelativeLayout) findViewById(R.id.activityLayout);
-                parentView.addView(edt);
-                setContentView(parentView);
-
-                parentView.post(new Runnable() {
-                    @Override
-                    public void run() {
-//                        parentView.addView(drawableView);
-//                        parentView.invalidate();
-                    }
-                });
+                canvasView.setPaintStrokeColor(prefs.getInt(Constants.BRUSH_COLOR_PREF, getResources().getColor(R.color.white)));
+                canvasView.setPaintStrokeWidth(prefs.getFloat(Constants.BRUSH_THICKNESS_PREF, 20));
+                canvasView.setBaseColor(Color.TRANSPARENT);
+                canvasView.setOpacity(150);
             }
 
             @Override
             public void onError() {
-                imageProgressBar.setVisibility(View.INVISIBLE);
             }
         };
 
-        try {
-            //If the String was a URL then this bookmark is a sample
-            new URL(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH));
-            Picasso.with(Paint_Bookmark_Activity.this).load(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
-        } catch (MalformedURLException e) {
-            //Else it's on disk
-            Picasso.with(Paint_Bookmark_Activity.this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH))).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
-        }
-
-        fabActionClear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drawableView.clear();
-            }
-        });
+        Picasso.with(Paint_Bookmark_Activity.this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH))).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
 
         fabActionUndo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                drawableView.undo();
+                canvasView.undo();
             }
         });
 
-        /***
-         * Save functionality for Bookmark Image and Drawing ontop of it
-         */
+        fabActionDrawingMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (canvasView.getDrawer() == CanvasView.Drawer.PEN) {
+                    canvasView.setDrawer(CanvasView.Drawer.RECTANGLE);
+                    fabActionDrawingMode.setIconDrawable(getResources().getDrawable(R.drawable.paint_bookmark_pen));
+                } else {
+                    canvasView.setDrawer(CanvasView.Drawer.PEN);
+                    fabActionDrawingMode.setIconDrawable(getResources().getDrawable(R.drawable.paint_bookmark_rectangle));
+                }
+                prefsEditor.putInt(Constants.CANVAS_DRAWING_MODE, canvasView.getDrawer().ordinal());
+                prefsEditor.apply();
+            }
+        });
+
         fabActionColor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -201,40 +170,18 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
                 final SeekBar brushThicknessBar = (SeekBar) setBrushThicknessAlert.findViewById(R.id.brushThicknessSeeker);
 
-                int brushThicknessPref = prefs.getInt(Constants.BRUSH_THICKNESS_PREF, 0);
+                float brushThicknessPref = prefs.getFloat(Constants.BRUSH_THICKNESS_PREF, 0);
 
-                //First time opening this activity
+                //First time editing brush thickness
                 if (brushThicknessPref == 0)
                     brushThicknessBar.setProgress(20);
                 else
-                    brushThicknessBar.setProgress(brushThicknessPref);
-
-                brushThicknessBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-                    int brushThickness;
-
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
-                        brushThickness = progresValue;
-
-                        config.setStrokeWidth(progresValue);
-                        drawableView.setConfig(config);
-                    }
-
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        prefsEditor.putInt(Constants.BRUSH_THICKNESS_PREF, brushThickness);
-                        prefsEditor.apply();
-                    }
-                });
+                    brushThicknessBar.setProgress((int) brushThicknessPref);
 
                 alert.setPositiveButton(Paint_Bookmark_Activity.this.getResources().getString(R.string.OK), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        prefsEditor.putInt(Constants.BRUSH_THICKNESS_PREF, brushThicknessBar.getProgress());
+                        canvasView.setPaintStrokeWidth(brushThicknessBar.getProgress());
+                        prefsEditor.putFloat(Constants.BRUSH_THICKNESS_PREF, brushThicknessBar.getProgress());
                         prefsEditor.apply();
                     }
                 });
@@ -255,19 +202,24 @@ public class Paint_Bookmark_Activity extends Base_Activity {
     public void onFabColorButtonClicked(View view) {
         switch (view.getId()) {
             case R.id.fab_color_blue:
-                config.setStrokeColor(getResources().getColor(R.color.blue_transparent));
+                canvasView.setPaintStrokeColor(getResources().getColor(R.color.blue));
+                prefsEditor.putInt(Constants.BRUSH_COLOR_PREF, getResources().getColor(R.color.blue));
                 break;
             case R.id.fab_color_green:
-                config.setStrokeColor(getResources().getColor(R.color.green_transparent));
+                canvasView.setPaintStrokeColor(getResources().getColor(R.color.green));
+                prefsEditor.putInt(Constants.BRUSH_COLOR_PREF, getResources().getColor(R.color.green));
                 break;
             case R.id.fab_color_yellow:
-                config.setStrokeColor(getResources().getColor(R.color.yellow_transparent));
+                canvasView.setPaintStrokeColor(getResources().getColor(R.color.yellow));
+                prefsEditor.putInt(Constants.BRUSH_COLOR_PREF, getResources().getColor(R.color.yellow));
                 break;
             case R.id.fab_color_red:
-                config.setStrokeColor(getResources().getColor(R.color.red_transparent));
+                canvasView.setPaintStrokeColor(getResources().getColor(R.color.red));
+                prefsEditor.putInt(Constants.BRUSH_COLOR_PREF, getResources().getColor(R.color.red));
                 break;
             case R.id.fab_color_white:
-                config.setStrokeColor(getResources().getColor(R.color.white_transparent));
+                canvasView.setPaintStrokeColor(getResources().getColor(R.color.white));
+                prefsEditor.putInt(Constants.BRUSH_COLOR_PREF, getResources().getColor(R.color.white));
                 break;
             case R.id.fab_back_to_options:
                 floatingColorsMenu.setVisibility(View.INVISIBLE);
@@ -277,8 +229,7 @@ public class Paint_Bookmark_Activity extends Base_Activity {
                 floatingActionsMenu.expand();
                 break;
         }
-
-        drawableView.setConfig(config);
+        prefsEditor.apply();
     }
 
     @Override
@@ -293,18 +244,22 @@ public class Paint_Bookmark_Activity extends Base_Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_action_save:
-                new AlertDialog.Builder(Paint_Bookmark_Activity.this)
-                        .setTitle(R.string.alert_dialog_save_title)
-                        .setMessage(R.string.bookmark_update_message)
-                        .setPositiveButton(R.string.alert_dialog_save_action, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                new SavePaintedBookmark_Task().execute();
-                            }
-                        })
-                        .setNegativeButton(R.string.cancel, null)
-                        .show();
+                if (savingBookmarkProgressBar.isShown())
+                    return false;
+                else {
+                    new AlertDialog.Builder(Paint_Bookmark_Activity.this)
+                            .setTitle(R.string.alert_dialog_save_title)
+                            .setMessage(R.string.bookmark_update_message)
+                            .setPositiveButton(R.string.alert_dialog_save_action, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    new SavePaintedBookmark_Task().execute();
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel, null)
+                            .show();
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -364,22 +319,17 @@ public class Paint_Bookmark_Activity extends Base_Activity {
         @Override
         protected Boolean doInBackground(String... strings) {
             try {
-                Paint mPaint1 = new Paint();
-                Paint mPaint2 = new Paint();
-
-                BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-
-                Bitmap mBitmap1 = BitmapFactory.decodeFile(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH), bmOptions);
+                Bitmap mBitmap1 = ((BitmapDrawable) bookmarkIMG.getDrawable()).getBitmap();
 
                 Bitmap mCBitmap = Bitmap.createBitmap(mBitmap1.getWidth(), mBitmap1.getHeight(), mBitmap1.getConfig());
 
-                Bitmap mBitmap2 = drawableView.obtainBitmap();
+                Bitmap mBitmap2 = canvasView.getScaleBitmap(mBitmap1.getWidth(), mBitmap1.getHeight());
 
                 Canvas tCanvas = new Canvas(mCBitmap);
 
-                tCanvas.drawBitmap(mBitmap1, 0, 0, mPaint1);
+                tCanvas.drawBitmap(mBitmap1, new Matrix(), null);
 
-                tCanvas.drawBitmap(mBitmap2, 0, 0, mPaint2);
+                tCanvas.drawBitmap(mBitmap2, new Matrix(), null);
 
                 String finalImagePathAfterPaint = storeImage(mCBitmap);
 
@@ -402,6 +352,7 @@ public class Paint_Bookmark_Activity extends Base_Activity {
                 FlurryAgent.logEvent("Bookmark_Paint");
 
                 savingBookmarkProgressBar.setVisibility(View.INVISIBLE);
+
                 finish();
             }
         }

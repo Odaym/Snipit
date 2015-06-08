@@ -68,6 +68,8 @@ public class View_Bookmark_Activity extends Base_Activity {
 
         EventBus_Singleton.getInstance().register(this);
 
+        ButterKnife.inject(this);
+
         dbHelper = new DatabaseHelper(this);
 
         String book_title = getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
@@ -178,7 +180,7 @@ public class View_Bookmark_Activity extends Base_Activity {
                 case R.id.rotate_right:
                     rotation += 90;
                     imageProgressBar.setVisibility(View.VISIBLE);
-                    Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG, new Callback() {
+                    Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.bookmark_not_found)).noPlaceholder().resize(2000, 2000).centerInside().rotate(rotation).into(bookmarkIMG, new Callback() {
                         @Override
                         public void onSuccess() {
                             imageProgressBar.setVisibility(View.INVISIBLE);
@@ -193,7 +195,7 @@ public class View_Bookmark_Activity extends Base_Activity {
                 case R.id.rotate_left:
                     imageProgressBar.setVisibility(View.VISIBLE);
                     rotation -= 90;
-                    Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.notfound_1)).resize(1500, 1500).centerInside().rotate(rotation).into(bookmarkIMG, new Callback() {
+                    Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.bookmark_not_found)).noPlaceholder().resize(2000, 2000).centerInside().rotate(rotation).into(bookmarkIMG, new Callback() {
                         @Override
                         public void onSuccess() {
                             imageProgressBar.setVisibility(View.INVISIBLE);
@@ -205,7 +207,7 @@ public class View_Bookmark_Activity extends Base_Activity {
                         }
                     });
                     break;
-                case R.id.share_picture:
+                case R.id.share_bookmark:
                     String book_title = getActivity().getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
                     Uri imageURI = Uri.parse("file://" + bookmark_imagepath);
                     Intent sendIntent = new Intent();
@@ -247,8 +249,11 @@ public class View_Bookmark_Activity extends Base_Activity {
             bookmarkNameTV.setText(bookmark_name);
 
             if (bookmark_pagenumber == Constants.NO_BOOKMARK_PAGE_NUMBER) {
+
                 bookmarkPageNumberLabelTV.setVisibility(View.GONE);
                 bookmarkPageNumberTV.setVisibility(View.GONE);
+
+                bookmarkNameTV.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.MATCH_PARENT));
             } else {
                 bookmarkPageNumberLabelTV.setText(getString(R.string.page));
                 bookmarkPageNumberTV.setText(" " + String.valueOf(bookmark_pagenumber));
@@ -344,9 +349,9 @@ public class View_Bookmark_Activity extends Base_Activity {
             };
 
             if (!helperMethods.isBookmarkOnDisk(bookmark_imagepath)) {
-                Picasso.with(context).load(bookmark_imagepath).error(getResources().getDrawable(R.drawable.notfound_1)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
+                Picasso.with(context).load(bookmark_imagepath).error(getResources().getDrawable(R.drawable.bookmark_not_found)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
             } else {
-                Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.notfound_1)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
+                Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.bookmark_not_found)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
             }
 
             PhotoViewAttacher mAttacher = new PhotoViewAttacher(bookmarkIMG);
@@ -354,9 +359,9 @@ public class View_Bookmark_Activity extends Base_Activity {
                 @Override
                 public void onPhotoTap(View view, float v, float v2) {
                     if (!clutterHidden) {
-                        dealWithClutter(false, view, bookmark_imagepath);
+                        dealWithClutter(clutterHidden, view, bookmark_imagepath);
                     } else {
-                        dealWithClutter(true, view, bookmark_imagepath);
+                        dealWithClutter(clutterHidden, view, bookmark_imagepath);
                     }
 
                     clutterHidden = !clutterHidden;
@@ -365,6 +370,7 @@ public class View_Bookmark_Activity extends Base_Activity {
 
             return rootView;
         }
+
 
         @DebugLog
         public void dealWithClutter(final boolean wasHidden, final View view, String bookmark_imagepath) {
@@ -479,4 +485,3 @@ public class View_Bookmark_Activity extends Base_Activity {
         }
     }
 }
-

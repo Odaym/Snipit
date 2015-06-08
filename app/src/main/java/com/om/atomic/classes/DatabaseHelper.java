@@ -248,9 +248,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         ArrayList<Bookmark> bookmarkResults = new ArrayList<>();
 
-        String query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = ? AND " + BM_NAME + " LIKE ? COLLATE NOCASE";
+        //Search through bookmark notes and bookmark names
+        String query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = ? AND " + BM_NAME + " LIKE ? COLLATE NOCASE OR " + BM_NOTE + " LIKE ? COLLATE NOCASE";
 
-        Cursor cursor = dbHandler.rawQuery(query, new String[]{String.valueOf(book_id), "%" + likeText + "%"});
+        Cursor cursor = dbHandler.rawQuery(query, new String[]{String.valueOf(book_id), "%" + likeText + "%", "%" + likeText + "%"});
 
         if (cursor.moveToFirst()) {
             do {

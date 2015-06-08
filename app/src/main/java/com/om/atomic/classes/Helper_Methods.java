@@ -41,7 +41,7 @@ public class Helper_Methods {
         }
     }
 
-    public boolean isBookmarkOnDisk (String bookmarkImagePath){
+    public boolean isBookmarkOnDisk(String bookmarkImagePath) {
         try {
             //If the String was a URL then this bookmark is a sample
             new URL(bookmarkImagePath);
@@ -89,7 +89,6 @@ public class Helper_Methods {
             }
         }
     }
-
 
 
     //Used to determine whether to allow scanning of Book Barcodes

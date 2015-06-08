@@ -13,7 +13,7 @@
         app:showAsAction="collapseActionView" />
 
     <item
-        android:id="@+id/share_picture"
+        android:id="@+id/share_bookmark"
         android:icon="@android:drawable/ic_menu_share"
         android:title="@string/share_bookmark"
         app:showAsAction="always" />
