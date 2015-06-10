@@ -24,6 +24,14 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/bookmarkIMG"
             android:layout_alignTop="@+id/bookmarkIMG" />
+
+        <ImageView
+            android:id="@+id/savingBookmarkGIF"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/bookmarkIMG"
+            android:layout_alignTop="@+id/bookmarkIMG"
+            android:visibility="gone" />
     </RelativeLayout>
 
     <fr.castorflex.android.smoothprogressbar.SmoothProgressBar xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -38,10 +46,10 @@
         app:spb_mirror_mode="false"
         app:spb_progressiveStart_activated="true"
         app:spb_progressiveStart_speed="2.0"
-        app:spb_progressiveStop_speed="3.4"
+        app:spb_progressiveStop_speed="4.5"
         app:spb_reversed="false"
         app:spb_sections_count="4"
-        app:spb_speed="3.0"
+        app:spb_speed="4.0"
         app:spb_stroke_separator_length="7dp"
         app:spb_stroke_width="4dp" />
 
@@ -122,7 +130,7 @@
             android:onClick="onFabColorButtonClicked"
             fab:fab_colorNormal="@color/gray"
             fab:fab_icon="@drawable/paint_bookmark_cancel"
-            fab:fab_size="mini"/>
+            fab:fab_size="mini" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_color_red"

@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,15 +22,19 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
+import com.bumptech.glide.Glide;
 import com.flurry.android.FlurryAgent;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.nineoldandroids.animation.Animator;
+import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
 import com.om.atomic.classes.CanvasView;
 import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.DatabaseHelper;
 import com.om.atomic.classes.EventBus_Poster;
 import com.om.atomic.classes.EventBus_Singleton;
+import com.om.atomic.classes.Helper_Methods;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -55,6 +58,8 @@ public class Paint_Bookmark_Activity extends Base_Activity {
     CanvasView canvasView;
     @InjectView(R.id.bookmarkIMG)
     ImageView bookmarkIMG;
+    @InjectView(R.id.savingBookmarkGIF)
+    ImageView savingBookmarkGIF;
     @InjectView(R.id.imageProgressBar)
     ProgressBar imageProgressBar;
     @InjectView(R.id.multiple_actions_fab)
@@ -305,10 +310,65 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
     private class SavePaintedBookmark_Task extends AsyncTask<String, String, Boolean> {
 
+        private Helper_Methods helperMethods;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             savingBookmarkProgressBar.setVisibility(View.VISIBLE);
+
+            helperMethods = new Helper_Methods(Paint_Bookmark_Activity.this);
+
+            canvasView.setVisibility(View.INVISIBLE);
+
+            ObjectAnimator hideBookmarkIMGAnim = helperMethods.hideViewElement(bookmarkIMG);
+            hideBookmarkIMGAnim.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
+                    ObjectAnimator showSavingBookmarkGIFAnim = helperMethods.showViewElement(savingBookmarkGIF);
+                    showSavingBookmarkGIFAnim.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            Glide.with(Paint_Bookmark_Activity.this).load(R.raw.thumbs_up_computer_kid).asGif().into(savingBookmarkGIF);
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    });
+
+                    showSavingBookmarkGIFAnim.start();
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+
+            hideBookmarkIMGAnim.start();
 
             if (floatingActionsMenu.isExpanded())
                 floatingActionsMenu.collapse();
@@ -321,15 +381,15 @@ public class Paint_Bookmark_Activity extends Base_Activity {
             try {
                 Bitmap mBitmap1 = ((BitmapDrawable) bookmarkIMG.getDrawable()).getBitmap();
 
-                Bitmap mCBitmap = Bitmap.createBitmap(mBitmap1.getWidth(), mBitmap1.getHeight(), mBitmap1.getConfig());
-
                 Bitmap mBitmap2 = canvasView.getScaleBitmap(mBitmap1.getWidth(), mBitmap1.getHeight());
+
+                Bitmap mCBitmap = Bitmap.createBitmap(mBitmap1.getWidth(), mBitmap1.getHeight(), mBitmap1.getConfig());
 
                 Canvas tCanvas = new Canvas(mCBitmap);
 
-                tCanvas.drawBitmap(mBitmap1, new Matrix(), null);
+                tCanvas.drawBitmap(mBitmap1, 0, 0, null);
 
-                tCanvas.drawBitmap(mBitmap2, new Matrix(), null);
+                tCanvas.drawBitmap(mBitmap2, 0, 0, null);
 
                 String finalImagePathAfterPaint = storeImage(mCBitmap);
 
@@ -346,9 +406,13 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
         @Override
         protected void onPostExecute(Boolean errorSaving) {
-            if (errorSaving)
+            if (errorSaving) {
                 Crouton.makeText(Paint_Bookmark_Activity.this, getResources().getString(R.string.bookmark_failed_update), Style.ALERT).show();
-            else {
+                savingBookmarkProgressBar.setVisibility(View.INVISIBLE);
+                helperMethods.hideViewElement(savingBookmarkGIF);
+                helperMethods.showViewElement(bookmarkIMG);
+                helperMethods.showViewElement(canvasView);
+            } else {
                 FlurryAgent.logEvent("Bookmark_Paint");
 
                 savingBookmarkProgressBar.setVisibility(View.INVISIBLE);
