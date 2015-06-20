@@ -13,6 +13,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,12 +32,10 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
+import com.getbase.floatingactionbutton.AddFloatingActionButton;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.melnykov.fab.FloatingActionButton;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.nispok.snackbar.listeners.EventListener;
@@ -73,7 +72,6 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import icepick.Icicle;
-import io.fabric.sdk.android.Fabric;
 import me.grantland.widget.AutofitTextView;
 
 public class Books_Activity extends Base_Activity {
@@ -88,7 +86,7 @@ public class Books_Activity extends Base_Activity {
     @InjectView(R.id.emptyListLayout)
     RelativeLayout emptyListLayout;
     @InjectView(R.id.createNewBookBTN)
-    FloatingActionButton createNewBookBTN;
+    AddFloatingActionButton createNewBookBTN;
 //    @InjectView(R.id.navDrawer)
 //    DrawerFrameLayout navDrawer;
 
@@ -127,9 +125,6 @@ public class Books_Activity extends Base_Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_books);
-
-        if (Constants.APPLICATION_CODE_STATE.equals("PRODUCTION"))
-            Fabric.with(this, new Crashlytics());
 
         EventBus_Singleton.getInstance().register(this);
 
@@ -251,8 +246,6 @@ public class Books_Activity extends Base_Activity {
                 }
             }
         });
-
-        createNewBookBTN.attachToListView(listView);
     }
 
     /**
@@ -357,7 +350,7 @@ public class Books_Activity extends Base_Activity {
         } else if (ebp.getMessage().equals("book_added") || ebp.getMessage().equals("bookmark_changed")) {
             prepareForNotifyDataChanged();
             //If animations are disabled
-            if (!dbHelper.getParam(null, 10)) {
+            if (dbHelper.getParam(null, 10)) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -386,7 +379,7 @@ public class Books_Activity extends Base_Activity {
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
 
-        final View listViewHeaderAd = View.inflate(this, R.layout.books_list_adview_header, null);
+        final View listViewHeaderAd = View.inflate(this, R.layout.books_list_adview_footer, null);
         AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
@@ -396,7 +389,10 @@ public class Books_Activity extends Base_Activity {
                 this, R.anim.books_list_layout_controller);
 
         //If animations are enabled
+        Log.d("DBVALUES", "Animations enabled? " + dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE));
+
         if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
+        Log.d("DBVALUES", "Animations enabled? STILL " + dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE));
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -602,7 +598,6 @@ public class Books_Activity extends Base_Activity {
         EventBus_Singleton.getInstance().unregister(this);
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -670,16 +665,10 @@ public class Books_Activity extends Base_Activity {
                 holder.bookmarksNumberTV.setElevation(5f);
             }
 
-            ViewGroup.LayoutParams listItemHeightParam = holder.list_item_book.getLayoutParams();
-
-            //If the item has a bookmark image, increase the hosting row's height
-            if (books.get(position).getImagePath() != null) {
-                listItemHeightParam.height = context.getResources().getDimensionPixelSize(R.dimen.book_with_image_height);
-                holder.list_item_book.setLayoutParams(listItemHeightParam);
-            } else {
-                listItemHeightParam.height = context.getResources().getDimensionPixelSize(R.dimen.book_without_image_height);
-                holder.list_item_book.setLayoutParams(listItemHeightParam);
-            }
+//            ViewGroup.LayoutParams listItemHeightParam = holder.list_item_book.getLayoutParams();
+//
+//            listItemHeightParam.height = context.getResources().getDimensionPixelSize(R.dimen.book_item_height);
+//            holder.list_item_book.setLayoutParams(listItemHeightParam);
 
             holder.bookTitleTV.setText(books.get(position).getTitle());
             holder.bookAuthorTV.setText(books.get(position).getAuthor());

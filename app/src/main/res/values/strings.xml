@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="banner_ad_unit_id_books_test">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="banner_ad_unit_id_bookmarks_test">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="banner_ad_unit_id_searchresults_test">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="banner_ad_unit_id_testing">ca-app-pub-3940256099942544/6300978111</string>
 
     <string name="banner_ad_unit_id_books">ca-app-pub-7047539644799809/6004168294</string>
     <string name="banner_ad_unit_id_bookmarks">ca-app-pub-7047539644799809/8957634697</string>
     <string name="banner_ad_unit_id_searchresults">ca-app-pub-7047539644799809/6418663895</string>
+    <string name="banner_ad_unit_id_opensource_libs">ca-app-pub-7047539644799809/2417489494</string>
+
 
     <string name="app_name">Atomic</string>
     <string name="app_version">1.0.0</string>
     <string name="gotit">Got it</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
-    <string name="takeNote">Take a note</string>
-    <string name="writeSomething">Write something here…</string>
     <string name="about">About</string>
     <string name="settings">Settings</string>
     <string name="delete">Delete</string>
@@ -33,6 +31,11 @@
     <string name="pref_populate_sample_data_summary">Jump right in by adding 4 sample books!</string>
     <string name="pref_about_section_title">About</string>
     <string name="pref_about_title">About Atomic</string>
+    <string name="pref_feedback_title">Send feedback</string>
+    <string name="pref_send_feedback_button_title">SEND</string>
+    <string name="pref_sendfeedback_alert_hint_tell_us_what_you_think">Don\'t hold back!</string>
+    <string name="pref_sendfeedback_alert_title">Compose Feedback</string>
+    <string name="pref_sendfeedback_alert_summary">We will respond via email to the feedback you provide. You can also send your feedback to:</string>
     <string name="pref_open_source_libraries_title">Open Source Libraries</string>
     <string name="pref_rate_google_play">Rate Atomic on Google Play</string>
     <string name="pref_rate_google_play_summary">Consider writing a review, it really helps!</string>
@@ -65,7 +68,6 @@
     <string name="page_number_error">Invalid page number</string>
     <string name="empty_bookmark_name_error">Give it a good name</string>
 
-
     <!-- CREATE_BOOK_ACTIVITY -->
     <string name="create_book_activity_title">New Book</string>
     <string name="edit_book_activity_title">Edit Book</string>
@@ -91,6 +93,8 @@
     <string name="image_not_found">Picture was removed!</string>
     <string name="share_bookmark">Share!</string>
     <string name="set_brush_thickness">Set brush thickness</string>
+    <string name="takeNote">Take a note</string>
+    <string name="writeSomething">Write something here…</string>
 
     <!-- SEARCH_RESULTS_ACTIVITY -->
     <string name="search_results_activity_title">Search Results</string>

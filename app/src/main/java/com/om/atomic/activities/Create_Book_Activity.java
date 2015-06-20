@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,9 +17,9 @@ import android.widget.RelativeLayout;
 
 import com.andreabaccega.widget.FormEditText;
 import com.flurry.android.FlurryAgent;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import com.melnykov.fab.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.atomic.classes.Book;
 import com.om.atomic.classes.Constants;
@@ -141,37 +140,11 @@ public class Create_Book_Activity extends Base_Activity {
         doneBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (helperMethods.validateFields(allFields)){
+                if (helperMethods.validateFields(allFields)) {
                     //If you are creating a new book
                     if (CALL_PURPOSE != Constants.EDIT_BOOK_PURPOSE_VALUE) {
-                        Random rand = new Random();
-
-                        Date date = new Date();
-                        String day = (String) android.text.format.DateFormat.format("dd", date);
-                        String month = (String) android.text.format.DateFormat.format("MMM", date);
-                        String year = (String) android.text.format.DateFormat.format("yyyy", date);
-
-                        Book book = new Book();
-                        book.setTitle(titleET.getText().toString());
-                        book.setAuthor(authorET.getText().toString());
-                        book.setImagePath(bookImagePath);
-                        book.setDate_added(month + " " + day + " " + year);
-                        book.setColorCode(rand.nextInt(7 - 1));
-
-                        int last_insert_book_id = dbHelper.createBook(book);
-
-                        FlurryAgent.logEvent("Book_Create");
-
-                        EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
-
-                        finish();
-
-                        Intent takeToBookmarks = new Intent(Create_Book_Activity.this, Bookmarks_Activity.class);
-                        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, last_insert_book_id);
-                        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
-                        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
-
-                        startActivity(takeToBookmarks);
+                        String bookSearchString = "https://www.googleapis.com/books/v1/volumes?" +
+                                "q=intitle:" + titleET.getText().toString() + "?q=inauthor:" + authorET.getText().toString() + "&key=" + Constants.GOOGLE_BOOKS_API_KEY;
                     } else {
                         //If you are editing an existing book
                         book_from_list.setTitle(titleET.getText().toString());
@@ -353,8 +326,8 @@ public class Create_Book_Activity extends Base_Activity {
                 }
                 try {
                     JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
-                    Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("smallThumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
-                    bookImagePath = imageInfo.getString("smallThumbnail");
+                    Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("thumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
+                    bookImagePath = imageInfo.getString("thumbnail");
                 } catch (JSONException jse) {
                     Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_image_not_found_error), Style.ALERT).show();
                     loadingBookInfoDialog.dismiss();
@@ -368,4 +341,88 @@ public class Create_Book_Activity extends Base_Activity {
             }
         }
     }
+
+    private class GetBookImage extends AsyncTask<String, Void, String> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            loadingBookInfoDialog = ProgressDialog.show(Create_Book_Activity.this, getResources().getString(R.string.loading_book_info_title),
+                    getResources().getString(R.string.loading_book_info_msg), true);
+        }
+
+        @Override
+        protected String doInBackground(String... bookURLs) {
+            StringBuilder bookBuilder = new StringBuilder();
+            for (String bookSearchURL : bookURLs) {
+                HttpClient bookClient = new DefaultHttpClient();
+                try {
+                    HttpGet bookGet = new HttpGet(bookSearchURL);
+                    HttpResponse bookResponse = bookClient.execute(bookGet);
+                    StatusLine bookSearchStatus = bookResponse.getStatusLine();
+                    if (bookSearchStatus.getStatusCode() == 200) {
+                        HttpEntity bookEntity = bookResponse.getEntity();
+                        InputStream bookContent = bookEntity.getContent();
+                        InputStreamReader bookInput = new InputStreamReader(bookContent);
+                        BufferedReader bookReader = new BufferedReader(bookInput);
+                        String lineIn;
+                        while ((lineIn = bookReader.readLine()) != null) {
+                            bookBuilder.append(lineIn);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return bookBuilder.toString();
+        }
+
+        protected void onPostExecute(String result) {
+            try {
+                JSONObject resultObject = new JSONObject(result);
+                JSONArray bookArray = resultObject.getJSONArray("items");
+                JSONObject bookObject = bookArray.getJSONObject(0);
+                JSONObject volumeObject = bookObject.getJSONObject("volumeInfo");
+                JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
+
+                Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("thumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
+
+                bookImagePath = imageInfo.getString("thumbnail");
+            } catch (JSONException jse) {
+                Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_image_not_found_error), Style.ALERT).show();
+                loadingBookInfoDialog.dismiss();
+                jse.printStackTrace();
+            }
+
+            Random rand = new Random();
+
+            Date date = new Date();
+            String day = (String) android.text.format.DateFormat.format("dd", date);
+            String month = (String) android.text.format.DateFormat.format("MMM", date);
+            String year = (String) android.text.format.DateFormat.format("yyyy", date);
+
+            Book book = new Book();
+            book.setTitle(titleET.getText().toString());
+            book.setAuthor(authorET.getText().toString());
+            book.setImagePath(bookImagePath);
+            book.setDate_added(month + " " + day + " " + year);
+            book.setColorCode(rand.nextInt(7 - 1));
+
+            int last_insert_book_id = dbHelper.createBook(book);
+
+            FlurryAgent.logEvent("Book_Create");
+
+            EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
+
+            finish();
+
+            Intent takeToBookmarks = new Intent(Create_Book_Activity.this, Bookmarks_Activity.class);
+            takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, last_insert_book_id);
+            takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
+            takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
+
+            startActivity(takeToBookmarks);
+
+        }
+    }
+
 }

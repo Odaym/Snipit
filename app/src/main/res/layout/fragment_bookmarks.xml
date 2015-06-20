@@ -65,32 +65,26 @@
             android:textSize="@dimen/book_date_added_fsize" />
     </RelativeLayout>
 
-    <com.melnykov.fab.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
+    <com.getbase.floatingactionbutton.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
         android:id="@+id/createNewNoteBTN"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_above="@id/bookmarkDetailsView"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/activity_horizontal_margin"
-        android:layout_marginEnd="@dimen/activity_vertical_margin"
-        android:layout_marginRight="@dimen/activity_vertical_margin"
-        android:src="@android:drawable/ic_menu_edit"
+        fab:fab_icon="@android:drawable/ic_menu_edit"
         fab:fab_colorNormal="@color/red"
-        fab:fab_colorPressed="@color/darker_red"
-        fab:fab_colorRipple="@color/darker_red" />
+        fab:fab_colorPressed="@color/yellow"
+        fab:fab_colorRipple="@color/yellow" />
 
-    <com.melnykov.fab.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
+    <com.getbase.floatingactionbutton.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
         android:id="@+id/paintBookmarkBTN"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_above="@id/bookmarkDetailsView"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="@dimen/activity_horizontal_margin"
-        android:layout_marginLeft="@dimen/activity_vertical_margin"
-        android:layout_marginStart="@dimen/activity_vertical_margin"
-        android:src="@drawable/paint_bookmark"
+        fab:fab_icon="@drawable/paint_bookmark"
         fab:fab_colorNormal="@color/blue"
         fab:fab_colorPressed="@color/yellow"
         fab:fab_colorRipple="@color/yellow" />

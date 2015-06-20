@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import com.andreabaccega.widget.FormEditText;
 import com.bumptech.glide.Glide;
 import com.flurry.android.FlurryAgent;
-import com.melnykov.fab.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.atomic.classes.Bookmark;
 import com.om.atomic.classes.Constants;
@@ -185,6 +185,8 @@ public class Create_Bookmark_Activity extends Base_Activity {
                 }
             }
         });
+
+        createNewBookmarkBTN.setColorNormal(getResources().getColor(helperMethods.determineFabButtonsColor(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR))));
 
         createNewBookmarkBTN.setOnClickListener(new View.OnClickListener() {
             @Override

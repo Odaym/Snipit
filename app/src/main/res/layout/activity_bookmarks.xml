@@ -11,7 +11,8 @@
         android:background="@color/light_gray"
         android:divider="@android:color/transparent"
         android:dividerHeight="@dimen/listview_padding_between"
-        android:drawSelectorOnTop="true"
+        android:drawSelectorOnTop="false"
+        android:listSelector="@android:color/transparent"
         android:paddingBottom="@dimen/listview_padding_between"
         android:paddingLeft="@dimen/listview_padding_left_right"
         android:paddingRight="@dimen/listview_padding_left_right"
@@ -50,18 +51,17 @@
 
     </RelativeLayout>
 
-    <com.melnykov.fab.FloatingActionButton
+    <com.getbase.floatingactionbutton.FloatingActionButton
         android:id="@+id/createNewBookmarkBTN"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:src="@drawable/create_bookmark_camera"
-        fab:fab_colorNormal="@color/green"
+        android:layout_marginBottom="@dimen/create_book_bookmark_fab_buttons_margins"
+        android:layout_marginEnd="@dimen/create_book_bookmark_fab_buttons_margins"
+        android:layout_marginRight="@dimen/create_book_bookmark_fab_buttons_margins"
+        fab:fab_icon="@drawable/create_bookmark_camera"
         fab:fab_colorPressed="@color/yellow"
         fab:fab_colorRipple="@color/yellow" />
 

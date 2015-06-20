@@ -18,10 +18,23 @@
         android:textColor="@android:color/white"
         android:visibility="visible" />
 
-    <ImageView
-        android:id="@+id/bookmarkIMG"
+    <RelativeLayout
+        android:id="@+id/bookmarkIMG_LoaderLayout"
         android:layout_width="@dimen/bookmark_thumb_width"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+        <ProgressBar
+            android:id="@+id/imageProgressLoader"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerInParent="true" />
+
+        <ImageView
+            android:id="@+id/bookmarkIMG"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
 
     <me.grantland.widget.AutofitTextView
         android:id="@+id/bookmarkNameTV"
@@ -30,8 +43,8 @@
         android:layout_marginLeft="10dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
-        android:layout_toEndOf="@+id/bookmarkIMG"
-        android:layout_toRightOf="@+id/bookmarkIMG"
+        android:layout_toEndOf="@+id/bookmarkIMG_LoaderLayout"
+        android:layout_toRightOf="@+id/bookmarkIMG_LoaderLayout"
         android:ellipsize="end"
         android:maxLines="4"
         android:textColor="@android:color/black"

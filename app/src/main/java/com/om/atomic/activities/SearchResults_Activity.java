@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -161,7 +162,7 @@ public class SearchResults_Activity extends Base_Activity {
 
         searchResultsAdapter = new SearchResults_Adapter(this);
 
-        final View listViewHeaderAd = View.inflate(this, R.layout.bookmarks_list_adview_header, null);
+        final View listViewHeaderAd = View.inflate(this, R.layout.search_results_list_adview_header, null);
         AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
@@ -359,7 +360,9 @@ public class SearchResults_Activity extends Base_Activity {
                 holder.bookmarkViews = (TextView) parentView.findViewById(R.id.bookmarkViewsTV);
                 holder.bookmarkNoteBTN = (Button) parentView.findViewById(R.id.bookmarkNoteBTN);
                 holder.bookmarkNoteTV = (AutofitTextView) parentView.findViewById(R.id.bookmarkNoteTV);
+                holder.imageProgressLoader = (ProgressBar) parentView.findViewById(R.id.imageProgressLoader);
                 holder.motherView = (RelativeLayout) parentView.findViewById(R.id.list_item_bookmark);
+                holder.needInflate = false;
 
                 parentView.setTag(holder);
             } else {
@@ -373,8 +376,13 @@ public class SearchResults_Activity extends Base_Activity {
             else
                 holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
 
+            LayerDrawable drawable = (LayerDrawable) ((LayerDrawable) holder.motherView
+                    .getBackground()).findDrawableByLayerId(R.id.content);
+            GradientDrawable gradient = (GradientDrawable) drawable.findDrawableByLayerId(R.id.innerView);
+
             if (bookmarks.get(position).getIsNoteShowing() == 0) {
-                ((GradientDrawable) ((LayerDrawable) holder.motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(R.color.white));
+                gradient.setColor(context.getResources().getColor(R.color.white));
+
                 holder.bookmarkAction.setAlpha(1f);
                 holder.bookmarkAction.setVisibility(View.VISIBLE);
                 holder.bookmarkIMG.setAlpha(1f);
@@ -383,15 +391,18 @@ public class SearchResults_Activity extends Base_Activity {
                 holder.bookmarkViews.setVisibility(View.VISIBLE);
                 holder.bookmarkName.setVisibility(View.VISIBLE);
                 holder.bookmarkName.setAlpha(1f);
+                holder.imageProgressLoader.setAlpha(1f);
                 holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
             } else {
-                ((GradientDrawable) ((LayerDrawable) holder.motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+
                 holder.bookmarkNoteTV.setText(bookmarks.get(position).getNote());
                 holder.bookmarkAction.setVisibility(View.INVISIBLE);
                 holder.bookmarkIMG.setVisibility(View.INVISIBLE);
                 holder.bookmarkViews.setVisibility(View.INVISIBLE);
                 holder.bookmarkName.setVisibility(View.INVISIBLE);
                 holder.bookmarkNoteTV.setVisibility(View.VISIBLE);
+                holder.imageProgressLoader.setVisibility(View.VISIBLE);
                 holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
             }
 
@@ -473,30 +484,36 @@ public class SearchResults_Activity extends Base_Activity {
 
                     RelativeLayout motherView = (RelativeLayout) view.getParent();
                     TextView bookmarkNoteTV = (TextView) motherView.getChildAt(0);
-                    ImageView bookmarkIMG = (ImageView) motherView.getChildAt(1);
+                    ProgressBar imageProgressLoader = (ProgressBar) ((RelativeLayout) motherView.getChildAt(1)).getChildAt(0);
+                    ImageView bookmarkIMG = (ImageView) ((RelativeLayout) motherView.getChildAt(1)).getChildAt(1);
                     TextView bookmarkName = (TextView) motherView.getChildAt(2);
                     Button bookmarkAction = (Button) motherView.getChildAt(3);
                     TextView bookmarkViews = (TextView) motherView.getChildAt(5);
 
                     int isNoteShowing = bookmarks.get(position).getIsNoteShowing();
 
+                    LayerDrawable drawable = (LayerDrawable) ((LayerDrawable) motherView
+                            .getBackground()).findDrawableByLayerId(R.id.content);
+                    GradientDrawable gradient = (GradientDrawable) drawable.findDrawableByLayerId(R.id.innerView);
+
                     //Note was showing, hide
                     if (isNoteShowing == 1) {
                         view.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
 
-                        ((GradientDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(R.color.white));
+                        gradient.setColor(context.getResources().getColor(R.color.white));
 
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkNoteTV));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkAction));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkIMG));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkViews));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkName));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(imageProgressLoader));
 
                         bookmarks.get(position).setIsNoteShowing(0);
                     } else {
                         view.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
 
-                        ((GradientDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                        gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
 
                         bookmarkNoteTV.setText(bookmarks.get(position).getNote());
 
@@ -505,6 +522,7 @@ public class SearchResults_Activity extends Base_Activity {
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkIMG));
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkViews));
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkName));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(imageProgressLoader));
 
                         bookmarks.get(position).setIsNoteShowing(1);
                     }
@@ -552,6 +570,7 @@ public class SearchResults_Activity extends Base_Activity {
         TextView bookmarkViews;
         Button bookmarkNoteBTN;
         AutofitTextView bookmarkNoteTV;
+        ProgressBar imageProgressLoader;
         boolean needInflate;
     }
 }

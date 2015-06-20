@@ -36,6 +36,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String BM_VIEWS = "views";
     public static final String BM_ORDER = "bookmark_order";
     public static final String BM_NOTE = "note";
+    public static final String BM_TIMES_PAINTED = "times_painted";
 
     public static final String PARAM_TABLE = "Param";
 
@@ -59,7 +60,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + " (" + B_ID + " INTEGER PRIMARY KEY, " + B_TITLE + " TEXT, " + B_AUTHOR + " TEXT, " + B_IMAGE + " TEXT, " + B_DATE_ADDED + " TEXT, " + B_COLOR_CODE + " INTEGER, " + B_ORDER + " INTEGER)";
 
         String CREATE_BOOKMARK_TABLE = "CREATE TABLE IF NOT EXISTS " + BOOKMARK_TABLE
-                + " (" + BM_ID + " INTEGER PRIMARY KEY, " + BM_BOOK_FOREIGN_KEY + " INTEGER, " + BM_NAME + " TEXT, " + BM_PAGENUMBER + " INTEGER, " + BM_IMAGEPATH + " TEXT, " + BM_DATE_ADDED + " TEXT, " + BM_ORDER + " INTEGER, " + BM_VIEWS + " INTEGER, " + BM_NOTE + " TEXT, FOREIGN KEY (" + BM_BOOK_FOREIGN_KEY + ") REFERENCES " + BOOK_TABLE + " (" + B_ID + ") ON DELETE CASCADE)";
+                + " (" + BM_ID + " INTEGER PRIMARY KEY, " + BM_BOOK_FOREIGN_KEY + " INTEGER, " + BM_NAME + " TEXT, " + BM_PAGENUMBER + " INTEGER, " + BM_IMAGEPATH + " TEXT, " + BM_DATE_ADDED + " TEXT, " + BM_ORDER + " INTEGER, " + BM_VIEWS + " INTEGER DEFAULT 0, " + BM_NOTE + " TEXT, " + BM_TIMES_PAINTED + " INTEGER DEFAULT 0, FOREIGN KEY (" + BM_BOOK_FOREIGN_KEY + ") REFERENCES " + BOOK_TABLE + " (" + B_ID + ") ON DELETE CASCADE)";
 
         String CREATE_PARAM_TABLE = "CREATE TABLE " + PARAM_TABLE
                 + " (id INTEGER PRIMARY KEY AUTOINCREMENT, " + PRM_NUMBER
@@ -80,7 +81,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
          * Initialize the Enable Layout Animations value
          * Values other than the Coachmark Seens will start from 10 onwards
          */
-        initializeParamToTrue(sqLiteDatabase, 10);
+        initializeAnimationsFalse(sqLiteDatabase, 10);
     }
 
     @DebugLog
@@ -233,6 +234,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 bookmark.setOrder(cursor.getInt(6));
                 bookmark.setViews(cursor.getInt(7));
                 bookmark.setNote(cursor.getString(8));
+                bookmark.setTimes_painted(cursor.getInt(9));
                 bookmarks.add(bookmark);
             } while (cursor.moveToNext());
         }
@@ -265,6 +267,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 bookmark.setOrder(cursor.getInt(6));
                 bookmark.setViews(cursor.getInt(7));
                 bookmark.setNote(cursor.getString(8));
+                bookmark.setTimes_painted(cursor.getInt(9));
                 bookmarkResults.add(bookmark);
             } while (cursor.moveToNext());
         }
@@ -329,6 +332,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         newValues.put(BM_ORDER, bookmark.getOrder());
         newValues.put(BM_VIEWS, bookmark.getViews());
         newValues.put(BM_NOTE, bookmark.getNote());
+        newValues.put(BM_TIMES_PAINTED, bookmark.getTimes_painted());
 
         dbHandler.update(BOOKMARK_TABLE, newValues, BM_ID + "= ?", args);
     }
@@ -341,6 +345,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String[] args = new String[]{String.valueOf(bookmark_id)};
 
         newValues.put(BM_IMAGEPATH, bookmarkImage);
+
+        dbHandler.update(BOOKMARK_TABLE, newValues, BM_ID + " = ?", args);
+    }
+
+    @DebugLog
+    public void update_BookmarkTimesPainted(int bookmark_id, int times_painted) {
+        SQLiteDatabase dbHandler = this.getWritableDatabase();
+        ContentValues newValues = new ContentValues();
+
+        String[] args = new String[]{String.valueOf(bookmark_id)};
+
+        newValues.put(BM_TIMES_PAINTED, times_painted);
 
         dbHandler.update(BOOKMARK_TABLE, newValues, BM_ID + " = ?", args);
     }
@@ -411,6 +427,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @DebugLog
+    public int getBookmarkTimesPainted(int bookmark_id) {
+        SQLiteDatabase dbHandler = this.getReadableDatabase();
+        Cursor cursor = dbHandler.rawQuery("SELECT " + BM_TIMES_PAINTED + " FROM " + BOOKMARK_TABLE + " WHERE " + BM_ID + " = " + bookmark_id, null);
+
+        int times_painted = 0;
+
+        if (cursor.moveToFirst())
+            times_painted = cursor.getInt(0);
+
+        cursor.close();
+
+        return times_painted;
+    }
+
+    @DebugLog
     public String getBookmarkNote(int bookmark_id) {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
         Cursor cursor = dbHandler.rawQuery("SELECT " + BM_NOTE + " FROM " + BOOKMARK_TABLE + " WHERE " + BM_ID + " = " + bookmark_id, null);
@@ -437,12 +468,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @DebugLog
-    public void initializeParamToTrue(SQLiteDatabase db, int paramNumber) {
+    public void initializeAnimationsFalse(SQLiteDatabase db, int paramNumber) {
         ContentValues newValues = new ContentValues();
 
         newValues.putNull("id");
         newValues.put(PRM_NUMBER, paramNumber);
-        newValues.put(PRM_STRINGVALUE, "True");
+        newValues.put(PRM_STRINGVALUE, "False");
 
         db.insert(PARAM_TABLE, null, newValues);
     }

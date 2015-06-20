@@ -36,6 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/introductionTextTV"
         android:layout_marginTop="10dp"
+        android:footerDividersEnabled="false"
         android:drawSelectorOnTop="true" />
 
 </RelativeLayout>

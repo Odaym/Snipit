@@ -11,7 +11,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.edmodo.cropper.CropImageView;
-import com.melnykov.fab.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.EventBus_Poster;

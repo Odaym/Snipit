@@ -5,15 +5,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.om.atomic.R;
 import com.om.atomic.classes.Helper_Methods;
 import com.om.atomic.classes.Open_Source_Library;
@@ -43,6 +43,7 @@ public class Open_Source_Libs_Activity extends Base_Activity {
 
         if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP)
             getWindow().setStatusBarColor(getResources().getColor(R.color.darker_purple));
+
         getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.color.purple));
 
         ArrayList<Open_Source_Library> libraries = new ArrayList<>();
@@ -56,6 +57,7 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         libraries.add(new Open_Source_Library("PhotoView", "https://github.com/chrisbanes/PhotoView", "PhotoView aims to help produce an easily usable implementation of a zooming Android ImageView. It is currently being used in photup."));
         libraries.add(new Open_Source_Library("Cropper", "https://github.com/edmodo/cropper", "The Cropper is an image cropping tool. It provides a way to set an image in XML and programmatically, and displays a resizable crop window on top of the image."));
         libraries.add(new Open_Source_Library("Crouton", "https://github.com/keyboardsurfer/Crouton", "Context sensitive notifications for Android."));
+        libraries.add(new Open_Source_Library("FloatingActionButton", "https://github.com/futuresimple/android-floating-action-button", "Yet another library for drawing Material Design promoted actions."));
         libraries.add(new Open_Source_Library("SmoothProgressBar", "https://github.com/castorflex/SmoothProgressBar", "Small library allowing you to make a smooth indeterminate progress bar."));
         libraries.add(new Open_Source_Library("Autofit TextView", "https://github.com/grantland/android-autofittextview", "A TextView that automatically resizes text to fit perfectly within its bounds."));
         libraries.add(new Open_Source_Library("Glide", "https://github.com/bumptech/glide", "Glide is a fast and efficient open source media management and image loading framework for Android that wraps media decoding, memory and disk caching, and resource pooling into a simple and easy to use interface."));
@@ -63,6 +65,12 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         libraries.add(new Open_Source_Library("Android Form EditText", "https://github.com/vekexasia/android-edittext-validator", "Android form edit text is an extension of EditText that brings data validation facilities to the edittext."));
 
 
+        final View listViewFooterAd = View.inflate(this, R.layout.open_source_libs_list_adview_footer, null);
+        AdView mAdView = (AdView) listViewFooterAd.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
+        librariesList.addFooterView(listViewFooterAd);
         librariesList.setAdapter(new Libraries_Adapter(this, libraries));
     }
 

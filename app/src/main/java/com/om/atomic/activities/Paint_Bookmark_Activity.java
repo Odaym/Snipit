@@ -311,64 +311,78 @@ public class Paint_Bookmark_Activity extends Base_Activity {
     private class SavePaintedBookmark_Task extends AsyncTask<String, String, Boolean> {
 
         private Helper_Methods helperMethods;
+        private int bookmark_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1);
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             savingBookmarkProgressBar.setVisibility(View.VISIBLE);
 
+            canvasView.setClickable(false);
+
             helperMethods = new Helper_Methods(Paint_Bookmark_Activity.this);
 
-            canvasView.setVisibility(View.INVISIBLE);
+            //At the time of easter egg paint-times counter - 1, give Glide a chance to load the GIF behind the bookmark image
+            if (dbHelper.getBookmarkTimesPainted(bookmark_id) == 3) {
+                Glide.with(Paint_Bookmark_Activity.this).load(R.raw.thumbs_up_computer_kid).asGif().into(savingBookmarkGIF);
+            }
 
-            ObjectAnimator hideBookmarkIMGAnim = helperMethods.hideViewElement(bookmarkIMG);
-            hideBookmarkIMGAnim.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
+            //At the time of easter egg paint-counter, hide the bookmark image to reveal the running GIF
+            if (dbHelper.getBookmarkTimesPainted(bookmark_id) == 4) {
 
-                    ObjectAnimator showSavingBookmarkGIFAnim = helperMethods.showViewElement(savingBookmarkGIF);
-                    showSavingBookmarkGIFAnim.addListener(new Animator.AnimatorListener() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
-                            Glide.with(Paint_Bookmark_Activity.this).load(R.raw.thumbs_up_computer_kid).asGif().into(savingBookmarkGIF);
-                        }
+                ObjectAnimator hideBookmarkIMGAnim = helperMethods.hideViewElement(bookmarkIMG);
 
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
+                hideBookmarkIMGAnim.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
 
-                        }
+                        ObjectAnimator showSavingBookmarkGIFAnim = helperMethods.showViewElement(savingBookmarkGIF);
 
-                        @Override
-                        public void onAnimationCancel(Animator animation) {
+                        showSavingBookmarkGIFAnim.addListener(new Animator.AnimatorListener() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+                                canvasView.setVisibility(View.INVISIBLE);
 
-                        }
+                                Glide.with(Paint_Bookmark_Activity.this).load(R.raw.thumbs_up_computer_kid).asGif().into(savingBookmarkGIF);
+                            }
 
-                        @Override
-                        public void onAnimationRepeat(Animator animation) {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
 
-                        }
-                    });
+                            }
 
-                    showSavingBookmarkGIFAnim.start();
-                }
+                            @Override
+                            public void onAnimationCancel(Animator animation) {
 
-                @Override
-                public void onAnimationEnd(Animator animation) {
+                            }
 
-                }
+                            @Override
+                            public void onAnimationRepeat(Animator animation) {
 
-                @Override
-                public void onAnimationCancel(Animator animation) {
+                            }
+                        });
 
-                }
+                        showSavingBookmarkGIFAnim.start();
+                    }
 
-                @Override
-                public void onAnimationRepeat(Animator animation) {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
 
-                }
-            });
+                    }
 
-            hideBookmarkIMGAnim.start();
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+
+                hideBookmarkIMGAnim.start();
+            }
 
             if (floatingActionsMenu.isExpanded())
                 floatingActionsMenu.collapse();
@@ -393,7 +407,7 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
                 String finalImagePathAfterPaint = storeImage(mCBitmap);
 
-                dbHelper.update_BookmarkImage(getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1), finalImagePathAfterPaint);
+                dbHelper.update_BookmarkImage(bookmark_id, finalImagePathAfterPaint);
 
                 publishProgress(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH), finalImagePathAfterPaint);
 
@@ -414,6 +428,12 @@ public class Paint_Bookmark_Activity extends Base_Activity {
                 helperMethods.showViewElement(canvasView);
             } else {
                 FlurryAgent.logEvent("Bookmark_Paint");
+
+                int bookmark_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1);
+
+                int times_painted = dbHelper.getBookmarkTimesPainted(bookmark_id);
+
+                dbHelper.update_BookmarkTimesPainted(bookmark_id, times_painted + 1);
 
                 savingBookmarkProgressBar.setVisibility(View.INVISIBLE);
 

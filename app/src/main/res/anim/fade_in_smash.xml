@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:anim/anticipate_overshoot_interpolator">
+
+    <alpha
+        android:duration="500"
+        android:fromAlpha="0"
+        android:toAlpha="1"
+        android:pivotX="10%"
+        android:pivotY="10%"
+        android:startOffset="0"/>
+</set>

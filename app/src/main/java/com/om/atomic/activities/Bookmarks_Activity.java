@@ -28,6 +28,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -35,12 +37,13 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.melnykov.fab.FloatingActionButton;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
@@ -60,6 +63,7 @@ import com.om.atomic.dragsort_listview.DragSortListView;
 import com.om.atomic.showcaseview.ShowcaseView;
 import com.om.atomic.showcaseview.ViewTarget;
 import com.squareup.otto.Subscribe;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import net.frakbot.jumpingbeans.JumpingBeans;
@@ -201,6 +205,10 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         getSupportActionBar().setTitle(book_title);
         helperMethods.setUpActionbarColors(this, book_color_code);
 
+        createNewBookmarkBTN.setColorNormal(getResources().getColor(helperMethods.determineFabButtonsColor(book_color_code)));
+
+        createNewBookmarkBTN.invalidate();
+
         createNewBookmarkBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -248,8 +256,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 }
             }
         });
-
-        createNewBookmarkBTN.attachToListView(listView);
     }
 
     @Override
@@ -427,24 +433,24 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
-//        final LayoutAnimationController controller
-//                = AnimationUtils.loadLayoutAnimation(
-//                this, R.anim.bookmarks_list_layout_controller);
+        final LayoutAnimationController controller
+                = AnimationUtils.loadLayoutAnimation(
+                this, R.anim.bookmarks_list_layout_controller);
 
-        //If animations are enabled
-//        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
-//            new Handler().postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    listView.addHeaderView(listViewHeaderAd);
-//                    listView.setAdapter(bookmarksAdapter);
-//                    listView.setLayoutAnimation(controller);
-//                }
-//            }, 100);
-//        } else {
-        listView.addHeaderView(listViewHeaderAd);
-        listView.setAdapter(bookmarksAdapter);
-//        }
+//        If animations are enabled
+        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    listView.addHeaderView(listViewHeaderAd);
+                    listView.setAdapter(bookmarksAdapter);
+                    listView.setLayoutAnimation(controller);
+                }
+            }, 100);
+        } else {
+            listView.addHeaderView(listViewHeaderAd);
+            listView.setAdapter(bookmarksAdapter);
+        }
     }
 
     @DebugLog
@@ -705,6 +711,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 holder.bookmarkNoteBTN = (Button) parentView.findViewById(R.id.bookmarkNoteBTN);
                 holder.bookmarkNoteTV = (AutofitTextView) parentView.findViewById(R.id.bookmarkNoteTV);
                 holder.motherView = (RelativeLayout) parentView.findViewById(R.id.list_item_bookmark);
+                holder.imageProgressLoader = (ProgressBar) parentView.findViewById(R.id.imageProgressLoader);
                 holder.needInflate = false;
 
                 parentView.setTag(holder);
@@ -721,8 +728,12 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
             }
 
+            LayerDrawable drawable = (LayerDrawable) ((LayerDrawable) holder.motherView
+                    .getBackground()).findDrawableByLayerId(R.id.content);
+            GradientDrawable gradient = (GradientDrawable) drawable.findDrawableByLayerId(R.id.innerView);
+
             if (bookmarks.get(position).getIsNoteShowing() == 0) {
-                ((GradientDrawable) ((LayerDrawable) holder.motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(R.color.white));
+                gradient.setColor(context.getResources().getColor(R.color.white));
 
                 holder.bookmarkAction.setAlpha(1f);
                 holder.bookmarkAction.setVisibility(View.VISIBLE);
@@ -732,9 +743,10 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 holder.bookmarkViews.setVisibility(View.VISIBLE);
                 holder.bookmarkName.setVisibility(View.VISIBLE);
                 holder.bookmarkName.setAlpha(1f);
+                holder.imageProgressLoader.setAlpha(1f);
                 holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
             } else {
-                ((GradientDrawable) ((LayerDrawable) holder.motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
 
                 holder.bookmarkNoteTV.setText(bookmarks.get(position).getNote());
                 holder.bookmarkAction.setVisibility(View.INVISIBLE);
@@ -742,6 +754,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 holder.bookmarkViews.setVisibility(View.INVISIBLE);
                 holder.bookmarkName.setVisibility(View.INVISIBLE);
                 holder.bookmarkNoteTV.setVisibility(View.VISIBLE);
+                holder.imageProgressLoader.setVisibility(View.VISIBLE);
                 holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
             }
 
@@ -749,9 +762,23 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             holder.bookmarkViews.setText(context.getResources().getText(R.string.bookmark_views_label) + " " + bookmarks.get(position).getViews());
 
             if (bookmarks.get(position).getImage_path().contains("http")) {
-                Picasso.with(Bookmarks_Activity.this).load(bookmarks.get(position).getImage_path()).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.bookmark_not_found)).noPlaceholder().into(holder.bookmarkIMG);
+                Picasso.with(Bookmarks_Activity.this).load(bookmarks.get(position).getImage_path()).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.bookmark_not_found)).into(holder.bookmarkIMG, new PicassoImageLoadedCallback(holder.imageProgressLoader) {
+                    @Override
+                    public void onSuccess() {
+                        if (holder.imageProgressLoader != null) {
+                            holder.imageProgressLoader.setVisibility(View.GONE);
+                        }
+                    }
+                });
             } else
-                Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.bookmark_not_found)).noPlaceholder().into(holder.bookmarkIMG);
+                Picasso.with(Bookmarks_Activity.this).load(new File(bookmarks.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom))).error(context.getResources().getDrawable(R.drawable.bookmark_not_found)).into(holder.bookmarkIMG, new PicassoImageLoadedCallback(holder.imageProgressLoader) {
+                    @Override
+                    public void onSuccess() {
+                        if (holder.imageProgressLoader != null) {
+                            holder.imageProgressLoader.setVisibility(View.GONE);
+                        }
+                    }
+                });
 
             holder.bookmarkAction.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -813,30 +840,36 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 
                     RelativeLayout motherView = (RelativeLayout) view.getParent();
                     TextView bookmarkNoteTV = (TextView) motherView.getChildAt(0);
-                    ImageView bookmarkIMG = (ImageView) motherView.getChildAt(1);
+                    ProgressBar imageProgressLoader = (ProgressBar) ((RelativeLayout) motherView.getChildAt(1)).getChildAt(0);
+                    ImageView bookmarkIMG = (ImageView) ((RelativeLayout) motherView.getChildAt(1)).getChildAt(1);
                     TextView bookmarkName = (TextView) motherView.getChildAt(2);
                     Button bookmarkAction = (Button) motherView.getChildAt(3);
                     TextView bookmarkViews = (TextView) motherView.getChildAt(5);
 
                     int isNoteShowing = bookmarks.get(position).getIsNoteShowing();
 
+                    LayerDrawable drawable = (LayerDrawable) ((LayerDrawable) motherView
+                            .getBackground()).findDrawableByLayerId(R.id.content);
+                    GradientDrawable gradient = (GradientDrawable) drawable.findDrawableByLayerId(R.id.innerView);
+
                     //Note was showing, hide
                     if (isNoteShowing == 1) {
                         view.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
 
-                        ((GradientDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(R.color.white));
+                        gradient.setColor(context.getResources().getColor(R.color.white));
 
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkNoteTV));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkAction));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkIMG));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkViews));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkName));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(imageProgressLoader));
 
                         bookmarks.get(position).setIsNoteShowing(0);
                     } else {
                         view.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
 
-                        ((GradientDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(R.id.innerView)).setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                        gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
 
                         bookmarkNoteTV.setText(bookmarks.get(position).getNote());
 
@@ -845,6 +878,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkIMG));
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkViews));
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkName));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(imageProgressLoader));
 
                         bookmarks.get(position).setIsNoteShowing(1);
                     }
@@ -904,6 +938,25 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         TextView bookmarkViews;
         Button bookmarkNoteBTN;
         AutofitTextView bookmarkNoteTV;
+        ProgressBar imageProgressLoader;
         boolean needInflate;
+    }
+
+    private class PicassoImageLoadedCallback implements Callback {
+        ProgressBar progressBar;
+
+        public PicassoImageLoadedCallback(ProgressBar progBar) {
+            progressBar = progBar;
+        }
+
+        @Override
+        public void onSuccess() {
+
+        }
+
+        @Override
+        public void onError() {
+
+        }
     }
 }

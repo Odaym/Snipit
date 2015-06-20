@@ -154,6 +154,25 @@ public class Helper_Methods {
     public int determineNoteViewBackground(int book_color_code) {
         switch (book_color_code) {
             case 0:
+                return R.color.pink;
+            case 1:
+                return R.color.red;
+            case 2:
+                return R.color.purple;
+            case 3:
+                return R.color.yellow;
+            case 4:
+                return R.color.blue;
+            case 5:
+                return R.color.brown;
+        }
+
+        return 0;
+    }
+
+    public int determineFabButtonsColor(int book_color_code) {
+        switch (book_color_code) {
+            case 0:
                 return R.color.darker_pink;
             case 1:
                 return R.color.darker_red;

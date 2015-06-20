@@ -12,6 +12,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="3dp"
         ads:adSize="BANNER"
-        ads:adUnitId="@string/banner_ad_unit_id_searchresults_test" />
+        ads:adUnitId="@string/banner_ad_unit_id_testing" />
 
 </RelativeLayout>
