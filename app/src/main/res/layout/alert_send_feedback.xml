@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:validator="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -12,16 +13,19 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <EditText
+        <com.andreabaccega.widget.FormEditText
             android:id="@+id/feedbackET"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
             android:hint="@string/pref_sendfeedback_alert_hint_tell_us_what_you_think"
-            android:inputType="textCapWords"
+            android:inputType="textCapSentences"
             android:paddingTop="10dp"
             android:singleLine="true"
             android:textColor="@android:color/black"
-            android:textCursorDrawable="@null" />
+            android:textColorHint="@color/edittext_hint_color"
+            android:textCursorDrawable="@null"
+            validator:emptyErrorString="@string/empty_feedback_field_error" />
 
     </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 

@@ -2,9 +2,11 @@ package com.om.atomic.classes;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String databaseName = "bookmarker.db";
     public static final int version = 1;
 
+    public SharedPreferences prefs;
+    public Context context;
+
     public static final String BOOK_TABLE = "Book";
 
     public static final String B_ID = "book_id";
@@ -23,6 +28,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String B_IMAGE = "image_path";
     public static final String B_DATE_ADDED = "date_added";
     public static final String B_COLOR_CODE = "color_code";
+    public static final String B_PAGES_COUNT = "pages_count";
+    public static final String B_PAGE_REACHED = "page_reached";
     public static final String B_ORDER = "book_order";
 
     public static final String BOOKMARK_TABLE = "Bookmark";
@@ -35,6 +42,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String BM_DATE_ADDED = "date_added";
     public static final String BM_VIEWS = "views";
     public static final String BM_ORDER = "bookmark_order";
+    public static final String BM_FAVORITE = "favorite";
     public static final String BM_NOTE = "note";
     public static final String BM_TIMES_PAINTED = "times_painted";
 
@@ -45,6 +53,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public DatabaseHelper(Context context) {
         super(context, databaseName, null, version);
+        this.context = context;
     }
 
     @Override
@@ -57,10 +66,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         String CREATE_BOOK_TABLE = "CREATE TABLE IF NOT EXISTS " + BOOK_TABLE
-                + " (" + B_ID + " INTEGER PRIMARY KEY, " + B_TITLE + " TEXT, " + B_AUTHOR + " TEXT, " + B_IMAGE + " TEXT, " + B_DATE_ADDED + " TEXT, " + B_COLOR_CODE + " INTEGER, " + B_ORDER + " INTEGER)";
+                + " (" + B_ID + " INTEGER PRIMARY KEY, " + B_TITLE + " TEXT, " + B_AUTHOR + " TEXT, " + B_IMAGE + " TEXT, " + B_PAGES_COUNT + " INTEGER DEFAULT 0, " + B_PAGE_REACHED + " INTEGER DEFAULT 0, " + B_DATE_ADDED + " TEXT, " + B_COLOR_CODE + " INTEGER, " + B_ORDER + " INTEGER)";
 
         String CREATE_BOOKMARK_TABLE = "CREATE TABLE IF NOT EXISTS " + BOOKMARK_TABLE
-                + " (" + BM_ID + " INTEGER PRIMARY KEY, " + BM_BOOK_FOREIGN_KEY + " INTEGER, " + BM_NAME + " TEXT, " + BM_PAGENUMBER + " INTEGER, " + BM_IMAGEPATH + " TEXT, " + BM_DATE_ADDED + " TEXT, " + BM_ORDER + " INTEGER, " + BM_VIEWS + " INTEGER DEFAULT 0, " + BM_NOTE + " TEXT, " + BM_TIMES_PAINTED + " INTEGER DEFAULT 0, FOREIGN KEY (" + BM_BOOK_FOREIGN_KEY + ") REFERENCES " + BOOK_TABLE + " (" + B_ID + ") ON DELETE CASCADE)";
+                + " (" + BM_ID + " INTEGER PRIMARY KEY, " + BM_BOOK_FOREIGN_KEY + " INTEGER, " + BM_NAME + " TEXT, " + BM_PAGENUMBER + " INTEGER, " + BM_IMAGEPATH + " TEXT, " + BM_DATE_ADDED + " TEXT, " + BM_ORDER + " INTEGER, " + BM_FAVORITE + " INTEGER DEFAULT 0, " + BM_VIEWS + " INTEGER DEFAULT 0, " + BM_NOTE + " TEXT, " + BM_TIMES_PAINTED + " INTEGER DEFAULT 0, FOREIGN KEY (" + BM_BOOK_FOREIGN_KEY + ") REFERENCES " + BOOK_TABLE + " (" + B_ID + ") ON DELETE CASCADE)";
 
         String CREATE_PARAM_TABLE = "CREATE TABLE " + PARAM_TABLE
                 + " (id INTEGER PRIMARY KEY AUTOINCREMENT, " + PRM_NUMBER
@@ -111,9 +120,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 book.setTitle(cursor.getString(1));
                 book.setAuthor(cursor.getString(2));
                 book.setImagePath(cursor.getString(3));
-                book.setDate_added(cursor.getString(4));
-                book.setColorCode(cursor.getInt(5));
-                book.setOrder(cursor.getInt(6));
+                book.setPages_count(cursor.getInt(4));
+                book.setPage_reached(cursor.getInt(5));
+                book.setDate_added(cursor.getString(6));
+                book.setColorCode(cursor.getInt(7));
+                book.setOrder(cursor.getInt(8));
+
                 books.add(book);
             } while (cursor.moveToNext());
         }
@@ -135,6 +147,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(B_IMAGE, book.getImagePath());
         cv.put(B_DATE_ADDED, book.getDate_added());
         cv.put(B_COLOR_CODE, book.getColorCode());
+        cv.put(B_PAGES_COUNT, book.getPages_count());
+        cv.put(B_PAGE_REACHED, book.getPage_reached());
         cv.put(B_ORDER, getMax_BookOrder(dbHandler));
 
         return (int) dbHandler.insert(BOOK_TABLE, null, cv);
@@ -157,6 +171,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cv.put(B_TITLE, book.getTitle());
             cv.put(B_AUTHOR, book.getAuthor());
             cv.put(B_IMAGE, book.getImagePath());
+            cv.put(B_PAGES_COUNT, book.getPages_count());
+            cv.put(B_PAGE_REACHED, book.getPage_reached());
             cv.put(B_DATE_ADDED, book.getDate_added());
             cv.put(B_COLOR_CODE, book.getColorCode());
             cv.put(B_ORDER, getMax_BookOrder(dbHandler));
@@ -185,6 +201,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         newValues.put(B_TITLE, book.getTitle());
         newValues.put(B_AUTHOR, book.getAuthor());
         newValues.put(B_DATE_ADDED, book.getDate_added());
+        newValues.put(B_PAGES_COUNT, book.getPages_count());
         newValues.put(B_ORDER, book.getOrder());
 
         dbHandler.update(BOOK_TABLE, newValues, B_ID + "= ?", args);
@@ -193,10 +210,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @DebugLog
     public void deleteBook(int book_id) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
+        List<Bookmark> bookmarks;
 
         //Remove all the bookmarks that belonged to this book and are still stored on disk as images
         //Do this BEFORE deleting the books because ON DELETE CASCADE
-        List<Bookmark> bookmarks = getAllBookmarks(book_id, null);
+        String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
+        if (!sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+            bookmarks = getAllBookmarks(book_id);
+        } else {
+            bookmarks = getAllBookmarks_Ordered(book_id, sorting_type_pref);
+        }
+
         for (Bookmark bookmark : bookmarks) {
             Helper_Methods.delete_image_from_disk(bookmark.getImage_path());
         }
@@ -208,17 +232,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public ArrayList<Bookmark> getAllBookmarks(int book_id, String sortBy) {
+    public ArrayList<Bookmark> getAllBookmarks(int book_id) {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
 
         ArrayList<Bookmark> bookmarks = new ArrayList<>();
 
-        String query;
-
-        if (sortBy == null)
-            query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = " + book_id + " ORDER BY " + BM_ORDER;
-        else
-            query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = " + book_id + " ORDER BY " + sortBy;
+        String query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = " + book_id + " ORDER BY " + BM_ORDER;
 
         Cursor cursor = dbHandler.rawQuery(query, null);
 
@@ -232,9 +251,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 bookmark.setImage_path(cursor.getString(4));
                 bookmark.setDate_added(cursor.getString(5));
                 bookmark.setOrder(cursor.getInt(6));
-                bookmark.setViews(cursor.getInt(7));
-                bookmark.setNote(cursor.getString(8));
-                bookmark.setTimes_painted(cursor.getInt(9));
+                bookmark.setFavorite(cursor.getInt(7));
+                bookmark.setViews(cursor.getInt(8));
+                bookmark.setNote(cursor.getString(9));
+                bookmark.setTimes_painted(cursor.getInt(10));
                 bookmarks.add(bookmark);
             } while (cursor.moveToNext());
         }
@@ -243,6 +263,71 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return bookmarks;
     }
+
+    public ArrayList<Bookmark> getAllBookmarks_Ordered(int book_id, String sortBy) {
+        SQLiteDatabase dbHandler = this.getReadableDatabase();
+
+        ArrayList<Bookmark> bookmarks = new ArrayList<>();
+
+        String query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = " + book_id + " ORDER BY " + sortBy;
+
+        Cursor cursor = dbHandler.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Bookmark bookmark = new Bookmark();
+                bookmark.setId(cursor.getInt(0));
+                bookmark.setBookId(cursor.getInt(1));
+                bookmark.setName(cursor.getString(2));
+                bookmark.setPage_number(cursor.getInt(3));
+                bookmark.setImage_path(cursor.getString(4));
+                bookmark.setDate_added(cursor.getString(5));
+                bookmark.setOrder(cursor.getInt(6));
+                bookmark.setFavorite(cursor.getInt(7));
+                bookmark.setViews(cursor.getInt(8));
+                bookmark.setNote(cursor.getString(9));
+                bookmark.setTimes_painted(cursor.getInt(10));
+                bookmarks.add(bookmark);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return bookmarks;
+    }
+
+    public ArrayList<Bookmark> getAllFavoriteBookmarks() {
+        SQLiteDatabase dbHandler = this.getReadableDatabase();
+
+        ArrayList<Bookmark> bookmarks = new ArrayList<>();
+
+        String query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_FAVORITE + " = 1";
+
+        Cursor cursor = dbHandler.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Bookmark bookmark = new Bookmark();
+                bookmark.setId(cursor.getInt(0));
+                bookmark.setBookId(cursor.getInt(1));
+                bookmark.setName(cursor.getString(2));
+                bookmark.setPage_number(cursor.getInt(3));
+                bookmark.setImage_path(cursor.getString(4));
+                bookmark.setDate_added(cursor.getString(5));
+                bookmark.setOrder(cursor.getInt(6));
+                bookmark.setFavorite(cursor.getInt(7));
+                bookmark.setViews(cursor.getInt(8));
+                bookmark.setNote(cursor.getString(9));
+                bookmark.setTimes_painted(cursor.getInt(10));
+                bookmarks.add(bookmark);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return bookmarks;
+    }
+
 
     @DebugLog
     public ArrayList<Bookmark> searchAllBookmarks(int book_id, String likeText) {
@@ -265,10 +350,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 bookmark.setImage_path(cursor.getString(4));
                 bookmark.setDate_added(cursor.getString(5));
                 bookmark.setOrder(cursor.getInt(6));
-                bookmark.setViews(cursor.getInt(7));
-                bookmark.setNote(cursor.getString(8));
-                bookmark.setTimes_painted(cursor.getInt(9));
+                bookmark.setFavorite(cursor.getInt(7));
+                bookmark.setViews(cursor.getInt(8));
+                bookmark.setNote(cursor.getString(9));
+                bookmark.setTimes_painted(cursor.getInt(10));
                 bookmarkResults.add(bookmark);
+                Log.d("Book_ID", "Book ID for " + bookmark.getName() + " is : " + bookmark.getBookId());
             } while (cursor.moveToNext());
         }
 
@@ -330,6 +417,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         newValues.put(BM_DATE_ADDED, bookmark.getDate_added());
         newValues.put(BM_IMAGEPATH, bookmark.getImage_path());
         newValues.put(BM_ORDER, bookmark.getOrder());
+        newValues.put(BM_FAVORITE, bookmark.getFavorite());
         newValues.put(BM_VIEWS, bookmark.getViews());
         newValues.put(BM_NOTE, bookmark.getNote());
         newValues.put(BM_TIMES_PAINTED, bookmark.getTimes_painted());
@@ -357,6 +445,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String[] args = new String[]{String.valueOf(bookmark_id)};
 
         newValues.put(BM_TIMES_PAINTED, times_painted);
+
+        dbHandler.update(BOOKMARK_TABLE, newValues, BM_ID + " = ?", args);
+    }
+
+    @DebugLog
+    public void update_BookmarkFavorite(int bookmark_id, int favorite) {
+        SQLiteDatabase dbHandler = this.getWritableDatabase();
+        ContentValues newValues = new ContentValues();
+
+        String[] args = new String[]{String.valueOf(bookmark_id)};
+
+        newValues.put(BM_FAVORITE, favorite);
 
         dbHandler.update(BOOKMARK_TABLE, newValues, BM_ID + " = ?", args);
     }
@@ -440,6 +540,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return times_painted;
     }
+
+    @DebugLog
+    public boolean getBookmarkFavoriteStatus(int bookmark_id) {
+        SQLiteDatabase dbHandler = this.getReadableDatabase();
+        Cursor cursor = dbHandler.rawQuery("SELECT " + BM_FAVORITE + " FROM " + BOOKMARK_TABLE + " WHERE " + BM_ID + " = " + bookmark_id, null);
+
+        int favorite = 0;
+
+        if (cursor.moveToFirst())
+            favorite = cursor.getInt(0);
+
+        cursor.close();
+
+        return favorite == 1;
+    }
+
 
     @DebugLog
     public String getBookmarkNote(int bookmark_id) {

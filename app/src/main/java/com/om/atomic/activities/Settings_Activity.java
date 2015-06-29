@@ -1,10 +1,12 @@
 package com.om.atomic.activities;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -13,18 +15,24 @@ import android.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.andreabaccega.widget.FormEditText;
 import com.flurry.android.FlurryAgent;
 import com.om.atomic.R;
+import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.DatabaseHelper;
 import com.om.atomic.classes.EventBus_Poster;
 import com.om.atomic.classes.EventBus_Singleton;
+import com.om.atomic.classes.GMailSender;
 import com.om.atomic.classes.Helper_Methods;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
@@ -32,11 +40,17 @@ import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class Settings_Activity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private ProgressDialog sendEmailFeedbackDialog;
+    private DatabaseHelper dbHelper = new DatabaseHelper(this);
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Helper_Methods helperMethods = new Helper_Methods(this);
+        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE))
+            overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
+
+        final Helper_Methods helperMethods = new Helper_Methods(this);
 
         final LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
 
@@ -53,7 +67,10 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                onBackPressed();
+
+                if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE))
+                    overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
             }
         });
 
@@ -72,13 +89,19 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View alertComposeFeedback = inflater.inflate(R.layout.alert_send_feedback, root, false);
 
-                final EditText inputFeedbackET = (EditText) alertComposeFeedback.findViewById(R.id.feedbackET);
+                final FormEditText inputFeedbackET = (FormEditText) alertComposeFeedback.findViewById(R.id.feedbackET);
                 inputFeedbackET.setHintTextColor(Settings_Activity.this.getResources().getColor(R.color.edittext_hint_color));
                 inputFeedbackET.setSelection(inputFeedbackET.getText().length());
 
                 alert.setPositiveButton(Settings_Activity.this.getResources().getString(R.string.pref_send_feedback_button_title), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-
+                        if (inputFeedbackET.testValidity()) {
+                            try {
+                                new SendFeedbackEmail().execute(inputFeedbackET.getText().toString());
+                            } catch (Exception e) {
+                                Log.e("SendMail", e.getMessage(), e);
+                            }
+                        }
                     }
                 });
 
@@ -174,5 +197,47 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
 
                 break;
         }
+    }
+
+    private class SendFeedbackEmail extends AsyncTask<String, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            sendEmailFeedbackDialog = ProgressDialog.show(Settings_Activity.this, getResources().getString(R.string.loading_book_info_title),
+                    getResources().getString(R.string.loading_sending_feedback), true);
+        }
+
+        @Override
+        protected Void doInBackground(String... feedbackContent) {
+            try {
+                GMailSender sender = new GMailSender("oday.maleh@gmail.com", "EASYPASSWORDiseasy1+2+3+4+");
+                sender.sendMail("In-app Feedback",
+                        feedbackContent[0],
+                        "oday.maleh@gmail.com",
+                        "apps.atomic@gmail.com");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void nothing) {
+            sendEmailFeedbackDialog.hide();
+            Crouton.makeText(Settings_Activity.this, getResources().getString(R.string.feedback_sent_alert), Style.CONFIRM).show();
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            super.onBackPressed();
+            //If Animations are enabled
+            if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE))
+                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

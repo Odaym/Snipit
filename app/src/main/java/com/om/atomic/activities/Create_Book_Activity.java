@@ -8,6 +8,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,16 +63,18 @@ public class Create_Book_Activity extends Base_Activity {
     FormEditText titleET;
     @InjectView(R.id.authorET)
     FormEditText authorET;
+    @InjectView(R.id.pagesCountET)
+    FormEditText pagesCountET;
     @InjectView(R.id.bookIMG)
     ImageView bookIMG;
     @InjectView(R.id.doneBTN)
     FloatingActionButton doneBTN;
     @InjectView(R.id.scanBTN)
     ImageView scanBTN;
-    @InjectView(R.id.poweredByGoogleBadge)
-    ImageView poweredByGoogleBadge;
 
     private String bookImagePath;
+    private int book_pages_count;
+    private boolean bookImageFoundAtGoogle = false;
     private DatabaseHelper dbHelper;
 
     private ShowcaseView scanBookShowcase;
@@ -80,6 +84,7 @@ public class Create_Book_Activity extends Base_Activity {
     private int CALL_PURPOSE;
     private Book book_from_list;
     private ProgressDialog loadingBookInfoDialog;
+    private ProgressDialog findingBookImageDialog;
 
     private static final int SHOW_SCAN_BOOK_SHOWCASE = 1;
 
@@ -131,6 +136,10 @@ public class Create_Book_Activity extends Base_Activity {
                 titleET.setText(book_from_list.getTitle());
                 titleET.setSelection(titleET.getText().length());
                 authorET.setText(book_from_list.getAuthor());
+
+                if (!(book_from_list.getPages_count() == Constants.NO_BOOK_PAGES_COUNT))
+                    pagesCountET.setText(String.valueOf(book_from_list.getPages_count()));
+
                 Picasso.with(Create_Book_Activity.this).load(book_from_list.getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
             }
         } else {
@@ -143,21 +152,43 @@ public class Create_Book_Activity extends Base_Activity {
                 if (helperMethods.validateFields(allFields)) {
                     //If you are creating a new book
                     if (CALL_PURPOSE != Constants.EDIT_BOOK_PURPOSE_VALUE) {
+                        titleET.addTextChangedListener(new BookInfoTextWatcher());
+                        authorET.addTextChangedListener(new BookInfoTextWatcher());
+
                         String bookSearchString = "https://www.googleapis.com/books/v1/volumes?" +
-                                "q=intitle:" + titleET.getText().toString() + "?q=inauthor:" + authorET.getText().toString() + "&key=" + Constants.GOOGLE_BOOKS_API_KEY;
+                                "q=intitle:" + titleET.getText().toString().replace(" ", "%20") + "?q=inauthor:" + authorET.getText().toString().replace(" ", "%20") + "&key=" + Constants.GOOGLE_BOOKS_API_KEY;
+                        if (Helper_Methods.isInternetAvailable(Create_Book_Activity.this)) {
+                            if (bookImageFoundAtGoogle) {
+                                finalizeInsertBook(bookImagePath);
+                            } else {
+                                new GetBookImage().execute(bookSearchString);
+                            }
+                        } else {
+                            finalizeInsertBook(bookImagePath);
+                        }
                     } else {
-                        //If you are editing an existing book
-                        book_from_list.setTitle(titleET.getText().toString());
-                        book_from_list.setAuthor(authorET.getText().toString());
-                        dbHelper.updateBook(book_from_list);
+                        if (!pagesCountET.getText().toString().isEmpty() && (Integer.valueOf(pagesCountET.getText().toString()) < book_from_list.getPage_reached())) {
+                            Crouton.makeText(Create_Book_Activity.this, getResources().getString(R.string.pages_count_page_reached_difference_error) + " " + getResources().getString(R.string.pages_count_error_label) + " : " + book_from_list.getPage_reached(), Style.ALERT).show();
+                        } else {
+                            //If you are editing an existing book
+                            book_from_list.setTitle(titleET.getText().toString());
+                            book_from_list.setAuthor(authorET.getText().toString());
 
-                        EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
+                            if (!pagesCountET.getText().toString().isEmpty())
+                                book_from_list.setPages_count(Integer.valueOf(pagesCountET.getText().toString()));
+                            else
+                                book_from_list.setPages_count(Constants.NO_BOOK_PAGES_COUNT);
 
-                        finish();
+                            dbHelper.updateBook(book_from_list);
 
-                        if (getCurrentFocus() != null) {
-                            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                            EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
+
+                            finish();
+
+                            if (getCurrentFocus() != null) {
+                                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                                inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                            }
                         }
                     }
                 }
@@ -192,6 +223,59 @@ public class Create_Book_Activity extends Base_Activity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @DebugLog
+    public void finalizeInsertBook(String foundBookImagePath) {
+        Random rand = new Random();
+
+        Date date = new Date();
+        String day = (String) android.text.format.DateFormat.format("dd", date);
+        String month = (String) android.text.format.DateFormat.format("MMM", date);
+        String year = (String) android.text.format.DateFormat.format("yyyy", date);
+
+        Book book = new Book();
+        book.setTitle(titleET.getText().toString());
+        book.setAuthor(authorET.getText().toString());
+        book.setImagePath(foundBookImagePath);
+        book.setDate_added(month + " " + day + " " + year);
+        book.setColorCode(rand.nextInt(7 - 1));
+
+        if (pagesCountET.getText().toString().isEmpty())
+            book.setPages_count(Constants.NO_BOOK_PAGES_COUNT);
+        else
+            book.setPages_count(Integer.valueOf(pagesCountET.getText().toString()));
+
+        book.setPage_reached(0);
+
+        int last_insert_book_id = dbHelper.createBook(book);
+
+        FlurryAgent.logEvent("Book_Create");
+
+        EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
+
+        Intent takeToBookmarks = new Intent(Create_Book_Activity.this, Bookmarks_Activity.class);
+        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, last_insert_book_id);
+        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
+        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
+
+        startActivity(takeToBookmarks);
+
+        finish();
+    }
+
+    private class BookInfoTextWatcher implements TextWatcher {
+
+        public void afterTextChanged(Editable s) {
+        }
+
+        public void beforeTextChanged(CharSequence s, int start, int count,
+                                      int after) {
+        }
+
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            bookImageFoundAtGoogle = false;
+        }
     }
 
     @DebugLog
@@ -300,6 +384,8 @@ public class Create_Book_Activity extends Base_Activity {
                 JSONArray bookArray = resultObject.getJSONArray("items");
                 JSONObject bookObject = bookArray.getJSONObject(0);
                 JSONObject volumeObject = bookObject.getJSONObject("volumeInfo");
+                book_pages_count = volumeObject.getInt("pageCount");
+
                 try {
                     titleET.setText(volumeObject.getString("title"));
 
@@ -312,9 +398,6 @@ public class Create_Book_Activity extends Base_Activity {
                         }
                         authorET.setText(authorBuild.toString());
                         loadingBookInfoDialog.dismiss();
-
-                        //Only show Powered By Google when the result was due to looking up the book in Google Books API
-                        poweredByGoogleBadge.setVisibility(View.VISIBLE);
                     } catch (JSONException jse) {
                         Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_author_not_found_error), Style.ALERT).show();
                         loadingBookInfoDialog.dismiss();
@@ -326,8 +409,8 @@ public class Create_Book_Activity extends Base_Activity {
                 }
                 try {
                     JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
-                    Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("thumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
-                    bookImagePath = imageInfo.getString("thumbnail");
+                    Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("smallThumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
+                    bookImagePath = imageInfo.getString("smallThumbnail");
                 } catch (JSONException jse) {
                     Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_image_not_found_error), Style.ALERT).show();
                     loadingBookInfoDialog.dismiss();
@@ -342,12 +425,12 @@ public class Create_Book_Activity extends Base_Activity {
         }
     }
 
-    private class GetBookImage extends AsyncTask<String, Void, String> {
+    private class GetBookImage extends AsyncTask<String, String, String> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            loadingBookInfoDialog = ProgressDialog.show(Create_Book_Activity.this, getResources().getString(R.string.loading_book_info_title),
-                    getResources().getString(R.string.loading_book_info_msg), true);
+            findingBookImageDialog = ProgressDialog.show(Create_Book_Activity.this, getResources().getString(R.string.loading_book_info_title),
+                    getResources().getString(R.string.finding_book_image), true);
         }
 
         @Override
@@ -376,6 +459,7 @@ public class Create_Book_Activity extends Base_Activity {
             return bookBuilder.toString();
         }
 
+        @Override
         protected void onPostExecute(String result) {
             try {
                 JSONObject resultObject = new JSONObject(result);
@@ -383,46 +467,26 @@ public class Create_Book_Activity extends Base_Activity {
                 JSONObject bookObject = bookArray.getJSONObject(0);
                 JSONObject volumeObject = bookObject.getJSONObject("volumeInfo");
                 JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
+                book_pages_count = volumeObject.getInt("pageCount");
 
-                Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("thumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
+                pagesCountET.setText(String.valueOf(book_pages_count));
+                Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("smallThumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
 
-                bookImagePath = imageInfo.getString("thumbnail");
+                bookImagePath = imageInfo.getString("smallThumbnail");
+
+                findingBookImageDialog.dismiss();
+
+                bookImageFoundAtGoogle = true;
             } catch (JSONException jse) {
                 Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_image_not_found_error), Style.ALERT).show();
-                loadingBookInfoDialog.dismiss();
+                pagesCountET.setText("");
+                bookIMG.setImageResource(0);
+                bookImageFoundAtGoogle = true;
+                book_pages_count = Constants.NO_BOOKMARK_PAGE_NUMBER;
+                bookImagePath = Constants.NO_BOOK_IMAGE;
+                findingBookImageDialog.dismiss();
                 jse.printStackTrace();
             }
-
-            Random rand = new Random();
-
-            Date date = new Date();
-            String day = (String) android.text.format.DateFormat.format("dd", date);
-            String month = (String) android.text.format.DateFormat.format("MMM", date);
-            String year = (String) android.text.format.DateFormat.format("yyyy", date);
-
-            Book book = new Book();
-            book.setTitle(titleET.getText().toString());
-            book.setAuthor(authorET.getText().toString());
-            book.setImagePath(bookImagePath);
-            book.setDate_added(month + " " + day + " " + year);
-            book.setColorCode(rand.nextInt(7 - 1));
-
-            int last_insert_book_id = dbHelper.createBook(book);
-
-            FlurryAgent.logEvent("Book_Create");
-
-            EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
-
-            finish();
-
-            Intent takeToBookmarks = new Intent(Create_Book_Activity.this, Bookmarks_Activity.class);
-            takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, last_insert_book_id);
-            takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
-            takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
-
-            startActivity(takeToBookmarks);
-
         }
     }
-
 }

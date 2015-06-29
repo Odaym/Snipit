@@ -5,9 +5,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -22,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -59,6 +62,8 @@ public class View_Bookmark_Activity extends Base_Activity {
     private ScreenSlidePagerAdapter mPagerAdapter;
     private int current_bookmark_position;
     private DatabaseHelper dbHelper;
+    private Button addFavoriteBookmarkBTN;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +73,8 @@ public class View_Bookmark_Activity extends Base_Activity {
         EventBus_Singleton.getInstance().register(this);
 
         ButterKnife.inject(this);
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         dbHelper = new DatabaseHelper(this);
 
@@ -99,8 +106,14 @@ public class View_Bookmark_Activity extends Base_Activity {
 
             if (extras_search_term != null)
                 bookmarks = dbHelper.searchAllBookmarks(bookmarks.get(current_bookmark_position).getBookId(), extras_search_term);
-            else
-                bookmarks = dbHelper.getAllBookmarks(bookmarks.get(current_bookmark_position).getBookId(), null);
+            else {
+                String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
+                if (!sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+                    bookmarks = dbHelper.getAllBookmarks(bookmarks.get(current_bookmark_position).getBookId());
+                } else {
+                    bookmarks = dbHelper.getAllBookmarks_Ordered(bookmarks.get(current_bookmark_position).getBookId(), sorting_type_pref);
+                }
+            }
 
             mPagerAdapter.notifyDataSetChanged();
         }
@@ -135,7 +148,7 @@ public class View_Bookmark_Activity extends Base_Activity {
         @InjectView(R.id.imageProgressBar)
         ProgressBar imageProgressBar;
 
-        Callback picassoCallback;
+        private Callback picassoCallback;
 
         private DatabaseHelper dbHelper;
         private Helper_Methods helperMethods;
@@ -157,19 +170,20 @@ public class View_Bookmark_Activity extends Base_Activity {
 
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.view_bookmark, menu);
+            if (!bookmark_imagepath.contains("http")) {
+                inflater.inflate(R.menu.view_bookmark, menu);
 
-            MenuItem rotate_left_item = menu.getItem(0);
-            MenuItem rotate_right_item = menu.getItem(1);
+                MenuItem rotate_left_item = menu.getItem(0);
+                MenuItem rotate_right_item = menu.getItem(1);
 
-            SpannableString rotate_left_string = new SpannableString(rotate_left_item.getTitle().toString());
-            rotate_left_string.setSpan(new ForegroundColorSpan(Color.BLACK), 0, rotate_left_string.length(), 0);
-            rotate_left_item.setTitle(rotate_left_string);
+                SpannableString rotate_left_string = new SpannableString(rotate_left_item.getTitle().toString());
+                rotate_left_string.setSpan(new ForegroundColorSpan(Color.BLACK), 0, rotate_left_string.length(), 0);
+                rotate_left_item.setTitle(rotate_left_string);
 
-            SpannableString rotate_right_string = new SpannableString(rotate_right_item.getTitle().toString());
-            rotate_right_string.setSpan(new ForegroundColorSpan(Color.BLACK), 0, rotate_right_string.length(), 0);
-            rotate_right_item.setTitle(rotate_right_string);
-
+                SpannableString rotate_right_string = new SpannableString(rotate_right_item.getTitle().toString());
+                rotate_right_string.setSpan(new ForegroundColorSpan(Color.BLACK), 0, rotate_right_string.length(), 0);
+                rotate_right_item.setTitle(rotate_right_string);
+            }
             super.onCreateOptionsMenu(menu, inflater);
         }
 

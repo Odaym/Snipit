@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_alignParentBottom="true"
+            android:layout_centerVertical="true"
             android:layout_marginEnd="20dp"
             android:layout_marginRight="20dp" />
 
@@ -50,31 +50,58 @@
             android:textColor="@color/mokhmal"
             android:textSize="@dimen/book_author_fsize" />
 
-        <TextView
-            android:id="@+id/bookDateAddedTV"
+        <RelativeLayout
+            android:id="@+id/bookProgressLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/bookAuthorTV"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:layout_toEndOf="@+id/bookThumbIMG"
             android:layout_toRightOf="@+id/bookThumbIMG"
-            android:textColor="@color/mokhmal"
-            android:textSize="@dimen/book_date_added_fsize" />
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/bookProgressValueTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/book_date_added_fsize" />
+
+            <ProgressBar
+                android:id="@+id/bookProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignEnd="@+id/bookProgressValueTV"
+                android:layout_alignLeft="@+id/bookProgressValueTV"
+                android:layout_alignRight="@+id/bookProgressValueTV"
+                android:layout_alignStart="@+id/bookProgressValueTV"
+                android:layout_below="@+id/bookProgressValueTV"
+                android:layout_marginTop="5dp" />
+        </RelativeLayout>
 
     </RelativeLayout>
 
-    <Button
-        android:id="@+id/bookAction"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/menu_overflow_fade"
-        android:focusable="false" />
+    <RelativeLayout
+        android:id="@+id/bookActionLayout"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:focusable="false">
+
+        <Button
+            android:id="@+id/bookAction"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/menu_overflow_fade"
+            android:clickable="false"
+            android:focusable="false" />
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/bookmarksNumberTV"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
@@ -84,5 +111,18 @@
         android:gravity="center"
         android:textColor="@color/white"
         android:textSize="@dimen/number_of_bookmarks_fsize" />
+
+    <TextView
+        android:id="@+id/bookDateAddedTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
+        android:paddingBottom="5dp"
+        android:textColor="@color/mokhmal"
+        android:textSize="@dimen/book_date_added_fsize" />
 
 </RelativeLayout>

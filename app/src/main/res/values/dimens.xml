@@ -13,6 +13,8 @@
 
     <dimen name="bookmark_list_item_height">100dp</dimen>
     <dimen name="bookmark_details_layout_height">100dp</dimen>
+    <dimen name="bookmark_details_layout_height_landscape">50dp</dimen>
+    <dimen name="padding_end_landscape">35dp</dimen>
 
     <dimen name="bookmark_thumb_height">100dp</dimen>
     <dimen name="bookmark_thumb_width">100dp</dimen>

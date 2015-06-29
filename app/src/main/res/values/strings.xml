@@ -8,8 +8,8 @@
     <string name="banner_ad_unit_id_searchresults">ca-app-pub-7047539644799809/6418663895</string>
     <string name="banner_ad_unit_id_opensource_libs">ca-app-pub-7047539644799809/2417489494</string>
 
-
     <string name="app_name">Atomic</string>
+    <string name="app_tagline">Bookmarks for textbooks!</string>
     <string name="app_version">1.0.0</string>
     <string name="gotit">Got it</string>
     <string name="cancel">Cancel</string>
@@ -20,6 +20,12 @@
     <string name="edit">Edit</string>
     <string name="undo_deletion_title">UNDO</string>
     <string name="action_needs_internet">This action needs an Internet connection</string>
+
+    <!-- NAVDRAWER -->
+    <string name="navdrawer_upgrade_premium_item">Upgrade to Premium</string>
+    <string name="navdrawer_settings_item">Settings</string>
+    <string name="navigation_drawer_open"></string>
+    <string name="navigation_drawer_closed"></string>
 
     <!-- PREFERENCE ACTIVITY-->
     <string name="pref_display_section_title">Display</string>
@@ -39,19 +45,21 @@
     <string name="pref_open_source_libraries_title">Open Source Libraries</string>
     <string name="pref_rate_google_play">Rate Atomic on Google Play</string>
     <string name="pref_rate_google_play_summary">Consider writing a review, it really helps!</string>
+    <string name="empty_feedback_field_error">This can\'t be empty</string>
+    <string name="loading_sending_feedback">Sending your feedback</string>
+    <string name="feedback_sent_alert">Feedback sent!</string>
 
     <!-- BOOKS_ACTIVITY -->
-    <string name="navigation_drawer_open">Open</string>
-    <string name="navigation_drawer_closed">Closed</string>
     <string name="empty_books_layout_hint">Books you add appear here</string>
     <string name="downloading_books_loader_title">Just a second</string>
-    <string name="downloading_books_loader_message">Downloading books…</string>
+    <string name="downloading_books_loader_message">Downloading sample books…</string>
     <string name="delete_book_confirmation_message">Deleted</string>
 
     <!-- BOOKMARKS_ACTIVITY -->
     <string name="edit_bookmark_option">Edit</string>
     <string name="remove_bookmark_option">Remove</string>
     <string name="bookmark_views_label">Views:</string>
+    <string name="bookmark_page_number_label">page:</string>
     <string name="sort_option_title">Sort</string>
     <string name="sort_action_by_page_number">Sort by Page</string>
     <string name="sort_action_by_name">Sort by Name</string>
@@ -73,9 +81,11 @@
     <string name="edit_book_activity_title">Edit Book</string>
     <string name="book_title">Book Title</string>
     <string name="book_author">Author</string>
+    <string name="book_pages_count">Pages</string>
     <string name="done_and_create_book">Done</string>
     <string name="loading_book_info_title">Hang on</string>
     <string name="loading_book_info_msg">Gathering book data</string>
+    <string name="finding_book_image">Finding book cover art</string>
     <string name="scan_result_error">Scan result was not a book</string>
     <string name="book_not_found">Couldn\'t find that book</string>
     <string name="book_image_not_found_error">Couldn\'t find book image</string>
@@ -83,14 +93,15 @@
     <string name="book_title_not_found_error">Couldn\'t find book title</string>
     <string name="no_scan_data">No scan data received!</string>
     <string name="scan_books_showcase">You can also add a book by scanning its barcode</string>
-    <string name="empty_book_title_error">The title of the book is required</string>
-    <string name="empty_author_name_error">The name of the author is required</string>
+    <string name="empty_book_title_error">Book title required</string>
+    <string name="empty_author_name_error">Author name required</string>
+    <string name="pages_count_error_label">Pages count</string>
+    <string name="pages_count_page_reached_difference_error">Pages count cannot be smaller than page reached!</string>
 
     <!-- VIEW_BOOKMARKS_ACTIVITY -->
     <string name="rotate_left">Rotate Left</string>
     <string name="rotate_right">Rotate Right</string>
     <string name="page">page:</string>
-    <string name="image_not_found">Picture was removed!</string>
     <string name="share_bookmark">Share!</string>
     <string name="set_brush_thickness">Set brush thickness</string>
     <string name="takeNote">Take a note</string>

@@ -79,7 +79,7 @@ public class Helper_Methods {
         List<Bookmark> bookmarks;
 
         for (Book book : books) {
-            bookmarks = dbHelper.getAllBookmarks(book.getId(), null);
+            bookmarks = dbHelper.getAllBookmarks(book.getId());
             for (Bookmark bookmark : bookmarks) {
                 ParseObject bookmarkObject = new ParseObject("Bookmark");
                 bookmarkObject.put("book_id", bookmark.getBookId());

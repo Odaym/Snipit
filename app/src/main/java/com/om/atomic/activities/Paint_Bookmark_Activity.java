@@ -115,8 +115,8 @@ public class Paint_Bookmark_Activity extends Base_Activity {
                     canvasView.setDrawer(CanvasView.Drawer.RECTANGLE);
                 }
 
-                canvasView.setPaintStrokeColor(prefs.getInt(Constants.BRUSH_COLOR_PREF, getResources().getColor(R.color.white)));
-                canvasView.setPaintStrokeWidth(prefs.getFloat(Constants.BRUSH_THICKNESS_PREF, 20));
+                canvasView.setPaintStrokeColor(prefs.getInt(Constants.BRUSH_COLOR_PREF, getResources().getColor(R.color.yellow)));
+                canvasView.setPaintStrokeWidth(prefs.getFloat(Constants.BRUSH_THICKNESS_PREF, 60));
                 canvasView.setBaseColor(Color.TRANSPARENT);
                 canvasView.setOpacity(150);
             }

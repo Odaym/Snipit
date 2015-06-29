@@ -71,9 +71,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginRight="10dp"
         fab:fab_addButtonColorNormal="@color/blue"
-        fab:fab_expandDirection="up"
-        fab:fab_labelStyle="@style/fab_labels_style"
-        fab:fab_labelsPosition="left">
+        fab:fab_expandDirection="up">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_undo"
@@ -118,9 +116,7 @@
         android:visibility="gone"
         fab:fab_addButtonColorNormal="@color/blue"
         fab:fab_addButtonSize="mini"
-        fab:fab_expandDirection="up"
-        fab:fab_labelStyle="@style/fab_labels_style"
-        fab:fab_labelsPosition="left">
+        fab:fab_expandDirection="up">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_back_to_options"

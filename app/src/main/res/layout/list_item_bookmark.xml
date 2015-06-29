@@ -50,29 +50,53 @@
         android:textColor="@android:color/black"
         android:textSize="@dimen/book_name_fsize" />
 
-    <Button
-        android:id="@+id/bookmarkAction"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
+    <RelativeLayout
+        android:id="@+id/bookmarkActionLayout"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/menu_overflow_fade"
-        android:focusable="false" />
+        android:focusable="false">
+
+        <Button
+            android:id="@+id/bookmarkAction"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/menu_overflow_fade"
+            android:clickable="false"
+            android:focusable="false" />
+    </RelativeLayout>
 
     <Button
         android:id="@+id/bookmarkNoteBTN"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_toLeftOf="@+id/bookmarkAction"
-        android:layout_toStartOf="@+id/bookmarkAction"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_below="@+id/bookmarkActionLayout"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:background="@drawable/gray_bookmark"
         android:focusable="false"
         android:visibility="gone" />
 
     <TextView
         android:id="@+id/bookmarkViewsTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:paddingBottom="10dp"
+        android:paddingEnd="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:textColor="@color/mokhmal"
+        android:textSize="@dimen/book_date_added_fsize" />
+
+    <TextView
+        android:id="@+id/bookmarkPageNumberTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

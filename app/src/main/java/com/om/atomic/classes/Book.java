@@ -19,6 +19,8 @@ public class Book implements Parcelable {
     private String author;
     private String image_path;
     private String date_added;
+    private int pages_count;
+    private int page_reached;
     private int color_code;
     private int order;
 
@@ -32,15 +34,19 @@ public class Book implements Parcelable {
         image_path = in.readString();
         date_added = in.readString();
         color_code = in.readInt();
+        pages_count = in.readInt();
+        page_reached = in.readInt();
         order = in.readInt();
     }
 
-    public Book(int id, String title, String author, String image_path, String date_added, int color_code, int order) {
+    public Book(int id, String title, String author, String image_path, String date_added, int pages_count, int page_reached, int color_code, int order) {
         this.id = id;
         this.title = title;
         this.author = author;
         this.image_path = image_path;
         this.date_added = date_added;
+        this.pages_count = pages_count;
+        this.page_reached = page_reached;
         this.color_code = color_code;
         this.order = order;
     }
@@ -101,6 +107,22 @@ public class Book implements Parcelable {
         this.order = order;
     }
 
+    public int getPages_count() {
+        return pages_count;
+    }
+
+    public int getPage_reached() {
+        return page_reached;
+    }
+
+    public void setPage_reached(int page_reached) {
+        this.page_reached = page_reached;
+    }
+
+    public void setPages_count(int pages_count) {
+        this.pages_count = pages_count;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -113,6 +135,8 @@ public class Book implements Parcelable {
         dest.writeString(image_path);
         dest.writeString(date_added);
         dest.writeInt(color_code);
+        dest.writeInt(pages_count);
+        dest.writeInt(page_reached);
         dest.writeInt(order);
     }
 }

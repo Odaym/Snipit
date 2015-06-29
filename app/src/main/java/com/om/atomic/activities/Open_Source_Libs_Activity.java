@@ -52,6 +52,7 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         libraries.add(new Open_Source_Library("Otto", "http://square.github.io/otto/", "An enhanced event bus with emphasis on Android support."));
         libraries.add(new Open_Source_Library("NineOldAndroids", "http://nineoldandroids.com/", "Android library for using the Honeycomb (Android 3.0) animation API on all versions of the platform back to 1.0!"));
         libraries.add(new Open_Source_Library("ButterKnife", "https://github.com/JakeWharton/butterknife/", "Field and method binding for Android views which uses annotation processing to generate boilerplate code for you."));
+        libraries.add(new Open_Source_Library("Material Drawer", "https://github.com/HeinrichReimer/material-drawer", "Custom drawer implementation for Material design apps."));
         libraries.add(new Open_Source_Library("Calligraphy", "https://github.com/chrisjenx/Calligraphy", "Custom fonts in Android an OK way."));
         libraries.add(new Open_Source_Library("DrawableView", "https://github.com/PaNaVTEC/DrawableView", "An Android view that allows to paint with a finger in the screen and saves the result as a Bitmap."));
         libraries.add(new Open_Source_Library("PhotoView", "https://github.com/chrisbanes/PhotoView", "PhotoView aims to help produce an easily usable implementation of a zooming Android ImageView. It is currently being used in photup."));

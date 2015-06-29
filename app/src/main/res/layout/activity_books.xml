@@ -1,89 +1,91 @@
-<!--<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"--><!--xmlns:app="http://schemas.android.com/apk/res-auto"--><!--android:id="@+id/drawer_layout"--><!--android:layout_width="match_parent"--><!--android:layout_height="match_parent">-->
-
-<!--<com.heinrichreimersoftware.materialdrawer.DrawerFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"--><!--xmlns:app="http://schemas.android.com/apk/res-auto"--><!--android:id="@+id/navDrawer"--><!--android:layout_width="match_parent"--><!--android:layout_height="match_parent"--><!--android:fitsSystemWindows="true">-->
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main_content"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/light_gray">
+    android:layout_height="match_parent">
 
-    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/toolbar"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/main_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/green"
-        android:paddingTop="@dimen/toolbar_top_padding"
-        android:theme="@style/ToolBarStyle"
-        app:theme="@style/ToolBarStyle" />
+        android:layout_height="match_parent"
+        android:background="@color/light_gray">
 
-    <com.om.atomic.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/booksList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
-        android:background="@color/light_gray"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="@dimen/listview_padding_between"
-        android:drawSelectorOnTop="false"
-        android:listSelector="@android:color/transparent"
-        android:paddingBottom="@dimen/listview_padding_between"
-        android:paddingLeft="@dimen/listview_padding_left_right"
-        android:paddingRight="@dimen/listview_padding_left_right"
-        android:paddingTop="@dimen/listview_padding_between"
-        dslv:drag_scroll_start="0.11"
-        dslv:drag_start_mode="onLongPress"
-        dslv:float_alpha="0.6"
-        dslv:float_background_color="@color/light_gray"
-        dslv:max_drag_scroll_speed="0.9"
-        dslv:slide_shuffle_speed="0.2" />
+        <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/green"
+            android:paddingTop="@dimen/toolbar_top_padding"
+            android:theme="@style/ToolBarStyle"
+            app:theme="@style/ToolBarStyle" />
 
-    <RelativeLayout
-        android:id="@+id/emptyListLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:alpha="0.5">
-
-        <ImageView
-            android:id="@+id/bookIMG"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_centerInParent="true"
-            android:src="@drawable/book_outline" />
-
-        <me.grantland.widget.AutofitTextView
-            android:id="@+id/emptyLayoutMessageTV"
+        <com.om.atomic.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/booksList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/bookIMG"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/padding_books_activity_hint_above_image"
-            android:text="@string/empty_books_layout_hint"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:layout_below="@id/toolbar"
+            android:background="@color/light_gray"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="@dimen/listview_padding_between"
+            android:drawSelectorOnTop="false"
+            android:listSelector="@android:color/transparent"
+            android:paddingBottom="@dimen/listview_padding_between"
+            android:paddingLeft="@dimen/listview_padding_left_right"
+            android:paddingRight="@dimen/listview_padding_left_right"
+            android:paddingTop="@dimen/listview_padding_between"
+            dslv:drag_scroll_start="0.11"
+            dslv:drag_start_mode="onLongPress"
+            dslv:float_alpha="0.6"
+            dslv:float_background_color="@color/light_gray"
+            dslv:max_drag_scroll_speed="0.9"
+            dslv:slide_shuffle_speed="0.2" />
+
+        <RelativeLayout
+            android:id="@+id/emptyListLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:alpha="0.5">
+
+            <ImageView
+                android:id="@+id/bookIMG"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/book_outline" />
+
+            <me.grantland.widget.AutofitTextView
+                android:id="@+id/emptyLayoutMessageTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/bookIMG"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/padding_books_activity_hint_above_image"
+                android:text="@string/empty_books_layout_hint"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        </RelativeLayout>
+
+        <com.getbase.floatingactionbutton.AddFloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/createNewBookBTN"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/create_book_bookmark_fab_buttons_margins"
+            android:layout_marginEnd="@dimen/create_book_bookmark_fab_buttons_margins"
+            android:layout_marginRight="@dimen/create_book_bookmark_fab_buttons_margins"
+            fab:fab_colorNormal="@color/green"
+            fab:fab_colorPressed="@color/yellow"
+            fab:fab_colorRipple="@color/yellow" />
 
     </RelativeLayout>
 
-    <com.getbase.floatingactionbutton.AddFloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/createNewBookBTN"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/create_book_bookmark_fab_buttons_margins"
-        android:layout_marginEnd="@dimen/create_book_bookmark_fab_buttons_margins"
-        android:layout_marginRight="@dimen/create_book_bookmark_fab_buttons_margins"
-        fab:fab_colorNormal="@color/green"
-        fab:fab_colorPressed="@color/yellow"
-        fab:fab_colorRipple="@color/yellow" />
-
-</RelativeLayout>
-
-    <!--<android.support.v7.widget.RecyclerView--><!--android:id="@+id/RecyclerView"--><!--android:layout_width="320dp"--><!--android:layout_below="@+id/main_content"--><!--android:layout_height="match_parent"--><!--android:layout_gravity="start"--><!--android:background="#ffffff"--><!--android:scrollbars="vertical">-->
-
-    <!--</android.support.v7.widget.RecyclerView>-->
-
-    <!--</android.support.v4.widget.DrawerLayout>-->
-
-    <!--</com.heinrichreimersoftware.materialdrawer.DrawerFrameLayout>-->
+    <com.heinrichreimersoftware.materialdrawer.DrawerView
+        android:id="@+id/navDrawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true" />
+</android.support.v4.widget.DrawerLayout>

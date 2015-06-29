@@ -20,6 +20,7 @@ public class Bookmark implements Parcelable {
     private String image_path;
     private String date_added;
     private int order;
+    private int favorite;
     private int views;
     private int book_id;
     private String note;
@@ -36,6 +37,7 @@ public class Bookmark implements Parcelable {
         image_path = in.readString();
         date_added = in.readString();
         order = in.readInt();
+        favorite = in.readInt();
         views = in.readInt();
         book_id = in.readInt();
         note = in.readString();
@@ -43,14 +45,14 @@ public class Bookmark implements Parcelable {
         isNoteShowing = in.readInt();
     }
 
-
-    public Bookmark(int id, String name, int page_number, String image_path, String date_added, int order, int book_id, int views, String note, int times_painted, int isNoteShowing) {
+    public Bookmark(int id, String name, int page_number, String image_path, String date_added, int order, int favorite, int views, int book_id, String note, int times_painted, int isNoteShowing) {
         this.id = id;
         this.name = name;
         this.page_number = page_number;
         this.image_path = image_path;
         this.date_added = date_added;
         this.order = order;
+        this.favorite = favorite;
         this.views = views;
         this.book_id = book_id;
         this.note = note;
@@ -106,6 +108,14 @@ public class Bookmark implements Parcelable {
         this.order = order;
     }
 
+    public int getFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(int favorite) {
+        this.favorite = favorite;
+    }
+
     public int getViews() {
         return views;
     }
@@ -159,6 +169,7 @@ public class Bookmark implements Parcelable {
         dest.writeString(image_path);
         dest.writeString(date_added);
         dest.writeInt(order);
+        dest.writeInt(favorite);
         dest.writeInt(views);
         dest.writeInt(book_id);
         dest.writeString(note);

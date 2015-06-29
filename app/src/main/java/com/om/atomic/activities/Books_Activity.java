@@ -3,20 +3,22 @@ package com.om.atomic.activities;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,15 +29,19 @@ import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.getbase.floatingactionbutton.AddFloatingActionButton;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.heinrichreimersoftware.materialdrawer.DrawerView;
+import com.heinrichreimersoftware.materialdrawer.structure.DrawerItem;
+import com.heinrichreimersoftware.materialdrawer.structure.DrawerProfile;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.nispok.snackbar.listeners.EventListener;
@@ -87,8 +93,14 @@ public class Books_Activity extends Base_Activity {
     RelativeLayout emptyListLayout;
     @InjectView(R.id.createNewBookBTN)
     AddFloatingActionButton createNewBookBTN;
-//    @InjectView(R.id.navDrawer)
-//    DrawerFrameLayout navDrawer;
+    @InjectView(R.id.drawerLayout)
+    DrawerLayout drawerLayout;
+    @InjectView(R.id.navDrawer)
+    DrawerView navDrawer;
+    @InjectView(R.id.toolbar)
+    Toolbar toolbar;
+
+    private ActionBarDrawerToggle drawerToggle;
 
     private LayoutAnimationController controller;
 
@@ -147,78 +159,62 @@ public class Books_Activity extends Base_Activity {
 
         handleEmptyOrPopulatedScreen(books);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
             toolbar.setElevation(25f);
+        } else {
+            listView.setDrawSelectorOnTop(true);
+            listView.setSelector(R.drawable.abc_list_selector_holo_dark);
         }
 
-        /**
-         * Navigation Drawer code
-         */
-//        navDrawer.setProfile(
-//                new DrawerProfile()
-//                        .setBackground(getResources().getDrawable(R.drawable.navdrawer_background))
-//                        .setName("Oday Maleh")
-//                        .setDescription("Motherfucker")
-//                        .setOnProfileClickListener(new DrawerProfile.OnProfileClickListener() {
-//                            @Override
-//                            public void onClick(DrawerProfile drawerProfile) {
-//                                Toast.makeText(Books_Activity.this, "Clicked profile", Toast.LENGTH_SHORT).show();
-//                            }
-//                        })
-//        );
-//
-//        navDrawer.addItem(
-//                new DrawerItem()
-//                        .setImage(getResources().getDrawable(R.drawable.notfound_1))
-//                        .setTextPrimary("Title 1")
-//                        .setTextSecondary("Description 1")
-//                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
-//                            @Override
-//                            public void onClick(DrawerItem drawerItem, int id, int position) {
-//                                Toast.makeText(Books_Activity.this, "Clicked 1st item", Toast.LENGTH_SHORT).show();
-//                            }
-//                        })
-//        );
-//        navDrawer.addDivider();
-//        navDrawer.addItem(
-//                new DrawerItem()
-//                        .setImage(getResources().getDrawable(R.drawable.notfound_1))
-//                        .setTextPrimary("Title 2")
-//                        .setTextSecondary("Description 2")
-//                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
-//                            @Override
-//                            public void onClick(DrawerItem drawerItem, int id, int position) {
-//                                Toast.makeText(Books_Activity.this, "Clicked 2nd item", Toast.LENGTH_SHORT).show();
-//                            }
-//                        })
-//        );
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_closed) {
+            public void onDrawerClosed(View view) {
+                invalidateOptionsMenu();
+            }
 
-//        String USER_FULL_NAME = getIntent().getExtras().getString(Constants.USER_FULL_NAME);
-//        String USER_EMAIL_ADDRESS = getIntent().getExtras().getString(Constants.USER_EMAIL_ADDRESS);
-//        String USER_PHOTO_URL = getIntent().getExtras().getString(Constants.USER_PHOTO_URL);
-//
-//        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, navDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_closed) {
-//
-//            @Override
-//            public void onDrawerOpened(View drawerView) {
-//                super.onDrawerOpened(drawerView);
-//            }
-//
-//            @Override
-//            public void onDrawerClosed(View drawerView) {
-//                super.onDrawerClosed(drawerView);
-//            }
-//        };
-//
-//        navDrawer.setDrawerListener(mDrawerToggle);
-//        mDrawerToggle.syncState();
-        /**
-         * END OF NAVIGATION DRAWER CODE
-         */
+            public void onDrawerOpened(View drawerView) {
+                invalidateOptionsMenu();
+            }
+        };
 
+        drawerLayout.setDrawerListener(drawerToggle);
+        drawerLayout.closeDrawer(navDrawer);
+
+        navDrawer.setProfile(
+                new DrawerProfile()
+                        .setBackground(getResources().getDrawable(R.drawable.navdrawer_background))
+                        .setAvatar(getResources().getDrawable(R.drawable.ic_launcher))
+                        .setName(getResources().getString(R.string.app_name))
+                        .setDescription(getResources().getString(R.string.app_tagline))
+        );
+
+        /**
+         * UPGRADE TO PREMIUM
+         */
+        navDrawer.addItem(
+                new DrawerItem()
+                        .setImage(getResources().getDrawable(R.drawable.premium), DrawerItem.SMALL_AVATAR)
+                        .setTextPrimary(getResources().getString(R.string.navdrawer_upgrade_premium_item))
+        );
+
+        /**
+         * SETTINGS
+         */
+        navDrawer.addItem(
+                new DrawerItem()
+                        .setImage(getResources().getDrawable(R.drawable.settings), DrawerItem.SMALL_AVATAR)
+                        .setTextPrimary(getResources().getString(R.string.settings))
+                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
+                            @Override
+                            public void onClick(DrawerItem drawerItem, int id, int position) {
+                                Intent openSettingsIntent = new Intent(Books_Activity.this, Settings_Activity.class);
+                                startActivity(openSettingsIntent);
+                            }
+                        })
+        );
+
+        navDrawer.setBackground(getResources().getDrawable(R.drawable.navdrawer_background_repeat));
 
         createNewBookBTN.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -246,6 +242,19 @@ public class Books_Activity extends Base_Activity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
     }
 
     /**
@@ -276,6 +285,8 @@ public class Books_Activity extends Base_Activity {
                         book.setId(Integer.parseInt(parseObject.get("book_id").toString()));
                         book.setTitle(parseObject.get("title").toString());
                         book.setAuthor(parseObject.get("author").toString());
+                        book.setPages_count(parseObject.getInt("pages_count"));
+                        book.setPage_reached(parseObject.getInt("page_reached"));
                         book.setImagePath(parseObject.get("thumb").toString());
                         book.setDate_added(month + " " + day + " " + year);
                         book.setColorCode(rand.nextInt(7 - 1));
@@ -314,6 +325,9 @@ public class Books_Activity extends Base_Activity {
                                     }
                                 }
                                 downloadingBookDataLoader.dismiss();
+
+                                if (drawerLayout.isDrawerOpen(GravityCompat.START))
+                                    drawerLayout.closeDrawer(GravityCompat.START);
                             }
                         }
                     });
@@ -326,19 +340,21 @@ public class Books_Activity extends Base_Activity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.books_activity, menu);
-
-        return super.onCreateOptionsMenu(menu);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent openSettingsIntent = new Intent(this, Settings_Activity.class);
-        startActivity(openSettingsIntent);
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (drawerLayout.isDrawerOpen(GravityCompat.START))
+                drawerLayout.closeDrawer(GravityCompat.START);
+            else
+                super.onBackPressed();
 
-        return super.onOptionsItemSelected(item);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Subscribe
@@ -389,10 +405,7 @@ public class Books_Activity extends Base_Activity {
                 this, R.anim.books_list_layout_controller);
 
         //If animations are enabled
-        Log.d("DBVALUES", "Animations enabled? " + dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE));
-
         if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
-        Log.d("DBVALUES", "Animations enabled? STILL " + dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE));
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -647,11 +660,14 @@ public class Books_Activity extends Base_Activity {
 
                 holder.list_item_book = (RelativeLayout) parentView.findViewById(R.id.list_item_book);
                 holder.bookDateAddedTV = (TextView) parentView.findViewById(R.id.bookDateAddedTV);
+                holder.bookProgressValueTV = (TextView) parentView.findViewById(R.id.bookProgressValueTV);
+                holder.bookProgressBar = (ProgressBar) parentView.findViewById(R.id.bookProgressBar);
                 holder.bookTitleTV = (AutofitTextView) parentView.findViewById(R.id.bookTitleTV);
                 holder.bookAuthorTV = (AutofitTextView) parentView.findViewById(R.id.bookAuthorTV);
                 holder.bookThumbIMG = (ImageView) parentView.findViewById(R.id.bookThumbIMG);
                 holder.bookmarksNumberTV = (TextView) parentView.findViewById(R.id.bookmarksNumberTV);
-                holder.bookAction = (Button) parentView.findViewById(R.id.bookAction);
+                holder.bookActionLayout = (RelativeLayout) parentView.findViewById(R.id.bookActionLayout);
+                holder.bookProgressLayout = (RelativeLayout) parentView.findViewById(R.id.bookProgressLayout);
                 holder.needInflate = false;
 
                 parentView.setTag(holder);
@@ -673,7 +689,29 @@ public class Books_Activity extends Base_Activity {
             holder.bookTitleTV.setText(books.get(position).getTitle());
             holder.bookAuthorTV.setText(books.get(position).getAuthor());
 
-            Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookThumbIMG);
+            //If the pages count of the book is NOT -1 - it means that there IS a pages count number
+            if (!(books.get(position).getPages_count() == Constants.NO_BOOK_PAGES_COUNT)) {
+                holder.bookProgressLayout.setVisibility(View.VISIBLE);
+
+                if (books.get(position).getPage_reached() == 0) {
+                    holder.bookProgressValueTV.setText("p. " + books.get(position).getPage_reached() + " of " + books.get(position).getPages_count() + " (0%)");
+                } else {
+                    int bookProgressPercentage = (books.get(position).getPage_reached() * 100) / books.get(position).getPages_count();
+
+                    holder.bookProgressValueTV.setText("p. " + books.get(position).getPage_reached() + " of " + books.get(position).getPages_count() + " (" + bookProgressPercentage + "%)");
+                }
+
+                holder.bookProgressBar.setMax(books.get(position).getPages_count());
+                holder.bookProgressBar.setProgress(books.get(position).getPage_reached());
+            } else {
+                holder.bookProgressLayout.setVisibility(View.GONE);
+            }
+
+            if (books.get(position).getImagePath().equals(Constants.NO_BOOK_IMAGE)) {
+                Glide.with(Books_Activity.this).load(R.raw.cat_reading).asGif().into(holder.bookThumbIMG);
+            } else {
+                Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookThumbIMG);
+            }
 
             String[] bookDateAdded = books.get(position).getDate_added().split(" ");
             holder.bookDateAddedTV.setText(bookDateAdded[0] + " " + bookDateAdded[1] + ", " + bookDateAdded[2]);
@@ -699,10 +737,11 @@ public class Books_Activity extends Base_Activity {
                     break;
             }
 
-            holder.bookAction.setOnClickListener(new View.OnClickListener() {
+            holder.bookActionLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(final View view) {
-                    view.setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
+                public void onClick(View view) {
+                    final View overflowButton = view.findViewById(R.id.bookAction);
+                    overflowButton.findViewById(R.id.bookAction).setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
 
                     PopupMenu popup = new PopupMenu(context, view);
                     popup.getMenuInflater().inflate(R.menu.book_list_item,
@@ -746,13 +785,13 @@ public class Books_Activity extends Base_Activity {
                     popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
                         @Override
                         public void onDismiss(PopupMenu popupMenu) {
-                            view.setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_fade));
+                            overflowButton.findViewById(R.id.bookAction).setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_fade));
                         }
                     });
                 }
             });
 
-            bookmarks = dbHelper.getAllBookmarks(books.get(position).getId(), null);
+            bookmarks = dbHelper.getAllBookmarks(books.get(position).getId());
             holder.bookmarksNumberTV.setText(bookmarks.size() + "");
 
             return parentView;
@@ -774,11 +813,14 @@ public class Books_Activity extends Base_Activity {
     public static class BooksViewHolder {
         RelativeLayout list_item_book;
         TextView bookDateAddedTV;
+        TextView bookProgressValueTV;
+        RelativeLayout bookProgressLayout;
+        ProgressBar bookProgressBar;
         AutofitTextView bookTitleTV;
         AutofitTextView bookAuthorTV;
         ImageView bookThumbIMG;
         TextView bookmarksNumberTV;
-        Button bookAction;
+        RelativeLayout bookActionLayout;
         boolean needInflate;
     }
 }
