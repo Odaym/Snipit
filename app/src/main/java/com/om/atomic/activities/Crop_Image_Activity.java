@@ -72,7 +72,7 @@ public class Crop_Image_Activity extends Base_Activity {
             public void onClick(View view) {
                 String finalImagePath = create_CroppedImageFile(cropImageView.getCroppedImage());
 
-            Helper_Methods.delete_image_from_disk(tempImagePath_fromIntent);
+                Helper_Methods.delete_image_from_disk(tempImagePath_fromIntent);
 
                 if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE || CALL_PURPOSE == Constants.EDIT_BOOKMARK_IMAGE_PURPOSE_VALUE) {
                     EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_picture_changed", finalImagePath));
@@ -94,6 +94,7 @@ public class Crop_Image_Activity extends Base_Activity {
                 cropImageView.rotateImage(90);
             }
         });
+
     }
 
     @DebugLog

@@ -1,5 +1,5 @@
 <resources>
-    <dimen name="toolbar_top_padding">24dp</dimen>
+    <dimen name="toolbar_top_padding">0dp</dimen>
 
     <dimen name="fab_actions_menu_buttons_bottom_padding">15dp</dimen>
 
@@ -7,4 +7,7 @@
 
     <dimen name="listview_padding_left_right">5dp</dimen>
     <dimen name="listview_padding_between">5dp</dimen>
+
+    <dimen name="bookmark_list_item_height">100dp</dimen>
+
 </resources>

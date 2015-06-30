@@ -65,6 +65,9 @@ public class View_Bookmark_Activity extends Base_Activity {
     private Button addFavoriteBookmarkBTN;
     private SharedPreferences prefs;
 
+    @InjectView(R.id.pager)
+    HackyViewPager mPager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,7 +93,6 @@ public class View_Bookmark_Activity extends Base_Activity {
 
         NUM_PAGES = bookmarks.size();
 
-        HackyViewPager mPager = (HackyViewPager) findViewById(R.id.pager);
         mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 
         mPager.setAdapter(mPagerAdapter);
@@ -108,7 +110,7 @@ public class View_Bookmark_Activity extends Base_Activity {
                 bookmarks = dbHelper.searchAllBookmarks(bookmarks.get(current_bookmark_position).getBookId(), extras_search_term);
             else {
                 String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-                if (!sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+                if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
                     bookmarks = dbHelper.getAllBookmarks(bookmarks.get(current_bookmark_position).getBookId());
                 } else {
                     bookmarks = dbHelper.getAllBookmarks_Ordered(bookmarks.get(current_bookmark_position).getBookId(), sorting_type_pref);

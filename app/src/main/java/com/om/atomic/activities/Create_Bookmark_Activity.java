@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -53,6 +54,8 @@ public class Create_Bookmark_Activity extends Base_Activity {
     FloatingActionButton doneBTN;
     @InjectView(R.id.createNewBookmarkBTN)
     FloatingActionButton createNewBookmarkBTN;
+    @InjectView(R.id.toolbar)
+    Toolbar toolbar;
 
     private ArrayList<FormEditText> allFields = new ArrayList<>();
 
@@ -75,6 +78,7 @@ public class Create_Bookmark_Activity extends Base_Activity {
 
         EventBus_Singleton.getInstance().register(this);
 
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));

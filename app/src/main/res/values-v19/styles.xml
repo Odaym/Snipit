@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- SHOWCASE VIEW STYLES -->
-    <!-- .................... -->
-
     <style name="ShowcaseView">
         <item name="sv_titleTextAppearance">@style/TextAppearance.ShowcaseView.Title</item>
         <item name="sv_detailTextAppearance">@style/TextAppearance.ShowcaseView.Detail</item>

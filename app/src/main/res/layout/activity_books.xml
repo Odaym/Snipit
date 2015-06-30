@@ -16,8 +16,9 @@
             android:layout_height="wrap_content"
             android:background="@color/green"
             android:paddingTop="@dimen/toolbar_top_padding"
-            android:theme="@style/ToolBarStyle"
-            app:theme="@style/ToolBarStyle" />
+            android:minHeight="?attr/actionBarSize"
+            android:theme="@style/ToolBarStyle_Global"
+            app:theme="@style/ToolBarStyle_Global" />
 
         <com.om.atomic.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
             android:id="@+id/booksList"

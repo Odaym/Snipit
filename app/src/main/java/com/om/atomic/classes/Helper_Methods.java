@@ -112,6 +112,18 @@ public class Helper_Methods {
         ActionBarActivity activity = (ActionBarActivity) activityReference;
 
         switch (book_color_code) {
+            case Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS:
+                if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP)
+                    activity.getWindow().setStatusBarColor(context.getResources().getColor(R.color.darker_green));
+                if (activity.getSupportActionBar() != null)
+                    activity.getSupportActionBar().setBackgroundDrawable(context.getResources().getDrawable(R.color.green));
+                break;
+            case Constants.OPEN_SOURCE_LIBS_ACTIVITY_TOOLBAR_COLORS:
+                if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP)
+                    activity.getWindow().setStatusBarColor(context.getResources().getColor(R.color.darker_purple));
+                if (activity.getSupportActionBar() != null)
+                    activity.getSupportActionBar().setBackgroundDrawable(context.getResources().getDrawable(R.color.purple));
+                break;
             case 0:
                 if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP)
                     activity.getWindow().setStatusBarColor(context.getResources().getColor(R.color.darker_pink));

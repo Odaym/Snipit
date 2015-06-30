@@ -8,4 +8,6 @@
     <dimen name="listview_padding_left_right">5dp</dimen>
     <dimen name="listview_padding_between">5dp</dimen>
 
+    <dimen name="bookmark_list_item_height">100dp</dimen>
+
 </resources>

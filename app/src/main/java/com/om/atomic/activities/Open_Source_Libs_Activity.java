@@ -1,8 +1,8 @@
 package com.om.atomic.activities;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.om.atomic.R;
+import com.om.atomic.classes.Constants;
 import com.om.atomic.classes.Helper_Methods;
 import com.om.atomic.classes.Open_Source_Library;
 
@@ -26,6 +27,8 @@ import butterknife.InjectView;
 public class Open_Source_Libs_Activity extends Base_Activity {
     @InjectView(R.id.librariesList)
     ListView librariesList;
+    @InjectView(R.id.toolbar)
+    Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,17 +37,15 @@ public class Open_Source_Libs_Activity extends Base_Activity {
 
         ButterKnife.inject(this);
 
+        Helper_Methods helperMethods = new Helper_Methods(this);
+
         overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getResources().getString(R.string.about_open_source_libraries_activity_title));
 
-        Helper_Methods helperMethods = new Helper_Methods(this);
-
-        if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP)
-            getWindow().setStatusBarColor(getResources().getColor(R.color.darker_purple));
-
-        getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.color.purple));
+        helperMethods.setUpActionbarColors(this, Constants.OPEN_SOURCE_LIBS_ACTIVITY_TOOLBAR_COLORS);
 
         ArrayList<Open_Source_Library> libraries = new ArrayList<>();
 

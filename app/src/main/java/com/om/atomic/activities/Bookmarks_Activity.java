@@ -16,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -95,6 +96,8 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
     RelativeLayout emptyListLayout;
     @InjectView(R.id.bookmarksList)
     DragSortListView listView;
+    @InjectView(R.id.toolbar)
+    Toolbar toolbar;
 
     private boolean inSearchMode = false;
     private String searchQueryForGlobalUse;
@@ -109,11 +112,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             new DragSortListView.DropListener() {
                 @Override
                 public void drop(int from, int to) {
-                    for (int i = 0; i < bookmarks.size(); i++) {
-                        dbHelper.updateBookmark(bookmarks.get(i));
-                        Log.d("BOOKMARKS", "ORDER ON DROP " + bookmarks.get(i).getOrder());
-                    }
-
                     bookmarksAdapter.notifyDataSetChanged();
                 }
             };
@@ -137,10 +135,8 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
 
             if (!sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-                prefsEditor = prefs.edit();
                 prefsEditor.putString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-                prefsEditor.apply();
-
+                prefsEditor.commit();
                 prepareForNotifyDataChanged(book_id);
 
                 Crouton.makeText(Bookmarks_Activity.this, R.string.sort_order_override, Style.ALERT).show();
@@ -207,23 +203,17 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         book_title = getIntent().getStringExtra(Constants.EXTRAS_BOOK_TITLE);
         book_color_code = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR);
 
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(book_title);
         helperMethods.setUpActionbarColors(this, book_color_code);
 
         String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-
         if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
             bookmarks = dbHelper.getAllBookmarks(book_id);
-            Log.d("BOOKMARKS", "NO SORT PREFERENCE");
-        }
-        else {
+        } else {
             bookmarks = dbHelper.getAllBookmarks_Ordered(book_id, sorting_type_pref);
-            Log.d("BOOKMARKS", sorting_type_pref);
         }
-
-        for (Bookmark bm : bookmarks)
-            Log.d("BOOKMARKS", "ORDER ONCREATE " + bm.getOrder());
 
         handleEmptyOrPopulatedScreen(bookmarks);
 

@@ -136,5 +136,5 @@
 
     <!-- ABOUT OPEN SOURCE LIBRARIES ACTIVITY -->
     <string name="about_open_source_libraries_activity_title">Open Source Libraries</string>
-    <string name="introduction_text">Atomic is made with ❤ by Oday Maleh. And when love was not enough, these libraries came to the rescue.</string>
+    <string name="introduction_text">Atomic is made with ❤ by Atomic Software. And when love was not enough, these libraries came to the rescue.</string>
 </resources>

@@ -4,10 +4,19 @@
     android:layout_height="match_parent"
     android:background="@color/light_gray">
 
+    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:theme="@style/ToolBarStyle_Global" />
+
     <com.om.atomic.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
         android:id="@+id/bookmarksList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar"
         android:background="@color/light_gray"
         android:divider="@android:color/transparent"
         android:dividerHeight="@dimen/listview_padding_between"
@@ -45,9 +54,9 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/bookmarkIMG"
             android:layout_centerHorizontal="true"
-            android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginTop="@dimen/padding_bookmarks_activity_hint_above_image"
-            android:text="@string/empty_bookmarks_layout_hint" />
+            android:text="@string/empty_bookmarks_layout_hint"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
     </RelativeLayout>
 
@@ -61,8 +70,8 @@
         android:layout_marginBottom="@dimen/create_book_bookmark_fab_buttons_margins"
         android:layout_marginEnd="@dimen/create_book_bookmark_fab_buttons_margins"
         android:layout_marginRight="@dimen/create_book_bookmark_fab_buttons_margins"
-        fab:fab_icon="@drawable/create_bookmark_camera"
         fab:fab_colorPressed="@color/yellow"
-        fab:fab_colorRipple="@color/yellow" />
+        fab:fab_colorRipple="@color/yellow"
+        fab:fab_icon="@drawable/create_bookmark_camera" />
 
 </RelativeLayout>

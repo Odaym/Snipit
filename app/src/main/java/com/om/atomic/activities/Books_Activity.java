@@ -104,6 +104,8 @@ public class Books_Activity extends Base_Activity {
 
     private LayoutAnimationController controller;
 
+    private Helper_Methods helperMethods;
+
     static final int DELETE_BOOK_ANIMATION_DURATION = 300;
 
     private final static int SHOW_CREATE_BOOK_SHOWCASE = 1;
@@ -140,6 +142,8 @@ public class Books_Activity extends Base_Activity {
 
         EventBus_Singleton.getInstance().register(this);
 
+        helperMethods = new Helper_Methods(this);
+
         ButterKnife.inject(this);
 
         UIHandler = new Handler() {
@@ -160,6 +164,7 @@ public class Books_Activity extends Base_Activity {
         handleEmptyOrPopulatedScreen(books);
 
         setSupportActionBar(toolbar);
+        helperMethods.setUpActionbarColors(this, Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS);
 
         if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
             toolbar.setElevation(25f);

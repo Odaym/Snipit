@@ -60,6 +60,7 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
             getWindow().setStatusBarColor(getResources().getColor(R.color.darker_red));
             toolbar.setElevation(25f);
         }
+
         toolbar.setBackgroundDrawable(getResources().getDrawable(R.color.red));
 
         root.addView(toolbar, 0);

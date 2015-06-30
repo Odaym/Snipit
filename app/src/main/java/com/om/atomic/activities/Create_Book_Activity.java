@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
@@ -71,6 +72,8 @@ public class Create_Book_Activity extends Base_Activity {
     FloatingActionButton doneBTN;
     @InjectView(R.id.scanBTN)
     ImageView scanBTN;
+    @InjectView(R.id.toolbar)
+    Toolbar toolbar;
 
     private String bookImagePath;
     private int book_pages_count;
@@ -114,6 +117,7 @@ public class Create_Book_Activity extends Base_Activity {
 
         final Helper_Methods helperMethods = new Helper_Methods(this);
 
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
@@ -144,6 +148,7 @@ public class Create_Book_Activity extends Base_Activity {
             }
         } else {
             getSupportActionBar().setTitle(getString(R.string.create_book_activity_title));
+            helperMethods.setUpActionbarColors(this, -1);
         }
 
         doneBTN.setOnClickListener(new View.OnClickListener() {
