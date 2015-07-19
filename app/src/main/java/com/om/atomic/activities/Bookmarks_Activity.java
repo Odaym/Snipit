@@ -81,8 +81,6 @@ import java.util.Locale;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import de.keyboardsurfer.android.widget.crouton.Crouton;
-import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 
@@ -100,13 +98,14 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
     Toolbar toolbar;
 
     private boolean inSearchMode = false;
-    private String searchQueryForGlobalUse;
+    private String searchQueryForGlobalUse = Constants.EXTRAS_NO_SEARCH_TERM;
 
     private Bookmark tempBookmark;
 
     private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 
     private SearchView searchView;
+    private String sorting_type_pref;
 
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
@@ -115,6 +114,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                     bookmarksAdapter.notifyDataSetChanged();
                 }
             };
+
     private Bookmarks_Adapter bookmarksAdapter;
     private int book_id;
     private DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
@@ -127,20 +127,11 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
         }
     };
+
     private DragSortListView.DragListener onDrag = new DragSortListView.DragListener() {
         @Override
         public void drag(int from, int to) {
             bookmarksAdapter.swap(from, to);
-
-            String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-
-            if (!sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-                prefsEditor.putString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-                prefsEditor.commit();
-                prepareForNotifyDataChanged(book_id);
-
-                Crouton.makeText(Bookmarks_Activity.this, R.string.sort_order_override, Style.ALERT).show();
-            }
         }
     };
 
@@ -208,12 +199,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         getSupportActionBar().setTitle(book_title);
         helperMethods.setUpActionbarColors(this, book_color_code);
 
-        String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-        if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-            bookmarks = dbHelper.getAllBookmarks(book_id);
-        } else {
-            bookmarks = dbHelper.getAllBookmarks_Ordered(book_id, sorting_type_pref);
-        }
+        bookmarks = dbHelper.getAllBookmarks(book_id);
 
         handleEmptyOrPopulatedScreen(bookmarks);
 
@@ -263,6 +249,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                         Intent intent = new Intent(Bookmarks_Activity.this, View_Bookmark_Activity.class);
                         intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
                         intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
+                        intent.putExtra(Constants.EXTRAS_SEARCH_TERM, searchQueryForGlobalUse);
                         intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position - 1);
                         intent.putParcelableArrayListExtra("bookmarks", bookmarks);
                         startActivity(intent);
@@ -306,6 +293,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 @Override
                 public boolean onClose() {
                     inSearchMode = false;
+                    searchQueryForGlobalUse = Constants.EXTRAS_NO_SEARCH_TERM;
                     return false;
                 }
             });
@@ -318,8 +306,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         String sortByFormattedForSQL;
-
-        prefsEditor = prefs.edit();
 
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -334,23 +320,20 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 return true;
             case R.id.sort_page_number:
                 sortByFormattedForSQL = "page_number";
-                prefsEditor.putString(Constants.SORTING_TYPE_PREF, sortByFormattedForSQL);
-                prefsEditor.apply();
-                bookmarks = dbHelper.getAllBookmarks_Ordered(book_id, sortByFormattedForSQL);
+                dbHelper.prepare_UpdatingAllSortedBookmarks(book_id, sortByFormattedForSQL);
+                bookmarks = dbHelper.getAllBookmarks(book_id);
                 bookmarksAdapter.notifyDataSetChanged();
                 break;
             case R.id.sort_by_name:
                 sortByFormattedForSQL = "name";
-                prefsEditor.putString(Constants.SORTING_TYPE_PREF, sortByFormattedForSQL);
-                prefsEditor.apply();
-                bookmarks = dbHelper.getAllBookmarks_Ordered(book_id, sortByFormattedForSQL);
+                dbHelper.prepare_UpdatingAllSortedBookmarks(book_id, sortByFormattedForSQL);
+                bookmarks = dbHelper.getAllBookmarks(book_id);
                 bookmarksAdapter.notifyDataSetChanged();
                 break;
             case R.id.sort_by_views:
                 sortByFormattedForSQL = "views";
-                prefsEditor.putString(Constants.SORTING_TYPE_PREF, sortByFormattedForSQL);
-                prefsEditor.apply();
-                bookmarks = dbHelper.getAllBookmarks_Ordered(book_id, sortByFormattedForSQL);
+                dbHelper.prepare_UpdatingAllSortedBookmarks(book_id, sortByFormattedForSQL);
+                bookmarks = dbHelper.getAllBookmarks(book_id);
                 bookmarksAdapter.notifyDataSetChanged();
                 break;
         }
@@ -378,12 +361,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
     public void handle_BusEvents(EventBus_Poster ebp) {
         switch (ebp.getMessage()) {
             case "bookmark_viewed":
-                String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-                if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-                    bookmarks = dbHelper.getAllBookmarks(book_id);
-                } else {
-                    bookmarks = dbHelper.getAllBookmarks_Ordered(book_id, sorting_type_pref);
-                }
+                bookmarks = dbHelper.getAllBookmarks(book_id);
                 bookmarksAdapter.notifyDataSetChanged();
                 break;
             case "bookmark_image_updated":
@@ -433,14 +411,9 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         /**
          * If a specific sorting order exists, follow that order when getting the bookmarks
          */
-        String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
 
         if (!inSearchMode) {
-            if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-                bookmarks = dbHelper.getAllBookmarks(book_id);
-            } else {
-                bookmarks = dbHelper.getAllBookmarks_Ordered(book_id, sorting_type_pref);
-            }
+            bookmarks = dbHelper.getAllBookmarks(book_id);
 
             handleEmptyUI(bookmarks);
         } else {
@@ -473,7 +446,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 this, R.anim.bookmarks_list_layout_controller);
 
 //        If animations are enabled
-        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
+        if (helperMethods.areAnimationsEnabled(dbHelper)) {
             listView.addHeaderView(listViewHeaderAd);
             listView.setAdapter(bookmarksAdapter);
             listView.setLayoutAnimation(controller);
@@ -678,12 +651,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                 searchQueryForGlobalUse = searchQuery;
                 bookmarks = dbHelper.searchAllBookmarks(book_id, searchQuery);
             } else {
-                String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-
-                if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT))
-                    bookmarks = dbHelper.getAllBookmarks(book_id);
-                else
-                    bookmarks = dbHelper.getAllBookmarks_Ordered(book_id, sorting_type_pref);
+                bookmarks = dbHelper.getAllBookmarks(book_id);
             }
 
             bookmarksAdapter.notifyDataSetChanged();
@@ -888,7 +856,12 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                                         undoDeleteBookmarkSB.dismiss();
                                     }
 
-                                    deleteCell(parentView, position);
+                                    if (helperMethods.areAnimationsEnabled(dbHelper)) {
+
+                                        deleteCell(parentView, position);
+                                    } else {
+                                        finalizeBookmarkDeletion(bookmarks.get(position));
+                                    }
 
                                     break;
                             }
@@ -1003,12 +976,13 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         public void swap(int from, int to) {
             if (to < bookmarks.size() && from < bookmarks.size()) {
                 Collections.swap(bookmarks, from, to);
+
                 int tempNumber = bookmarks.get(from).getOrder();
                 bookmarks.get(from).setOrder(bookmarks.get(to).getOrder());
                 bookmarks.get(to).setOrder(tempNumber);
 
-//                dbHelper.updateBookmark(bookmarks.get(from));
-//                dbHelper.updateBookmark(bookmarks.get(to));
+                dbHelper.updateBookmark(bookmarks.get(from));
+                dbHelper.updateBookmark(bookmarks.get(to));
             }
         }
     }

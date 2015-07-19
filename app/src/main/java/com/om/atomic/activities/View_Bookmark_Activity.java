@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -83,6 +84,7 @@ public class View_Bookmark_Activity extends Base_Activity {
 
         String book_title = getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
         current_bookmark_position = getIntent().getExtras().getInt(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION);
+
         bookmarks = getIntent().getExtras().getParcelableArrayList("bookmarks");
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -102,19 +104,24 @@ public class View_Bookmark_Activity extends Base_Activity {
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
         if (ebp.getMessage().equals("bookmark_image_needs_reload")) {
-            //If at the end of this whole operation we discover that this was being done on a search result list
-            // change the query that will get the updated version of the bookmark that needs reloading
-            String extras_search_term = getIntent().getExtras().getString(Constants.EXTRAS_SEARCH_TERM);
+            String extras_search_term = getIntent().getExtras().getString(Constants.EXTRAS_SEARCH_TERM, Constants.EXTRAS_NO_SEARCH_TERM);
+            String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
 
-            if (extras_search_term != null)
+            Log.d("POSITON", "BEFORE IF! --- Search term is " + extras_search_term + " - Sorting preference is " + sorting_type_pref);
+
+            if (extras_search_term.equals(Constants.EXTRAS_NO_SEARCH_TERM) && sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+                Log.d("POSITION", "No search term - No sorting preference");
+                bookmarks = dbHelper.getAllBookmarks(bookmarks.get(current_bookmark_position).getBookId());
+            } else if (extras_search_term.equals(Constants.EXTRAS_NO_SEARCH_TERM) && !sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
+                Log.d("POSITION", "No search term - Sorting preference is " + sorting_type_pref);
+                bookmarks = dbHelper.getAllBookmarks_Ordered(bookmarks.get(current_bookmark_position).getBookId(), sorting_type_pref);
+            } else if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
                 bookmarks = dbHelper.searchAllBookmarks(bookmarks.get(current_bookmark_position).getBookId(), extras_search_term);
-            else {
-                String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-                if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-                    bookmarks = dbHelper.getAllBookmarks(bookmarks.get(current_bookmark_position).getBookId());
-                } else {
-                    bookmarks = dbHelper.getAllBookmarks_Ordered(bookmarks.get(current_bookmark_position).getBookId(), sorting_type_pref);
-                }
+                Log.d("POSITION", "Search term is " + extras_search_term + " - No sorting preference " + sorting_type_pref);
+            } else {
+                bookmarks = dbHelper.searchAllBookmarks_Ordered(bookmarks.get(current_bookmark_position).getBookId(), extras_search_term, sorting_type_pref);
+//                    bookmarks = dbHelper.searchAllBookmarks(bookmarks.get(current_bookmark_position).getBookId(), extras_search_term);
+//                    bookmarks = dbHelper.getAllBookmarks_Ordered(bookmarks.get(current_bookmark_position).getBookId(), sorting_type_pref);
             }
 
             mPagerAdapter.notifyDataSetChanged();

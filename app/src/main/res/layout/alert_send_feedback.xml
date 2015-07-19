@@ -25,7 +25,8 @@
             android:textColor="@android:color/black"
             android:textColorHint="@color/edittext_hint_color"
             android:textCursorDrawable="@null"
-            validator:emptyErrorString="@string/empty_feedback_field_error" />
+            validator:emptyErrorString="@string/empty_feedback_field_error"
+            validator:testType="alpha" />
 
     </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 

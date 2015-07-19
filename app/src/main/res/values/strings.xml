@@ -8,7 +8,7 @@
     <string name="banner_ad_unit_id_searchresults">ca-app-pub-7047539644799809/6418663895</string>
     <string name="banner_ad_unit_id_opensource_libs">ca-app-pub-7047539644799809/2417489494</string>
 
-    <string name="app_name">Atomic</string>
+    <string name="app_name">Snipit</string>
     <string name="app_tagline">Bookmarks for textbooks!</string>
     <string name="app_version">1.0.0</string>
     <string name="gotit">Got it</string>
@@ -22,6 +22,8 @@
     <string name="action_needs_internet">This action needs an Internet connection</string>
 
     <!-- NAVDRAWER -->
+    <string name="navdrawer_favorite_bookmarks_item">Favorite Bookmarks</string>
+    <string name="navdrawer_trash_item">Trash</string>
     <string name="navdrawer_upgrade_premium_item">Upgrade to Premium</string>
     <string name="navdrawer_settings_item">Settings</string>
     <string name="navigation_drawer_open"></string>
@@ -33,17 +35,17 @@
     <string name="pref_tutorial_section_title">Tutorial</string>
     <string name="pref_tutorial_title">Tutorial Mode</string>
     <string name="pref_tutorial_summary">Hint screens will show up to help you get started</string>
-    <string name="pref_populate_sample_data_title">Test drive Atomic</string>
+    <string name="pref_populate_sample_data_title">Test drive Snipit</string>
     <string name="pref_populate_sample_data_summary">Jump right in by adding 4 sample books!</string>
     <string name="pref_about_section_title">About</string>
-    <string name="pref_about_title">About Atomic</string>
+    <string name="pref_about_title">About Snipit</string>
     <string name="pref_feedback_title">Send feedback</string>
     <string name="pref_send_feedback_button_title">SEND</string>
     <string name="pref_sendfeedback_alert_hint_tell_us_what_you_think">Don\'t hold back!</string>
     <string name="pref_sendfeedback_alert_title">Compose Feedback</string>
     <string name="pref_sendfeedback_alert_summary">We will respond via email to the feedback you provide. You can also send your feedback to:</string>
     <string name="pref_open_source_libraries_title">Open Source Libraries</string>
-    <string name="pref_rate_google_play">Rate Atomic on Google Play</string>
+    <string name="pref_rate_google_play">Rate Snipit on Google Play</string>
     <string name="pref_rate_google_play_summary">Consider writing a review, it really helps!</string>
     <string name="empty_feedback_field_error">This can\'t be empty</string>
     <string name="loading_sending_feedback">Sending your feedback</string>
@@ -136,5 +138,5 @@
 
     <!-- ABOUT OPEN SOURCE LIBRARIES ACTIVITY -->
     <string name="about_open_source_libraries_activity_title">Open Source Libraries</string>
-    <string name="introduction_text">Atomic is made with ❤ by Atomic Software. And when love was not enough, these libraries came to the rescue.</string>
+    <string name="introduction_text">Snipit is made with ❤ by Atomic Software. And when love was not enough, these libraries came to the rescue.</string>
 </resources>

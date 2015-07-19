@@ -31,11 +31,10 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.getbase.floatingactionbutton.AddFloatingActionButton;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -85,7 +84,7 @@ public class Books_Activity extends Base_Activity {
     @Icicle
     ArrayList<Book> books;
 
-    private Book tempBook;
+    Book tempBook;
 
     @InjectView(R.id.booksList)
     DragSortListView listView;
@@ -159,7 +158,7 @@ public class Books_Activity extends Base_Activity {
         };
 
         dbHelper = new DatabaseHelper(this);
-        books = dbHelper.getAllBooks(null);
+        books = dbHelper.getAllBooks();
 
         handleEmptyOrPopulatedScreen(books);
 
@@ -195,9 +194,39 @@ public class Books_Activity extends Base_Activity {
         );
 
         /**
-         * UPGRADE TO PREMIUM
+         * FAVORITE BOOKMARKS
          */
         navDrawer.addItem(
+                new DrawerItem()
+                        .setImage(getResources().getDrawable(R.drawable.favorites), DrawerItem.SMALL_AVATAR)
+                        .setTextPrimary(getResources().getString(R.string.navdrawer_favorite_bookmarks_item))
+                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
+                            @Override
+                            public void onClick(DrawerItem drawerItem, int i, int i1) {
+                                Toast.makeText(Books_Activity.this, "Favorite bookmarks will appear here", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+        );
+
+        /**
+         * TRASH
+         */
+        navDrawer.addItem(
+                new DrawerItem()
+                        .setImage(getResources().getDrawable(R.drawable.trash), DrawerItem.SMALL_AVATAR)
+                        .setTextPrimary(getResources().getString(R.string.navdrawer_trash_item))
+                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
+                            @Override
+                            public void onClick(DrawerItem drawerItem, int i, int i1) {
+                                Toast.makeText(Books_Activity.this, "Deleted bookmarks will appear here", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+        );
+
+        /**
+         * UPGRADE TO PREMIUM
+         */
+        navDrawer.addFixedItem(
                 new DrawerItem()
                         .setImage(getResources().getDrawable(R.drawable.premium), DrawerItem.SMALL_AVATAR)
                         .setTextPrimary(getResources().getString(R.string.navdrawer_upgrade_premium_item))
@@ -206,7 +235,7 @@ public class Books_Activity extends Base_Activity {
         /**
          * SETTINGS
          */
-        navDrawer.addItem(
+        navDrawer.addFixedItem(
                 new DrawerItem()
                         .setImage(getResources().getDrawable(R.drawable.settings), DrawerItem.SMALL_AVATAR)
                         .setTextPrimary(getResources().getString(R.string.settings))
@@ -387,7 +416,7 @@ public class Books_Activity extends Base_Activity {
 
     @DebugLog
     public void prepareForNotifyDataChanged() {
-        books = dbHelper.getAllBooks(null);
+        books = dbHelper.getAllBooks();
         handleEmptyUI(books);
     }
 
@@ -410,7 +439,7 @@ public class Books_Activity extends Base_Activity {
                 this, R.anim.books_list_layout_controller);
 
         //If animations are enabled
-        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
+        if (helperMethods.areAnimationsEnabled(dbHelper)) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -490,63 +519,7 @@ public class Books_Activity extends Base_Activity {
         Animation.AnimationListener collapseAL = new Animation.AnimationListener() {
             @Override
             public void onAnimationEnd(Animation arg0) {
-
-                Spannable sentenceToSpan = new SpannableString(getResources().getString(R.string.delete_book_confirmation_message) + " " + books.get(index).getTitle());
-
-                sentenceToSpan.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, 7, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                books.remove(index);
-                handleEmptyUI(books);
-                booksAdapter.notifyDataSetChanged();
-
-                undoDeleteBookSB =
-                        Snackbar.with(getApplicationContext())
-                                .actionLabel(R.string.undo_deletion_title)
-                                        //So that we differentiate between explicitly dismissing the snackbar and having it go away due to pressing UNDO
-                                .dismissOnActionClicked(false)
-                                .duration(8000)
-                                .actionColor(getResources().getColor(R.color.yellow))
-                                .text(sentenceToSpan)
-                                .eventListener(new EventListener() {
-                                    @Override
-                                    public void onShow(Snackbar snackbar) {
-                                    }
-
-                                    @Override
-                                    public void onShowByReplace(Snackbar snackbar) {
-                                    }
-
-                                    @Override
-                                    public void onShown(Snackbar snackbar) {
-                                    }
-
-                                    @Override
-                                    public void onDismiss(Snackbar snackbar) {
-                                        if (itemPendingDeleteDecision) {
-                                            finalizeBookDeletion(tempBook);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onDismissByReplace(Snackbar snackbar) {
-                                    }
-
-                                    @Override
-                                    public void onDismissed(Snackbar snackbar) {
-                                    }
-                                }).actionListener(new ActionClickListener() {
-                            @Override
-                            public void onActionClicked(Snackbar snackbar) {
-                                prepareForNotifyDataChanged();
-                                booksAdapter.notifyDataSetChanged();
-
-                                itemPendingDeleteDecision = false;
-                                undoDeleteBookSB.dismiss();
-
-                            }
-                        });
-
-                undoDeleteBookSB.show(Books_Activity.this);
+                showUndeleteDialog(tempBook);
             }
 
             @Override
@@ -587,6 +560,68 @@ public class Books_Activity extends Base_Activity {
 
         anim.setDuration(DELETE_BOOK_ANIMATION_DURATION);
         v.startAnimation(anim);
+    }
+
+    public void showUndeleteDialog(final Book tempBookToDelete) {
+        itemPendingDeleteDecision = true;
+
+        Spannable sentenceToSpan = new SpannableString(getResources().getString(R.string.delete_book_confirmation_message) + " " + tempBookToDelete.getTitle());
+
+        sentenceToSpan.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, 7, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        books.remove(tempBookToDelete);
+        handleEmptyUI(books);
+        booksAdapter.notifyDataSetChanged();
+
+        undoDeleteBookSB =
+                Snackbar.with(getApplicationContext())
+                        .actionLabel(R.string.undo_deletion_title)
+                                //So that we differentiate between explicitly dismissing the snackbar and having it go away due to pressing UNDO
+                        .dismissOnActionClicked(false)
+                        .duration(8000)
+                        .actionColor(getResources().getColor(R.color.yellow))
+                        .text(sentenceToSpan)
+                        .eventListener(new EventListener() {
+                            @Override
+                            public void onShow(Snackbar snackbar) {
+                            }
+
+                            @Override
+                            public void onShowByReplace(Snackbar snackbar) {
+                            }
+
+                            @Override
+                            public void onShown(Snackbar snackbar) {
+                            }
+
+                            @Override
+                            public void onDismiss(Snackbar snackbar) {
+                                if (itemPendingDeleteDecision) {
+                                    finalizeBookDeletion(tempBookToDelete);
+                                }
+                            }
+
+                            @Override
+                            public void onDismissByReplace(Snackbar snackbar) {
+                            }
+
+                            @Override
+                            public void onDismissed(Snackbar snackbar) {
+                            }
+                        }).actionListener(new ActionClickListener() {
+                    @Override
+                    public void onActionClicked(Snackbar snackbar) {
+                        prepareForNotifyDataChanged();
+                        booksAdapter.notifyDataSetChanged();
+
+                        itemPendingDeleteDecision = false;
+                        undoDeleteBookSB.dismiss();
+
+                    }
+                });
+
+        undoDeleteBookSB.show(Books_Activity.this);
+
     }
 
     public void finalizeBookDeletion(Book tempBook) {
@@ -665,14 +700,11 @@ public class Books_Activity extends Base_Activity {
 
                 holder.list_item_book = (RelativeLayout) parentView.findViewById(R.id.list_item_book);
                 holder.bookDateAddedTV = (TextView) parentView.findViewById(R.id.bookDateAddedTV);
-                holder.bookProgressValueTV = (TextView) parentView.findViewById(R.id.bookProgressValueTV);
-                holder.bookProgressBar = (ProgressBar) parentView.findViewById(R.id.bookProgressBar);
                 holder.bookTitleTV = (AutofitTextView) parentView.findViewById(R.id.bookTitleTV);
                 holder.bookAuthorTV = (AutofitTextView) parentView.findViewById(R.id.bookAuthorTV);
                 holder.bookThumbIMG = (ImageView) parentView.findViewById(R.id.bookThumbIMG);
                 holder.bookmarksNumberTV = (TextView) parentView.findViewById(R.id.bookmarksNumberTV);
                 holder.bookActionLayout = (RelativeLayout) parentView.findViewById(R.id.bookActionLayout);
-                holder.bookProgressLayout = (RelativeLayout) parentView.findViewById(R.id.bookProgressLayout);
                 holder.needInflate = false;
 
                 parentView.setTag(holder);
@@ -694,29 +726,25 @@ public class Books_Activity extends Base_Activity {
             holder.bookTitleTV.setText(books.get(position).getTitle());
             holder.bookAuthorTV.setText(books.get(position).getAuthor());
 
-            //If the pages count of the book is NOT -1 - it means that there IS a pages count number
-            if (!(books.get(position).getPages_count() == Constants.NO_BOOK_PAGES_COUNT)) {
-                holder.bookProgressLayout.setVisibility(View.VISIBLE);
+//            //If the pages count of the book is NOT -1 - it means that there IS a pages count number
+//            if (!(books.get(position).getPages_count() == Constants.NO_BOOK_PAGES_COUNT)) {
+//                holder.bookProgressLayout.setVisibility(View.VISIBLE);
+//
+//                if (books.get(position).getPage_reached() == 0) {
+//                    holder.bookProgressValueTV.setText("p. " + books.get(position).getPage_reached() + " of " + books.get(position).getPages_count() + " (0%)");
+//                } else {
+//                    int bookProgressPercentage = (books.get(position).getPage_reached() * 100) / books.get(position).getPages_count();
+//
+//                    holder.bookProgressValueTV.setText("p. " + books.get(position).getPage_reached() + " of " + books.get(position).getPages_count() + " (" + bookProgressPercentage + "%)");
+//                }
+//
+//                holder.bookProgressBar.setMax(books.get(position).getPages_count());
+//                holder.bookProgressBar.setProgress(books.get(position).getPage_reached());
+//            } else {
+//                holder.bookProgressLayout.setVisibility(View.GONE);
+//            }
 
-                if (books.get(position).getPage_reached() == 0) {
-                    holder.bookProgressValueTV.setText("p. " + books.get(position).getPage_reached() + " of " + books.get(position).getPages_count() + " (0%)");
-                } else {
-                    int bookProgressPercentage = (books.get(position).getPage_reached() * 100) / books.get(position).getPages_count();
-
-                    holder.bookProgressValueTV.setText("p. " + books.get(position).getPage_reached() + " of " + books.get(position).getPages_count() + " (" + bookProgressPercentage + "%)");
-                }
-
-                holder.bookProgressBar.setMax(books.get(position).getPages_count());
-                holder.bookProgressBar.setProgress(books.get(position).getPage_reached());
-            } else {
-                holder.bookProgressLayout.setVisibility(View.GONE);
-            }
-
-            if (books.get(position).getImagePath().equals(Constants.NO_BOOK_IMAGE)) {
-                Glide.with(Books_Activity.this).load(R.raw.cat_reading).asGif().into(holder.bookThumbIMG);
-            } else {
-                Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookThumbIMG);
-            }
+            Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookThumbIMG);
 
             String[] bookDateAdded = books.get(position).getDate_added().split(" ");
             holder.bookDateAddedTV.setText(bookDateAdded[0] + " " + bookDateAdded[1] + ", " + bookDateAdded[2]);
@@ -774,12 +802,17 @@ public class Books_Activity extends Base_Activity {
                                     //Dissmiss the UNDO Snackbar and handle the deletion of the previously awaiting item yourself
                                     if (undoDeleteBookSB != null && undoDeleteBookSB.isShowing()) {
                                         //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
+                                        //I am able to use tempBook here because I am certain that it would have now been initialized inside deleteCell(), no way to reach this point without having been through deleteCell() first
                                         dbHelper.deleteBook(tempBook.getId());
                                         itemPendingDeleteDecision = false;
                                         undoDeleteBookSB.dismiss();
                                     }
 
-                                    deleteCell(parentView, position);
+                                    if (helperMethods.areAnimationsEnabled(dbHelper)) {
+                                        deleteCell(parentView, position);
+                                    } else {
+                                        showUndeleteDialog(books.get(position));
+                                    }
 
                                     break;
                             }
@@ -818,9 +851,6 @@ public class Books_Activity extends Base_Activity {
     public static class BooksViewHolder {
         RelativeLayout list_item_book;
         TextView bookDateAddedTV;
-        TextView bookProgressValueTV;
-        RelativeLayout bookProgressLayout;
-        ProgressBar bookProgressBar;
         AutofitTextView bookTitleTV;
         AutofitTextView bookAuthorTV;
         ImageView bookThumbIMG;

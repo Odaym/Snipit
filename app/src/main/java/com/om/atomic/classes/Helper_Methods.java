@@ -41,6 +41,10 @@ public class Helper_Methods {
         }
     }
 
+    public boolean areAnimationsEnabled(DatabaseHelper dbHelper){
+        return dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE);
+    }
+
     public boolean isBookmarkOnDisk(String bookmarkImagePath) {
         try {
             //If the String was a URL then this bookmark is a sample
@@ -64,7 +68,7 @@ public class Helper_Methods {
     }
 
     public void uploadBookDataToParse(DatabaseHelper dbHelper) {
-        List<Book> books = dbHelper.getAllBooks(null);
+        List<Book> books = dbHelper.getAllBooks();
 
         for (Book book : books) {
             ParseObject bookObject = new ParseObject("Book");
@@ -75,7 +79,7 @@ public class Helper_Methods {
     }
 
     public void uploadBookmarkDataToParse(DatabaseHelper dbHelper) {
-        List<Book> books = dbHelper.getAllBooks(null);
+        List<Book> books = dbHelper.getAllBooks();
         List<Bookmark> bookmarks;
 
         for (Book book : books) {

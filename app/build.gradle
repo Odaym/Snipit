@@ -30,7 +30,7 @@ android {
     //min SDK: Jellybean 16
 
     defaultConfig {
-        applicationId "com.om.atomic"
+        applicationId "com.om.snipit"
         minSdkVersion 16
         targetSdkVersion 21
         versionCode 1

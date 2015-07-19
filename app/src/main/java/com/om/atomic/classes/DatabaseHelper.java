@@ -2,7 +2,6 @@ package com.om.atomic.classes;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -17,7 +16,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String databaseName = "bookmarker.db";
     public static final int version = 1;
 
-    public SharedPreferences prefs;
     public Context context;
 
     public static final String BOOK_TABLE = "Book";
@@ -98,7 +96,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i2) {
     }
 
-    public ArrayList<Book> getAllBooks(String sortBy) {
+    public ArrayList<Book> getAllBooks() {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
 //        SQLiteDatabase dbHandler = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath() + File.separator + "bookmarker.db", null, 0);
 
@@ -106,10 +104,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String query;
 
-        if (sortBy == null)
-            query = "SELECT * FROM " + BOOK_TABLE + " ORDER BY " + B_ORDER;
-        else
-            query = "SELECT * FROM " + BOOK_TABLE + " ORDER BY " + sortBy;
+        query = "SELECT * FROM " + BOOK_TABLE + " ORDER BY " + B_ORDER;
 
         Cursor cursor = dbHandler.rawQuery(query, null);
 
@@ -210,16 +205,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @DebugLog
     public void deleteBook(int book_id) {
         SQLiteDatabase dbHandler = this.getWritableDatabase();
-        List<Bookmark> bookmarks;
 
         //Remove all the bookmarks that belonged to this book and are still stored on disk as images
         //Do this BEFORE deleting the books because ON DELETE CASCADE
-        String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
-        if (!sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-            bookmarks = getAllBookmarks(book_id);
-        } else {
-            bookmarks = getAllBookmarks_Ordered(book_id, sorting_type_pref);
-        }
+        List<Bookmark> bookmarks = getAllBookmarks(book_id);
 
         for (Bookmark bookmark : bookmarks) {
             Helper_Methods.delete_image_from_disk(bookmark.getImage_path());
@@ -229,7 +218,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String whereClause = B_ID + " = ?";
         String[] whereArgs = new String[]{String.valueOf(book_id)};
         dbHandler.delete(table, whereClause, whereArgs);
-
     }
 
     public ArrayList<Bookmark> getAllBookmarks(int book_id) {
@@ -264,6 +252,72 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return bookmarks;
     }
 
+//    public void prepare_UpdatingAllSortedBookmarks(int book_id, String sortBy) {
+//        SQLiteDatabase dbHandler = this.getReadableDatabase();
+//
+//        //Get all the bookmarks of that book, then for each one, update its bookmarks with the new order
+//        String query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = " + book_id + " ORDER BY " + sortBy;
+//
+//        Cursor cursor = dbHandler.rawQuery(query, null);
+//
+//        if (cursor.moveToFirst()) {
+//            do {
+//                //Let the database know of this new order by setting each bookmark's order to the new one
+//            } while (cursor.moveToNext());
+//        }
+//
+//        cursor.close();
+//    }
+
+    @DebugLog
+    public void update_BookmarkOrder(SQLiteDatabase dbHandler, int bookmark_id, int bookmark_order) {
+        ContentValues newValues = new ContentValues();
+
+        Log.d("SORT", "Updating bookmark order to be : " + bookmark_order);
+
+        String[] args = new String[]{String.valueOf(bookmark_id)};
+
+        newValues.put(BM_ORDER, bookmark_order);
+
+        dbHandler.update(BOOKMARK_TABLE, newValues, BM_ID + " = ?", args);
+    }
+
+    public ArrayList<Bookmark> prepare_UpdatingAllSortedBookmarks(int book_id, String sortBy) {
+        SQLiteDatabase dbHandler = this.getReadableDatabase();
+
+        ArrayList<Bookmark> bookmarks = new ArrayList<>();
+
+        String query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = " + book_id + " ORDER BY " + sortBy;
+
+        Cursor cursor = dbHandler.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Bookmark bookmark = new Bookmark();
+                bookmark.setId(cursor.getInt(0));
+                bookmark.setBookId(cursor.getInt(1));
+                bookmark.setName(cursor.getString(2));
+                bookmark.setPage_number(cursor.getInt(3));
+                bookmark.setImage_path(cursor.getString(4));
+                bookmark.setDate_added(cursor.getString(5));
+                bookmark.setOrder(cursor.getInt(6));
+                bookmark.setFavorite(cursor.getInt(7));
+                bookmark.setViews(cursor.getInt(8));
+                bookmark.setNote(cursor.getString(9));
+                bookmark.setTimes_painted(cursor.getInt(10));
+                bookmarks.add(bookmark);
+
+                //Let the database know of this new order by setting each bookmark's order to the new one
+                update_BookmarkOrder(dbHandler, bookmark.getId(), cursor.getPosition());
+                Log.d("SORT", "BOOKMARK ORDER DB : " + bookmark.getOrder() + " - Cursor position (New order) : " + cursor.getPosition());
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return bookmarks;
+    }
+
     public ArrayList<Bookmark> getAllBookmarks_Ordered(int book_id, String sortBy) {
         SQLiteDatabase dbHandler = this.getReadableDatabase();
 
@@ -288,6 +342,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 bookmark.setNote(cursor.getString(9));
                 bookmark.setTimes_painted(cursor.getInt(10));
                 bookmarks.add(bookmark);
+
+                //Let the database know of this new order by setting each bookmark's order to the new one
+                update_BookmarkOrder(dbHandler, cursor.getInt(0), cursor.getInt(6));
             } while (cursor.moveToNext());
         }
 
@@ -355,7 +412,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 bookmark.setNote(cursor.getString(9));
                 bookmark.setTimes_painted(cursor.getInt(10));
                 bookmarkResults.add(bookmark);
-                Log.d("Book_ID", "Book ID for " + bookmark.getName() + " is : " + bookmark.getBookId());
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return bookmarkResults;
+    }
+
+    @DebugLog
+    public ArrayList<Bookmark> searchAllBookmarks_Ordered(int book_id, String likeText, String sortBy) {
+        SQLiteDatabase dbHandler = this.getReadableDatabase();
+
+        ArrayList<Bookmark> bookmarkResults = new ArrayList<>();
+
+        //Search through bookmark notes and bookmark names
+        String query = "SELECT * FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = ? AND " + BM_NAME + " LIKE ? COLLATE NOCASE OR " + BM_NOTE + " LIKE ? COLLATE NOCASE ORDER BY " + sortBy;
+
+        Cursor cursor = dbHandler.rawQuery(query, new String[]{String.valueOf(book_id), "%" + likeText + "%", "%" + likeText + "%"});
+
+        if (cursor.moveToFirst()) {
+            do {
+                Bookmark bookmark = new Bookmark();
+                bookmark.setId(cursor.getInt(0));
+                bookmark.setBookId(cursor.getInt(1));
+                bookmark.setName(cursor.getString(2));
+                bookmark.setPage_number(cursor.getInt(3));
+                bookmark.setImage_path(cursor.getString(4));
+                bookmark.setDate_added(cursor.getString(5));
+                bookmark.setOrder(cursor.getInt(6));
+                bookmark.setFavorite(cursor.getInt(7));
+                bookmark.setViews(cursor.getInt(8));
+                bookmark.setNote(cursor.getString(9));
+                bookmark.setTimes_painted(cursor.getInt(10));
+                bookmarkResults.add(bookmark);
             } while (cursor.moveToNext());
         }
 
@@ -376,7 +466,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(BM_PAGENUMBER, bookmark.getPage_number());
         cv.put(BM_IMAGEPATH, bookmark.getImage_path());
         cv.put(BM_DATE_ADDED, bookmark.getDate_added());
-        cv.put(BM_ORDER, getMax_BookmarkOrder(dbHandler));
+        cv.put(BM_ORDER, getMax_BookmarkOrder(dbHandler, book_id));
         cv.put(BM_VIEWS, 0);
         cv.put(BM_NOTE, "");
 
@@ -396,7 +486,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cv.put(BM_PAGENUMBER, bookmark.getPage_number());
             cv.put(BM_IMAGEPATH, bookmark.getImage_path());
             cv.put(BM_DATE_ADDED, bookmark.getDate_added());
-            cv.put(BM_ORDER, getMax_BookmarkOrder(dbHandler));
+            cv.put(BM_ORDER, getMax_BookmarkOrder(dbHandler, book_id));
             cv.put(BM_VIEWS, 0);
             cv.put(BM_NOTE, "");
 
@@ -498,8 +588,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @DebugLog
-    public int getMax_BookmarkOrder(SQLiteDatabase dbHandler) {
-        Cursor cursor = dbHandler.rawQuery("SELECT MAX(" + BM_ORDER + ") FROM " + BOOKMARK_TABLE, null);
+    public int getMax_BookmarkOrder(SQLiteDatabase dbHandler, int book_id) {
+        Cursor cursor = dbHandler.rawQuery("SELECT MAX(" + BM_ORDER + ") FROM " + BOOKMARK_TABLE + " WHERE " + BM_BOOK_FOREIGN_KEY + " = " + book_id, null);
 
         int max_bookmark_order = 0;
 

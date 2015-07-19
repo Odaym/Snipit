@@ -16,10 +16,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
@@ -96,12 +94,16 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
 
                 alert.setPositiveButton(Settings_Activity.this.getResources().getString(R.string.pref_send_feedback_button_title), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        if (inputFeedbackET.testValidity()) {
-                            try {
-                                new SendFeedbackEmail().execute(inputFeedbackET.getText().toString());
-                            } catch (Exception e) {
-                                Log.e("SendMail", e.getMessage(), e);
+                        if (Helper_Methods.isInternetAvailable(Settings_Activity.this)) {
+                            if (inputFeedbackET.testValidity()) {
+                                try {
+                                    new SendFeedbackEmail().execute(inputFeedbackET.getText().toString());
+                                } catch (Exception e) {
+                                    Log.e("SendMail", e.getMessage(), e);
+                                }
                             }
+                        } else {
+                            Crouton.makeText(Settings_Activity.this, getString(R.string.action_needs_internet), Style.ALERT).show();
                         }
                     }
                 });

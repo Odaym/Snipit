@@ -68,27 +68,27 @@
 
             </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 
-            <com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/pagesCountETFloating"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                float:fletPadding="10dp">
+            <!--<com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"-->
+                <!--android:id="@+id/pagesCountETFloating"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="3"-->
+                <!--float:fletPadding="10dp">-->
 
-                <com.andreabaccega.widget.FormEditText
-                    android:id="@+id/pagesCountET"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:maxLength="4"
-                    android:hint="@string/book_pages_count"
-                    android:inputType="number"
-                    android:singleLine="true"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="@color/edittext_hint_color"
-                    android:textCursorDrawable="@null" />
+                <!--<com.andreabaccega.widget.FormEditText-->
+                    <!--android:id="@+id/pagesCountET"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginBottom="20dp"-->
+                    <!--android:maxLength="4"-->
+                    <!--android:hint="@string/book_pages_count"-->
+                    <!--android:inputType="number"-->
+                    <!--android:singleLine="true"-->
+                    <!--android:textColor="@android:color/black"-->
+                    <!--android:textColorHint="@color/edittext_hint_color"-->
+                    <!--android:textCursorDrawable="@null" />-->
 
-            </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+            <!--</com.wrapp.floatlabelededittext.FloatLabeledEditText>-->
 
         </LinearLayout>
 
