@@ -10,7 +10,7 @@ import com.parse.Parse;
 import io.fabric.sdk.android.Fabric;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
-public class Atomic_Application extends Application {
+public class Snipit_Application extends Application {
     @Override
     public void onCreate() {
         super.onCreate();

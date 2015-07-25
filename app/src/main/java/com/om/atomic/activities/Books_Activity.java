@@ -200,12 +200,6 @@ public class Books_Activity extends Base_Activity {
                 new DrawerItem()
                         .setImage(getResources().getDrawable(R.drawable.favorites), DrawerItem.SMALL_AVATAR)
                         .setTextPrimary(getResources().getString(R.string.navdrawer_favorite_bookmarks_item))
-                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
-                            @Override
-                            public void onClick(DrawerItem drawerItem, int i, int i1) {
-                                Toast.makeText(Books_Activity.this, "Favorite bookmarks will appear here", Toast.LENGTH_SHORT).show();
-                            }
-                        })
         );
 
         /**
@@ -215,12 +209,6 @@ public class Books_Activity extends Base_Activity {
                 new DrawerItem()
                         .setImage(getResources().getDrawable(R.drawable.trash), DrawerItem.SMALL_AVATAR)
                         .setTextPrimary(getResources().getString(R.string.navdrawer_trash_item))
-                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
-                            @Override
-                            public void onClick(DrawerItem drawerItem, int i, int i1) {
-                                Toast.makeText(Books_Activity.this, "Deleted bookmarks will appear here", Toast.LENGTH_SHORT).show();
-                            }
-                        })
         );
 
         /**
@@ -247,6 +235,22 @@ public class Books_Activity extends Base_Activity {
                             }
                         })
         );
+
+        navDrawer.setOnItemClickListener(new DrawerItem.OnItemClickListener() {
+            @Override
+            public void onClick(DrawerItem drawerItem, int id, int position) {
+                navDrawer.selectItem(position);
+
+                switch (position) {
+                    case 0:
+                        Toast.makeText(Books_Activity.this, "Your favorite bookmarks will appear here", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 1:
+                        Toast.makeText(Books_Activity.this, "Deleted bookmarks will appear here", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        });
 
         navDrawer.setBackground(getResources().getDrawable(R.drawable.navdrawer_background_repeat));
 
