@@ -1,10 +1,10 @@
-package com.om.atomic.showcaseview;
+package com.om.snipit.showcaseview;
 
 import android.app.Activity;
 import android.graphics.Point;
 import android.view.View;
 
-import com.om.atomic.showcaseview.targets.Target;
+import com.om.snipit.showcaseview.targets.Target;
 
 /**
  * Target a view on the screen. This will centre the target on the view.

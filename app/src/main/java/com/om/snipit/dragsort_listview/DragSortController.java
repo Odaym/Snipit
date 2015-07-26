@@ -1,4 +1,4 @@
-package com.om.atomic.dragsort_listview;
+package com.om.snipit.dragsort_listview;
 
 import android.graphics.Point;
 import android.view.GestureDetector;

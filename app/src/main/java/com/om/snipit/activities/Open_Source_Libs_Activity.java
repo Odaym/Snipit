@@ -1,4 +1,4 @@
-package com.om.atomic.activities;
+package com.om.snipit.activities;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -15,9 +15,9 @@ import android.widget.TextView;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.om.atomic.R;
-import com.om.atomic.classes.Constants;
-import com.om.atomic.classes.Helper_Methods;
-import com.om.atomic.classes.Open_Source_Library;
+import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.Helper_Methods;
+import com.om.snipit.classes.Open_Source_Library;
 
 import java.util.ArrayList;
 

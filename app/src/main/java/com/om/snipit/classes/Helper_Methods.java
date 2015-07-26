@@ -1,4 +1,4 @@
-package com.om.atomic.classes;
+package com.om.snipit.classes;
 
 import android.app.Activity;
 import android.content.Context;
@@ -41,10 +41,6 @@ public class Helper_Methods {
         }
     }
 
-    public boolean areAnimationsEnabled(DatabaseHelper dbHelper){
-        return dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE);
-    }
-
     public boolean isBookmarkOnDisk(String bookmarkImagePath) {
         try {
             //If the String was a URL then this bookmark is a sample
@@ -67,7 +63,7 @@ public class Helper_Methods {
         return allValid;
     }
 
-    public void uploadBookDataToParse(DatabaseHelper dbHelper) {
+    public void uploadBookDataToParse(DatabaseHelperasdasd dbHelper) {
         List<Book> books = dbHelper.getAllBooks();
 
         for (Book book : books) {
@@ -78,7 +74,7 @@ public class Helper_Methods {
         }
     }
 
-    public void uploadBookmarkDataToParse(DatabaseHelper dbHelper) {
+    public void uploadBookmarkDataToParse(DatabaseHelperasdasd dbHelper) {
         List<Book> books = dbHelper.getAllBooks();
         List<Bookmark> bookmarks;
 

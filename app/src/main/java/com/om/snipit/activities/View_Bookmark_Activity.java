@@ -1,4 +1,4 @@
-package com.om.atomic.activities;
+package com.om.snipit.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -37,13 +37,13 @@ import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
-import com.om.atomic.classes.Bookmark;
-import com.om.atomic.classes.Constants;
-import com.om.atomic.classes.DatabaseHelper;
-import com.om.atomic.classes.EventBus_Poster;
-import com.om.atomic.classes.EventBus_Singleton;
-import com.om.atomic.classes.HackyViewPager;
-import com.om.atomic.classes.Helper_Methods;
+import com.om.snipit.classes.Bookmark;
+import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.DatabaseHelperasdasd;
+import com.om.snipit.classes.EventBus_Poster;
+import com.om.snipit.classes.EventBus_Singleton;
+import com.om.snipit.classes.HackyViewPager;
+import com.om.snipit.classes.Helper_Methods;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -62,7 +62,7 @@ public class View_Bookmark_Activity extends Base_Activity {
     private int NUM_PAGES;
     private ScreenSlidePagerAdapter mPagerAdapter;
     private int current_bookmark_position;
-    private DatabaseHelper dbHelper;
+    private DatabaseHelperasdasd dbHelper;
     private Button addFavoriteBookmarkBTN;
     private SharedPreferences prefs;
 
@@ -80,7 +80,7 @@ public class View_Bookmark_Activity extends Base_Activity {
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        dbHelper = new DatabaseHelper(this);
+        dbHelper = new DatabaseHelperasdasd(this);
 
         String book_title = getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
         current_bookmark_position = getIntent().getExtras().getInt(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION);
@@ -159,7 +159,7 @@ public class View_Bookmark_Activity extends Base_Activity {
 
         private Callback picassoCallback;
 
-        private DatabaseHelper dbHelper;
+        private DatabaseHelperasdasd dbHelper;
         private Helper_Methods helperMethods;
         private Context context;
         private int rotation = 0;
@@ -173,7 +173,7 @@ public class View_Bookmark_Activity extends Base_Activity {
             super.onCreate(savedInstanceState);
             setHasOptionsMenu(true);
 
-            dbHelper = new DatabaseHelper(context);
+            dbHelper = new DatabaseHelperasdasd(context);
             helperMethods = new Helper_Methods(context);
         }
 
@@ -310,7 +310,7 @@ public class View_Bookmark_Activity extends Base_Activity {
                             AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
                             LayoutInflater inflater = (LayoutInflater) context
-                                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
                             View alertCreateNoteView = inflater.inflate(R.layout.alert_create_bookmark_note, rootView, false);
 
                             final EditText inputNoteET = (EditText) alertCreateNoteView.findViewById(R.id.bookmarkNoteET);
@@ -335,7 +335,7 @@ public class View_Bookmark_Activity extends Base_Activity {
                                 @Override
                                 public void run() {
                                     InputMethodManager keyboard = (InputMethodManager)
-                                            context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                                            context.getSystemService(INPUT_METHOD_SERVICE);
                                     keyboard.showSoftInput(inputNoteET, 0);
                                 }
                             }, 0);

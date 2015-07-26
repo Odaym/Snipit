@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.om.atomic.showcaseview.targets;
+package com.om.snipit.showcaseview.targets;
 
 import android.app.Activity;
 import android.view.View;

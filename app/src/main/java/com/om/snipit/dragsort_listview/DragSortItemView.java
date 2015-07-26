@@ -1,4 +1,4 @@
-package com.om.atomic.dragsort_listview;
+package com.om.snipit.dragsort_listview;
 
 import android.content.Context;
 import android.view.Gravity;

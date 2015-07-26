@@ -5,7 +5,7 @@
  * Released under the MIT license
  */
 
-package com.om.atomic.classes;
+package com.om.snipit.classes;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.om.atomic.showcaseview;
+package com.om.snipit.showcaseview;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;

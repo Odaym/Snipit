@@ -1,4 +1,4 @@
-package com.om.atomic.showcaseview;
+package com.om.snipit.showcaseview;
 
 import android.app.Activity;
 import android.content.Context;
@@ -19,8 +19,8 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.om.atomic.R;
-import com.om.atomic.showcaseview.targets.ActionViewTarget;
-import com.om.atomic.showcaseview.targets.Target;
+import com.om.snipit.showcaseview.targets.ActionViewTarget;
+import com.om.snipit.showcaseview.targets.Target;
 
 /**
  * A view which allows you to showcase areas of your app with an explanation.

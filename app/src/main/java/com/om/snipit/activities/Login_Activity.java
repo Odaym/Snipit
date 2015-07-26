@@ -1,4 +1,4 @@
-package com.om.atomic.activities;
+package com.om.snipit.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,7 +12,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.om.atomic.R;
-import com.om.atomic.classes.Constants;
+import com.om.snipit.classes.Constants;
 
 import butterknife.InjectView;
 import de.keyboardsurfer.android.widget.crouton.Crouton;

@@ -1,4 +1,4 @@
-package com.om.atomic.activities;
+package com.om.snipit.activities;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -16,12 +16,12 @@ import com.bumptech.glide.Glide;
 import com.flurry.android.FlurryAgent;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.om.atomic.R;
-import com.om.atomic.classes.Bookmark;
-import com.om.atomic.classes.Constants;
-import com.om.atomic.classes.DatabaseHelper;
-import com.om.atomic.classes.EventBus_Poster;
-import com.om.atomic.classes.EventBus_Singleton;
-import com.om.atomic.classes.Helper_Methods;
+import com.om.snipit.classes.Bookmark;
+import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.DatabaseHelperasdasd;
+import com.om.snipit.classes.EventBus_Poster;
+import com.om.snipit.classes.EventBus_Singleton;
+import com.om.snipit.classes.Helper_Methods;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
@@ -59,7 +59,7 @@ public class Create_Bookmark_Activity extends Base_Activity {
 
     private ArrayList<FormEditText> allFields = new ArrayList<>();
 
-    private DatabaseHelper dbHelper;
+    private DatabaseHelperasdasd dbHelper;
     private int CALL_PURPOSE;
     private Bookmark bookmark_from_list;
     private String tempImagePath, finalImagePath;
@@ -83,7 +83,7 @@ public class Create_Bookmark_Activity extends Base_Activity {
 
         helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
 
-        dbHelper = new DatabaseHelper(this);
+        dbHelper = new DatabaseHelperasdasd(this);
 
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, -1);
 

@@ -1,4 +1,4 @@
-package com.om.atomic.classes;
+package com.om.snipit.classes;
 
 public class EventBus_Poster {
     private String message;

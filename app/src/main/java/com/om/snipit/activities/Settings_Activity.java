@@ -1,4 +1,4 @@
-package com.om.atomic.activities;
+package com.om.snipit.activities;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -26,12 +26,12 @@ import android.widget.TextView;
 import com.andreabaccega.widget.FormEditText;
 import com.flurry.android.FlurryAgent;
 import com.om.atomic.R;
-import com.om.atomic.classes.Constants;
-import com.om.atomic.classes.DatabaseHelper;
-import com.om.atomic.classes.EventBus_Poster;
-import com.om.atomic.classes.EventBus_Singleton;
-import com.om.atomic.classes.GMailSender;
-import com.om.atomic.classes.Helper_Methods;
+import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.DatabaseHelperasdasd;
+import com.om.snipit.classes.EventBus_Poster;
+import com.om.snipit.classes.EventBus_Singleton;
+import com.om.snipit.classes.GMailSender;
+import com.om.snipit.classes.Helper_Methods;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
@@ -39,7 +39,7 @@ import de.keyboardsurfer.android.widget.crouton.Style;
 public class Settings_Activity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private ProgressDialog sendEmailFeedbackDialog;
-    private DatabaseHelper dbHelper = new DatabaseHelper(this);
+    private DatabaseHelperasdasd dbHelper = new DatabaseHelperasdasd(this);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -166,7 +166,7 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        DatabaseHelperasdasd dbHelper = new DatabaseHelperasdasd(this);
 
         switch (key) {
             case "pref_key_tutorial_mode":

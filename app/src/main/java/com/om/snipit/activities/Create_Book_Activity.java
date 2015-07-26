@@ -1,4 +1,4 @@
-package com.om.atomic.activities;
+package com.om.snipit.activities;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -24,15 +24,15 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.om.atomic.R;
-import com.om.atomic.classes.Book;
-import com.om.atomic.classes.Constants;
-import com.om.atomic.classes.DatabaseHelper;
-import com.om.atomic.classes.EventBus_Poster;
-import com.om.atomic.classes.EventBus_Singleton;
-import com.om.atomic.classes.Helper_Methods;
-import com.om.atomic.classes.Param;
-import com.om.atomic.showcaseview.ShowcaseView;
-import com.om.atomic.showcaseview.ViewTarget;
+import com.om.snipit.classes.Book;
+import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.DatabaseHelperasdasd;
+import com.om.snipit.classes.EventBus_Poster;
+import com.om.snipit.classes.EventBus_Singleton;
+import com.om.snipit.classes.Helper_Methods;
+import com.om.snipit.classes.Param;
+import com.om.snipit.showcaseview.ShowcaseView;
+import com.om.snipit.showcaseview.ViewTarget;
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.HttpEntity;
@@ -76,7 +76,7 @@ public class Create_Book_Activity extends Base_Activity {
     private String bookImagePath;
     private int book_pages_count;
     private boolean bookImageFoundAtGoogle = false;
-    private DatabaseHelper dbHelper;
+    private DatabaseHelperasdasd dbHelper;
 
     private ShowcaseView scanBookShowcase;
 
@@ -111,7 +111,7 @@ public class Create_Book_Activity extends Base_Activity {
             }
         };
 
-        dbHelper = new DatabaseHelper(this);
+        dbHelper = new DatabaseHelperasdasd(this);
 
         final Helper_Methods helperMethods = new Helper_Methods(this);
 

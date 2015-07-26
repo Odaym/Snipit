@@ -12,7 +12,7 @@
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:theme="@style/ToolBarStyle_Global" />
 
-    <com.om.atomic.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
+    <com.om.snipit.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
         android:id="@+id/bookmarksList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

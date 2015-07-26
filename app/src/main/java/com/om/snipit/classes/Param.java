@@ -1,43 +1,44 @@
-package com.om.atomic.classes;
+package com.om.snipit.classes;
+
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
+@DatabaseTable(tableName = "Param")
 
 public class Param {
 
-	private int number;
-	private String value;
-	private int id;
+    @DatabaseField(id = true)
+    private int id;
+    @DatabaseField
+    private int number;
+    @DatabaseField
+    private boolean enabled;
 
-	public Param() {
-		super();
-	}
+    public Param() {
+        super();
+    }
 
-	public Param(int number, String value, int id) {
-		super();
-		this.id = id;
-		this.number = number;
-		this.value = value;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getNumber() {
+        return number;
+    }
 
-	public int getNumber() {
-		return number;
-	}
+    public void setNumber(int number) {
+        this.number = number;
+    }
 
-	public void setNumber(int number) {
-		this.number = number;
-	}
+    public boolean isEnabled() {
+        return enabled;
+    }
 
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

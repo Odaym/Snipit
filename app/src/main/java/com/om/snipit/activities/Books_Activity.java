@@ -1,4 +1,4 @@
-package com.om.atomic.activities;
+package com.om.snipit.activities;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -41,21 +41,23 @@ import com.google.android.gms.ads.AdView;
 import com.heinrichreimersoftware.materialdrawer.DrawerView;
 import com.heinrichreimersoftware.materialdrawer.structure.DrawerItem;
 import com.heinrichreimersoftware.materialdrawer.structure.DrawerProfile;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.nispok.snackbar.listeners.EventListener;
 import com.om.atomic.R;
-import com.om.atomic.classes.Book;
-import com.om.atomic.classes.Bookmark;
-import com.om.atomic.classes.Constants;
-import com.om.atomic.classes.DatabaseHelper;
-import com.om.atomic.classes.EventBus_Poster;
-import com.om.atomic.classes.EventBus_Singleton;
-import com.om.atomic.classes.Helper_Methods;
-import com.om.atomic.classes.Param;
-import com.om.atomic.dragsort_listview.DragSortListView;
-import com.om.atomic.showcaseview.ShowcaseView;
-import com.om.atomic.showcaseview.ViewTarget;
+import com.om.snipit.classes.Book;
+import com.om.snipit.classes.Bookmark;
+import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.DatabaseHelper;
+import com.om.snipit.classes.EventBus_Poster;
+import com.om.snipit.classes.EventBus_Singleton;
+import com.om.snipit.classes.Helper_Methods;
+import com.om.snipit.classes.Param;
+import com.om.snipit.dragsort_listview.DragSortListView;
+import com.om.snipit.showcaseview.ShowcaseView;
+import com.om.snipit.showcaseview.ViewTarget;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -76,15 +78,9 @@ import butterknife.InjectView;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
-import icepick.Icicle;
 import me.grantland.widget.AutofitTextView;
 
 public class Books_Activity extends Base_Activity {
-
-    @Icicle
-    ArrayList<Book> books;
-
-    Book tempBook;
 
     @InjectView(R.id.booksList)
     DragSortListView listView;
@@ -105,14 +101,19 @@ public class Books_Activity extends Base_Activity {
 
     private Helper_Methods helperMethods;
 
-    static final int DELETE_BOOK_ANIMATION_DURATION = 300;
-
     private final static int SHOW_CREATE_BOOK_SHOWCASE = 1;
     private static Handler UIHandler = new Handler();
     private ProgressDialog downloadingBookDataLoader;
 
     private Books_Adapter booksAdapter;
-    private DatabaseHelper dbHelper;
+    private List<Book> books;
+    private Book tempBook;
+
+    private DatabaseHelper databaseHelper = null;
+    private RuntimeExceptionDao<Book, Integer> bookDAO;
+    private RuntimeExceptionDao<Bookmark, Integer> bookmarkDAO;
+    private RuntimeExceptionDao<Param, Integer> paramDAO;
+
     private ShowcaseView createBookShowcase;
     private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 
@@ -143,6 +144,10 @@ public class Books_Activity extends Base_Activity {
 
         helperMethods = new Helper_Methods(this);
 
+        bookDAO = getHelper().getBookDAO();
+        bookmarkDAO = getHelper().getBookmarkDAO();
+        paramDAO = getHelper().getParamDAO();
+
         ButterKnife.inject(this);
 
         UIHandler = new Handler() {
@@ -157,8 +162,7 @@ public class Books_Activity extends Base_Activity {
             }
         };
 
-        dbHelper = new DatabaseHelper(this);
-        books = dbHelper.getAllBooks();
+        books = bookDAO.queryForAll();
 
         handleEmptyOrPopulatedScreen(books);
 
@@ -227,13 +231,6 @@ public class Books_Activity extends Base_Activity {
                 new DrawerItem()
                         .setImage(getResources().getDrawable(R.drawable.settings), DrawerItem.SMALL_AVATAR)
                         .setTextPrimary(getResources().getString(R.string.settings))
-                        .setOnItemClickListener(new DrawerItem.OnItemClickListener() {
-                            @Override
-                            public void onClick(DrawerItem drawerItem, int id, int position) {
-                                Intent openSettingsIntent = new Intent(Books_Activity.this, Settings_Activity.class);
-                                startActivity(openSettingsIntent);
-                            }
-                        })
         );
 
         navDrawer.setOnItemClickListener(new DrawerItem.OnItemClickListener() {
@@ -251,6 +248,22 @@ public class Books_Activity extends Base_Activity {
                 }
             }
         });
+
+        navDrawer.setOnFixedItemClickListener(new DrawerItem.OnItemClickListener() {
+            @Override
+            public void onClick(DrawerItem drawerItem, int id, int position) {
+                switch (position) {
+                    case 0:
+                        Toast.makeText(Books_Activity.this, "Upgrade to premium!", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 1:
+                        Intent openSettingsIntent = new Intent(Books_Activity.this, Settings_Activity.class);
+                        startActivity(openSettingsIntent);
+                        break;
+                }
+            }
+        });
+
 
         navDrawer.setBackground(getResources().getDrawable(R.drawable.navdrawer_background_repeat));
 
@@ -282,12 +295,20 @@ public class Books_Activity extends Base_Activity {
         });
     }
 
+    public DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+
+        return databaseHelper;
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         drawerToggle.onConfigurationChanged(newConfig);
     }
-
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -344,19 +365,22 @@ public class Books_Activity extends Base_Activity {
                                     bookmark.setPage_number(Integer.parseInt(parseObject.get("page_number").toString()));
                                     bookmark.setImage_path(parseObject.get("image").toString());
                                     bookmark.setDate_added(month + " " + day + ", " + year);
+                                    bookmark.setDeleted(false);
+                                    bookmark.setFavorite(false);
 
                                     bookmarksToInsert.add(bookmark);
                                 }
 
                                 for (int i = 0; i < booksToInsert.size(); i++) {
-                                    int db_insert_success_status =
-                                            dbHelper.createSampleBook(booksToInsert.get(i));
+//                                    int db_insert_success_status =
+//                                            dbHelper.createSampleBook(booksToInsert.get(i));
+                                    bookDAO.createIfNotExists(booksToInsert.get(i));
 
                                     //If the book did not already exist, go ahead and insert its bookmarks
-                                    if (db_insert_success_status == 0) {
+                                    if (bookDAO.idExists(booksToInsert.get(i).getId())) {
                                         for (int j = 0; j < bookmarksToInsert.size(); j++) {
                                             if (bookmarksToInsert.get(j).getBookId() == booksToInsert.get(i).getId())
-                                                dbHelper.createSampleBookmark(bookmarksToInsert.get(j), booksToInsert.get(i).getId());
+                                                bookmarkDAO.createIfNotExists(bookmarksToInsert.get(j));
                                         }
 
                                         EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
@@ -404,7 +428,9 @@ public class Books_Activity extends Base_Activity {
         } else if (ebp.getMessage().equals("book_added") || ebp.getMessage().equals("bookmark_changed")) {
             prepareForNotifyDataChanged();
             //If animations are disabled
-            if (dbHelper.getParam(null, 10)) {
+//            if (dbHelper.getParam(null, 10)) {
+            Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
+            if (animationsParam.isEnabled()) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -420,7 +446,7 @@ public class Books_Activity extends Base_Activity {
 
     @DebugLog
     public void prepareForNotifyDataChanged() {
-        books = dbHelper.getAllBooks();
+        books = bookDAO.queryForAll();
         handleEmptyUI(books);
     }
 
@@ -443,7 +469,8 @@ public class Books_Activity extends Base_Activity {
                 this, R.anim.books_list_layout_controller);
 
         //If animations are enabled
-        if (helperMethods.areAnimationsEnabled(dbHelper)) {
+        Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
+        if (animationsParam.isEnabled()) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -460,7 +487,9 @@ public class Books_Activity extends Base_Activity {
 
     @DebugLog
     public void showCreateBookShowcase() {
-        if (!dbHelper.getParam(null, 2)) {
+        Param tutorialMode = paramDAO.queryForId(Constants.TUTORIAL_MODE_DATABASE_VALUE);
+
+        if (tutorialMode.isEnabled()) {
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
@@ -487,10 +516,9 @@ public class Books_Activity extends Base_Activity {
                 public void onClick(View view) {
                     createBookShowcase.hide();
 
-                    Param param = new Param();
-                    param.setNumber(2);
-                    param.setValue("True");
-                    dbHelper.updateParam(param);
+                    Param bookTutorialParam = paramDAO.queryForId(Constants.SEEN_BOOK_TUTORIAL_DATABASE_VALUE);
+                    bookTutorialParam.setEnabled(false);
+                    paramDAO.update(bookTutorialParam);
 
                     handleEmptyUI(books);
                 }
@@ -501,7 +529,10 @@ public class Books_Activity extends Base_Activity {
 
     public void handleEmptyUI(List<Book> books) {
         //Books are empty and the coachmark has been dismissed
-        if (books.isEmpty() && dbHelper.getParam(null, 2)) {
+
+        Param bookTutorialParam = paramDAO.queryForId(Constants.SEEN_BOOK_TUTORIAL_DATABASE_VALUE);
+
+        if (books.isEmpty() && !bookTutorialParam.isEnabled()) {
             emptyListLayout.setVisibility(View.VISIBLE);
             JumpingBeans.with((TextView) emptyListLayout.findViewById(R.id.emptyLayoutMessageTV)).appendJumpingDots().build();
         } else if (books.isEmpty()) {
@@ -562,7 +593,7 @@ public class Books_Activity extends Base_Activity {
             anim.setAnimationListener(al);
         }
 
-        anim.setDuration(DELETE_BOOK_ANIMATION_DURATION);
+        anim.setDuration(Constants.DELETE_BOOK_BOOKMARK_ANIMATION_DURATION);
         v.startAnimation(anim);
     }
 
@@ -629,7 +660,7 @@ public class Books_Activity extends Base_Activity {
     }
 
     public void finalizeBookDeletion(Book tempBook) {
-        dbHelper.deleteBook(tempBook.getId());
+        bookDAO.delete(tempBook);
         prepareForNotifyDataChanged();
         booksAdapter.notifyDataSetChanged();
         itemPendingDeleteDecision = false;
@@ -666,16 +697,13 @@ public class Books_Activity extends Base_Activity {
         private Context context;
         private BooksViewHolder holder;
         private List<Bookmark> bookmarks;
-        private DatabaseHelper dbHelper;
 
         public Books_Adapter(Context context) {
             super();
             this.context = context;
 
-            this.dbHelper = new DatabaseHelper(context);
-
             this.inflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    .getSystemService(LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
@@ -722,31 +750,8 @@ public class Books_Activity extends Base_Activity {
                 holder.bookmarksNumberTV.setElevation(5f);
             }
 
-//            ViewGroup.LayoutParams listItemHeightParam = holder.list_item_book.getLayoutParams();
-//
-//            listItemHeightParam.height = context.getResources().getDimensionPixelSize(R.dimen.book_item_height);
-//            holder.list_item_book.setLayoutParams(listItemHeightParam);
-
             holder.bookTitleTV.setText(books.get(position).getTitle());
             holder.bookAuthorTV.setText(books.get(position).getAuthor());
-
-//            //If the pages count of the book is NOT -1 - it means that there IS a pages count number
-//            if (!(books.get(position).getPages_count() == Constants.NO_BOOK_PAGES_COUNT)) {
-//                holder.bookProgressLayout.setVisibility(View.VISIBLE);
-//
-//                if (books.get(position).getPage_reached() == 0) {
-//                    holder.bookProgressValueTV.setText("p. " + books.get(position).getPage_reached() + " of " + books.get(position).getPages_count() + " (0%)");
-//                } else {
-//                    int bookProgressPercentage = (books.get(position).getPage_reached() * 100) / books.get(position).getPages_count();
-//
-//                    holder.bookProgressValueTV.setText("p. " + books.get(position).getPage_reached() + " of " + books.get(position).getPages_count() + " (" + bookProgressPercentage + "%)");
-//                }
-//
-//                holder.bookProgressBar.setMax(books.get(position).getPages_count());
-//                holder.bookProgressBar.setProgress(books.get(position).getPage_reached());
-//            } else {
-//                holder.bookProgressLayout.setVisibility(View.GONE);
-//            }
 
             Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookThumbIMG);
 
@@ -807,12 +812,14 @@ public class Books_Activity extends Base_Activity {
                                     if (undoDeleteBookSB != null && undoDeleteBookSB.isShowing()) {
                                         //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
                                         //I am able to use tempBook here because I am certain that it would have now been initialized inside deleteCell(), no way to reach this point without having been through deleteCell() first
-                                        dbHelper.deleteBook(tempBook.getId());
+                                        bookDAO.delete(tempBook);
                                         itemPendingDeleteDecision = false;
                                         undoDeleteBookSB.dismiss();
                                     }
 
-                                    if (helperMethods.areAnimationsEnabled(dbHelper)) {
+                                    Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
+
+                                    if (animationsParam.isEnabled()) {
                                         deleteCell(parentView, position);
                                     } else {
                                         showUndeleteDialog(books.get(position));
@@ -833,7 +840,7 @@ public class Books_Activity extends Base_Activity {
                 }
             });
 
-            bookmarks = dbHelper.getAllBookmarks(books.get(position).getId());
+            bookmarks = bookmarkDAO.queryForEq("book_id", books.get(position).getId());
             holder.bookmarksNumberTV.setText(bookmarks.size() + "");
 
             return parentView;
@@ -846,8 +853,8 @@ public class Books_Activity extends Base_Activity {
                 int tempNumber = books.get(from).getOrder();
                 books.get(from).setOrder(books.get(to).getOrder());
                 books.get(to).setOrder(tempNumber);
-                dbHelper.updateBook(books.get(from));
-                dbHelper.updateBook(books.get(to));
+                bookDAO.update(books.get(from));
+                bookDAO.update(books.get(to));
             }
         }
     }

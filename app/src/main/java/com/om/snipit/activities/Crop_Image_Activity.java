@@ -1,4 +1,4 @@
-package com.om.atomic.activities;
+package com.om.snipit.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,10 +13,10 @@ import android.view.View;
 import com.edmodo.cropper.CropImageView;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.om.atomic.R;
-import com.om.atomic.classes.Constants;
-import com.om.atomic.classes.EventBus_Poster;
-import com.om.atomic.classes.EventBus_Singleton;
-import com.om.atomic.classes.Helper_Methods;
+import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.EventBus_Poster;
+import com.om.snipit.classes.EventBus_Singleton;
+import com.om.snipit.classes.Helper_Methods;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

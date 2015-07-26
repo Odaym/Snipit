@@ -1,63 +1,40 @@
-package com.om.atomic.classes;
+package com.om.snipit.classes;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
 
-public class Bookmark implements Parcelable {
-    public static final Parcelable.Creator<Bookmark> CREATOR = new Parcelable.Creator<Bookmark>() {
-        public Bookmark createFromParcel(Parcel in) {
-            return new Bookmark(in);
-        }
+@DatabaseTable(tableName = "Bookmark")
 
-        public Bookmark[] newArray(int size) {
-            return new Bookmark[size];
-        }
-    };
+public class Bookmark {
 
+    @DatabaseField(generatedId = true)
     private int id;
-    private String name;
-    private int page_number;
-    private String image_path;
-    private String date_added;
-    private int order;
-    private int favorite;
-    private int views;
+    @DatabaseField(foreign = true)
     private int book_id;
+    @DatabaseField
+    private String name;
+    @DatabaseField
+    private int page_number;
+    @DatabaseField
+    private String image_path;
+    @DatabaseField
+    private String date_added;
+    @DatabaseField
+    private int order;
+    @DatabaseField
+    private boolean favorite;
+    @DatabaseField
+    private int views;
+    @DatabaseField
     private String note;
+    @DatabaseField
     private int times_painted;
+    @DatabaseField
     private int isNoteShowing;
+    @DatabaseField
+    private boolean deleted;
 
     public Bookmark() {
-    }
-
-    public Bookmark(Parcel in) {
-        id = in.readInt();
-        name = in.readString();
-        page_number = in.readInt();
-        image_path = in.readString();
-        date_added = in.readString();
-        order = in.readInt();
-        favorite = in.readInt();
-        views = in.readInt();
-        book_id = in.readInt();
-        note = in.readString();
-        times_painted = in.readInt();
-        isNoteShowing = in.readInt();
-    }
-
-    public Bookmark(int id, String name, int page_number, String image_path, String date_added, int order, int favorite, int views, int book_id, String note, int times_painted, int isNoteShowing) {
-        this.id = id;
-        this.name = name;
-        this.page_number = page_number;
-        this.image_path = image_path;
-        this.date_added = date_added;
-        this.order = order;
-        this.favorite = favorite;
-        this.views = views;
-        this.book_id = book_id;
-        this.note = note;
-        this.times_painted = times_painted;
-        this.isNoteShowing = isNoteShowing;
     }
 
     public int getId() {
@@ -108,11 +85,11 @@ public class Bookmark implements Parcelable {
         this.order = order;
     }
 
-    public int getFavorite() {
+    public boolean isFavorite() {
         return favorite;
     }
 
-    public void setFavorite(int favorite) {
+    public void setFavorite(boolean favorite) {
         this.favorite = favorite;
     }
 
@@ -156,24 +133,11 @@ public class Bookmark implements Parcelable {
         this.times_painted = times_painted;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public boolean isDeleted() {
+        return deleted;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(name);
-        dest.writeInt(page_number);
-        dest.writeString(image_path);
-        dest.writeString(date_added);
-        dest.writeInt(order);
-        dest.writeInt(favorite);
-        dest.writeInt(views);
-        dest.writeInt(book_id);
-        dest.writeString(note);
-        dest.writeInt(times_painted);
-        dest.writeInt(isNoteShowing);
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

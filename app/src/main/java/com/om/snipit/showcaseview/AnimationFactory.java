@@ -1,4 +1,4 @@
-package com.om.atomic.showcaseview;
+package com.om.snipit.showcaseview;
 
 import android.graphics.Point;
 import android.view.View;

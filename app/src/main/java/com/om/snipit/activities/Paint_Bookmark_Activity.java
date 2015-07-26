@@ -1,4 +1,4 @@
-package com.om.atomic.activities;
+package com.om.snipit.activities;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -29,12 +29,12 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
-import com.om.atomic.classes.CanvasView;
-import com.om.atomic.classes.Constants;
-import com.om.atomic.classes.DatabaseHelper;
-import com.om.atomic.classes.EventBus_Poster;
-import com.om.atomic.classes.EventBus_Singleton;
-import com.om.atomic.classes.Helper_Methods;
+import com.om.snipit.classes.CanvasView;
+import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.DatabaseHelperasdasd;
+import com.om.snipit.classes.EventBus_Poster;
+import com.om.snipit.classes.EventBus_Singleton;
+import com.om.snipit.classes.Helper_Methods;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -79,7 +79,7 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
     private SharedPreferences prefs;
     private SharedPreferences.Editor prefsEditor;
-    private DatabaseHelper dbHelper;
+    private DatabaseHelperasdasd dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +90,7 @@ public class Paint_Bookmark_Activity extends Base_Activity {
         prefsEditor = prefs.edit();
         prefsEditor.apply();
 
-        dbHelper = new DatabaseHelper(this);
+        dbHelper = new DatabaseHelperasdasd(this);
 
         ButterKnife.inject(this);
 

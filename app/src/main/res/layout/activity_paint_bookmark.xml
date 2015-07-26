@@ -25,7 +25,7 @@
             android:layout_alignBottom="@+id/bookmarkIMG"
             android:layout_alignTop="@+id/bookmarkIMG" />
 
-        <com.om.atomic.classes.CanvasView
+        <com.om.snipit.classes.CanvasView
             android:id="@+id/canvasView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -1,10 +1,10 @@
-package com.om.atomic.showcaseview.targets;
+package com.om.snipit.showcaseview.targets;
 
 import android.app.Activity;
 import android.graphics.Point;
 import android.view.ViewParent;
 
-import com.om.atomic.showcaseview.ViewTarget;
+import com.om.snipit.showcaseview.ViewTarget;
 
 
 public class ActionViewTarget implements Target {

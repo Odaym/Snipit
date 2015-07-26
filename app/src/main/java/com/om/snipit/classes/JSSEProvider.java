@@ -1,4 +1,4 @@
-package com.om.atomic.classes;
+package com.om.snipit.classes;
 
 import java.security.AccessController;
 import java.security.Provider;

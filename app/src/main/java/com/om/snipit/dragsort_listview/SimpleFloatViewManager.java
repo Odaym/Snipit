@@ -1,4 +1,4 @@
-package com.om.atomic.dragsort_listview;
+package com.om.snipit.dragsort_listview;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;

@@ -1,7 +1,12 @@
-package com.om.atomic.classes;
+package com.om.snipit.classes;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
+@DatabaseTable(tableName = "Book")
 
 public class Book implements Parcelable {
     public static final Parcelable.Creator<Book> CREATOR = new Parcelable.Creator<Book>() {
@@ -14,14 +19,23 @@ public class Book implements Parcelable {
         }
     };
 
+    @DatabaseField (generatedId = true)
     private int id;
+    @DatabaseField
     private String title;
+    @DatabaseField
     private String author;
+    @DatabaseField
     private String image_path;
+    @DatabaseField
     private String date_added;
+    @DatabaseField
     private int pages_count;
+    @DatabaseField
     private int page_reached;
+    @DatabaseField
     private int color_code;
+    @DatabaseField
     private int order;
 
     public Book() {

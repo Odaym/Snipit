@@ -1,4 +1,4 @@
-package com.om.atomic.activities;
+package com.om.snipit.activities;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -7,15 +7,15 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 
 import com.om.atomic.R;
-import com.om.atomic.classes.Constants;
-import com.om.atomic.classes.DatabaseHelper;
+import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.DatabaseHelperasdasd;
 
 import icepick.Icepick;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class Base_Activity extends ActionBarActivity {
     private String activityName = this.getClass().getSimpleName();
-    private DatabaseHelper dbHelper = new DatabaseHelper(this);
+    private DatabaseHelperasdasd dbHelper = new DatabaseHelperasdasd(this);
 
     @Override
     protected void attachBaseContext(Context newBase) {
