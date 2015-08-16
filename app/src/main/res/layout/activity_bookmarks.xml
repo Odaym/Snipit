@@ -26,6 +26,7 @@
         android:paddingLeft="@dimen/listview_padding_left_right"
         android:paddingRight="@dimen/listview_padding_left_right"
         android:paddingTop="@dimen/listview_padding_between"
+        android:scrollbars="none"
         dslv:drag_scroll_start="0.11"
         dslv:drag_start_mode="onLongPress"
         dslv:float_alpha="0.6"

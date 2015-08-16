@@ -1,56 +1,33 @@
 package com.om.snipit.classes;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+
 @DatabaseTable(tableName = "Book")
 
-public class Book implements Parcelable {
-    public static final Parcelable.Creator<Book> CREATOR = new Parcelable.Creator<Book>() {
-        public Book createFromParcel(Parcel in) {
-            return new Book(in);
-        }
-
-        public Book[] newArray(int size) {
-            return new Book[size];
-        }
-    };
+public class Book {
 
     @DatabaseField (generatedId = true)
-    private int id;
+    int id;
     @DatabaseField
-    private String title;
+    String title;
     @DatabaseField
-    private String author;
+    String author;
     @DatabaseField
-    private String image_path;
+    String image_path;
     @DatabaseField
-    private String date_added;
+    String date_added;
     @DatabaseField
-    private int pages_count;
+    int pages_count;
     @DatabaseField
-    private int page_reached;
+    int page_reached;
     @DatabaseField
-    private int color_code;
+    int color_code;
     @DatabaseField
-    private int order;
+    int order;
 
     public Book() {
-    }
-
-    public Book(Parcel in) {
-        id = in.readInt();
-        title = in.readString();
-        author = in.readString();
-        image_path = in.readString();
-        date_added = in.readString();
-        color_code = in.readInt();
-        pages_count = in.readInt();
-        page_reached = in.readInt();
-        order = in.readInt();
     }
 
     public Book(int id, String title, String author, String image_path, String date_added, int pages_count, int page_reached, int color_code, int order) {
@@ -135,22 +112,5 @@ public class Book implements Parcelable {
 
     public void setPages_count(int pages_count) {
         this.pages_count = pages_count;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(title);
-        dest.writeString(author);
-        dest.writeString(image_path);
-        dest.writeString(date_added);
-        dest.writeInt(color_code);
-        dest.writeInt(pages_count);
-        dest.writeInt(page_reached);
-        dest.writeInt(order);
     }
 }

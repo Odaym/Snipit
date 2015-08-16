@@ -5,17 +5,14 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -33,13 +29,18 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.SelectArg;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
 import com.om.snipit.classes.Bookmark;
 import com.om.snipit.classes.Constants;
-import com.om.snipit.classes.DatabaseHelperasdasd;
+import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.HackyViewPager;
@@ -49,7 +50,9 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -58,13 +61,18 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class View_Bookmark_Activity extends Base_Activity {
 
-    private ArrayList<Bookmark> bookmarks;
+    private String extras_search_term;
+    private int book_id;
+
+    private List<Bookmark> bookmarks;
     private int NUM_PAGES;
-    private ScreenSlidePagerAdapter mPagerAdapter;
     private int current_bookmark_position;
-    private DatabaseHelperasdasd dbHelper;
-    private Button addFavoriteBookmarkBTN;
-    private SharedPreferences prefs;
+    private ScreenSlidePagerAdapter mPagerAdapter;
+
+    private DatabaseHelper databaseHelper;
+    private RuntimeExceptionDao<Bookmark, Integer> bookmarkDAO;
+    private QueryBuilder<Bookmark, Integer> bookmarkQueryBuilder;
+    private PreparedQuery<Bookmark> pq;
 
     @InjectView(R.id.pager)
     HackyViewPager mPager;
@@ -78,17 +86,22 @@ public class View_Bookmark_Activity extends Base_Activity {
 
         ButterKnife.inject(this);
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-        dbHelper = new DatabaseHelperasdasd(this);
+        bookmarkDAO = getHelper().getBookmarkDAO();
+        bookmarkQueryBuilder = bookmarkDAO.queryBuilder();
 
         String book_title = getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
+
         current_bookmark_position = getIntent().getExtras().getInt(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION);
 
-        bookmarks = getIntent().getExtras().getParcelableArrayList("bookmarks");
+        book_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID);
+        extras_search_term = getIntent().getExtras().getString(Constants.EXTRAS_SEARCH_TERM, Constants.EXTRAS_NO_SEARCH_TERM);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(book_title);
+        handleWhichBookmarksToLoad();
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle(book_title);
+        }
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
@@ -104,27 +117,30 @@ public class View_Bookmark_Activity extends Base_Activity {
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
         if (ebp.getMessage().equals("bookmark_image_needs_reload")) {
-            String extras_search_term = getIntent().getExtras().getString(Constants.EXTRAS_SEARCH_TERM, Constants.EXTRAS_NO_SEARCH_TERM);
-            String sorting_type_pref = prefs.getString(Constants.SORTING_TYPE_PREF, Constants.SORTING_TYPE_NOSORT);
 
-            Log.d("POSITON", "BEFORE IF! --- Search term is " + extras_search_term + " - Sorting preference is " + sorting_type_pref);
-
-            if (extras_search_term.equals(Constants.EXTRAS_NO_SEARCH_TERM) && sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-                Log.d("POSITION", "No search term - No sorting preference");
-                bookmarks = dbHelper.getAllBookmarks(bookmarks.get(current_bookmark_position).getBookId());
-            } else if (extras_search_term.equals(Constants.EXTRAS_NO_SEARCH_TERM) && !sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-                Log.d("POSITION", "No search term - Sorting preference is " + sorting_type_pref);
-                bookmarks = dbHelper.getAllBookmarks_Ordered(bookmarks.get(current_bookmark_position).getBookId(), sorting_type_pref);
-            } else if (sorting_type_pref.equals(Constants.SORTING_TYPE_NOSORT)) {
-                bookmarks = dbHelper.searchAllBookmarks(bookmarks.get(current_bookmark_position).getBookId(), extras_search_term);
-                Log.d("POSITION", "Search term is " + extras_search_term + " - No sorting preference " + sorting_type_pref);
-            } else {
-                bookmarks = dbHelper.searchAllBookmarks_Ordered(bookmarks.get(current_bookmark_position).getBookId(), extras_search_term, sorting_type_pref);
-//                    bookmarks = dbHelper.searchAllBookmarks(bookmarks.get(current_bookmark_position).getBookId(), extras_search_term);
-//                    bookmarks = dbHelper.getAllBookmarks_Ordered(bookmarks.get(current_bookmark_position).getBookId(), sorting_type_pref);
-            }
+            handleWhichBookmarksToLoad();
 
             mPagerAdapter.notifyDataSetChanged();
+        }
+    }
+
+    public void handleWhichBookmarksToLoad() {
+        try {
+            if (extras_search_term.equals(Constants.EXTRAS_NO_SEARCH_TERM)) {
+                bookmarkQueryBuilder.where().eq("book_id", book_id);
+                bookmarkQueryBuilder.orderBy("order", false);
+            } else {
+                SelectArg nameSelectArg = new SelectArg("%" + extras_search_term + "%");
+                SelectArg noteSelectArg = new SelectArg("%" + extras_search_term + "%");
+
+                bookmarkQueryBuilder.where().eq("book_id", book_id).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
+                bookmarkQueryBuilder.orderBy("order", false);
+            }
+
+            pq = bookmarkQueryBuilder.prepare();
+            bookmarks = bookmarkDAO.query(pq);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -157,42 +173,65 @@ public class View_Bookmark_Activity extends Base_Activity {
         @InjectView(R.id.imageProgressBar)
         ProgressBar imageProgressBar;
 
+        private MenuItem favoriteBookmark_Item;
+
         private Callback picassoCallback;
 
-        private DatabaseHelperasdasd dbHelper;
         private Helper_Methods helperMethods;
         private Context context;
         private int rotation = 0;
+
+        private Bookmark tempBookmark;
+
         private String bookmark_imagepath, bookmark_name, bookmark_dateAdded;
         private int bookmark_pagenumber, bookmark_id;
 
         private boolean clutterHidden = false;
+
+        private DatabaseHelper databaseHelper;
+        private RuntimeExceptionDao<Bookmark, Integer> bookmarkDAO;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setHasOptionsMenu(true);
 
-            dbHelper = new DatabaseHelperasdasd(context);
             helperMethods = new Helper_Methods(context);
+            bookmarkDAO = getHelper().getBookmarkDAO();
+        }
+
+        public DatabaseHelper getHelper() {
+            if (databaseHelper == null) {
+                databaseHelper =
+                        OpenHelperManager.getHelper(getActivity(), DatabaseHelper.class);
+            }
+
+            return databaseHelper;
         }
 
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            if (!bookmark_imagepath.contains("http")) {
-                inflater.inflate(R.menu.view_bookmark, menu);
+            inflater.inflate(R.menu.view_bookmark, menu);
 
-                MenuItem rotate_left_item = menu.getItem(0);
-                MenuItem rotate_right_item = menu.getItem(1);
+            MenuItem rotate_left_item = menu.getItem(0);
+            MenuItem rotate_right_item = menu.getItem(1);
+            favoriteBookmark_Item = menu.getItem(3);
 
-                SpannableString rotate_left_string = new SpannableString(rotate_left_item.getTitle().toString());
-                rotate_left_string.setSpan(new ForegroundColorSpan(Color.BLACK), 0, rotate_left_string.length(), 0);
-                rotate_left_item.setTitle(rotate_left_string);
+            tempBookmark = bookmarkDAO.queryForId(bookmark_id);
 
-                SpannableString rotate_right_string = new SpannableString(rotate_right_item.getTitle().toString());
-                rotate_right_string.setSpan(new ForegroundColorSpan(Color.BLACK), 0, rotate_right_string.length(), 0);
-                rotate_right_item.setTitle(rotate_right_string);
-            }
+            if (tempBookmark.isFavorite())
+                favoriteBookmark_Item.setIcon(getResources().getDrawable(android.R.drawable.star_big_on));
+            else
+                favoriteBookmark_Item.setIcon(getResources().getDrawable(android.R.drawable.star_big_off));
+
+            SpannableString rotate_left_string = new SpannableString(rotate_left_item.getTitle().toString());
+            rotate_left_string.setSpan(new ForegroundColorSpan(Color.BLACK), 0, rotate_left_string.length(), 0);
+            rotate_left_item.setTitle(rotate_left_string);
+
+            SpannableString rotate_right_string = new SpannableString(rotate_right_item.getTitle().toString());
+            rotate_right_string.setSpan(new ForegroundColorSpan(Color.BLACK), 0, rotate_right_string.length(), 0);
+            rotate_right_item.setTitle(rotate_right_string);
+
             super.onCreateOptionsMenu(menu, inflater);
         }
 
@@ -239,6 +278,20 @@ public class View_Bookmark_Activity extends Base_Activity {
                     sendIntent.setType("*/*");
                     startActivity(Intent.createChooser(sendIntent, "Share using:"));
                     break;
+                case R.id.favorite_bookmark:
+                    if (tempBookmark.isFavorite()) {
+                        tempBookmark.setFavorite(false);
+                        favoriteBookmark_Item.setIcon(getResources().getDrawable(android.R.drawable.star_big_off));
+                    } else {
+                        tempBookmark.setFavorite(true);
+                        favoriteBookmark_Item.setIcon(getResources().getDrawable(android.R.drawable.star_big_on));
+                    }
+
+                    bookmarkDAO.update(tempBookmark);
+
+                    EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_favorited"));
+
+                    break;
             }
             return super.onOptionsItemSelected(item);
         }
@@ -271,11 +324,8 @@ public class View_Bookmark_Activity extends Base_Activity {
             bookmarkNameTV.setText(bookmark_name);
 
             if (bookmark_pagenumber == Constants.NO_BOOKMARK_PAGE_NUMBER) {
-
-                bookmarkPageNumberLabelTV.setVisibility(View.GONE);
-                bookmarkPageNumberTV.setVisibility(View.GONE);
-
-                bookmarkNameTV.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+                bookmarkPageNumberLabelTV.setVisibility(View.INVISIBLE);
+                bookmarkPageNumberTV.setVisibility(View.INVISIBLE);
             } else {
                 bookmarkPageNumberLabelTV.setText(getString(R.string.page));
                 bookmarkPageNumberTV.setText(" " + String.valueOf(bookmark_pagenumber));
@@ -315,12 +365,14 @@ public class View_Bookmark_Activity extends Base_Activity {
 
                             final EditText inputNoteET = (EditText) alertCreateNoteView.findViewById(R.id.bookmarkNoteET);
                             inputNoteET.setHintTextColor(getActivity().getResources().getColor(R.color.edittext_hint_color));
-                            inputNoteET.setText(dbHelper.getBookmarkNote(bookmark_id));
+                            inputNoteET.setText(bookmarkDAO.queryForId(bookmark_id).getNote());
                             inputNoteET.setSelection(inputNoteET.getText().length());
 
                             alert.setPositiveButton(context.getResources().getString(R.string.OK), new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                    dbHelper.update_BookmarkNote(bookmark_id, inputNoteET.getText().toString());
+                                    Bookmark bookmarkToUpdate = bookmarkDAO.queryForId(bookmark_id);
+                                    bookmarkToUpdate.setNote(inputNoteET.getText().toString());
+                                    bookmarkDAO.update(bookmarkToUpdate);
 
                                     EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_note_changed"));
                                 }
@@ -370,11 +422,7 @@ public class View_Bookmark_Activity extends Base_Activity {
                 }
             };
 
-            if (!helperMethods.isBookmarkOnDisk(bookmark_imagepath)) {
-                Picasso.with(context).load(bookmark_imagepath).error(getResources().getDrawable(R.drawable.bookmark_not_found)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
-            } else {
-                Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.bookmark_not_found)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
-            }
+            Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.bookmark_not_found)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
 
             PhotoViewAttacher mAttacher = new PhotoViewAttacher(bookmarkIMG);
             mAttacher.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
@@ -393,7 +441,6 @@ public class View_Bookmark_Activity extends Base_Activity {
             return rootView;
         }
 
-
         @DebugLog
         public void dealWithClutter(final boolean wasHidden, final View view, String bookmark_imagepath) {
             ArrayList<ObjectAnimator> arrayListObjectAnimators = new ArrayList<ObjectAnimator>();
@@ -405,9 +452,7 @@ public class View_Bookmark_Activity extends Base_Activity {
 
                 arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkDetailsView));
                 arrayListObjectAnimators.add(helperMethods.showViewElement(createNewNoteBTN));
-
-                if (helperMethods.isBookmarkOnDisk(bookmark_imagepath))
-                    arrayListObjectAnimators.add(helperMethods.showViewElement(paintBookmarkBTN));
+                arrayListObjectAnimators.add(helperMethods.showViewElement(paintBookmarkBTN));
 
             } else {
                 ((View_Bookmark_Activity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -416,9 +461,7 @@ public class View_Bookmark_Activity extends Base_Activity {
 
                 arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkDetailsView));
                 arrayListObjectAnimators.add(helperMethods.hideViewElement(createNewNoteBTN));
-
-                if (helperMethods.isBookmarkOnDisk(bookmark_imagepath))
-                    arrayListObjectAnimators.add(helperMethods.hideViewElement(paintBookmarkBTN));
+                arrayListObjectAnimators.add(helperMethods.hideViewElement(paintBookmarkBTN));
             }
 
             objectAnimators = arrayListObjectAnimators
@@ -505,5 +548,14 @@ public class View_Bookmark_Activity extends Base_Activity {
         public Fragment getRegisteredFragment(int position) {
             return registeredFragments.get(position);
         }
+    }
+
+    public DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+
+        return databaseHelper;
     }
 }

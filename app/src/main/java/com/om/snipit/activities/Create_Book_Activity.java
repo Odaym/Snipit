@@ -23,10 +23,12 @@ import com.flurry.android.FlurryAgent;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.om.atomic.R;
 import com.om.snipit.classes.Book;
 import com.om.snipit.classes.Constants;
-import com.om.snipit.classes.DatabaseHelperasdasd;
+import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
@@ -76,7 +78,10 @@ public class Create_Book_Activity extends Base_Activity {
     private String bookImagePath;
     private int book_pages_count;
     private boolean bookImageFoundAtGoogle = false;
-    private DatabaseHelperasdasd dbHelper;
+
+    private DatabaseHelper databaseHelper;
+    private RuntimeExceptionDao<Book, Integer> bookDAO;
+    private RuntimeExceptionDao<Param, Integer> paramDAO;
 
     private ShowcaseView scanBookShowcase;
 
@@ -96,6 +101,9 @@ public class Create_Book_Activity extends Base_Activity {
 
         ButterKnife.inject(this);
 
+        bookDAO = getHelper().getBookDAO();
+        paramDAO = getHelper().getParamDAO();
+
         allFields.add(titleET);
         allFields.add(authorET);
 
@@ -110,8 +118,6 @@ public class Create_Book_Activity extends Base_Activity {
                 super.handleMessage(msg);
             }
         };
-
-        dbHelper = new DatabaseHelperasdasd(this);
 
         final Helper_Methods helperMethods = new Helper_Methods(this);
 
@@ -130,9 +136,9 @@ public class Create_Book_Activity extends Base_Activity {
         if (CALL_PURPOSE == Constants.EDIT_BOOK_PURPOSE_VALUE) {
             getSupportActionBar().setTitle(getString(R.string.edit_book_activity_title));
 
-            helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
+            book_from_list = bookDAO.queryForId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
 
-            book_from_list = getIntent().getParcelableExtra("book");
+            helperMethods.setUpActionbarColors(this, book_from_list.getColorCode());
 
             if (book_from_list != null) {
                 titleET.setText(book_from_list.getTitle());
@@ -159,11 +165,11 @@ public class Create_Book_Activity extends Base_Activity {
                         String bookSearchString = "https://www.googleapis.com/books/v1/volumes?" +
                                 "q=intitle:" + titleET.getText().toString().replace(" ", "%20") + "?q=inauthor:" + authorET.getText().toString().replace(" ", "%20") + "&key=" + Constants.GOOGLE_BOOKS_API_KEY;
                         if (Helper_Methods.isInternetAvailable(Create_Book_Activity.this)) {
-                            if (bookImageFoundAtGoogle) {
+//                            if (bookImageFoundAtGoogle) {
                                 finalizeInsertBook(bookImagePath);
-                            } else {
-                                new GetBookImage().execute(bookSearchString);
-                            }
+//                            } else {
+//                                new GetBookImage().execute(bookSearchString);
+//                            }
                         } else {
                             finalizeInsertBook(bookImagePath);
                         }
@@ -172,7 +178,7 @@ public class Create_Book_Activity extends Base_Activity {
                         book_from_list.setTitle(titleET.getText().toString());
                         book_from_list.setAuthor(authorET.getText().toString());
 
-                        dbHelper.updateBook(book_from_list);
+                        bookDAO.update(book_from_list);
 
                         EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
 
@@ -232,17 +238,18 @@ public class Create_Book_Activity extends Base_Activity {
         book.setImagePath(foundBookImagePath);
         book.setDate_added(month + " " + day + " " + year);
         book.setColorCode(rand.nextInt(7 - 1));
+        book.setOrder((int) (bookDAO.countOf() + 1));
         book.setPages_count(book_pages_count);
         book.setPage_reached(0);
 
-        int last_insert_book_id = dbHelper.createBook(book);
+        bookDAO.create(book);
 
         FlurryAgent.logEvent("Book_Create");
 
         EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
 
         Intent takeToBookmarks = new Intent(Create_Book_Activity.this, Bookmarks_Activity.class);
-        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, last_insert_book_id);
+        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
         takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
         takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
 
@@ -267,7 +274,8 @@ public class Create_Book_Activity extends Base_Activity {
 
     @DebugLog
     public void showScanBookHintShowcase() {
-        if (!dbHelper.getParam(null, 3)) {
+        final Param createBookTutorialParam = paramDAO.queryForId(Constants.SEEN_CREATE_BOOK_TUTORIAL_DATABASE_VALUE);
+        if (createBookTutorialParam.isEnabled()) {
 
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -294,10 +302,8 @@ public class Create_Book_Activity extends Base_Activity {
                     InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     inputMethodManager.toggleSoftInputFromWindow(scanBookShowcase.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
 
-                    Param param = new Param();
-                    param.setNumber(3);
-                    param.setValue("True");
-                    dbHelper.updateParam(param);
+                    createBookTutorialParam.setEnabled(false);
+                    paramDAO.update(createBookTutorialParam);
                 }
             });
             scanBookShowcase.setShouldCentreText(true);
@@ -329,6 +335,15 @@ public class Create_Book_Activity extends Base_Activity {
         } else {
             Crouton.makeText(Create_Book_Activity.this, getString(R.string.no_scan_data), Style.ALERT).show();
         }
+    }
+
+    public DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+
+        return databaseHelper;
     }
 
     private class GetBookInfo extends AsyncTask<String, Void, String> {

@@ -1,31 +1,30 @@
 package com.om.snipit.activities;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.om.atomic.R;
 import com.om.snipit.classes.Constants;
-import com.om.snipit.classes.DatabaseHelperasdasd;
-
-import icepick.Icepick;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+import com.om.snipit.classes.DatabaseHelper;
+import com.om.snipit.classes.Param;
 
 public class Base_Activity extends ActionBarActivity {
     private String activityName = this.getClass().getSimpleName();
-    private DatabaseHelperasdasd dbHelper = new DatabaseHelperasdasd(this);
 
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
+    private DatabaseHelper databaseHelper;
+    private Param animationsParam;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Icepick.restoreInstanceState(this, savedInstanceState);
+
+        RuntimeExceptionDao<Param, Integer> paramDAO = getHelper().getParamDAO();
+
+        animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
 
         performIntroAnimationCheck();
     }
@@ -33,7 +32,6 @@ public class Base_Activity extends ActionBarActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Icepick.saveInstanceState(this, outState);
     }
 
     @Override
@@ -61,7 +59,7 @@ public class Base_Activity extends ActionBarActivity {
 
     public void performIntroAnimationCheck() {
         //If Animations are enabled
-        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
+        if (animationsParam.isEnabled()) {
             //Only set this animation to the Activities that are NOT Paint_Bookmark and NOT Books
             if (!activityName.equals(Constants.BOOKS_ACTIVITY_NAME) && !activityName.equals(Constants.PAINT_BOOKMARK_ACTIVITY_NAME))
                 overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
@@ -72,8 +70,9 @@ public class Base_Activity extends ActionBarActivity {
     }
 
     public void performOutroAnimationCheck() {
+
         //If Animations are enabled
-        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE)) {
+        if (animationsParam.isEnabled()) {
             //Only set this animation to the Activities that are NOT Paint_Bookmark and NOT Books
             if (!activityName.equals(Constants.BOOKS_ACTIVITY_NAME) && !activityName.equals(Constants.PAINT_BOOKMARK_ACTIVITY_NAME))
                 overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
@@ -81,5 +80,14 @@ public class Base_Activity extends ActionBarActivity {
             else if (!activityName.equals(Constants.BOOKS_ACTIVITY_NAME))
                 overridePendingTransition(R.anim.no_change, R.anim.slide_down);
         }
+    }
+
+    public DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+
+        return databaseHelper;
     }
 }

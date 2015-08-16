@@ -18,10 +18,6 @@
             android:key="pref_key_tutorial_mode"
             android:summary="@string/pref_tutorial_summary"
             android:title="@string/pref_tutorial_title" />
-        <Preference
-            android:key="pref_key_populate_sample_data"
-            android:summary="@string/pref_populate_sample_data_summary"
-            android:title="@string/pref_populate_sample_data_title" />
     </PreferenceCategory>
 
     <PreferenceCategory

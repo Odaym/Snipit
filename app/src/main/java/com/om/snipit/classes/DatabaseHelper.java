@@ -31,11 +31,21 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db, ConnectionSource connectionSource) {
         try {
+            Log.d("DB", "DatabaseHelper class created, onCreate() called");
+
             TableUtils.createTable(connectionSource, Book.class);
             TableUtils.createTable(connectionSource, Bookmark.class);
             TableUtils.createTable(connectionSource, Param.class);
+
+            paramRuntimeDAO = getParamDAO();
+            paramRuntimeDAO.createIfNotExists(new Param(Constants.SEEN_BOOK_TUTORIAL_DATABASE_VALUE, false));
+            paramRuntimeDAO.createIfNotExists(new Param(Constants.SEEN_BOOKMARK_TUTORIAL_DATABASE_VALUE, false));
+            paramRuntimeDAO.createIfNotExists(new Param(Constants.SEEN_CREATE_BOOK_TUTORIAL_DATABASE_VALUE, false));
+            paramRuntimeDAO.createIfNotExists(new Param(Constants.TUTORIAL_MODE_DATABASE_VALUE, false));
+            paramRuntimeDAO.createIfNotExists(new Param(Constants.ANIMATIONS_DATABASE_VALUE, false));
+
         } catch (SQLException e) {
-            Log.e(DatabaseHelperasdasd.class.getName(), "Can't create database", e);
+            Log.e(DatabaseHelper.class.getName(), "Can't create database", e);
             throw new RuntimeException(e);
         }
     }

@@ -8,31 +8,29 @@ import com.j256.ormlite.table.DatabaseTable;
 public class Bookmark {
 
     @DatabaseField(generatedId = true)
-    private int id;
-    @DatabaseField(foreign = true)
-    private int book_id;
+    int id;
     @DatabaseField
-    private String name;
+    int book_id;
     @DatabaseField
-    private int page_number;
+    String name;
     @DatabaseField
-    private String image_path;
+    int page_number;
     @DatabaseField
-    private String date_added;
+    String image_path;
     @DatabaseField
-    private int order;
+    String date_added;
     @DatabaseField
-    private boolean favorite;
+    int order;
     @DatabaseField
-    private int views;
+    boolean favorite;
     @DatabaseField
-    private String note;
+    int views;
     @DatabaseField
-    private int times_painted;
+    String note;
     @DatabaseField
-    private int isNoteShowing;
+    int times_painted;
     @DatabaseField
-    private boolean deleted;
+    int isNoteShowing;
 
     public Bookmark() {
     }
@@ -131,13 +129,5 @@ public class Bookmark {
 
     public void setTimes_painted(int times_painted) {
         this.times_painted = times_painted;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
     }
 }

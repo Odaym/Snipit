@@ -10,12 +10,15 @@ public class Param {
     @DatabaseField(id = true)
     private int id;
     @DatabaseField
-    private int number;
-    @DatabaseField
     private boolean enabled;
 
     public Param() {
         super();
+    }
+
+    public Param(int id, boolean enabled) {
+        this.id = id;
+        this.enabled = enabled;
     }
 
     public void setId(int id) {
@@ -24,14 +27,6 @@ public class Param {
 
     public int getId() {
         return id;
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
     }
 
     public boolean isEnabled() {

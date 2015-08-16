@@ -25,13 +25,16 @@ import android.widget.TextView;
 
 import com.andreabaccega.widget.FormEditText;
 import com.flurry.android.FlurryAgent;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.om.atomic.R;
 import com.om.snipit.classes.Constants;
-import com.om.snipit.classes.DatabaseHelperasdasd;
+import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.GMailSender;
 import com.om.snipit.classes.Helper_Methods;
+import com.om.snipit.classes.Param;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
@@ -39,13 +42,19 @@ import de.keyboardsurfer.android.widget.crouton.Style;
 public class Settings_Activity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private ProgressDialog sendEmailFeedbackDialog;
-    private DatabaseHelperasdasd dbHelper = new DatabaseHelperasdasd(this);
+    private DatabaseHelper databaseHelper;
+    private RuntimeExceptionDao<Param, Integer> paramDAO;
+    private Param animationsParam;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE))
+        paramDAO = getHelper().getParamDAO();
+
+        animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
+
+        if (animationsParam.isEnabled())
             overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
         final Helper_Methods helperMethods = new Helper_Methods(this);
@@ -59,7 +68,7 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
             toolbar.setElevation(25f);
         }
 
-        toolbar.setBackgroundDrawable(getResources().getDrawable(R.color.red));
+        toolbar.setBackgroundColor(getResources().getColor(R.color.red));
 
         root.addView(toolbar, 0);
 
@@ -68,7 +77,7 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
             public void onClick(View v) {
                 onBackPressed();
 
-                if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE))
+                if (animationsParam.isEnabled())
                     overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
             }
         });
@@ -135,22 +144,6 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
             }
         });
 
-        Preference populateSampleData = findPreference("pref_key_populate_sample_data");
-
-        populateSampleData.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                if (Helper_Methods.isInternetAvailable(Settings_Activity.this)) {
-                    FlurryAgent.logEvent("Test_Drive");
-                    EventBus_Singleton.getInstance().post(new EventBus_Poster("populate_sample_data"));
-                    finish();
-                } else {
-                    Crouton.makeText(Settings_Activity.this, getString(R.string.action_needs_internet), Style.INFO).show();
-                }
-                return false;
-            }
-        });
-
         Preference aboutOpenSourceLibs = findPreference("pref_key_open_source_libs");
 
         aboutOpenSourceLibs.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -166,37 +159,56 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-        DatabaseHelperasdasd dbHelper = new DatabaseHelperasdasd(this);
-
         switch (key) {
             case "pref_key_tutorial_mode":
+                Param tutorialParam = paramDAO.queryForId(Constants.TUTORIAL_MODE_DATABASE_VALUE);
+
+                Param seenBookParam = paramDAO.queryForId(Constants.SEEN_BOOK_TUTORIAL_DATABASE_VALUE);
+                Param seenBookmarkParam = paramDAO.queryForId(Constants.SEEN_BOOKMARK_TUTORIAL_DATABASE_VALUE);
+                Param seenCreateBookParam = paramDAO.queryForId(Constants.SEEN_CREATE_BOOK_TUTORIAL_DATABASE_VALUE);
+
                 if (sharedPreferences.getBoolean("pref_key_tutorial_mode", true)) {
                     FlurryAgent.logEvent("Tutorial_Mode_ON");
 
                     //Set all coachmarks to Unseen
-                    dbHelper.reverseParamsTruths(1, "False");
-                    dbHelper.reverseParamsTruths(2, "False");
-                    dbHelper.reverseParamsTruths(3, "False");
+                    seenBookParam.setEnabled(true);
+                    seenBookmarkParam.setEnabled(true);
+                    seenCreateBookParam.setEnabled(true);
+
+                    tutorialParam.setEnabled(true);
                 } else {
                     FlurryAgent.logEvent("Tutorial_Mode_OFF");
 
                     //Set all coachmarks to Seen
-                    dbHelper.reverseParamsTruths(1, "True");
-                    dbHelper.reverseParamsTruths(2, "True");
-                    dbHelper.reverseParamsTruths(3, "True");
+                    seenBookParam.setEnabled(false);
+                    seenBookmarkParam.setEnabled(false);
+                    seenCreateBookParam.setEnabled(false);
+
+                    tutorialParam.setEnabled(false);
                 }
+
+                paramDAO.update(seenBookParam);
+                paramDAO.update(seenBookmarkParam);
+                paramDAO.update(seenCreateBookParam);
+
+                paramDAO.update(tutorialParam);
+
                 break;
             case "pref_key_animations_mode":
+                Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
+
                 //Reflect the change in the database because this preference has already changed
                 if (sharedPreferences.getBoolean("pref_key_animations_mode", true)) {
                     FlurryAgent.logEvent("Layout_Animations_ON");
 
-                    dbHelper.reverseParamsTruths(10, "True");
+                    animationsParam.setEnabled(true);
                 } else {
                     FlurryAgent.logEvent("Layout_Animations_OFF");
 
-                    dbHelper.reverseParamsTruths(10, "False");
+                    animationsParam.setEnabled(false);
                 }
+
+                paramDAO.update(animationsParam);
 
                 break;
         }
@@ -237,10 +249,19 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             super.onBackPressed();
             //If Animations are enabled
-            if (dbHelper.getParam(null, Constants.ANIMATIONS_ENABLED_DATABASE_VALUE))
+            if (animationsParam.isEnabled())
                 overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    public DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+
+        return databaseHelper;
     }
 }

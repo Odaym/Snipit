@@ -15,13 +15,11 @@ import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
-import com.parse.ParseObject;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 import hugo.weaving.DebugLog;
 
@@ -63,33 +61,32 @@ public class Helper_Methods {
         return allValid;
     }
 
-    public void uploadBookDataToParse(DatabaseHelperasdasd dbHelper) {
-        List<Book> books = dbHelper.getAllBooks();
-
-        for (Book book : books) {
-            ParseObject bookObject = new ParseObject("Book");
-            bookObject.put("title", book.getTitle());
-            bookObject.put("author", book.getAuthor());
-            bookObject.saveInBackground();
-        }
-    }
-
-    public void uploadBookmarkDataToParse(DatabaseHelperasdasd dbHelper) {
-        List<Book> books = dbHelper.getAllBooks();
-        List<Bookmark> bookmarks;
-
-        for (Book book : books) {
-            bookmarks = dbHelper.getAllBookmarks(book.getId());
-            for (Bookmark bookmark : bookmarks) {
-                ParseObject bookmarkObject = new ParseObject("Bookmark");
-                bookmarkObject.put("book_id", bookmark.getBookId());
-                bookmarkObject.put("title", bookmark.getName());
-                bookmarkObject.put("page_number", bookmark.getPage_number());
-                bookmarkObject.saveInBackground();
-            }
-        }
-    }
-
+//    public void uploadBookDataToParse(DatabaseHelperasdasd dbHelper) {
+//        List<Book> books = dbHelper.getAllBooks();
+//
+//        for (Book book : books) {
+//            ParseObject bookObject = new ParseObject("Book");
+//            bookObject.put("title", book.getTitle());
+//            bookObject.put("author", book.getAuthor());
+//            bookObject.saveInBackground();
+//        }
+//    }
+//
+//    public void uploadBookmarkDataToParse(DatabaseHelperasdasd dbHelper) {
+//        List<Book> books = dbHelper.getAllBooks();
+//        List<Bookmark> bookmarks;
+//
+//        for (Book book : books) {
+//            bookmarks = dbHelper.getAllBookmarks(book.getId());
+//            for (Bookmark bookmark : bookmarks) {
+//                ParseObject bookmarkObject = new ParseObject("Bookmark");
+//                bookmarkObject.put("book_id", bookmark.getBookId());
+//                bookmarkObject.put("title", bookmark.getName());
+//                bookmarkObject.put("page_number", bookmark.getPage_number());
+//                bookmarkObject.saveInBackground();
+//            }
+//        }
+//    }
 
     //Used to determine whether to allow scanning of Book Barcodes
     public static boolean isInternetAvailable(Context context) {

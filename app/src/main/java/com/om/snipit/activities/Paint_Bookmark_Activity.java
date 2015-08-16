@@ -26,12 +26,15 @@ import com.bumptech.glide.Glide;
 import com.flurry.android.FlurryAgent;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
+import com.om.snipit.classes.Bookmark;
 import com.om.snipit.classes.CanvasView;
 import com.om.snipit.classes.Constants;
-import com.om.snipit.classes.DatabaseHelperasdasd;
+import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
@@ -79,18 +82,20 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
     private SharedPreferences prefs;
     private SharedPreferences.Editor prefsEditor;
-    private DatabaseHelperasdasd dbHelper;
+
+    private DatabaseHelper databaseHelper;
+    private RuntimeExceptionDao<Bookmark, Integer> bookmarkDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_paint_bookmark);
 
+        bookmarkDAO = getHelper().getBookmarkDAO();
+
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefsEditor = prefs.edit();
         prefsEditor.apply();
-
-        dbHelper = new DatabaseHelperasdasd(this);
 
         ButterKnife.inject(this);
 
@@ -237,6 +242,15 @@ public class Paint_Bookmark_Activity extends Base_Activity {
         prefsEditor.apply();
     }
 
+    public DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+
+        return databaseHelper;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -312,6 +326,7 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
         private Helper_Methods helperMethods;
         private int bookmark_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1);
+        private Bookmark bookmarkBeingPainted = bookmarkDAO.queryForId(bookmark_id);
 
         @Override
         protected void onPreExecute() {
@@ -322,13 +337,14 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
             helperMethods = new Helper_Methods(Paint_Bookmark_Activity.this);
 
+
             //At the time of easter egg paint-times counter - 1, give Glide a chance to load the GIF behind the bookmark image
-            if (dbHelper.getBookmarkTimesPainted(bookmark_id) == 3) {
+            if (bookmarkBeingPainted.getTimes_painted() == 3) {
                 Glide.with(Paint_Bookmark_Activity.this).load(R.raw.thumbs_up_computer_kid).asGif().into(savingBookmarkGIF);
             }
 
             //At the time of easter egg paint-counter, hide the bookmark image to reveal the running GIF
-            if (dbHelper.getBookmarkTimesPainted(bookmark_id) == 4) {
+            if (bookmarkBeingPainted.getTimes_painted() == 4) {
 
                 ObjectAnimator hideBookmarkIMGAnim = helperMethods.hideViewElement(bookmarkIMG);
 
@@ -407,7 +423,9 @@ public class Paint_Bookmark_Activity extends Base_Activity {
 
                 String finalImagePathAfterPaint = storeImage(mCBitmap);
 
-                dbHelper.update_BookmarkImage(bookmark_id, finalImagePathAfterPaint);
+                bookmarkBeingPainted.setImage_path(finalImagePathAfterPaint);
+
+                bookmarkDAO.update(bookmarkBeingPainted);
 
                 publishProgress(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH), finalImagePathAfterPaint);
 
@@ -429,11 +447,11 @@ public class Paint_Bookmark_Activity extends Base_Activity {
             } else {
                 FlurryAgent.logEvent("Bookmark_Paint");
 
-                int bookmark_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1);
+                int times_painted = bookmarkBeingPainted.getTimes_painted();
 
-                int times_painted = dbHelper.getBookmarkTimesPainted(bookmark_id);
+                bookmarkBeingPainted.setTimes_painted(times_painted + 1);
 
-                dbHelper.update_BookmarkTimesPainted(bookmark_id, times_painted + 1);
+                bookmarkDAO.update(bookmarkBeingPainted);
 
                 savingBookmarkProgressBar.setVisibility(View.INVISIBLE);
 

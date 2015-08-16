@@ -49,19 +49,20 @@
         <activity
             android:name="com.om.snipit.activities.Bookmarks_Activity"
             android:theme="@style/Bookmarks_Activity_Theme"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustNothing">
-        </activity>
+            android:windowSoftInputMode="stateAlwaysHidden|adjustNothing"/>
 
         <activity
             android:name="com.om.snipit.activities.Create_Book_Activity"
             android:label="@string/create_book_activity_title"
             android:screenOrientation="portrait"
+            android:theme="@style/Create_Book_Activity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
         <activity
             android:name="com.om.snipit.activities.Create_Bookmark_Activity"
             android:label="@string/create_bookmark_activity_title"
             android:screenOrientation="portrait"
+            android:theme="@style/Create_Bookmark_Activity"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
@@ -78,13 +79,16 @@
             android:screenOrientation="portrait"
             android:theme="@style/View_Bookmark_Activity_Theme" />
 
-        <activity android:name="com.om.snipit.activities.Settings_Activity" />
+        <activity
+            android:name="com.om.snipit.activities.Settings_Activity"
+            android:theme="@style/Settings_Activity_Theme" />
 
         <activity
             android:name="com.om.snipit.activities.Open_Source_Libs_Activity"
             android:screenOrientation="portrait" />
 
-        <activity android:name="com.google.android.gms.ads.AdActivity"
+        <activity
+            android:name="com.google.android.gms.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:theme="@android:style/Theme.Translucent" />
 

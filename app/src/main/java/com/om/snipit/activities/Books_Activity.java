@@ -1,6 +1,5 @@
 package com.om.snipit.activities;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -17,6 +16,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -36,13 +36,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.AddFloatingActionButton;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.heinrichreimersoftware.materialdrawer.DrawerView;
 import com.heinrichreimersoftware.materialdrawer.structure.DrawerItem;
 import com.heinrichreimersoftware.materialdrawer.structure.DrawerProfile;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.nispok.snackbar.listeners.EventListener;
@@ -58,25 +58,17 @@ import com.om.snipit.classes.Param;
 import com.om.snipit.dragsort_listview.DragSortListView;
 import com.om.snipit.showcaseview.ShowcaseView;
 import com.om.snipit.showcaseview.ViewTarget;
-import com.parse.FindCallback;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
 import net.frakbot.jumpingbeans.JumpingBeans;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import de.keyboardsurfer.android.widget.crouton.Crouton;
-import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 
@@ -99,11 +91,8 @@ public class Books_Activity extends Base_Activity {
 
     private LayoutAnimationController controller;
 
-    private Helper_Methods helperMethods;
-
     private final static int SHOW_CREATE_BOOK_SHOWCASE = 1;
     private static Handler UIHandler = new Handler();
-    private ProgressDialog downloadingBookDataLoader;
 
     private Books_Adapter booksAdapter;
     private List<Book> books;
@@ -113,6 +102,11 @@ public class Books_Activity extends Base_Activity {
     private RuntimeExceptionDao<Book, Integer> bookDAO;
     private RuntimeExceptionDao<Bookmark, Integer> bookmarkDAO;
     private RuntimeExceptionDao<Param, Integer> paramDAO;
+
+    private QueryBuilder<Book, Integer> bookQueryBuilder;
+    private QueryBuilder<Bookmark, Integer> bookmarkQueryBuilder;
+    private PreparedQuery<Bookmark> pq;
+    private PreparedQuery<Book> pqBook;
 
     private ShowcaseView createBookShowcase;
     private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
@@ -142,11 +136,14 @@ public class Books_Activity extends Base_Activity {
 
         EventBus_Singleton.getInstance().register(this);
 
-        helperMethods = new Helper_Methods(this);
+        Helper_Methods helperMethods = new Helper_Methods(this);
 
         bookDAO = getHelper().getBookDAO();
         bookmarkDAO = getHelper().getBookmarkDAO();
         paramDAO = getHelper().getParamDAO();
+
+        bookQueryBuilder = bookDAO.queryBuilder();
+        bookmarkQueryBuilder = bookmarkDAO.queryBuilder();
 
         ButterKnife.inject(this);
 
@@ -162,9 +159,11 @@ public class Books_Activity extends Base_Activity {
             }
         };
 
-        books = bookDAO.queryForAll();
+        prepareQueryBuilder();
 
-        handleEmptyOrPopulatedScreen(books);
+        books = bookDAO.query(pqBook);
+
+        handleEmptyOrPopulatedScreen();
 
         setSupportActionBar(toolbar);
         helperMethods.setUpActionbarColors(this, Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS);
@@ -200,20 +199,20 @@ public class Books_Activity extends Base_Activity {
         /**
          * FAVORITE BOOKMARKS
          */
-        navDrawer.addItem(
-                new DrawerItem()
-                        .setImage(getResources().getDrawable(R.drawable.favorites), DrawerItem.SMALL_AVATAR)
-                        .setTextPrimary(getResources().getString(R.string.navdrawer_favorite_bookmarks_item))
-        );
+//        navDrawer.addItem(
+//                new DrawerItem()
+//                        .setImage(getResources().getDrawable(R.drawable.favorites), DrawerItem.SMALL_AVATAR)
+//                        .setTextPrimary(getResources().getString(R.string.navdrawer_favorite_bookmarks_item))
+//        );
 
-        /**
-         * TRASH
-         */
-        navDrawer.addItem(
-                new DrawerItem()
-                        .setImage(getResources().getDrawable(R.drawable.trash), DrawerItem.SMALL_AVATAR)
-                        .setTextPrimary(getResources().getString(R.string.navdrawer_trash_item))
-        );
+//        /**
+//         * TRASH
+//         */
+//        navDrawer.addItem(
+//                new DrawerItem()
+//                        .setImage(getResources().getDrawable(R.drawable.trash), DrawerItem.SMALL_AVATAR)
+//                        .setTextPrimary(getResources().getString(R.string.navdrawer_trash_item))
+//        );
 
         /**
          * UPGRADE TO PREMIUM
@@ -289,6 +288,7 @@ public class Books_Activity extends Base_Activity {
                     openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
                     openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
                     openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
+                    openBookmarksForBook.putExtra(Constants.EXTRAS_IS_FAVORITE_BOOKMARKS_FRAGMENT, false);
                     startActivity(openBookmarksForBook);
                 }
             }
@@ -304,6 +304,16 @@ public class Books_Activity extends Base_Activity {
         return databaseHelper;
     }
 
+    public void prepareQueryBuilder() {
+        try {
+            bookQueryBuilder.where().not().eq("title", "null");
+            bookQueryBuilder.orderBy("order", true);
+            pqBook = bookQueryBuilder.prepare();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -314,91 +324,6 @@ public class Books_Activity extends Base_Activity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         drawerToggle.syncState();
-    }
-
-    /**
-     * The algorithm is:
-     * 1. Download books from Parse
-     * 2. Download bookmarks from Parse
-     * 3. For every book being added, if it exists, go through its bookmarks and add those
-     * <p/>
-     * Outcome: Non-replicable set of sample books. If some are missing by virtue of having been deleted, they will be replaced but never replicated.
-     */
-    public void populateSampleData() {
-        final List<Book> booksToInsert = new ArrayList<Book>();
-        final List<Bookmark> bookmarksToInsert = new ArrayList<Bookmark>();
-
-        Date date = new Date();
-        final String day = (String) android.text.format.DateFormat.format("dd", date);
-        final String month = (String) android.text.format.DateFormat.format("MMM", date);
-        final String year = (String) android.text.format.DateFormat.format("yyyy", date);
-
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Book");
-        query.findInBackground(new FindCallback<ParseObject>() {
-            public void done(final List<ParseObject> parseObjects, ParseException e) {
-                if (e == null) {
-                    for (ParseObject parseObject : parseObjects) {
-                        Random rand = new Random();
-
-                        Book book = new Book();
-                        book.setId(Integer.parseInt(parseObject.get("book_id").toString()));
-                        book.setTitle(parseObject.get("title").toString());
-                        book.setAuthor(parseObject.get("author").toString());
-                        book.setPages_count(parseObject.getInt("pages_count"));
-                        book.setPage_reached(parseObject.getInt("page_reached"));
-                        book.setImagePath(parseObject.get("thumb").toString());
-                        book.setDate_added(month + " " + day + " " + year);
-                        book.setColorCode(rand.nextInt(7 - 1));
-
-                        booksToInsert.add(book);
-                    }
-
-                    ParseQuery<ParseObject> query = ParseQuery.getQuery("Bookmark");
-                    query.findInBackground(new FindCallback<ParseObject>() {
-                        @Override
-                        public void done(List<ParseObject> parseObjects, ParseException e) {
-                            if (e == null) {
-                                for (ParseObject parseObject : parseObjects) {
-                                    Bookmark bookmark = new Bookmark();
-                                    bookmark.setBookId(Integer.parseInt(parseObject.get("book_id").toString()));
-                                    bookmark.setName(parseObject.get("title").toString());
-                                    bookmark.setPage_number(Integer.parseInt(parseObject.get("page_number").toString()));
-                                    bookmark.setImage_path(parseObject.get("image").toString());
-                                    bookmark.setDate_added(month + " " + day + ", " + year);
-                                    bookmark.setDeleted(false);
-                                    bookmark.setFavorite(false);
-
-                                    bookmarksToInsert.add(bookmark);
-                                }
-
-                                for (int i = 0; i < booksToInsert.size(); i++) {
-//                                    int db_insert_success_status =
-//                                            dbHelper.createSampleBook(booksToInsert.get(i));
-                                    bookDAO.createIfNotExists(booksToInsert.get(i));
-
-                                    //If the book did not already exist, go ahead and insert its bookmarks
-                                    if (bookDAO.idExists(booksToInsert.get(i).getId())) {
-                                        for (int j = 0; j < bookmarksToInsert.size(); j++) {
-                                            if (bookmarksToInsert.get(j).getBookId() == booksToInsert.get(i).getId())
-                                                bookmarkDAO.createIfNotExists(bookmarksToInsert.get(j));
-                                        }
-
-                                        EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
-                                    }
-                                }
-                                downloadingBookDataLoader.dismiss();
-
-                                if (drawerLayout.isDrawerOpen(GravityCompat.START))
-                                    drawerLayout.closeDrawer(GravityCompat.START);
-                            }
-                        }
-                    });
-                } else {
-                    //Something went wrong while getting data from Parse
-                    Crouton.makeText(Books_Activity.this, "Something went wrong! Please check your Internet connection", Style.ALERT).show();
-                }
-            }
-        });
     }
 
     @Override
@@ -421,48 +346,61 @@ public class Books_Activity extends Base_Activity {
 
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
-        if (ebp.getMessage().equals("populate_sample_data")) {
-            downloadingBookDataLoader = ProgressDialog.show(this, getResources().getString(R.string.downloading_books_loader_title),
-                    getResources().getString(R.string.downloading_books_loader_message), true);
-            populateSampleData();
-        } else if (ebp.getMessage().equals("book_added") || ebp.getMessage().equals("bookmark_changed")) {
-            prepareForNotifyDataChanged();
-            //If animations are disabled
-//            if (dbHelper.getParam(null, 10)) {
-            Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
-            if (animationsParam.isEnabled()) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        listView.setLayoutAnimation(controller);
-                        booksAdapter.notifyDataSetChanged();
-                    }
-                }, 100);
-            } else {
-                booksAdapter.notifyDataSetChanged();
-            }
+        String ebpMessage = ebp.getMessage();
+
+        switch (ebpMessage) {
+            case "book_added":
+                handleBusEvents_ListRefresher();
+                Log.d("EVENTS", "book_added - Books_Activity");
+                break;
+            case "bookmark_added_books_activity":
+                handleBusEvents_ListRefresher();
+                Log.d("EVENTS", "bookmark_added_books_activity - Books_Activity");
+                break;
+            case "bookmark_deleted_books_activity":
+                handleBusEvents_ListRefresher();
+                Log.d("EVENTS", "bookmark_deleted_books_activity - Books_Activity");
+                break;
+        }
+    }
+
+    public void handleBusEvents_ListRefresher() {
+        prepareForNotifyDataChanged();
+
+        //If animations are disabled
+        Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
+        if (animationsParam.isEnabled()) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    listView.setLayoutAnimation(controller);
+                    booksAdapter.notifyDataSetChanged();
+                }
+            }, 100);
+        } else {
+            booksAdapter.notifyDataSetChanged();
         }
     }
 
     @DebugLog
     public void prepareForNotifyDataChanged() {
-        books = bookDAO.queryForAll();
-        handleEmptyUI(books);
+        books = bookDAO.query(pqBook);
+        handleEmptyUI();
     }
 
     @DebugLog
-    public void handleEmptyOrPopulatedScreen(List<Book> books) {
-        handleEmptyUI(books);
+    public void handleEmptyOrPopulatedScreen() {
+        handleEmptyUI();
 
         booksAdapter = new Books_Adapter(this);
 
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
 
-        final View listViewHeaderAd = View.inflate(this, R.layout.books_list_adview_footer, null);
-        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+//        final View listViewHeaderAd = View.inflate(this, R.layout.books_list_adview_footer, null);
+//        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//        mAdView.loadAd(adRequest);
 
         controller
                 = AnimationUtils.loadLayoutAnimation(
@@ -474,13 +412,13 @@ public class Books_Activity extends Base_Activity {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    listView.addFooterView(listViewHeaderAd);
+//                    listView.addFooterView(listViewHeaderAd);
                     listView.setAdapter(booksAdapter);
                     listView.setLayoutAnimation(controller);
                 }
             }, 100);
         } else {
-            listView.addFooterView(listViewHeaderAd);
+//            listView.addFooterView(listViewHeaderAd);
             listView.setAdapter(booksAdapter);
         }
     }
@@ -520,22 +458,22 @@ public class Books_Activity extends Base_Activity {
                     bookTutorialParam.setEnabled(false);
                     paramDAO.update(bookTutorialParam);
 
-                    handleEmptyUI(books);
+                    handleEmptyUI();
                 }
             });
             createBookShowcase.show();
         }
     }
 
-    public void handleEmptyUI(List<Book> books) {
+    public void handleEmptyUI() {
         //Books are empty and the coachmark has been dismissed
 
         Param bookTutorialParam = paramDAO.queryForId(Constants.SEEN_BOOK_TUTORIAL_DATABASE_VALUE);
 
-        if (books.isEmpty() && !bookTutorialParam.isEnabled()) {
+        if (bookDAO.queryForAll().isEmpty() && !bookTutorialParam.isEnabled()) {
             emptyListLayout.setVisibility(View.VISIBLE);
             JumpingBeans.with((TextView) emptyListLayout.findViewById(R.id.emptyLayoutMessageTV)).appendJumpingDots().build();
-        } else if (books.isEmpty()) {
+        } else if (bookDAO.queryForAll().isEmpty()) {
             emptyListLayout.setVisibility(View.GONE);
             UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOK_SHOWCASE, 200);
         } else {
@@ -600,12 +538,14 @@ public class Books_Activity extends Base_Activity {
     public void showUndeleteDialog(final Book tempBookToDelete) {
         itemPendingDeleteDecision = true;
 
+        tempBook = tempBookToDelete;
+
         Spannable sentenceToSpan = new SpannableString(getResources().getString(R.string.delete_book_confirmation_message) + " " + tempBookToDelete.getTitle());
 
         sentenceToSpan.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, 7, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         books.remove(tempBookToDelete);
-        handleEmptyUI(books);
+        handleEmptyUI();
         booksAdapter.notifyDataSetChanged();
 
         undoDeleteBookSB =
@@ -651,15 +591,14 @@ public class Books_Activity extends Base_Activity {
 
                         itemPendingDeleteDecision = false;
                         undoDeleteBookSB.dismiss();
-
                     }
                 });
 
         undoDeleteBookSB.show(Books_Activity.this);
-
     }
 
     public void finalizeBookDeletion(Book tempBook) {
+        bookmarkDAO.delete(bookmarkDAO.queryForEq("book_id", tempBook.getId()));
         bookDAO.delete(tempBook);
         prepareForNotifyDataChanged();
         booksAdapter.notifyDataSetChanged();
@@ -803,15 +742,25 @@ public class Books_Activity extends Base_Activity {
                                 case R.id.edit:
                                     Intent editBookIntent = new Intent(Books_Activity.this, Create_Book_Activity.class);
                                     editBookIntent.putExtra(Constants.EDIT_BOOK_PURPOSE_STRING, Constants.EDIT_BOOK_PURPOSE_VALUE);
-                                    editBookIntent.putExtra(Constants.EXTRAS_BOOK_COLOR, books.get(position).getColorCode());
-                                    editBookIntent.putExtra("book", books.get(position));
+                                    editBookIntent.putExtra(Constants.EXTRAS_BOOK_ID, books.get(position).getId());
+//                                    editBookIntent.putExtra(Constants.EXTRAS_BOOK_COLOR, books.get(position).getColorCode());
+//                                    editBookIntent.putExtra("book", Parcels.wrap(books.get(position)));
                                     startActivity(editBookIntent);
                                     break;
                                 case R.id.delete:
                                     //Dissmiss the UNDO Snackbar and handle the deletion of the previously awaiting item yourself
                                     if (undoDeleteBookSB != null && undoDeleteBookSB.isShowing()) {
                                         //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
-                                        //I am able to use tempBook here because I am certain that it would have now been initialized inside deleteCell(), no way to reach this point without having been through deleteCell() first
+                                        //I am able to use tempBook h=ere because I am certain that it would have now been initialized inside deleteCell(), no way to reach this point without having been through deleteCell() first
+
+                                        try {
+                                            bookmarkQueryBuilder.where().eq("book_id", tempBook.getId());
+                                            pq = bookmarkQueryBuilder.prepare();
+                                            bookmarkDAO.delete(bookmarkDAO.query(pq));
+                                        } catch (SQLException e) {
+                                            e.printStackTrace();
+                                        }
+
                                         bookDAO.delete(tempBook);
                                         itemPendingDeleteDecision = false;
                                         undoDeleteBookSB.dismiss();

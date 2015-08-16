@@ -17,7 +17,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:hint="@string/writeSomething"
-            android:inputType="textCapWords"
+            android:inputType="textCapSentences"
             android:paddingTop="20dp"
             android:singleLine="true"
             android:textColor="@android:color/black"

@@ -15,10 +15,12 @@ import com.andreabaccega.widget.FormEditText;
 import com.bumptech.glide.Glide;
 import com.flurry.android.FlurryAgent;
 import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.om.atomic.R;
 import com.om.snipit.classes.Bookmark;
 import com.om.snipit.classes.Constants;
-import com.om.snipit.classes.DatabaseHelperasdasd;
+import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
@@ -59,7 +61,9 @@ public class Create_Bookmark_Activity extends Base_Activity {
 
     private ArrayList<FormEditText> allFields = new ArrayList<>();
 
-    private DatabaseHelperasdasd dbHelper;
+    private DatabaseHelper databaseHelper;
+    private RuntimeExceptionDao<Bookmark, Integer> bookmarkDAO;
+
     private int CALL_PURPOSE;
     private Bookmark bookmark_from_list;
     private String tempImagePath, finalImagePath;
@@ -72,6 +76,8 @@ public class Create_Bookmark_Activity extends Base_Activity {
 
         ButterKnife.inject(this);
 
+        bookmarkDAO = getHelper().getBookmarkDAO();
+
         allFields.add(nameET);
 
         final Helper_Methods helperMethods = new Helper_Methods(this);
@@ -82,8 +88,6 @@ public class Create_Bookmark_Activity extends Base_Activity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
-
-        dbHelper = new DatabaseHelperasdasd(this);
 
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, -1);
 
@@ -101,7 +105,7 @@ public class Create_Bookmark_Activity extends Base_Activity {
         if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
             getSupportActionBar().setTitle(getString(R.string.edit_bookmark_activity_title));
 
-            bookmark_from_list = getIntent().getParcelableExtra("bookmark");
+            bookmark_from_list = bookmarkDAO.queryForId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1));
 
             nameET.setText(bookmark_from_list.getName());
             nameET.setSelection(nameET.getText().length());
@@ -141,9 +145,9 @@ public class Create_Bookmark_Activity extends Base_Activity {
                             else
                                 bookmark_from_list.setImage_path(bookmark_from_list.getImage_path());
 
-                            dbHelper.updateBookmark(bookmark_from_list);
+                            bookmarkDAO.update(bookmark_from_list);
 
-                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
+                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_name_page_edited"));
 
                             finish();
                         } catch (NumberFormatException e) {
@@ -160,6 +164,9 @@ public class Create_Bookmark_Activity extends Base_Activity {
                         try {
                             Bookmark bookmark = new Bookmark();
                             bookmark.setName(nameET.getText().toString());
+                            bookmark.setBookId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
+                            bookmark.setOrder(bookmarkDAO.queryForEq("book_id", getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID)).size() + 1);
+                            bookmark.setFavorite(false);
 
                             //Only try to parse if there was a number given
                             if (!pageNumberET.getText().toString().isEmpty())
@@ -174,11 +181,12 @@ public class Create_Bookmark_Activity extends Base_Activity {
 
                             bookmark.setDate_added(month + " " + day + ", " + year);
 
-                            dbHelper.createBookmark(bookmark, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
+                            bookmarkDAO.create(bookmark);
 
                             FlurryAgent.logEvent("Bookmark_Create");
 
-                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed", "new_bookmark"));
+                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_added_bookmarks_activity"));
+                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_added_books_activity"));
 
                             finish();
                         } catch (NumberFormatException e) {
@@ -211,6 +219,15 @@ public class Create_Bookmark_Activity extends Base_Activity {
                 }
             }
         });
+    }
+
+    public DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+
+        return databaseHelper;
     }
 
     @Subscribe

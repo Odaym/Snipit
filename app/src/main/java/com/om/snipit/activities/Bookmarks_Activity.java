@@ -2,7 +2,6 @@ package com.om.snipit.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -12,7 +11,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
@@ -44,12 +42,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.SelectArg;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
@@ -74,8 +71,6 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import net.frakbot.jumpingbeans.JumpingBeans;
-
-import org.parceler.Parcels;
 
 import java.io.File;
 import java.io.IOException;
@@ -107,7 +102,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 
     private DatabaseHelper databaseHelper;
     private QueryBuilder<Bookmark, Integer> bookmarkQueryBuilder;
-    PreparedQuery<Bookmark> pq;
+    private PreparedQuery<Bookmark> pq;
     private RuntimeExceptionDao<Book, Integer> bookDAO;
     private RuntimeExceptionDao<Bookmark, Integer> bookmarkDAO;
     private RuntimeExceptionDao<Param, Integer> paramDAO;
@@ -120,7 +115,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
     private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 
     private SearchView searchView;
-    private String sorting_type_pref;
 
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
@@ -149,12 +143,12 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 
     private String book_title;
     private int book_color_code;
+    private boolean isFavoriteBookmarks_Fragment;
+
     private ShowcaseView createBookmarkShowcase;
     private List<Bookmark> bookmarks;
     private String mCurrentPhotoPath;
     private Uri photoFileUri;
-//    private SharedPreferences prefs;
-//    private SharedPreferences.Editor prefsEditor;
     private Helper_Methods helperMethods;
     private Handler UIHandler;
 
@@ -186,12 +180,10 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 
         helperMethods = new Helper_Methods(this);
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-        bookmarkQueryBuilder = bookmarkDAO.queryBuilder();
-
         bookmarkDAO = getHelper().getBookmarkDAO();
         paramDAO = getHelper().getParamDAO();
+
+        bookmarkQueryBuilder = bookmarkDAO.queryBuilder();
 
         Helper_Methods helperMethods = new Helper_Methods(this);
 
@@ -259,8 +251,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                         intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
                         intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
                         intent.putExtra(Constants.EXTRAS_SEARCH_TERM, searchQueryForGlobalUse);
-                        intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position - 1);
-                        intent.putExtra("bookmarks", Parcels.wrap(bookmarks));
+                        intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position);
                         startActivity(intent);
                     }
                 }
@@ -323,8 +314,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        String sortByFormattedForSQL;
-
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
@@ -336,23 +325,23 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             case R.id.search:
                 searchView.setIconified(false);
                 return true;
-            case R.id.sort_page_number:
-                sortByFormattedForSQL = "page_number";
-//                dbHelper.prepare_UpdatingAllSortedBookmarks(book_id, sortByFormattedForSQL);
-//                bookmarks = dbHelper.getAllBookmarks(book_id);
-//                bookmarksAdapter.notifyDataSetChanged();
-                break;
             case R.id.sort_by_name:
-                sortByFormattedForSQL = "name";
-//                dbHelper.prepare_UpdatingAllSortedBookmarks(book_id, sortByFormattedForSQL);
-//                bookmarks = dbHelper.getAllBookmarks(book_id);
-//                bookmarksAdapter.notifyDataSetChanged();
+                prepareSortedBookmarks(book_id, "name");
+                prepareQueryBuilder(book_id);
+                bookmarks = bookmarkDAO.query(pq);
+                bookmarksAdapter.notifyDataSetChanged();
                 break;
             case R.id.sort_by_views:
-                sortByFormattedForSQL = "views";
-//                dbHelper.prepare_UpdatingAllSortedBookmarks(book_id, sortByFormattedForSQL);
-//                bookmarks = dbHelper.getAllBookmarks(book_id);
-//                bookmarksAdapter.notifyDataSetChanged();
+                prepareSortedBookmarks(book_id, "views");
+                prepareQueryBuilder(book_id);
+                bookmarks = bookmarkDAO.query(pq);
+                bookmarksAdapter.notifyDataSetChanged();
+                break;
+            case R.id.sort_page_number:
+                prepareSortedBookmarks(book_id, "page_number");
+                prepareQueryBuilder(book_id);
+                bookmarks = bookmarkDAO.query(pq);
+                bookmarksAdapter.notifyDataSetChanged();
                 break;
         }
 
@@ -367,7 +356,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         switch (requestCode) {
             case REQUEST_IMAGE_CAPTURE:
                 Intent openCreateBookmark = new Intent(Bookmarks_Activity.this, Crop_Image_Activity.class);
-                openCreateBookmark.putExtra(Constants.EXTRAS_BOOK_ID, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
+                openCreateBookmark.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
                 openCreateBookmark.putExtra(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, mCurrentPhotoPath);
                 openCreateBookmark.putExtra(Constants.EXTRAS_BOOK_COLOR, book_color_code);
                 startActivity(openCreateBookmark);
@@ -377,17 +366,45 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
-        switch (ebp.getMessage()) {
-            case "bookmark_viewed":
-                bookmarks = bookmarkDAO.query(pq);
+        String ebpMessage = ebp.getMessage();
+
+        switch (ebpMessage) {
+            case "bookmark_favorited":
+                prepareForNotifyDataChanged(book_id);
                 bookmarksAdapter.notifyDataSetChanged();
+                Log.d("EVENTS", "bookmark_favorited - Bookmarks_Activity");
+                break;
+            case "bookmark_viewed":
+//                bookmarks = bookmarkDAO.query(pq);
+//                bookmarksAdapter.notifyDataSetChanged();
+                Log.d("EVENTS", "bookmark_viewed - Bookmarks_Activity");
+                break;
+            case "bookmark_added_bookmarks_activity":
+                prepareForNotifyDataChanged(book_id);
+                bookmarksAdapter.notifyDataSetChanged();
+                Log.d("EVENTS", "bookmark_added_bookmarks_activity - Bookmarks_Activity");
+                break;
+            case "bookmark_deleted_bookmarks_activity":
+                prepareForNotifyDataChanged(book_id);
+                bookmarksAdapter.notifyDataSetChanged();
+                Log.d("EVENTS", "bookmark_deleted_bookmarks_activity - Bookmarks_Activity");
                 break;
             case "bookmark_image_updated":
                 Helper_Methods.delete_image_from_disk(ebp.getExtra());
-            case "bookmark_changed":
+                prepareForNotifyDataChanged(book_id);
+                bookmarksAdapter.notifyDataSetChanged();
+                Log.d("EVENTS", "bookmark_image_updated - Bookmarks_Activity");
+                break;
+            case "bookmark_name_page_edited":
+                prepareForNotifyDataChanged(book_id);
+                bookmarksAdapter.notifyDataSetChanged();
+                Log.d("EVENTS", "bookmark_name_page_edited - Bookmarks_Activity");
+                break;
             case "bookmark_note_changed":
                 prepareForNotifyDataChanged(book_id);
                 bookmarksAdapter.notifyDataSetChanged();
+                Log.d("EVENTS", "bookmark_note_changed - Bookmarks_Activity");
+                break;
 //            if (ebp.getExtra() != null) {
 //                if (ebp.getExtra().equals("new_bookmark")) {
 //                    listView.smoothScrollToPosition(bookmarksAdapter.getCount() + 1, 0, 500);
@@ -397,7 +414,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 //                                    .getView(bookmarksAdapter.getCount() - 1, null, null));
 //                }
 //            }
-                break;
+//                break;
         }
     }
 
@@ -429,7 +446,6 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         /**
          * If a specific sorting order exists, follow that order when getting the bookmarks
          */
-
         if (!inSearchMode) {
             prepareQueryBuilder(book_id);
 
@@ -459,10 +475,10 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
 
-        final View listViewHeaderAd = View.inflate(this, R.layout.bookmarks_list_adview_header, null);
-        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+//        final View listViewHeaderAd = View.inflate(this, R.layout.bookmarks_list_adview_header, null);
+//        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//        mAdView.loadAd(adRequest);
 
         final LayoutAnimationController controller
                 = AnimationUtils.loadLayoutAnimation(
@@ -472,11 +488,11 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
 
         if (animationsParam.isEnabled()) {
-            listView.addHeaderView(listViewHeaderAd);
+//            listView.addHeaderView(listViewHeaderAd);
             listView.setAdapter(bookmarksAdapter);
             listView.setLayoutAnimation(controller);
         } else {
-            listView.addHeaderView(listViewHeaderAd);
+//            listView.addHeaderView(listViewHeaderAd);
             listView.setAdapter(bookmarksAdapter);
         }
     }
@@ -527,10 +543,12 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             //Books are empty and the coachmark has been dismissed
             final Param bookmarkTutorialParam = paramDAO.queryForId(Constants.SEEN_BOOKMARK_TUTORIAL_DATABASE_VALUE);
 
-            if (bookmarks.isEmpty() && !bookmarkTutorialParam.isEnabled()) {
+            prepareQueryBuilder(book_id);
+
+            if (bookmarkDAO.query(pq).isEmpty() && !bookmarkTutorialParam.isEnabled()) {
                 emptyListLayout.setVisibility(View.VISIBLE);
                 JumpingBeans.with((TextView) emptyListLayout.findViewById(R.id.emptyLayoutMessageTV)).appendJumpingDots().build();
-            } else if (bookmarks.isEmpty()) {
+            } else if (bookmarkDAO.query(pq).isEmpty()) {
                 emptyListLayout.setVisibility(View.GONE);
                 UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOKMARK_SHOWCASE, WAIT_DURATION_BFEORE_SHOW_BOOKMARK_SHOWCASE);
             } else {
@@ -547,77 +565,18 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         }
     }
 
-    private void deleteCell(final View v, final int index) {
-        BookmarksViewHolder vh = (BookmarksViewHolder) v.getTag();
+    private void deleteCell(final View bookmarkView, final int index) {
+        BookmarksViewHolder vh = (BookmarksViewHolder) bookmarkView.getTag();
         vh.needInflate = true;
 
-        tempBookmark = bookmarks.get(index);
-
         itemPendingDeleteDecision = true;
+
+        tempBookmark = bookmarks.get(index);
 
         Animation.AnimationListener collapseAL = new Animation.AnimationListener() {
             @Override
             public void onAnimationEnd(Animation arg0) {
-                EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_changed"));
-
-                Spannable sentenceToSpan = new SpannableString(getResources().getString(R.string.delete_book_confirmation_message) + " " + bookmarks.get(index).getName());
-
-                sentenceToSpan.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, 7, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                bookmarks.remove(index);
-                handleEmptyUI(bookmarks);
-                bookmarksAdapter.notifyDataSetChanged();
-
-                undoDeleteBookmarkSB =
-                        Snackbar.with(getApplicationContext())
-                                .actionLabel(R.string.undo_deletion_title)
-                                        //So that we differentiate between explicitly dismissing the snackbar and having it go away due to pressing UNDO
-                                .dismissOnActionClicked(false)
-                                .duration(8000)
-                                .actionColor(getResources().getColor(R.color.yellow))
-                                .text(sentenceToSpan)
-                                .eventListener(new EventListener() {
-                                    @Override
-                                    public void onShow(Snackbar snackbar) {
-                                    }
-
-                                    @Override
-                                    public void onShowByReplace(Snackbar snackbar) {
-                                    }
-
-                                    @Override
-                                    public void onShown(Snackbar snackbar) {
-                                    }
-
-                                    @Override
-                                    public void onDismiss(Snackbar snackbar) {
-                                        if (itemPendingDeleteDecision) {
-                                            finalizeBookmarkDeletion(tempBookmark);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onDismissByReplace(Snackbar snackbar) {
-                                    }
-
-                                    @Override
-                                    public void onDismissed(Snackbar snackbar) {
-                                    }
-                                }).actionListener(new ActionClickListener() {
-                            @Override
-                            public void onActionClicked(Snackbar snackbar) {
-                                tempBookmark.setDeleted(false);
-                                bookmarkDAO.update(tempBookmark);
-
-                                prepareForNotifyDataChanged(book_id);
-                                bookmarksAdapter.notifyDataSetChanged();
-
-                                itemPendingDeleteDecision = false;
-                                undoDeleteBookmarkSB.dismiss();
-                            }
-                        });
-
-                undoDeleteBookmarkSB.show(Bookmarks_Activity.this);
+                showUndeleteDialog(tempBookmark);
             }
 
             @Override
@@ -629,7 +588,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             }
         };
 
-        collapse(v, collapseAL);
+        collapse(bookmarkView, collapseAL);
     }
 
     private void collapse(final View v, Animation.AnimationListener al) {
@@ -660,10 +619,73 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         v.startAnimation(anim);
     }
 
+    public void showUndeleteDialog(final Bookmark tempBookmarkToDelete) {
+        EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_deleted_books_activity"));
+
+        tempBookmark = tempBookmarkToDelete;
+
+        itemPendingDeleteDecision = true;
+
+        Spannable sentenceToSpan = new SpannableString(getResources().getString(R.string.delete_book_confirmation_message) + " " + tempBookmarkToDelete.getName());
+
+        sentenceToSpan.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, 7, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        bookmarks.remove(tempBookmarkToDelete);
+        handleEmptyUI(bookmarks);
+        bookmarksAdapter.notifyDataSetChanged();
+
+        undoDeleteBookmarkSB =
+                Snackbar.with(getApplicationContext())
+                        .actionLabel(R.string.undo_deletion_title)
+                                //So that we differentiate between explicitly dismissing the snackbar and having it go away due to pressing UNDO
+                        .dismissOnActionClicked(false)
+                        .duration(8000)
+                        .actionColor(getResources().getColor(R.color.yellow))
+                        .text(sentenceToSpan)
+                        .eventListener(new EventListener() {
+                            @Override
+                            public void onShow(Snackbar snackbar) {
+                            }
+
+                            @Override
+                            public void onShowByReplace(Snackbar snackbar) {
+                            }
+
+                            @Override
+                            public void onShown(Snackbar snackbar) {
+                            }
+
+                            @Override
+                            public void onDismiss(Snackbar snackbar) {
+                                if (itemPendingDeleteDecision) {
+                                    finalizeBookmarkDeletion(tempBookmarkToDelete);
+                                }
+                            }
+
+                            @Override
+                            public void onDismissByReplace(Snackbar snackbar) {
+                            }
+
+                            @Override
+                            public void onDismissed(Snackbar snackbar) {
+                            }
+                        }).actionListener(new ActionClickListener() {
+                    @Override
+                    public void onActionClicked(Snackbar snackbar) {
+                        prepareForNotifyDataChanged(book_id);
+                        bookmarksAdapter.notifyDataSetChanged();
+
+                        itemPendingDeleteDecision = false;
+                        undoDeleteBookmarkSB.dismiss();
+                    }
+                });
+
+        undoDeleteBookmarkSB.show(Bookmarks_Activity.this);
+    }
+
     public void finalizeBookmarkDeletion(Bookmark tempBookmark) {
         Helper_Methods.delete_image_from_disk(tempBookmark.getImage_path());
-        tempBookmark.setDeleted(true);
-        bookmarkDAO.update(tempBookmark);
+        bookmarkDAO.delete(tempBookmark);
         prepareForNotifyDataChanged(tempBookmark.getBookId());
         bookmarksAdapter.notifyDataSetChanged();
         itemPendingDeleteDecision = false;
@@ -694,9 +716,9 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 
     public void prepareQueryBuilder(int book_id) {
         try {
-            bookmarkQueryBuilder.where().eq("book_id", book_id).and().eq("deleted", false);
+            bookmarkQueryBuilder.where().eq("book_id", book_id);
+            bookmarkQueryBuilder.orderBy("order", false);
             pq = bookmarkQueryBuilder.prepare();
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -704,8 +726,29 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
 
     public void prepareSearchQueryBuilder(String searchQuery) {
         try {
-            bookmarkQueryBuilder.where().eq("book_id", book_id).and().eq("deleted", false).and().like("name", "%" + searchQuery + "%").or().like("note", "%" + searchQuery + "%");
+            SelectArg nameSelectArg = new SelectArg("%" + searchQuery + "%");
+            SelectArg noteSelectArg = new SelectArg("%" + searchQuery + "%");
+
+
+            bookmarkQueryBuilder.where().eq("book_id", book_id).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
             pq = bookmarkQueryBuilder.prepare();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void prepareSortedBookmarks(int book_id, String sortCriteria) {
+        try {
+            bookmarkQueryBuilder.where().eq("book_id", book_id);
+            bookmarkQueryBuilder.orderBy(sortCriteria, false);
+            pq = bookmarkQueryBuilder.prepare();
+
+            List<Bookmark> sortedBookmarks = bookmarkDAO.query(pq);
+
+            for (int i = 0; i < sortedBookmarks.size(); i++) {
+                sortedBookmarks.get(i).setOrder(i);
+                bookmarkDAO.update(sortedBookmarks.get(i));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -828,7 +871,12 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
             }
 
             holder.bookmarkName.setText(bookmarks.get(position).getName());
-            holder.bookmarkPageNumber.setText(context.getResources().getText(R.string.bookmark_page_number_label) + " " + bookmarks.get(position).getPage_number());
+
+            if (bookmarks.get(position).getPage_number() == Constants.NO_BOOKMARK_PAGE_NUMBER)
+                holder.bookmarkPageNumber.setVisibility(View.INVISIBLE);
+            else
+                holder.bookmarkPageNumber.setText(context.getResources().getText(R.string.bookmark_page_number_label) + " " + bookmarks.get(position).getPage_number());
+
 //            holder.bookmarkViews.setText(context.getResources().getText(R.string.bookmark_views_label) + " " + bookmarks.get(position).getViews());
 
             if (bookmarks.get(position).getImage_path().contains("http")) {
@@ -888,15 +936,14 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                                     Intent editBookmarkIntent = new Intent(Bookmarks_Activity.this, Create_Bookmark_Activity.class);
                                     editBookmarkIntent.putExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, Constants.EDIT_BOOKMARK_PURPOSE_VALUE);
                                     editBookmarkIntent.putExtra(Constants.EXTRAS_BOOK_COLOR, book_color_code);
-                                    editBookmarkIntent.putExtra("bookmark", Parcels.wrap(bookmarks.get(position)));
+                                    editBookmarkIntent.putExtra(Constants.EXTRAS_BOOKMARK_ID, bookmarks.get(position).getId());
                                     startActivity(editBookmarkIntent);
                                     break;
                                 case R.id.delete:
                                     //Dissmiss the UNDO Snackbar and handle the deletion of the previously awaiting item yourself
                                     if (undoDeleteBookmarkSB != null && undoDeleteBookmarkSB.isShowing()) {
                                         //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
-                                        tempBookmark.setDeleted(true);
-                                        bookmarkDAO.update(tempBookmark);
+                                        bookmarkDAO.delete(tempBookmark);
                                         itemPendingDeleteDecision = false;
                                         undoDeleteBookmarkSB.dismiss();
                                     }
@@ -906,7 +953,7 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
                                     if (animationsParam.isEnabled()) {
                                         deleteCell(parentView, position);
                                     } else {
-                                        finalizeBookmarkDeletion(bookmarks.get(position));
+                                        showUndeleteDialog(bookmarks.get(position));
                                     }
 
                                     break;
@@ -1019,11 +1066,9 @@ public class Bookmarks_Activity extends Base_Activity implements SearchView.OnQu
         public void swap(int from, int to) {
             if (to < bookmarks.size() && from < bookmarks.size()) {
                 Collections.swap(bookmarks, from, to);
-
                 int tempNumber = bookmarks.get(from).getOrder();
                 bookmarks.get(from).setOrder(bookmarks.get(to).getOrder());
                 bookmarks.get(to).setOrder(tempNumber);
-
                 bookmarkDAO.update(bookmarks.get(from));
                 bookmarkDAO.update(bookmarks.get(to));
             }

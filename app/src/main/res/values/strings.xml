@@ -35,8 +35,6 @@
     <string name="pref_tutorial_section_title">Tutorial</string>
     <string name="pref_tutorial_title">Tutorial Mode</string>
     <string name="pref_tutorial_summary">Hint screens will show up to help you get started</string>
-    <string name="pref_populate_sample_data_title">Test drive Snipit</string>
-    <string name="pref_populate_sample_data_summary">Jump right in by adding 4 sample books!</string>
     <string name="pref_about_section_title">About</string>
     <string name="pref_about_title">About Snipit</string>
     <string name="pref_feedback_title">Send feedback</string>
@@ -68,7 +66,7 @@
     <string name="sort_action_by_date">Sort by Views</string>
     <string name="sort_order_override">Sorting preference override. Restoring previous order.</string>
     <string name="empty_bookmarks_layout_hint">Bookmarks you add appear here</string>
-    <string name="delete_bookmark_confirmation_message">Are you sure you want to delete this bookmark?</string>
+    <string name="delete_bookmark_confirmation_message">Deleted</string>
 
     <!-- CREATE_BOOKMARK_ACTIVITY -->
     <string name="create_bookmark_activity_title">New Bookmark</string>
@@ -108,6 +106,7 @@
     <string name="set_brush_thickness">Set brush thickness</string>
     <string name="takeNote">Take a note</string>
     <string name="writeSomething">Write something here…</string>
+    <string name="favorite_bookmark">Favorite!</string>
 
     <!-- SEARCH_RESULTS_ACTIVITY -->
     <string name="search_results_activity_title">Search Results</string>
