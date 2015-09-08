@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/run_ocr"
+        android:title="Run OCR"
+        app:showAsAction="collapseActionView" />
+
+    <item
         android:id="@+id/rotate_right"
         android:title="@string/rotate_right"
         app:showAsAction="collapseActionView" />
