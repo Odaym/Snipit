@@ -9,7 +9,7 @@
     <string name="banner_ad_unit_id_opensource_libs">ca-app-pub-7047539644799809/2417489494</string>
 
     <string name="app_name">Snipit</string>
-    <string name="app_tagline">Bookmarks for textbooks!</string>
+    <string name="app_tagline">Digitize the real world</string>
     <string name="app_version">1.0.0</string>
     <string name="gotit">Got it</string>
     <string name="cancel">Cancel</string>
@@ -20,6 +20,9 @@
     <string name="edit">Edit</string>
     <string name="undo_deletion_title">UNDO</string>
     <string name="action_needs_internet">This action needs an Internet connection</string>
+
+    <!-- SHARING -->
+    <string name="sharing_message">I used Snipit to take this, have a look!</string>
 
     <!-- NAVDRAWER -->
     <string name="navdrawer_favorite_bookmarks_item">Favorite Bookmarks</string>
