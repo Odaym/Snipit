@@ -166,7 +166,7 @@ public class Create_Book_Activity extends Base_Activity {
                                 "q=intitle:" + titleET.getText().toString().replace(" ", "%20") + "?q=inauthor:" + authorET.getText().toString().replace(" ", "%20") + "&key=" + Constants.GOOGLE_BOOKS_API_KEY;
                         if (Helper_Methods.isInternetAvailable(Create_Book_Activity.this)) {
 //                            if (bookImageFoundAtGoogle) {
-                                finalizeInsertBook(bookImagePath);
+                            finalizeInsertBook(bookImagePath);
 //                            } else {
 //                                new GetBookImage().execute(bookSearchString);
 //                            }
