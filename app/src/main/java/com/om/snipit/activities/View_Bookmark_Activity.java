@@ -38,6 +38,7 @@ import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
+import com.om.snipit.abbyy_ocr.AsyncTask_ProcessOCR;
 import com.om.snipit.classes.Bookmark;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
@@ -49,13 +50,19 @@ import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -122,6 +129,44 @@ public class View_Bookmark_Activity extends Base_Activity {
 
             mPagerAdapter.notifyDataSetChanged();
         }
+    }
+
+    public void updateResults(Boolean success) {
+        if (!success)
+            return;
+        try {
+            StringBuilder contents = new StringBuilder();
+
+            FileInputStream fis = openFileInput("results.txt");
+            try {
+                Reader reader = new InputStreamReader(fis, "UTF-8");
+                BufferedReader bufReader = new BufferedReader(reader);
+                String text = null;
+                while ((text = bufReader.readLine()) != null) {
+                    contents.append(text).append(System.getProperty("line.separator"));
+                }
+            } finally {
+                fis.close();
+            }
+
+            displayMessage(contents.toString());
+        } catch (Exception e) {
+            displayMessage("Error: " + e.getMessage());
+        }
+    }
+
+    public void displayMessage(String text) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("OCR Scan Results")
+                .setMessage(text)
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        //do things
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     public void handleWhichBookmarksToLoad() {
@@ -215,7 +260,8 @@ public class View_Bookmark_Activity extends Base_Activity {
 
             MenuItem rotate_left_item = menu.getItem(0);
             MenuItem rotate_right_item = menu.getItem(1);
-            favoriteBookmark_Item = menu.getItem(3);
+
+            favoriteBookmark_Item = menu.getItem(4);
 
             tempBookmark = bookmarkDAO.queryForId(bookmark_id);
 
@@ -238,6 +284,13 @@ public class View_Bookmark_Activity extends Base_Activity {
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
+                case R.id.run_ocr:
+                    if (Helper_Methods.isInternetAvailable(getActivity())) {
+                        new AsyncTask_ProcessOCR((View_Bookmark_Activity) getActivity()).execute(bookmark_imagepath, "results.txt");
+                    } else {
+                        Crouton.makeText(getActivity(), getString(R.string.action_needs_internet), Style.ALERT).show();
+                    }
+                    break;
                 case R.id.rotate_right:
                     rotation += 90;
                     imageProgressBar.setVisibility(View.VISIBLE);
@@ -270,12 +323,20 @@ public class View_Bookmark_Activity extends Base_Activity {
                     break;
                 case R.id.share_bookmark:
                     String book_title = getActivity().getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
-                    Uri imageURI = Uri.parse("file://" + bookmark_imagepath);
+                    Uri imageURI = Uri.parse(bookmark_imagepath);
+
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
                     sendIntent.putExtra(Intent.EXTRA_STREAM, imageURI);
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Bookmark name: \"" + bookmark_name + "\"\nfrom book: \"" + book_title + "\"\non page: " + bookmark_pagenumber);
-                    sendIntent.setType("*/*");
+
+                    //Include the page number in the sharing message if a page number exists, otherwise don't
+                    if (bookmark_pagenumber == Constants.NO_BOOKMARK_PAGE_NUMBER) {
+                        sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.sharing_message) + "\nTitle: \"" + bookmark_name + "\"\nFrom: \"" + book_title + "\"");
+                    } else {
+                        sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.sharing_message) + "\nTitle: \"" + bookmark_name + "\"\nFrom: \"" + book_title + "\"\nPage: " + bookmark_pagenumber);
+                    }
+
+                    sendIntent.setType("image/*");
                     startActivity(Intent.createChooser(sendIntent, "Share using:"));
                     break;
                 case R.id.favorite_bookmark:
@@ -290,9 +351,9 @@ public class View_Bookmark_Activity extends Base_Activity {
                     bookmarkDAO.update(tempBookmark);
 
                     EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_favorited"));
-
                     break;
             }
+
             return super.onOptionsItemSelected(item);
         }
 
