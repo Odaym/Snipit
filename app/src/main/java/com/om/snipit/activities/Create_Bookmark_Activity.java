@@ -165,7 +165,7 @@ public class Create_Bookmark_Activity extends Base_Activity {
                             Bookmark bookmark = new Bookmark();
                             bookmark.setName(nameET.getText().toString());
                             bookmark.setBookId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
-                            bookmark.setOrder(bookmarkDAO.queryForEq("book_id", getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID)).size() + 1);
+                            bookmark.setOrder(bookmarkDAO.queryForEq("book_id", getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID)).size() + 1);
                             bookmark.setFavorite(false);
 
                             //Only try to parse if there was a number given
