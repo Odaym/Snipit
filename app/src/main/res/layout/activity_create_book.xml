@@ -13,16 +13,26 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_below="@+id/toolbar"
         android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
         android:paddingLeft="@dimen/activity_vertical_margin"
         android:paddingRight="@dimen/activity_vertical_margin">
 
-        <com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/titleETFloating"
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/poweredByGoogleBadge"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            float:fletPadding="10dp">
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/powered_by_google" />
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/titleETFloating"
+            android:layout_below="@+id/poweredByGoogleBadge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <com.andreabaccega.widget.FormEditText
                 android:id="@+id/titleET"
@@ -36,77 +46,33 @@
                 android:textCursorDrawable="@null"
                 validator:emptyErrorString="@string/empty_book_title_error" />
 
-        </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+        </android.support.design.widget.TextInputLayout>
 
-        <LinearLayout
-            android:id="@+id/book_author_pagescount_layout"
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/authorETFloating"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/titleETFloating">
+            android:layout_below="@id/titleETFloating">
 
-            <com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/authorETFloating"
+            <com.andreabaccega.widget.FormEditText
+                android:id="@+id/authorET"
                 android:layout_width="match_parent"
-                android:layout_marginEnd="5dp"
-                android:layout_marginRight="5dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                float:fletPadding="10dp">
-
-                <com.andreabaccega.widget.FormEditText
-                    android:id="@+id/authorET"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="@string/book_author"
-                    android:inputType="textCapWords"
-                    android:singleLine="true"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="@color/edittext_hint_color"
-                    android:textCursorDrawable="@null"
-                    validator:emptyErrorString="@string/empty_author_name_error" />
-
-            </com.wrapp.floatlabelededittext.FloatLabeledEditText>
-
-            <!--<com.wrapp.floatlabelededittext.FloatLabeledEditText xmlns:float="http://schemas.android.com/apk/res-auto"-->
-                <!--android:id="@+id/pagesCountETFloating"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_weight="3"-->
-                <!--float:fletPadding="10dp">-->
-
-                <!--<com.andreabaccega.widget.FormEditText-->
-                    <!--android:id="@+id/pagesCountET"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_marginBottom="20dp"-->
-                    <!--android:maxLength="4"-->
-                    <!--android:hint="@string/book_pages_count"-->
-                    <!--android:inputType="number"-->
-                    <!--android:singleLine="true"-->
-                    <!--android:textColor="@android:color/black"-->
-                    <!--android:textColorHint="@color/edittext_hint_color"-->
-                    <!--android:textCursorDrawable="@null" />-->
-
-            <!--</com.wrapp.floatlabelededittext.FloatLabeledEditText>-->
-
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/poweredByGoogleBadge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/powered_by_google" />
+                android:layout_marginBottom="20dp"
+                android:hint="@string/book_author"
+                android:inputType="textCapWords"
+                android:singleLine="true"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/edittext_hint_color"
+                android:textCursorDrawable="@null"
+                validator:emptyErrorString="@string/empty_author_name_error" />
+        </android.support.design.widget.TextInputLayout>
 
         <ImageView
             android:id="@+id/bookIMG"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/book_author_pagescount_layout" />
+            android:layout_below="@+id/authorETFloating" />
     </RelativeLayout>
 
     <com.getbase.floatingactionbutton.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
