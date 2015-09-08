@@ -186,7 +186,7 @@ public class Books_Activity extends Base_Activity {
         };
 
         drawerLayout.setDrawerListener(drawerToggle);
-        drawerLayout.closeDrawer(navDrawer);
+        drawerLayout.closeDrawer(GravityCompat.START);
 
         navDrawer.setProfile(
                 new DrawerProfile()
@@ -199,11 +199,11 @@ public class Books_Activity extends Base_Activity {
         /**
          * FAVORITE BOOKMARKS
          */
-//        navDrawer.addItem(
-//                new DrawerItem()
-//                        .setImage(getResources().getDrawable(R.drawable.favorites), DrawerItem.SMALL_AVATAR)
-//                        .setTextPrimary(getResources().getString(R.string.navdrawer_favorite_bookmarks_item))
-//        );
+        navDrawer.addItem(
+                new DrawerItem()
+                        .setImage(getResources().getDrawable(R.drawable.favorites), DrawerItem.SMALL_AVATAR)
+                        .setTextPrimary(getResources().getString(R.string.navdrawer_favorite_bookmarks_item))
+        );
 
 //        /**
 //         * TRASH
@@ -623,11 +623,6 @@ public class Books_Activity extends Base_Activity {
     protected void onDestroy() {
         super.onDestroy();
         EventBus_Singleton.getInstance().unregister(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
     }
 
     public class Books_Adapter extends BaseAdapter {
