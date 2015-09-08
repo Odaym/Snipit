@@ -103,7 +103,7 @@ public class Crop_Image_Activity extends Base_Activity {
         String imageFileName = "JPEG_" + timeStamp;
 
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "Atomic");
+                Environment.DIRECTORY_PICTURES), "Snipit");
 
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
