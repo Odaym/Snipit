@@ -16,7 +16,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -30,8 +29,6 @@ import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.om.atomic.R;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
-import com.om.snipit.classes.EventBus_Poster;
-import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.GMailSender;
 import com.om.snipit.classes.Helper_Methods;
 import com.om.snipit.classes.Param;
@@ -225,11 +222,11 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
         @Override
         protected Void doInBackground(String... feedbackContent) {
             try {
-                GMailSender sender = new GMailSender("oday.maleh@gmail.com", "EASYPASSWORDiseasy1+2+3+4+");
-                sender.sendMail("In-app Feedback",
+                GMailSender sender = new GMailSender(Constants.FEEDBACK_EMAIL_FROM_ADDRESS, Constants.FEEDBACK_EMAIL_FROM_ADDRESS_PASSWORD);
+                sender.sendMail(Constants.FEEDBACK_EMAIL_SUBJECT,
                         feedbackContent[0],
-                        "oday.maleh@gmail.com",
-                        "apps.atomic@gmail.com");
+                        Constants.FEEDBACK_EMAIL_APPEARS_AS,
+                        Constants.FEEDBACK_EMAIL_TO);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -242,18 +239,6 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
             sendEmailFeedbackDialog.hide();
             Crouton.makeText(Settings_Activity.this, getResources().getString(R.string.feedback_sent_alert), Style.CONFIRM).show();
         }
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            super.onBackPressed();
-            //If Animations are enabled
-            if (animationsParam.isEnabled())
-                overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     public DatabaseHelper getHelper() {
