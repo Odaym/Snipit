@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,7 +21,6 @@ import android.widget.RelativeLayout;
 
 import com.andreabaccega.widget.FormEditText;
 import com.flurry.android.FlurryAgent;
-import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -126,6 +126,7 @@ public class Create_Book_Activity extends Base_Activity {
 
         if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
             scanBTN.setElevation(15f);
+            toolbar.setElevation(25f);
         }
 
         UIHandler.sendEmptyMessageDelayed(SHOW_SCAN_BOOK_SHOWCASE, 500);
@@ -145,7 +146,7 @@ public class Create_Book_Activity extends Base_Activity {
                 titleET.setSelection(titleET.getText().length());
                 authorET.setText(book_from_list.getAuthor());
 
-                if (!book_from_list.getImagePath().isEmpty())
+                if (book_from_list.getImagePath() != null && !book_from_list.getImagePath().isEmpty())
                     Picasso.with(Create_Book_Activity.this).load(book_from_list.getImagePath()).into(bookIMG);
             }
         } else {
@@ -183,11 +184,11 @@ public class Create_Book_Activity extends Base_Activity {
                         EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
 
                         finish();
+                    }
 
-                        if (getCurrentFocus() != null) {
-                            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                        }
+                    if (getCurrentFocus() != null) {
+                        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                     }
                 }
             }
@@ -248,7 +249,7 @@ public class Create_Book_Activity extends Base_Activity {
 
         EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
 
-        Intent takeToBookmarks = new Intent(Create_Book_Activity.this, Bookmarks_Activity.class);
+        Intent takeToBookmarks = new Intent(Create_Book_Activity.this, Snippets_Activity.class);
         takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
         takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
         takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());

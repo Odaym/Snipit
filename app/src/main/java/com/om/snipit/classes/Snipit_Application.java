@@ -1,13 +1,13 @@
 package com.om.snipit.classes;
 
-import android.support.multidex.MultiDexApplication;
+import android.app.Application;
 
 import com.crashlytics.android.Crashlytics;
 import com.flurry.android.FlurryAgent;
 
 import io.fabric.sdk.android.Fabric;
 
-public class Snipit_Application extends MultiDexApplication {
+public class Snipit_Application extends Application {
 
     @Override
     public void onCreate() {

@@ -1,10 +1,13 @@
 package com.om.snipit.activities;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -14,16 +17,15 @@ import android.widget.ImageView;
 import com.andreabaccega.widget.FormEditText;
 import com.bumptech.glide.Glide;
 import com.flurry.android.FlurryAgent;
-import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.om.atomic.R;
-import com.om.snipit.classes.Bookmark;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
+import com.om.snipit.classes.Snippet;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
@@ -42,7 +44,7 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 
-public class Create_Bookmark_Activity extends Base_Activity {
+public class Create_Snippet_Activity extends Base_Activity {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
@@ -60,23 +62,24 @@ public class Create_Bookmark_Activity extends Base_Activity {
     Toolbar toolbar;
 
     private ArrayList<FormEditText> allFields = new ArrayList<>();
+    private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 
     private DatabaseHelper databaseHelper;
-    private RuntimeExceptionDao<Bookmark, Integer> bookmarkDAO;
+    private RuntimeExceptionDao<Snippet, Integer> bookmarkDAO;
 
     private int CALL_PURPOSE;
-    private Bookmark bookmark_from_list;
+    private Snippet snippet_from_list;
     private String tempImagePath, finalImagePath;
     private EventBus_Poster ebpFromEditBookmark;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_bookmark);
+        setContentView(R.layout.activity_create_snippet);
 
         ButterKnife.inject(this);
 
-        bookmarkDAO = getHelper().getBookmarkDAO();
+        bookmarkDAO = getHelper().getSnipitDAO();
 
         allFields.add(nameET);
 
@@ -86,8 +89,11 @@ public class Create_Bookmark_Activity extends Base_Activity {
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
+
+        if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
+            toolbar.setElevation(25f);
+        }
 
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, -1);
 
@@ -105,21 +111,21 @@ public class Create_Bookmark_Activity extends Base_Activity {
         if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
             getSupportActionBar().setTitle(getString(R.string.edit_bookmark_activity_title));
 
-            bookmark_from_list = bookmarkDAO.queryForId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1));
+            snippet_from_list = bookmarkDAO.queryForId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1));
 
-            nameET.setText(bookmark_from_list.getName());
+            nameET.setText(snippet_from_list.getName());
             nameET.setSelection(nameET.getText().length());
 
-            if (bookmark_from_list.getPage_number() != Constants.NO_BOOKMARK_PAGE_NUMBER)
-                pageNumberET.setText(String.valueOf(bookmark_from_list.getPage_number()));
+            if (snippet_from_list.getPage_number() != Constants.NO_BOOKMARK_PAGE_NUMBER)
+                pageNumberET.setText(String.valueOf(snippet_from_list.getPage_number()));
 
             try {
                 //If the String was a URL then this bookmark is a sample
-                new URL(bookmark_from_list.getImage_path());
-                Glide.with(Create_Bookmark_Activity.this).load(bookmark_from_list.getImage_path()).centerCrop().error(getResources().getDrawable(R.drawable.notfound_1)).into(bookmarkIMG);
+                new URL(snippet_from_list.getImage_path());
+                Glide.with(Create_Snippet_Activity.this).load(snippet_from_list.getImage_path()).centerCrop().error(getResources().getDrawable(R.drawable.notfound_1)).into(bookmarkIMG);
             } catch (MalformedURLException e) {
                 //Else it's on disk
-                Picasso.with(this).load(new File(bookmark_from_list.getImage_path())).into(bookmarkIMG);
+                Picasso.with(this).load(new File(snippet_from_list.getImage_path())).into(bookmarkIMG);
             }
         } else {
             getSupportActionBar().setTitle(getString(R.string.create_bookmark_activity_title));
@@ -132,27 +138,27 @@ public class Create_Bookmark_Activity extends Base_Activity {
                     //If you are editing an existing bookmark
                     if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
                         try {
-                            bookmark_from_list.setName(nameET.getText().toString());
+                            snippet_from_list.setName(nameET.getText().toString());
 
                             //Only try to parse if there was a number given
                             if (!pageNumberET.getText().toString().isEmpty())
-                                bookmark_from_list.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
+                                snippet_from_list.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
                             else
-                                bookmark_from_list.setPage_number(Constants.NO_BOOKMARK_PAGE_NUMBER);
+                                snippet_from_list.setPage_number(Constants.NO_BOOKMARK_PAGE_NUMBER);
 
                             if (ebpFromEditBookmark != null)
-                                bookmark_from_list.setImage_path(ebpFromEditBookmark.getExtra());
+                                snippet_from_list.setImage_path(ebpFromEditBookmark.getExtra());
                             else
-                                bookmark_from_list.setImage_path(bookmark_from_list.getImage_path());
+                                snippet_from_list.setImage_path(snippet_from_list.getImage_path());
 
-                            bookmarkDAO.update(bookmark_from_list);
+                            bookmarkDAO.update(snippet_from_list);
 
                             EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_name_page_edited"));
 
                             finish();
                         } catch (NumberFormatException e) {
                             pageNumberET.setText("");
-                            Crouton.makeText(Create_Bookmark_Activity.this, getString(R.string.page_number_error), Style.ALERT).show();
+                            Crouton.makeText(Create_Snippet_Activity.this, getString(R.string.page_number_error), Style.ALERT).show();
                         }
                     } else {
                         //If you are creating a new bookmark
@@ -162,26 +168,26 @@ public class Create_Bookmark_Activity extends Base_Activity {
                         String year = (String) android.text.format.DateFormat.format("yyyy", date);
 
                         try {
-                            Bookmark bookmark = new Bookmark();
-                            bookmark.setName(nameET.getText().toString());
-                            bookmark.setBookId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
-                            bookmark.setOrder(bookmarkDAO.queryForEq("book_id", getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID)).size() + 1);
-                            bookmark.setFavorite(false);
+                            Snippet snippet = new Snippet();
+                            snippet.setName(nameET.getText().toString());
+                            snippet.setBookId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
+                            snippet.setOrder(bookmarkDAO.queryForEq("book_id", getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID)).size() + 1);
+                            snippet.setFavorite(false);
 
                             //Only try to parse if there was a number given
                             if (!pageNumberET.getText().toString().isEmpty())
-                                bookmark.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
+                                snippet.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
                             else
-                                bookmark.setPage_number(Constants.NO_BOOKMARK_PAGE_NUMBER);
+                                snippet.setPage_number(Constants.NO_BOOKMARK_PAGE_NUMBER);
 
                             if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_IMAGE_PURPOSE_VALUE)
-                                bookmark.setImage_path(ebpFromEditBookmark.getExtra());
+                                snippet.setImage_path(ebpFromEditBookmark.getExtra());
                             else
-                                bookmark.setImage_path(finalImagePath);
+                                snippet.setImage_path(finalImagePath);
 
-                            bookmark.setDate_added(month + " " + day + ", " + year);
+                            snippet.setDate_added(month + " " + day + ", " + year);
 
-                            bookmarkDAO.create(bookmark);
+                            bookmarkDAO.create(snippet);
 
                             FlurryAgent.logEvent("Bookmark_Create");
 
@@ -191,14 +197,14 @@ public class Create_Bookmark_Activity extends Base_Activity {
                             finish();
                         } catch (NumberFormatException e) {
                             pageNumberET.setText("");
-                            Crouton.makeText(Create_Bookmark_Activity.this, getString(R.string.page_number_error), Style.ALERT).show();
+                            Crouton.makeText(Create_Snippet_Activity.this, getString(R.string.page_number_error), Style.ALERT).show();
                         }
                     }
                 }
             }
         });
 
-        createNewBookmarkBTN.setColorNormal(getResources().getColor(helperMethods.determineFabButtonsColor(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR))));
+        createNewBookmarkBTN.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(helperMethods.determineFabButtonsColor(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR)))));
 
         createNewBookmarkBTN.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -253,7 +259,7 @@ public class Create_Bookmark_Activity extends Base_Activity {
                 if (CALL_PURPOSE != Constants.EDIT_BOOKMARK_PURPOSE_VALUE)
                     CALL_PURPOSE = Constants.EDIT_BOOKMARK_IMAGE_PURPOSE_VALUE;
 
-                Intent openCropImageActivity = new Intent(Create_Bookmark_Activity.this, Crop_Image_Activity.class);
+                Intent openCropImageActivity = new Intent(Create_Snippet_Activity.this, Crop_Image_Activity.class);
                 openCropImageActivity.putExtra(Constants.EXTRAS_BOOK_ID, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
                 openCropImageActivity.putExtra(Constants.EXTRAS_BOOK_COLOR, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
                 openCropImageActivity.putExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, CALL_PURPOSE);

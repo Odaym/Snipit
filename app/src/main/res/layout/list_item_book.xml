@@ -50,7 +50,7 @@
             android:textSize="@dimen/book_author_fsize" />
     </RelativeLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/bookActionLayout"
         android:layout_width="35dp"
         android:layout_height="35dp"
@@ -64,7 +64,7 @@
             android:background="@drawable/menu_overflow_fade"
             android:clickable="false"
             android:focusable="false" />
-    </RelativeLayout>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/bookmarksNumberTV"

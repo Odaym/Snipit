@@ -37,6 +37,7 @@
         <activity
             android:name="com.om.snipit.activities.Books_Activity"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/Books_Activity_Theme"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
@@ -47,9 +48,13 @@
         </activity>
 
         <activity
-            android:name="com.om.snipit.activities.Bookmarks_Activity"
-            android:theme="@style/Bookmarks_Activity_Theme"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustNothing"/>
+            android:name="com.om.snipit.activities.Snippets_Activity"
+            android:theme="@style/Snippets_Activity_Theme" />
+
+        <activity
+            android:name="com.om.snipit.activities.Snippets_Gallery_Activity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Snippets_Gallery_Activity_Theme" />
 
         <activity
             android:name="com.om.snipit.activities.Create_Book_Activity"
@@ -59,14 +64,14 @@
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
         <activity
-            android:name="com.om.snipit.activities.Create_Bookmark_Activity"
+            android:name="com.om.snipit.activities.Create_Snippet_Activity"
             android:label="@string/create_bookmark_activity_title"
             android:screenOrientation="portrait"
             android:theme="@style/Create_Bookmark_Activity"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.om.snipit.activities.View_Bookmark_Activity"
+            android:name="com.om.snipit.activities.View_Snippet_Activity"
             android:screenOrientation="portrait"
             android:theme="@style/View_Bookmark_Activity_Theme" />
 
@@ -75,7 +80,7 @@
             android:theme="@style/Crop_Image_Activity_Theme" />
 
         <activity
-            android:name="com.om.snipit.activities.Paint_Bookmark_Activity"
+            android:name="com.om.snipit.activities.Paint_Snippet_Activity"
             android:screenOrientation="portrait"
             android:theme="@style/View_Bookmark_Activity_Theme" />
 

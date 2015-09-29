@@ -22,7 +22,5 @@
             android:singleLine="true"
             android:textColor="@android:color/black"
             android:textCursorDrawable="@null" />
-
     </com.wrapp.floatlabelededittext.FloatLabeledEditText>
-
 </LinearLayout>

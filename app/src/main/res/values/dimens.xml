@@ -63,6 +63,18 @@
     <!-- BOOKS ACTIVITY -->
     <dimen name="toolbar_top_padding">0dp</dimen>
 
+    <!-- SNIPPETS GALLERY-->
+    <dimen name="snippet_grid_item_margin_end">1dp</dimen>
+    <dimen name="snippet_grid_item_picture_height">250dp</dimen>
+    <dimen name="snippet_grid_item_picture_width">250dp</dimen>
+    <dimen name="snippet_grid_item_layout_height">230dp</dimen>
+    <dimen name="snippet_grid_item_image_layout_height">170dp</dimen>
+    <dimen name="snippet_grid_image_padding_start">10dp</dimen>
+    <dimen name="snippet_grid_image_padding_end">10dp</dimen>
+    <dimen name="snippets_gridview_padding_between">5dp</dimen>
+    <dimen name="snippet_name_grid_item_font_size">13dp</dimen>
+    <dimen name="snippet_grid_item_separator_height">0.3dp</dimen>
+
     <!-- PAINT_BOOKMARK_ACTIVITY -->
     <dimen name="fab_actions_menu_buttons_bottom_padding">20dp</dimen>
 

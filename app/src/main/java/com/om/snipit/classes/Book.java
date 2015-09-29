@@ -8,7 +8,7 @@ import com.j256.ormlite.table.DatabaseTable;
 
 public class Book {
 
-    @DatabaseField (generatedId = true)
+    @DatabaseField (generatedId = true, index = true)
     int id;
     @DatabaseField
     String title;

@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
-import com.om.snipit.activities.View_Bookmark_Activity;
+import com.om.snipit.activities.View_Snippet_Activity;
 
 import java.io.FileOutputStream;
 
@@ -16,9 +16,9 @@ public class AsyncTask_ProcessOCR extends AsyncTask<String, String, Boolean> {
     /**
      * application context.
      */
-    private final View_Bookmark_Activity activity;
+    private final View_Snippet_Activity activity;
 
-    public AsyncTask_ProcessOCR(View_Bookmark_Activity activity) {
+    public AsyncTask_ProcessOCR(View_Snippet_Activity activity) {
         this.activity = activity;
         dialog = new ProgressDialog(activity);
     }

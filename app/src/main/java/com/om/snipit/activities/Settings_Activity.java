@@ -130,7 +130,7 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
 
                 TextView feedbackSendingSummaryTV = (TextView) alertComposeFeedback.findViewById(R.id.feedbackSendingSummaryTV);
                 feedbackSendingSummaryTV.append(" ");
-                feedbackSendingSummaryTV.append(Html.fromHtml("<a href=\"mailto:apps.atomic@gmail.com\">apps.atomic@gmail.com</a>"));
+                feedbackSendingSummaryTV.append(Html.fromHtml("<a href=\"mailto:snipit.me@gmail.com\">snipit.me@gmail.com</a>"));
                 feedbackSendingSummaryTV.setMovementMethod(LinkMovementMethod.getInstance());
 
                 alert.setTitle(Settings_Activity.this.getResources().getString(R.string.pref_sendfeedback_alert_title));
@@ -161,7 +161,7 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
                 Param tutorialParam = paramDAO.queryForId(Constants.TUTORIAL_MODE_DATABASE_VALUE);
 
                 Param seenBookParam = paramDAO.queryForId(Constants.SEEN_BOOK_TUTORIAL_DATABASE_VALUE);
-                Param seenBookmarkParam = paramDAO.queryForId(Constants.SEEN_BOOKMARK_TUTORIAL_DATABASE_VALUE);
+                Param seenBookmarkParam = paramDAO.queryForId(Constants.SEEN_SNIPIT_TUTORIAL_DATABASE_VALUE);
                 Param seenCreateBookParam = paramDAO.queryForId(Constants.SEEN_CREATE_BOOK_TUTORIAL_DATABASE_VALUE);
 
                 if (sharedPreferences.getBoolean("pref_key_tutorial_mode", true)) {

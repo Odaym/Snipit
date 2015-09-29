@@ -78,28 +78,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/red"
-            fab:fab_icon="@drawable/paint_bookmark_undo" />
+            fab:fab_icon="@drawable/ic_undo_white" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_drawing_mode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/green"
-            fab:fab_icon="@drawable/paint_bookmark_rectangle" />
+            fab:fab_icon="@drawable/ic_square_white" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/yellow"
-            fab:fab_icon="@drawable/paint_bookmark_color" />
+            fab:fab_icon="@drawable/ic_color_lens_white" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_thickness"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/purple"
-            fab:fab_icon="@drawable/paint_bookmark_thickness" />
+            fab:fab_icon="@drawable/ic_border_color_white" />
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
@@ -124,7 +124,7 @@
             android:layout_height="wrap_content"
             android:onClick="onFabColorButtonClicked"
             fab:fab_colorNormal="@color/gray"
-            fab:fab_icon="@drawable/paint_bookmark_cancel"
+            fab:fab_icon="@drawable/ic_clear_white"
             fab:fab_size="mini" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton

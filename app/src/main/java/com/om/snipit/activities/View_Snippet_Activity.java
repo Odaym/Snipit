@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -28,7 +29,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -39,13 +39,13 @@ import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
 import com.om.snipit.abbyy_ocr.AsyncTask_ProcessOCR;
-import com.om.snipit.classes.Bookmark;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.HackyViewPager;
 import com.om.snipit.classes.Helper_Methods;
+import com.om.snipit.classes.Snippet;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -66,20 +66,22 @@ import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
-public class View_Bookmark_Activity extends Base_Activity {
+public class View_Snippet_Activity extends Base_Activity {
 
     private String extras_search_term;
+    private boolean extras_viewing_snippets_gallery = false;
     private int book_id;
+    private String book_title;
 
-    private List<Bookmark> bookmarks;
+    private List<Snippet> snippets;
     private int NUM_PAGES;
     private int current_bookmark_position;
     private ScreenSlidePagerAdapter mPagerAdapter;
 
     private DatabaseHelper databaseHelper;
-    private RuntimeExceptionDao<Bookmark, Integer> bookmarkDAO;
-    private QueryBuilder<Bookmark, Integer> bookmarkQueryBuilder;
-    private PreparedQuery<Bookmark> pq;
+    private RuntimeExceptionDao<Snippet, Integer> bookmarkDAO;
+    private QueryBuilder<Snippet, Integer> bookmarkQueryBuilder;
+    private PreparedQuery<Snippet> pq;
 
     @InjectView(R.id.pager)
     HackyViewPager mPager;
@@ -87,33 +89,38 @@ public class View_Bookmark_Activity extends Base_Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_view_bookmarks);
+        setContentView(R.layout.activity_view_snippets);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         EventBus_Singleton.getInstance().register(this);
 
         ButterKnife.inject(this);
 
-        bookmarkDAO = getHelper().getBookmarkDAO();
+        bookmarkDAO = getHelper().getSnipitDAO();
         bookmarkQueryBuilder = bookmarkDAO.queryBuilder();
 
-        String book_title = getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
-
+        //These two fields are common amongst both Intents that lead up to this Activity. Whether we are in Snippets Gallery or not, and what the position of the current Snippet is within the list of all grabbed snippets, perfect.
+        extras_viewing_snippets_gallery = getIntent().getExtras().getBoolean(Constants.EXTRAS_VIEWING_SNIPPETS_GALLERY);
         current_bookmark_position = getIntent().getExtras().getInt(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION);
 
-        book_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID);
-        extras_search_term = getIntent().getExtras().getString(Constants.EXTRAS_SEARCH_TERM, Constants.EXTRAS_NO_SEARCH_TERM);
-
-        handleWhichBookmarksToLoad();
-
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (extras_viewing_snippets_gallery) {
+            //If viewing snippets from Snippets Gallery
+            getSupportActionBar().setTitle("Zabri");
+        } else {
+            //If viewing snippets from a Collection, not from Snippets Gallery
+            book_title = getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
+            book_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID);
+            extras_search_term = getIntent().getExtras().getString(Constants.EXTRAS_SEARCH_TERM, Constants.EXTRAS_NO_SEARCH_TERM);
             getSupportActionBar().setTitle(book_title);
         }
+
+        handleWhichBookmarksToLoad();
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
 
-        NUM_PAGES = bookmarks.size();
+        NUM_PAGES = snippets.size();
 
         mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 
@@ -171,19 +178,25 @@ public class View_Bookmark_Activity extends Base_Activity {
 
     public void handleWhichBookmarksToLoad() {
         try {
-            if (extras_search_term.equals(Constants.EXTRAS_NO_SEARCH_TERM)) {
+            if (extras_viewing_snippets_gallery) {
+                snippets = bookmarkDAO.queryForAll();
+            } else if (extras_search_term.equals(Constants.EXTRAS_NO_SEARCH_TERM)) {
                 bookmarkQueryBuilder.where().eq("book_id", book_id);
                 bookmarkQueryBuilder.orderBy("order", false);
+
+                pq = bookmarkQueryBuilder.prepare();
+                snippets = bookmarkDAO.query(pq);
             } else {
                 SelectArg nameSelectArg = new SelectArg("%" + extras_search_term + "%");
                 SelectArg noteSelectArg = new SelectArg("%" + extras_search_term + "%");
 
                 bookmarkQueryBuilder.where().eq("book_id", book_id).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
                 bookmarkQueryBuilder.orderBy("order", false);
+
+                pq = bookmarkQueryBuilder.prepare();
+                snippets = bookmarkDAO.query(pq);
             }
 
-            pq = bookmarkQueryBuilder.prepare();
-            bookmarks = bookmarkDAO.query(pq);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -226,7 +239,7 @@ public class View_Bookmark_Activity extends Base_Activity {
         private Context context;
         private int rotation = 0;
 
-        private Bookmark tempBookmark;
+        private Snippet tempSnippet;
 
         private String bookmark_imagepath, bookmark_name, bookmark_dateAdded;
         private int bookmark_pagenumber, bookmark_id;
@@ -234,7 +247,7 @@ public class View_Bookmark_Activity extends Base_Activity {
         private boolean clutterHidden = false;
 
         private DatabaseHelper databaseHelper;
-        private RuntimeExceptionDao<Bookmark, Integer> bookmarkDAO;
+        private RuntimeExceptionDao<Snippet, Integer> bookmarkDAO;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -242,7 +255,91 @@ public class View_Bookmark_Activity extends Base_Activity {
             setHasOptionsMenu(true);
 
             helperMethods = new Helper_Methods(context);
-            bookmarkDAO = getHelper().getBookmarkDAO();
+            bookmarkDAO = getHelper().getSnipitDAO();
+
+            picassoCallback = new Callback() {
+                @Override
+                public void onSuccess() {
+                    //Because they become disabled if an error occurred while loading the image
+                    if (!createNewNoteBTN.isEnabled()) {
+                        createNewNoteBTN.setEnabled(true);
+                        createNewNoteBTN.setAlpha(1f);
+                    }
+                    if (!paintBookmarkBTN.isEnabled()) {
+                        paintBookmarkBTN.setEnabled(true);
+                        paintBookmarkBTN.setAlpha(1f);
+                    }
+
+                    imageProgressBar.setVisibility(View.INVISIBLE);
+
+                    createNewNoteBTN.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            AlertDialog.Builder alert = new AlertDialog.Builder(context);
+
+                            LayoutInflater inflater = (LayoutInflater) context
+                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
+                            View alertCreateNoteView = inflater.inflate(R.layout.alert_create_snippet_note, null, false);
+
+                            final EditText inputNoteET = (EditText) alertCreateNoteView.findViewById(R.id.bookmarkNoteET);
+                            inputNoteET.setHintTextColor(getActivity().getResources().getColor(R.color.edittext_hint_color));
+                            inputNoteET.setText(bookmarkDAO.queryForId(bookmark_id).getNote());
+                            inputNoteET.setSelection(inputNoteET.getText().length());
+
+                            alert.setPositiveButton(context.getResources().getString(R.string.OK), new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    Snippet snippetToUpdate = bookmarkDAO.queryForId(bookmark_id);
+                                    snippetToUpdate.setNote(inputNoteET.getText().toString());
+                                    bookmarkDAO.update(snippetToUpdate);
+
+                                    EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_note_changed"));
+                                }
+                            });
+
+                            alert.setNegativeButton(context.getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                }
+                            });
+
+                            inputNoteET.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    InputMethodManager keyboard = (InputMethodManager)
+                                            context.getSystemService(INPUT_METHOD_SERVICE);
+                                    keyboard.showSoftInput(inputNoteET, 0);
+                                }
+                            }, 0);
+
+                            alert.setTitle(context.getResources().getString(R.string.takeNote));
+                            alert.setView(alertCreateNoteView);
+                            alert.show();
+                        }
+                    });
+
+                    paintBookmarkBTN.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent openPaintActivity = new Intent(context, Paint_Snippet_Activity.class);
+                            openPaintActivity.putExtra(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, bookmark_imagepath);
+//                            openPaintActivity.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, mPager.getCurrentItem())
+                            //Send the ID of the bookmark to be used in case the bookmark image needs to be updated
+                            openPaintActivity.putExtra(Constants.EXTRAS_BOOKMARK_ID, bookmark_id);
+                            startActivity(openPaintActivity);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError() {
+                    imageProgressBar.setVisibility(View.INVISIBLE);
+
+                    createNewNoteBTN.setEnabled(false);
+                    createNewNoteBTN.setAlpha(0.2f);
+                    paintBookmarkBTN.setEnabled(false);
+                    paintBookmarkBTN.setAlpha(0.2f);
+                }
+            };
+
         }
 
         public DatabaseHelper getHelper() {
@@ -263,9 +360,9 @@ public class View_Bookmark_Activity extends Base_Activity {
 
             favoriteBookmark_Item = menu.getItem(4);
 
-            tempBookmark = bookmarkDAO.queryForId(bookmark_id);
+            tempSnippet = bookmarkDAO.queryForId(bookmark_id);
 
-            if (tempBookmark.isFavorite())
+            if (tempSnippet.isFavorite())
                 favoriteBookmark_Item.setIcon(getResources().getDrawable(android.R.drawable.star_big_on));
             else
                 favoriteBookmark_Item.setIcon(getResources().getDrawable(android.R.drawable.star_big_off));
@@ -286,7 +383,7 @@ public class View_Bookmark_Activity extends Base_Activity {
             switch (item.getItemId()) {
                 case R.id.run_ocr:
                     if (Helper_Methods.isInternetAvailable(getActivity())) {
-                        new AsyncTask_ProcessOCR((View_Bookmark_Activity) getActivity()).execute(bookmark_imagepath, "results.txt");
+                        new AsyncTask_ProcessOCR((View_Snippet_Activity) getActivity()).execute(bookmark_imagepath, "results.txt");
                     } else {
                         Crouton.makeText(getActivity(), getString(R.string.action_needs_internet), Style.ALERT).show();
                     }
@@ -340,15 +437,15 @@ public class View_Bookmark_Activity extends Base_Activity {
                     startActivity(Intent.createChooser(sendIntent, "Share using:"));
                     break;
                 case R.id.favorite_bookmark:
-                    if (tempBookmark.isFavorite()) {
-                        tempBookmark.setFavorite(false);
+                    if (tempSnippet.isFavorite()) {
+                        tempSnippet.setFavorite(false);
                         favoriteBookmark_Item.setIcon(getResources().getDrawable(android.R.drawable.star_big_off));
                     } else {
-                        tempBookmark.setFavorite(true);
+                        tempSnippet.setFavorite(true);
                         favoriteBookmark_Item.setIcon(getResources().getDrawable(android.R.drawable.star_big_on));
                     }
 
-                    bookmarkDAO.update(tempBookmark);
+                    bookmarkDAO.update(tempSnippet);
 
                     EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_favorited"));
                     break;
@@ -375,12 +472,12 @@ public class View_Bookmark_Activity extends Base_Activity {
                                  Bundle savedInstanceState) {
 
             final ViewGroup rootView = (ViewGroup) inflater.inflate(
-                    R.layout.fragment_bookmarks, container, false);
+                    R.layout.fragment_snippets, container, false);
 
             ButterKnife.inject(this, rootView);
 
-            ((View_Bookmark_Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            ((View_Bookmark_Activity) context).getSupportActionBar().show();
+            ((View_Snippet_Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            ((View_Snippet_Activity) context).getSupportActionBar().show();
 
             bookmarkNameTV.setText(bookmark_name);
 
@@ -399,89 +496,6 @@ public class View_Bookmark_Activity extends Base_Activity {
             } else {
                 paintBookmarkBTN.setVisibility(View.GONE);
             }
-
-            picassoCallback = new Callback() {
-                @Override
-                public void onSuccess() {
-                    //Because they become disabled if an error occurred while loading the image
-                    if (!createNewNoteBTN.isEnabled()) {
-                        createNewNoteBTN.setEnabled(true);
-                        createNewNoteBTN.setAlpha(1f);
-                    }
-                    if (!paintBookmarkBTN.isEnabled()) {
-                        paintBookmarkBTN.setEnabled(true);
-                        paintBookmarkBTN.setAlpha(1f);
-                    }
-
-                    imageProgressBar.setVisibility(View.INVISIBLE);
-
-                    createNewNoteBTN.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            AlertDialog.Builder alert = new AlertDialog.Builder(context);
-
-                            LayoutInflater inflater = (LayoutInflater) context
-                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
-                            View alertCreateNoteView = inflater.inflate(R.layout.alert_create_bookmark_note, rootView, false);
-
-                            final EditText inputNoteET = (EditText) alertCreateNoteView.findViewById(R.id.bookmarkNoteET);
-                            inputNoteET.setHintTextColor(getActivity().getResources().getColor(R.color.edittext_hint_color));
-                            inputNoteET.setText(bookmarkDAO.queryForId(bookmark_id).getNote());
-                            inputNoteET.setSelection(inputNoteET.getText().length());
-
-                            alert.setPositiveButton(context.getResources().getString(R.string.OK), new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    Bookmark bookmarkToUpdate = bookmarkDAO.queryForId(bookmark_id);
-                                    bookmarkToUpdate.setNote(inputNoteET.getText().toString());
-                                    bookmarkDAO.update(bookmarkToUpdate);
-
-                                    EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_note_changed"));
-                                }
-                            });
-
-                            alert.setNegativeButton(context.getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                }
-                            });
-
-                            inputNoteET.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    InputMethodManager keyboard = (InputMethodManager)
-                                            context.getSystemService(INPUT_METHOD_SERVICE);
-                                    keyboard.showSoftInput(inputNoteET, 0);
-                                }
-                            }, 0);
-
-                            alert.setTitle(context.getResources().getString(R.string.takeNote));
-                            alert.setView(alertCreateNoteView);
-                            alert.show();
-                        }
-                    });
-
-                    paintBookmarkBTN.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent openPaintActivity = new Intent(context, Paint_Bookmark_Activity.class);
-                            openPaintActivity.putExtra(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, bookmark_imagepath);
-//                            openPaintActivity.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, mPager.getCurrentItem())
-                            //Send the ID of the bookmark to be used in case the bookmark image needs to be updated
-                            openPaintActivity.putExtra(Constants.EXTRAS_BOOKMARK_ID, bookmark_id);
-                            startActivity(openPaintActivity);
-                        }
-                    });
-                }
-
-                @Override
-                public void onError() {
-                    imageProgressBar.setVisibility(View.INVISIBLE);
-
-                    createNewNoteBTN.setEnabled(false);
-                    createNewNoteBTN.setAlpha(0.2f);
-                    paintBookmarkBTN.setEnabled(false);
-                    paintBookmarkBTN.setAlpha(0.2f);
-                }
-            };
 
             Picasso.with(context).load(new File(bookmark_imagepath)).error(getResources().getDrawable(R.drawable.bookmark_not_found)).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
 
@@ -508,17 +522,17 @@ public class View_Bookmark_Activity extends Base_Activity {
             Animator[] objectAnimators;
 
             if (wasHidden) {
-                ((View_Bookmark_Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                ((View_Bookmark_Activity) context).getSupportActionBar().show();
+                ((View_Snippet_Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                ((View_Snippet_Activity) context).getSupportActionBar().show();
 
                 arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkDetailsView));
                 arrayListObjectAnimators.add(helperMethods.showViewElement(createNewNoteBTN));
                 arrayListObjectAnimators.add(helperMethods.showViewElement(paintBookmarkBTN));
 
             } else {
-                ((View_Bookmark_Activity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                ((View_Snippet_Activity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                         WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                ((View_Bookmark_Activity) context).getSupportActionBar().hide();
+                ((View_Snippet_Activity) context).getSupportActionBar().hide();
 
                 arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkDetailsView));
                 arrayListObjectAnimators.add(helperMethods.hideViewElement(createNewNoteBTN));
@@ -574,15 +588,15 @@ public class View_Bookmark_Activity extends Base_Activity {
         public Fragment getItem(int position) {
             View_Bookmark_Fragment imageFragment = new View_Bookmark_Fragment();
             Bundle bundle = new Bundle();
-            bundle.putInt(Constants.EXTRAS_BOOK_ID, bookmarks.get(position).getBookId());
-            bundle.putInt(Constants.EXTRAS_BOOKMARK_ID, bookmarks.get(position).getId());
-            bundle.putString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, bookmarks.get(position).getImage_path());
-            bundle.putString(Constants.EXTRAS_BOOKMARK_NAME, bookmarks.get(position).getName());
-            bundle.putInt(Constants.EXTRAS_BOOKMARK_PAGENUMBER, bookmarks.get(position).getPage_number());
-            bundle.putString(Constants.EXTRAS_BOOKMARK_DATE_ADDED, bookmarks.get(position).getDate_added());
-            bundle.putString(Constants.EXTRAS_BOOKMARK_NOTE, bookmarks.get(position).getNote());
-            bundle.putInt(Constants.EXTRAS_BOOKMARK_VIEWS, bookmarks.get(position).getViews());
-            bundle.putInt(Constants.EXTRAS_BOOKMARK_ISNOTESHOWING, bookmarks.get(position).getIsNoteShowing());
+            bundle.putInt(Constants.EXTRAS_BOOK_ID, snippets.get(position).getBookId());
+            bundle.putInt(Constants.EXTRAS_BOOKMARK_ID, snippets.get(position).getId());
+            bundle.putString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, snippets.get(position).getImage_path());
+            bundle.putString(Constants.EXTRAS_BOOKMARK_NAME, snippets.get(position).getName());
+            bundle.putInt(Constants.EXTRAS_BOOKMARK_PAGENUMBER, snippets.get(position).getPage_number());
+            bundle.putString(Constants.EXTRAS_BOOKMARK_DATE_ADDED, snippets.get(position).getDate_added());
+            bundle.putString(Constants.EXTRAS_BOOKMARK_NOTE, snippets.get(position).getNote());
+            bundle.putInt(Constants.EXTRAS_BOOKMARK_VIEWS, snippets.get(position).getViews());
+            bundle.putInt(Constants.EXTRAS_BOOKMARK_ISNOTESHOWING, snippets.get(position).getIsNoteShowing());
             imageFragment.setArguments(bundle);
 
             return imageFragment;

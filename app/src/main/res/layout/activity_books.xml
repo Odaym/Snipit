@@ -68,19 +68,19 @@
 
         </RelativeLayout>
 
-        <com.getbase.floatingactionbutton.AddFloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
+        <android.support.design.widget.FloatingActionButton
             android:id="@+id/createNewBookBTN"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_marginBottom="@dimen/create_book_bookmark_fab_buttons_margins"
-            android:layout_marginEnd="@dimen/create_book_bookmark_fab_buttons_margins"
-            android:layout_marginRight="@dimen/create_book_bookmark_fab_buttons_margins"
-            fab:fab_colorNormal="@color/green"
-            fab:fab_colorPressed="@color/yellow"
-            fab:fab_colorRipple="@color/yellow" />
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_add_white"
+            app:backgroundTint="@color/green"
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            app:fabSize="normal" />
 
     </RelativeLayout>
 

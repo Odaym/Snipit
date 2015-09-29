@@ -12,7 +12,9 @@
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 
-    <style name="Bookmarks_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Snippets_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar" />
+
+    <style name="Snippets_Gallery_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar"/>
 
     <style name="Settings_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar"/>
 

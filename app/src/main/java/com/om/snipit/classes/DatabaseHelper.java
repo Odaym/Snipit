@@ -21,7 +21,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
     private RuntimeExceptionDao<Book, Integer> bookRuntimeDAO = null;
-    private RuntimeExceptionDao<Bookmark, Integer> bookmarkRuntimeDAO = null;
+    private RuntimeExceptionDao<Snippet, Integer> snipitRuntimeDAO = null;
     private RuntimeExceptionDao<Param, Integer> paramRuntimeDAO = null;
 
     public DatabaseHelper(Context context) {
@@ -34,12 +34,12 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
             Log.d("DB", "DatabaseHelper class created, onCreate() called");
 
             TableUtils.createTable(connectionSource, Book.class);
-            TableUtils.createTable(connectionSource, Bookmark.class);
+            TableUtils.createTable(connectionSource, Snippet.class);
             TableUtils.createTable(connectionSource, Param.class);
 
             paramRuntimeDAO = getParamDAO();
             paramRuntimeDAO.createIfNotExists(new Param(Constants.SEEN_BOOK_TUTORIAL_DATABASE_VALUE, false));
-            paramRuntimeDAO.createIfNotExists(new Param(Constants.SEEN_BOOKMARK_TUTORIAL_DATABASE_VALUE, false));
+            paramRuntimeDAO.createIfNotExists(new Param(Constants.SEEN_SNIPIT_TUTORIAL_DATABASE_VALUE, false));
             paramRuntimeDAO.createIfNotExists(new Param(Constants.SEEN_CREATE_BOOK_TUTORIAL_DATABASE_VALUE, false));
             paramRuntimeDAO.createIfNotExists(new Param(Constants.TUTORIAL_MODE_DATABASE_VALUE, false));
             paramRuntimeDAO.createIfNotExists(new Param(Constants.ANIMATIONS_DATABASE_VALUE, false));
@@ -61,11 +61,11 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         return bookRuntimeDAO;
     }
 
-    public RuntimeExceptionDao<Bookmark, Integer> getBookmarkDAO() {
-        if (bookmarkRuntimeDAO == null) {
-            bookmarkRuntimeDAO = getRuntimeExceptionDao(Bookmark.class);
+    public RuntimeExceptionDao<Snippet, Integer> getSnipitDAO() {
+        if (snipitRuntimeDAO == null) {
+            snipitRuntimeDAO = getRuntimeExceptionDao(Snippet.class);
         }
-        return bookmarkRuntimeDAO;
+        return snipitRuntimeDAO;
     }
 
     public RuntimeExceptionDao<Param, Integer> getParamDAO() {
@@ -79,7 +79,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     public void close() {
         super.close();
         bookRuntimeDAO = null;
-        bookmarkRuntimeDAO = null;
+        snipitRuntimeDAO = null;
         paramRuntimeDAO = null;
     }
 }

@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -30,12 +31,12 @@ import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.getbase.floatingactionbutton.AddFloatingActionButton;
 import com.heinrichreimersoftware.materialdrawer.DrawerView;
 import com.heinrichreimersoftware.materialdrawer.structure.DrawerItem;
 import com.heinrichreimersoftware.materialdrawer.structure.DrawerProfile;
@@ -48,13 +49,13 @@ import com.nispok.snackbar.listeners.ActionClickListener;
 import com.nispok.snackbar.listeners.EventListener;
 import com.om.atomic.R;
 import com.om.snipit.classes.Book;
-import com.om.snipit.classes.Bookmark;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
 import com.om.snipit.classes.Param;
+import com.om.snipit.classes.Snippet;
 import com.om.snipit.dragsort_listview.DragSortListView;
 import com.om.snipit.showcaseview.ShowcaseView;
 import com.om.snipit.showcaseview.ViewTarget;
@@ -79,7 +80,7 @@ public class Books_Activity extends Base_Activity {
     @InjectView(R.id.emptyListLayout)
     RelativeLayout emptyListLayout;
     @InjectView(R.id.createNewBookBTN)
-    AddFloatingActionButton createNewBookBTN;
+    FloatingActionButton createNewBookBTN;
     @InjectView(R.id.drawerLayout)
     DrawerLayout drawerLayout;
     @InjectView(R.id.navDrawer)
@@ -100,12 +101,12 @@ public class Books_Activity extends Base_Activity {
 
     private DatabaseHelper databaseHelper = null;
     private RuntimeExceptionDao<Book, Integer> bookDAO;
-    private RuntimeExceptionDao<Bookmark, Integer> bookmarkDAO;
+    private RuntimeExceptionDao<Snippet, Integer> bookmarkDAO;
     private RuntimeExceptionDao<Param, Integer> paramDAO;
 
     private QueryBuilder<Book, Integer> bookQueryBuilder;
-    private QueryBuilder<Bookmark, Integer> bookmarkQueryBuilder;
-    private PreparedQuery<Bookmark> pq;
+    private QueryBuilder<Snippet, Integer> bookmarkQueryBuilder;
+    private PreparedQuery<Snippet> pq;
     private PreparedQuery<Book> pqBook;
 
     private ShowcaseView createBookShowcase;
@@ -139,7 +140,7 @@ public class Books_Activity extends Base_Activity {
         Helper_Methods helperMethods = new Helper_Methods(this);
 
         bookDAO = getHelper().getBookDAO();
-        bookmarkDAO = getHelper().getBookmarkDAO();
+        bookmarkDAO = getHelper().getSnipitDAO();
         paramDAO = getHelper().getParamDAO();
 
         bookQueryBuilder = bookDAO.queryBuilder();
@@ -202,17 +203,19 @@ public class Books_Activity extends Base_Activity {
         navDrawer.addItem(
                 new DrawerItem()
                         .setImage(getResources().getDrawable(R.drawable.favorites), DrawerItem.SMALL_AVATAR)
-                        .setTextPrimary(getResources().getString(R.string.navdrawer_favorite_bookmarks_item))
+                        .setTextPrimary(getResources().getString(R.string.navdrawer_favorite_bookmarks_item_primary))
+                        .setTextSecondary(getResources().getString(R.string.navdrawer_favorite_bookmarks_item_secondary))
         );
 
-//        /**
-//         * TRASH
-//         */
-//        navDrawer.addItem(
-//                new DrawerItem()
-//                        .setImage(getResources().getDrawable(R.drawable.trash), DrawerItem.SMALL_AVATAR)
-//                        .setTextPrimary(getResources().getString(R.string.navdrawer_trash_item))
-//        );
+        /**
+         * Snippets Gallery
+         */
+        navDrawer.addItem(
+                new DrawerItem()
+                        .setImage(getResources().getDrawable(R.drawable.trash), DrawerItem.SMALL_AVATAR)
+                        .setTextPrimary(getResources().getString(R.string.navdrawer_snippets_gallery_primary))
+                        .setTextSecondary(getResources().getString(R.string.navdrawer_snippets_gallery_secondary))
+        );
 
         /**
          * UPGRADE TO PREMIUM
@@ -242,7 +245,8 @@ public class Books_Activity extends Base_Activity {
                         Toast.makeText(Books_Activity.this, "Your favorite bookmarks will appear here", Toast.LENGTH_SHORT).show();
                         break;
                     case 1:
-                        Toast.makeText(Books_Activity.this, "Deleted bookmarks will appear here", Toast.LENGTH_SHORT).show();
+                        Intent openAllSnippets_Intent = new Intent(Books_Activity.this, Snippets_Gallery_Activity.class);
+                        startActivity(openAllSnippets_Intent);
                         break;
                 }
             }
@@ -280,7 +284,7 @@ public class Books_Activity extends Base_Activity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Intent openBookmarksForBook = new Intent(Books_Activity.this, Bookmarks_Activity.class);
+                Intent openBookmarksForBook = new Intent(Books_Activity.this, Snippets_Activity.class);
                 Book book = (Book) listView.getItemAtPosition(position);
 
                 //Clicking on an adview when there's no Internet connection will cause this condition to be satisfied because no Book will be found at the index of that adview
@@ -630,7 +634,7 @@ public class Books_Activity extends Base_Activity {
         private LayoutInflater inflater;
         private Context context;
         private BooksViewHolder holder;
-        private List<Bookmark> bookmarks;
+        private List<Snippet> snippets;
 
         public Books_Adapter(Context context) {
             super();
@@ -670,7 +674,7 @@ public class Books_Activity extends Base_Activity {
                 holder.bookAuthorTV = (AutofitTextView) parentView.findViewById(R.id.bookAuthorTV);
                 holder.bookThumbIMG = (ImageView) parentView.findViewById(R.id.bookThumbIMG);
                 holder.bookmarksNumberTV = (TextView) parentView.findViewById(R.id.bookmarksNumberTV);
-                holder.bookActionLayout = (RelativeLayout) parentView.findViewById(R.id.bookActionLayout);
+                holder.bookActionLayout = (LinearLayout) parentView.findViewById(R.id.bookActionLayout);
                 holder.needInflate = false;
 
                 parentView.setTag(holder);
@@ -784,8 +788,8 @@ public class Books_Activity extends Base_Activity {
                 }
             });
 
-            bookmarks = bookmarkDAO.queryForEq("book_id", books.get(position).getId());
-            holder.bookmarksNumberTV.setText(bookmarks.size() + "");
+            snippets = bookmarkDAO.queryForEq("book_id", books.get(position).getId());
+            holder.bookmarksNumberTV.setText(snippets.size() + "");
 
             return parentView;
         }
@@ -810,7 +814,7 @@ public class Books_Activity extends Base_Activity {
         AutofitTextView bookAuthorTV;
         ImageView bookThumbIMG;
         TextView bookmarksNumberTV;
-        RelativeLayout bookActionLayout;
+        LinearLayout bookActionLayout;
         boolean needInflate;
     }
 }

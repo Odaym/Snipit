@@ -7,11 +7,11 @@ import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.View;
 
 import com.edmodo.cropper.CropImageView;
-import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.om.atomic.R;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.EventBus_Poster;
@@ -77,7 +77,7 @@ public class Crop_Image_Activity extends Base_Activity {
                 if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE || CALL_PURPOSE == Constants.EDIT_BOOKMARK_IMAGE_PURPOSE_VALUE) {
                     EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_picture_changed", finalImagePath));
                 } else {
-                    Intent openCreateBookmark = new Intent(Crop_Image_Activity.this, Create_Bookmark_Activity.class);
+                    Intent openCreateBookmark = new Intent(Crop_Image_Activity.this, Create_Snippet_Activity.class);
                     openCreateBookmark.putExtra(Constants.EXTRAS_BOOK_ID, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
                     openCreateBookmark.putExtra(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, finalImagePath);
                     openCreateBookmark.putExtra(Constants.EXTRAS_BOOK_COLOR, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));

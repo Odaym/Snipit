@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:validator="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -11,10 +12,11 @@
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:theme="@style/ToolBarStyle_Global" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
+        android:orientation="vertical"
         android:paddingLeft="@dimen/activity_vertical_margin"
         android:paddingRight="@dimen/activity_vertical_margin">
 
@@ -22,15 +24,12 @@
             android:id="@+id/poweredByGoogleBadge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
+            android:layout_gravity="top|end"
             android:layout_marginTop="10dp"
             android:src="@drawable/powered_by_google" />
 
-        <android.support.design.widget.TextInputLayout
+        <com.wrapp.floatlabelededittext.FloatLabeledEditText
             android:id="@+id/titleETFloating"
-            android:layout_below="@+id/poweredByGoogleBadge"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -46,13 +45,12 @@
                 android:textCursorDrawable="@null"
                 validator:emptyErrorString="@string/empty_book_title_error" />
 
-        </android.support.design.widget.TextInputLayout>
+        </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 
-        <android.support.design.widget.TextInputLayout
+        <com.wrapp.floatlabelededittext.FloatLabeledEditText
             android:id="@+id/authorETFloating"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/titleETFloating">
+            android:layout_height="wrap_content">
 
             <com.andreabaccega.widget.FormEditText
                 android:id="@+id/authorET"
@@ -66,26 +64,27 @@
                 android:textColorHint="@color/edittext_hint_color"
                 android:textCursorDrawable="@null"
                 validator:emptyErrorString="@string/empty_author_name_error" />
-        </android.support.design.widget.TextInputLayout>
+        </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 
         <ImageView
             android:id="@+id/bookIMG"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/authorETFloating" />
-    </RelativeLayout>
+            android:layout_height="match_parent" />
+    </LinearLayout>
 
-    <com.getbase.floatingactionbutton.FloatingActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/doneBTN"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        fab:fab_colorNormal="@color/white"
-        fab:fab_colorPressed="@color/yellow"
-        fab:fab_colorRipple="@color/yellow"
-        fab:fab_icon="@drawable/check_done" />
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_done_black"
+        app:backgroundTint="@color/white"
+        app:borderWidth="0dp"
+        app:elevation="6dp"
+        app:fabSize="normal" />
 
     <ImageView
         android:id="@+id/scanBTN"

@@ -25,8 +25,10 @@
     <string name="sharing_message">I used Snipit to take this, have a look!</string>
 
     <!-- NAVDRAWER -->
-    <string name="navdrawer_favorite_bookmarks_item">Favorite Bookmarks</string>
-    <string name="navdrawer_trash_item">Trash</string>
+    <string name="navdrawer_favorite_bookmarks_item_primary">Favorites</string>
+    <string name="navdrawer_favorite_bookmarks_item_secondary">Your favorite snippets</string>
+    <string name="navdrawer_snippets_gallery_primary">Gallery</string>
+    <string name="navdrawer_snippets_gallery_secondary">View all snippets</string>
     <string name="navdrawer_upgrade_premium_item">Upgrade to Premium</string>
     <string name="navdrawer_settings_item">Settings</string>
     <string name="navigation_drawer_open"></string>
@@ -68,13 +70,13 @@
     <string name="sort_action_by_name">Sort by Name</string>
     <string name="sort_action_by_date">Sort by Views</string>
     <string name="sort_order_override">Sorting preference override. Restoring previous order.</string>
-    <string name="empty_bookmarks_layout_hint">Bookmarks you add appear here</string>
+    <string name="empty_bookmarks_layout_hint">Snippets you add appear here</string>
     <string name="delete_bookmark_confirmation_message">Deleted</string>
 
     <!-- CREATE_BOOKMARK_ACTIVITY -->
-    <string name="create_bookmark_activity_title">New Bookmark</string>
-    <string name="edit_bookmark_activity_title">Edit Bookmark</string>
-    <string name="bookmark_name">Bookmark Name</string>
+    <string name="create_bookmark_activity_title">New Snippet</string>
+    <string name="edit_bookmark_activity_title">Edit Snippet</string>
+    <string name="bookmark_name">Snippet Name</string>
     <string name="bookmark_page">Page</string>
     <string name="page_number_error">Invalid page number</string>
     <string name="empty_bookmark_name_error">Give it a good name</string>
@@ -128,15 +130,18 @@
     <string name="menu_action_save">SAVE</string>
     <string name="alert_dialog_save_action">Save</string>
     <string name="alert_dialog_save_title">Are you sure?</string>
-    <string name="bookmark_updated_successfully">Bookmark updated successfully, wonderful!</string>
-    <string name="bookmark_failed_update">Couldn\'t update bookmark, please try that again!</string>
-    <string name="bookmark_update_message">This will permanently overwrite the original bookmark</string>
+    <string name="bookmark_updated_successfully">Snippet updated successfully, wonderful!</string>
+    <string name="bookmark_failed_update">Couldn\'t update snippet, please try that again!</string>
+    <string name="bookmark_update_message">This will permanently overwrite the original snippet</string>
+
+    <!-- ALL SNIPPETS ACTIVITY-->
+    <string name="all_snippets_activity_title">Snippets</string>
 
     <string name="create_book_showcase_title">No books yet!</string>
     <string name="create_book_showcase_description">\nAdd a new book to get started</string>
 
-    <string name="create_bookmark_showcase_title">No bookmarks yet!</string>
-    <string name="create_bookmark_showcase_description">\nAdd a new bookmark to get started</string>
+    <string name="create_bookmark_showcase_title">No snippets yet!</string>
+    <string name="create_bookmark_showcase_description">\nAdd a new snippet to get started</string>
 
     <!-- ABOUT OPEN SOURCE LIBRARIES ACTIVITY -->
     <string name="about_open_source_libraries_activity_title">Open Source Libraries</string>

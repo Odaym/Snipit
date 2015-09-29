@@ -5,11 +5,11 @@ import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "Bookmark")
 
-public class Bookmark {
+public class Snippet {
 
     @DatabaseField(generatedId = true)
     int id;
-    @DatabaseField
+    @DatabaseField (index = true)
     int book_id;
     @DatabaseField
     String name;
@@ -32,7 +32,7 @@ public class Bookmark {
     @DatabaseField
     int isNoteShowing;
 
-    public Bookmark() {
+    public Snippet() {
     }
 
     public int getId() {
