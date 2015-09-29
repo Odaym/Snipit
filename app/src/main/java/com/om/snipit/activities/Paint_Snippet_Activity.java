@@ -1,6 +1,7 @@
 package com.om.snipit.activities;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -318,6 +319,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
         private int bookmark_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1);
         private Snippet snippetBeingPainted = bookmarkDAO.queryForId(bookmark_id);
         private Bitmap mBitmapOriginal, mBitmapNew;
+        private ProgressDialog savePaintedSnippetDialog;
 
         @Override
         protected void onPreExecute() {
@@ -331,6 +333,9 @@ public class Paint_Snippet_Activity extends Base_Activity {
                 floatingActionsMenu.collapse();
             if (floatingColorsMenu.isExpanded())
                 floatingColorsMenu.collapse();
+
+            savePaintedSnippetDialog = ProgressDialog.show(Paint_Snippet_Activity.this, getResources().getString(R.string.save_painted_bookmark_dialog_title),
+                    getResources().getString(R.string.save_painted_bookmark_dialog_message), true);
 
             mBitmapOriginal = ((BitmapDrawable) bookmarkIMG.getDrawable()).getBitmap();
             mBitmapNew = canvasView.getScaleBitmap(mBitmapOriginal.getWidth(), mBitmapOriginal.getHeight());
@@ -369,8 +374,12 @@ public class Paint_Snippet_Activity extends Base_Activity {
                 helperMethods.hideViewElement(savingBookmarkGIF);
                 helperMethods.showViewElement(bookmarkIMG);
                 helperMethods.showViewElement(canvasView);
+
+                savePaintedSnippetDialog.dismiss();
             } else {
                 FlurryAgent.logEvent("Bookmark_Paint");
+
+                savePaintedSnippetDialog.dismiss();
 
                 finish();
             }

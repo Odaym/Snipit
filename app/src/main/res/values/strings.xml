@@ -56,8 +56,6 @@
 
     <!-- BOOKS_ACTIVITY -->
     <string name="empty_books_layout_hint">Books you add appear here</string>
-    <string name="downloading_books_loader_title">Just a second</string>
-    <string name="downloading_books_loader_message">Downloading sample books…</string>
     <string name="delete_book_confirmation_message">Deleted</string>
 
     <!-- BOOKMARKS_ACTIVITY -->
@@ -133,6 +131,8 @@
     <string name="bookmark_updated_successfully">Snippet updated successfully, wonderful!</string>
     <string name="bookmark_failed_update">Couldn\'t update snippet, please try that again!</string>
     <string name="bookmark_update_message">This will permanently overwrite the original snippet</string>
+    <string name="save_painted_bookmark_dialog_title">Just a moment</string>
+    <string name="save_painted_bookmark_dialog_message">Updating snippet…</string>
 
     <!-- ALL SNIPPETS ACTIVITY-->
     <string name="all_snippets_activity_title">Snippets</string>
