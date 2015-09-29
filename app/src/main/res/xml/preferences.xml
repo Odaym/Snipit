@@ -14,7 +14,7 @@
         android:key="pref_key_tutorial"
         android:title="@string/pref_tutorial_section_title">
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="pref_key_tutorial_mode"
             android:summary="@string/pref_tutorial_summary"
             android:title="@string/pref_tutorial_title" />

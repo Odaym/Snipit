@@ -275,7 +275,7 @@ public class Create_Book_Activity extends Base_Activity {
 
     @DebugLog
     public void showScanBookHintShowcase() {
-        final Param createBookTutorialParam = paramDAO.queryForId(Constants.SEEN_CREATE_BOOK_TUTORIAL_DATABASE_VALUE);
+        final Param createBookTutorialParam = paramDAO.queryForId(Constants.CREATE_BOOK_TUTORIAL_DATABASE_VALUE_ENABLED);
         if (createBookTutorialParam.isEnabled()) {
 
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);

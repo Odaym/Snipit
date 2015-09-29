@@ -22,22 +22,19 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
-import com.bumptech.glide.Glide;
 import com.flurry.android.FlurryAgent;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.atomic.R;
-import com.om.snipit.classes.Snippet;
 import com.om.snipit.classes.CanvasView;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
+import com.om.snipit.classes.Snippet;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -53,7 +50,6 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
-import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import hugo.weaving.DebugLog;
 
 public class Paint_Snippet_Activity extends Base_Activity {
@@ -77,8 +73,6 @@ public class Paint_Snippet_Activity extends Base_Activity {
     FloatingActionButton fabActionUndo;
     @InjectView(R.id.fab_action_thickness)
     FloatingActionButton fabActionThickness;
-    @InjectView(R.id.savingBookmarkProgressBar)
-    SmoothProgressBar savingBookmarkProgressBar;
 
     private SharedPreferences prefs;
     private SharedPreferences.Editor prefsEditor;
@@ -263,22 +257,18 @@ public class Paint_Snippet_Activity extends Base_Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_action_save:
-                if (savingBookmarkProgressBar.isShown())
-                    return false;
-                else {
-                    new AlertDialog.Builder(Paint_Snippet_Activity.this)
-                            .setTitle(R.string.alert_dialog_save_title)
-                            .setMessage(R.string.bookmark_update_message)
-                            .setPositiveButton(R.string.alert_dialog_save_action, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                    new SavePaintedBookmark_Task().execute();
-                                }
-                            })
-                            .setNegativeButton(R.string.cancel, null)
-                            .show();
-                }
+                new AlertDialog.Builder(Paint_Snippet_Activity.this)
+                        .setTitle(R.string.alert_dialog_save_title)
+                        .setMessage(R.string.bookmark_update_message)
+                        .setPositiveButton(R.string.alert_dialog_save_action, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                new SavePaintedBookmark_Task().execute();
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -327,99 +317,35 @@ public class Paint_Snippet_Activity extends Base_Activity {
         private Helper_Methods helperMethods;
         private int bookmark_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1);
         private Snippet snippetBeingPainted = bookmarkDAO.queryForId(bookmark_id);
+        private Bitmap mBitmapOriginal, mBitmapNew;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            savingBookmarkProgressBar.setVisibility(View.VISIBLE);
 
             canvasView.setClickable(false);
 
             helperMethods = new Helper_Methods(Paint_Snippet_Activity.this);
 
-
-            //At the time of easter egg paint-times counter - 1, give Glide a chance to load the GIF behind the bookmark image
-            if (snippetBeingPainted.getTimes_painted() == 3) {
-                Glide.with(Paint_Snippet_Activity.this).load(R.raw.thumbs_up_computer_kid).asGif().into(savingBookmarkGIF);
-            }
-
-            //At the time of easter egg paint-counter, hide the bookmark image to reveal the running GIF
-            if (snippetBeingPainted.getTimes_painted() == 4) {
-
-                ObjectAnimator hideBookmarkIMGAnim = helperMethods.hideViewElement(bookmarkIMG);
-
-                hideBookmarkIMGAnim.addListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-
-                        ObjectAnimator showSavingBookmarkGIFAnim = helperMethods.showViewElement(savingBookmarkGIF);
-
-                        showSavingBookmarkGIFAnim.addListener(new Animator.AnimatorListener() {
-                            @Override
-                            public void onAnimationStart(Animator animation) {
-                                canvasView.setVisibility(View.INVISIBLE);
-
-                                Glide.with(Paint_Snippet_Activity.this).load(R.raw.thumbs_up_computer_kid).asGif().into(savingBookmarkGIF);
-                            }
-
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-
-                            }
-
-                            @Override
-                            public void onAnimationCancel(Animator animation) {
-
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animator animation) {
-
-                            }
-                        });
-
-                        showSavingBookmarkGIFAnim.start();
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animator animation) {
-
-                    }
-                });
-
-                hideBookmarkIMGAnim.start();
-            }
-
             if (floatingActionsMenu.isExpanded())
                 floatingActionsMenu.collapse();
             if (floatingColorsMenu.isExpanded())
                 floatingColorsMenu.collapse();
+
+            mBitmapOriginal = ((BitmapDrawable) bookmarkIMG.getDrawable()).getBitmap();
+            mBitmapNew = canvasView.getScaleBitmap(mBitmapOriginal.getWidth(), mBitmapOriginal.getHeight());
         }
 
         @Override
         protected Boolean doInBackground(String... strings) {
             try {
-                Bitmap mBitmap1 = ((BitmapDrawable) bookmarkIMG.getDrawable()).getBitmap();
-
-                Bitmap mBitmap2 = canvasView.getScaleBitmap(mBitmap1.getWidth(), mBitmap1.getHeight());
-
-                Bitmap mCBitmap = Bitmap.createBitmap(mBitmap1.getWidth(), mBitmap1.getHeight(), mBitmap1.getConfig());
+                Bitmap mCBitmap = Bitmap.createBitmap(mBitmapOriginal.getWidth(), mBitmapOriginal.getHeight(), mBitmapOriginal.getConfig());
 
                 Canvas tCanvas = new Canvas(mCBitmap);
 
-                tCanvas.drawBitmap(mBitmap1, 0, 0, null);
+                tCanvas.drawBitmap(mBitmapOriginal, 0, 0, null);
 
-                tCanvas.drawBitmap(mBitmap2, 0, 0, null);
+                tCanvas.drawBitmap(mBitmapNew, 0, 0, null);
 
                 String finalImagePathAfterPaint = storeImage(mCBitmap);
 
@@ -440,20 +366,11 @@ public class Paint_Snippet_Activity extends Base_Activity {
         protected void onPostExecute(Boolean errorSaving) {
             if (errorSaving) {
                 Crouton.makeText(Paint_Snippet_Activity.this, getResources().getString(R.string.bookmark_failed_update), Style.ALERT).show();
-                savingBookmarkProgressBar.setVisibility(View.INVISIBLE);
                 helperMethods.hideViewElement(savingBookmarkGIF);
                 helperMethods.showViewElement(bookmarkIMG);
                 helperMethods.showViewElement(canvasView);
             } else {
                 FlurryAgent.logEvent("Bookmark_Paint");
-
-                int times_painted = snippetBeingPainted.getTimes_painted();
-
-                snippetBeingPainted.setTimes_painted(times_painted + 1);
-
-                bookmarkDAO.update(snippetBeingPainted);
-
-                savingBookmarkProgressBar.setVisibility(View.INVISIBLE);
 
                 finish();
             }

@@ -101,7 +101,7 @@ public class Books_Activity extends Base_Activity {
 
     private DatabaseHelper databaseHelper = null;
     private RuntimeExceptionDao<Book, Integer> bookDAO;
-    private RuntimeExceptionDao<Snippet, Integer> bookmarkDAO;
+    private RuntimeExceptionDao<Snippet, Integer> snipitDAO;
     private RuntimeExceptionDao<Param, Integer> paramDAO;
 
     private QueryBuilder<Book, Integer> bookQueryBuilder;
@@ -140,11 +140,11 @@ public class Books_Activity extends Base_Activity {
         Helper_Methods helperMethods = new Helper_Methods(this);
 
         bookDAO = getHelper().getBookDAO();
-        bookmarkDAO = getHelper().getSnipitDAO();
+        snipitDAO = getHelper().getSnipitDAO();
         paramDAO = getHelper().getParamDAO();
 
         bookQueryBuilder = bookDAO.queryBuilder();
-        bookmarkQueryBuilder = bookmarkDAO.queryBuilder();
+        bookmarkQueryBuilder = snipitDAO.queryBuilder();
 
         ButterKnife.inject(this);
 
@@ -273,9 +273,6 @@ public class Books_Activity extends Base_Activity {
         createNewBookBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (createBookShowcase != null)
-                    createBookShowcase.hide();
-
                 Intent openCreateBookActivity = new Intent(Books_Activity.this, Create_Book_Activity.class);
                 startActivity(openCreateBookActivity);
             }
@@ -354,6 +351,9 @@ public class Books_Activity extends Base_Activity {
 
         switch (ebpMessage) {
             case "book_added":
+                if (createBookShowcase != null)
+                    createBookShowcase.hide();
+
                 handleBusEvents_ListRefresher();
                 Log.d("EVENTS", "book_added - Books_Activity");
                 break;
@@ -458,7 +458,7 @@ public class Books_Activity extends Base_Activity {
                 public void onClick(View view) {
                     createBookShowcase.hide();
 
-                    Param bookTutorialParam = paramDAO.queryForId(Constants.SEEN_BOOK_TUTORIAL_DATABASE_VALUE);
+                    Param bookTutorialParam = paramDAO.queryForId(Constants.BOOK_TUTORIAL_DATABASE_VALUE_ENABLED);
                     bookTutorialParam.setEnabled(false);
                     paramDAO.update(bookTutorialParam);
 
@@ -472,7 +472,7 @@ public class Books_Activity extends Base_Activity {
     public void handleEmptyUI() {
         //Books are empty and the coachmark has been dismissed
 
-        Param bookTutorialParam = paramDAO.queryForId(Constants.SEEN_BOOK_TUTORIAL_DATABASE_VALUE);
+        Param bookTutorialParam = paramDAO.queryForId(Constants.BOOK_TUTORIAL_DATABASE_VALUE_ENABLED);
 
         if (bookDAO.queryForAll().isEmpty() && !bookTutorialParam.isEnabled()) {
             emptyListLayout.setVisibility(View.VISIBLE);
@@ -602,7 +602,7 @@ public class Books_Activity extends Base_Activity {
     }
 
     public void finalizeBookDeletion(Book tempBook) {
-        bookmarkDAO.delete(bookmarkDAO.queryForEq("book_id", tempBook.getId()));
+        snipitDAO.delete(snipitDAO.queryForEq("book_id", tempBook.getId()));
         bookDAO.delete(tempBook);
         prepareForNotifyDataChanged();
         booksAdapter.notifyDataSetChanged();
@@ -755,7 +755,7 @@ public class Books_Activity extends Base_Activity {
                                         try {
                                             bookmarkQueryBuilder.where().eq("book_id", tempBook.getId());
                                             pq = bookmarkQueryBuilder.prepare();
-                                            bookmarkDAO.delete(bookmarkDAO.query(pq));
+                                            snipitDAO.delete(snipitDAO.query(pq));
                                         } catch (SQLException e) {
                                             e.printStackTrace();
                                         }
@@ -788,7 +788,7 @@ public class Books_Activity extends Base_Activity {
                 }
             });
 
-            snippets = bookmarkDAO.queryForEq("book_id", books.get(position).getId());
+            snippets = snipitDAO.queryForEq("book_id", books.get(position).getId());
             holder.bookmarksNumberTV.setText(snippets.size() + "");
 
             return parentView;

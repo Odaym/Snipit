@@ -38,10 +38,10 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
             TableUtils.createTable(connectionSource, Param.class);
 
             paramRuntimeDAO = getParamDAO();
-            paramRuntimeDAO.createIfNotExists(new Param(Constants.SEEN_BOOK_TUTORIAL_DATABASE_VALUE, false));
-            paramRuntimeDAO.createIfNotExists(new Param(Constants.SEEN_SNIPIT_TUTORIAL_DATABASE_VALUE, false));
-            paramRuntimeDAO.createIfNotExists(new Param(Constants.SEEN_CREATE_BOOK_TUTORIAL_DATABASE_VALUE, false));
-            paramRuntimeDAO.createIfNotExists(new Param(Constants.TUTORIAL_MODE_DATABASE_VALUE, false));
+            paramRuntimeDAO.createIfNotExists(new Param(Constants.BOOK_TUTORIAL_DATABASE_VALUE_ENABLED, true));
+            paramRuntimeDAO.createIfNotExists(new Param(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED, true));
+            paramRuntimeDAO.createIfNotExists(new Param(Constants.CREATE_BOOK_TUTORIAL_DATABASE_VALUE_ENABLED, true));
+            paramRuntimeDAO.createIfNotExists(new Param(Constants.TUTORIAL_MODE_DATABASE_VALUE, true));
             paramRuntimeDAO.createIfNotExists(new Param(Constants.ANIMATIONS_DATABASE_VALUE, false));
 
         } catch (SQLException e) {

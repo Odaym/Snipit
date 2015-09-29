@@ -215,9 +215,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         createNewBookmarkBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (createBookmarkShowcase != null)
-                    createBookmarkShowcase.hide();
-
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                     File photoFile = null;
@@ -385,6 +382,9 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 Log.d("EVENTS", "bookmark_viewed - Bookmarks_Activity");
                 break;
             case "bookmark_added_bookmarks_activity":
+                if (createBookmarkShowcase != null)
+                    createBookmarkShowcase.hide();
+
                 prepareForNotifyDataChanged(book_id);
                 bookmarksAdapter.notifyDataSetChanged();
                 Log.d("EVENTS", "bookmark_added_bookmarks_activity - Bookmarks_Activity");
@@ -505,7 +505,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     @DebugLog
     public void showCreateBookmarkShowcase() {
         //When a bookmark is deleted from inside Search Results Activity, leading up to this Activity having zero bookmarks and causing the coachmark to appear when the activity is not in focus. So make sure it is in focus first
-        final Param bookmarkTutorialParam = paramDAO.queryForId(Constants.SEEN_SNIPIT_TUTORIAL_DATABASE_VALUE);
+        final Param bookmarkTutorialParam = paramDAO.queryForId(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED);
 
         if (bookmarkTutorialParam.isEnabled()) {
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -546,7 +546,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     public void handleEmptyUI(List<Snippet> snippets) {
         if (!inSearchMode) {
             //Books are empty and the coachmark has been dismissed
-            final Param bookmarkTutorialParam = paramDAO.queryForId(Constants.SEEN_SNIPIT_TUTORIAL_DATABASE_VALUE);
+            final Param bookmarkTutorialParam = paramDAO.queryForId(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED);
 
             prepareQueryBuilder(book_id);
 

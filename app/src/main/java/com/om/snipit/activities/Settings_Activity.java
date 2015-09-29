@@ -160,33 +160,33 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
             case "pref_key_tutorial_mode":
                 Param tutorialParam = paramDAO.queryForId(Constants.TUTORIAL_MODE_DATABASE_VALUE);
 
-                Param seenBookParam = paramDAO.queryForId(Constants.SEEN_BOOK_TUTORIAL_DATABASE_VALUE);
-                Param seenBookmarkParam = paramDAO.queryForId(Constants.SEEN_SNIPIT_TUTORIAL_DATABASE_VALUE);
-                Param seenCreateBookParam = paramDAO.queryForId(Constants.SEEN_CREATE_BOOK_TUTORIAL_DATABASE_VALUE);
+                Param bookTutorialParam = paramDAO.queryForId(Constants.BOOK_TUTORIAL_DATABASE_VALUE_ENABLED);
+                Param snippetTutorialParam = paramDAO.queryForId(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED);
+                Param createBookTutorialParam = paramDAO.queryForId(Constants.CREATE_BOOK_TUTORIAL_DATABASE_VALUE_ENABLED);
 
                 if (sharedPreferences.getBoolean("pref_key_tutorial_mode", true)) {
                     FlurryAgent.logEvent("Tutorial_Mode_ON");
 
                     //Set all coachmarks to Unseen
-                    seenBookParam.setEnabled(true);
-                    seenBookmarkParam.setEnabled(true);
-                    seenCreateBookParam.setEnabled(true);
+                    bookTutorialParam.setEnabled(true);
+                    snippetTutorialParam.setEnabled(true);
+                    createBookTutorialParam.setEnabled(true);
 
                     tutorialParam.setEnabled(true);
                 } else {
                     FlurryAgent.logEvent("Tutorial_Mode_OFF");
 
                     //Set all coachmarks to Seen
-                    seenBookParam.setEnabled(false);
-                    seenBookmarkParam.setEnabled(false);
-                    seenCreateBookParam.setEnabled(false);
+                    bookTutorialParam.setEnabled(false);
+                    snippetTutorialParam.setEnabled(false);
+                    createBookTutorialParam.setEnabled(false);
 
                     tutorialParam.setEnabled(false);
                 }
 
-                paramDAO.update(seenBookParam);
-                paramDAO.update(seenBookmarkParam);
-                paramDAO.update(seenCreateBookParam);
+                paramDAO.update(bookTutorialParam);
+                paramDAO.update(snippetTutorialParam);
+                paramDAO.update(createBookTutorialParam);
 
                 paramDAO.update(tutorialParam);
 

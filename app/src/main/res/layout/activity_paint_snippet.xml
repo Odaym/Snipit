@@ -33,25 +33,6 @@
             android:layout_alignTop="@+id/bookmarkIMG" />
     </RelativeLayout>
 
-    <fr.castorflex.android.smoothprogressbar.SmoothProgressBar xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/savingBookmarkProgressBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:indeterminate="true"
-        android:visibility="gone"
-        app:spb_colors="@array/saveBookmarkProgressBarColors"
-        app:spb_interpolator="spb_interpolator_accelerate"
-        app:spb_mirror_mode="false"
-        app:spb_progressiveStart_activated="true"
-        app:spb_progressiveStart_speed="2.0"
-        app:spb_progressiveStop_speed="4.5"
-        app:spb_reversed="false"
-        app:spb_sections_count="4"
-        app:spb_speed="4.0"
-        app:spb_stroke_separator_length="7dp"
-        app:spb_stroke_width="4dp" />
-
     <ProgressBar
         android:id="@+id/imageProgressBar"
         android:layout_width="wrap_content"
