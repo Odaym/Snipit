@@ -350,6 +350,9 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (resultCode != RESULT_OK)
+            return;
+
         switch (requestCode) {
             case REQUEST_IMAGE_CAPTURE:
                 if (photoFile == null)
