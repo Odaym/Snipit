@@ -3,8 +3,7 @@ package com.om.snipit.classes;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-@DatabaseTable(tableName = "Bookmark")
-//@DatabaseTable(tableName = "Snipit")
+@DatabaseTable(tableName = "Snipit")
 
 public class Snippet {
 
