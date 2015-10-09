@@ -54,8 +54,7 @@ import com.nineoldandroids.animation.ObjectAnimator;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.nispok.snackbar.listeners.EventListener;
-import com.om.atomic.R;
-import com.om.snipit.classes.Book;
+import com.om.snipit.R;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
@@ -85,6 +84,8 @@ import java.util.Locale;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 
@@ -92,20 +93,19 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
-    @InjectView(R.id.createNewBookmarkBTN)
-    FloatingActionButton createNewBookmarkBTN;
+    @InjectView(R.id.createNewSnippetBTN)
+    FloatingActionButton createNewSnippetBTN;
     @InjectView(R.id.emptyListLayout)
     RelativeLayout emptyListLayout;
-    @InjectView(R.id.bookmarksList)
+    @InjectView(R.id.snippetsList)
     DragSortListView listView;
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
 
     private DatabaseHelper databaseHelper;
-    private QueryBuilder<Snippet, Integer> bookmarkQueryBuilder;
+    private QueryBuilder<Snippet, Integer> snippetQueryBuilder;
     private PreparedQuery<Snippet> pq;
-    private RuntimeExceptionDao<Book, Integer> bookDAO;
-    private RuntimeExceptionDao<Snippet, Integer> bookmarkDAO;
+    private RuntimeExceptionDao<Snippet, Integer> snippetDAO;
     private RuntimeExceptionDao<Param, Integer> paramDAO;
 
     private boolean inSearchMode = false;
@@ -117,37 +117,37 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
     private SearchView searchView;
 
+    private Snippets_Adapter snippetsAdapter;
+    private int book_id;
+
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
                 @Override
                 public void drop(int from, int to) {
-                    bookmarksAdapter.notifyDataSetChanged();
+                    snippetsAdapter.notifyDataSetChanged();
                 }
             };
-
-    private Bookmarks_Adapter bookmarksAdapter;
-    private int book_id;
 
     private DragSortListView.DragListener onDrag = new DragSortListView.DragListener() {
         @Override
         public void drag(int from, int to) {
-            bookmarksAdapter.swap(from, to);
+            snippetsAdapter.swap(from, to);
         }
     };
 
-    private Snackbar undoDeleteBookmarkSB;
+    private Snackbar undeleteSnippetSB;
     private boolean itemPendingDeleteDecision = false;
 
-    private final static int SHOW_CREATE_BOOKMARK_SHOWCASE = 1;
-    private final static int WAIT_DURATION_BFEORE_SHOW_BOOKMARK_SHOWCASE = 200;
+    private final static int SHOW_CREATE_SNIPPET_SHOWCASE = 1;
+    private final static int WAIT_DURATION_BFEORE_SHOW_SNIPPET_SHOWCASE = 200;
     private final static int WAIT_DURATION_BFEORE_HIDE_CLUTTER_ANIMATION = 200;
 
     private String book_title;
     private int book_color_code;
 
-    private ShowcaseView createBookmarkShowcase;
+    private ShowcaseView createSnippetShowcase;
     private List<Snippet> snippets;
-    private String mCurrentPhotoPath;
+    private File photoFile;
     private Uri photoFileUri;
     private Helper_Methods helperMethods;
     private Handler UIHandler;
@@ -163,8 +163,8 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    case SHOW_CREATE_BOOKMARK_SHOWCASE:
-                        showCreateBookmarkShowcase();
+                    case SHOW_CREATE_SNIPPET_SHOWCASE:
+                        showCreateSnippetShowcase();
                         break;
                 }
                 super.handleMessage(msg);
@@ -180,14 +180,12 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         helperMethods = new Helper_Methods(this);
 
-        bookmarkDAO = getHelper().getSnipitDAO();
+        snippetDAO = getHelper().getSnipitDAO();
         paramDAO = getHelper().getParamDAO();
 
-        bookmarkQueryBuilder = bookmarkDAO.queryBuilder();
+        snippetQueryBuilder = snippetDAO.queryBuilder();
 
         Helper_Methods helperMethods = new Helper_Methods(this);
-
-        mCurrentPhotoPath = constructImageFilename();
 
         book_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID);
         book_title = getIntent().getStringExtra(Constants.EXTRAS_BOOK_TITLE);
@@ -204,22 +202,22 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         prepareQueryBuilder(book_id);
 
-        snippets = bookmarkDAO.query(pq);
+        snippets = snippetDAO.query(pq);
 
         handleEmptyOrPopulatedScreen(snippets);
 
-        createNewBookmarkBTN.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(helperMethods.determineFabButtonsColor(book_color_code))));
+        createNewSnippetBTN.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(helperMethods.determineFabButtonsColor(book_color_code))));
 
-        createNewBookmarkBTN.invalidate();
+        createNewSnippetBTN.invalidate();
 
-        createNewBookmarkBTN.setOnClickListener(new View.OnClickListener() {
+        createNewSnippetBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    File photoFile = null;
+                    photoFile = null;
                     try {
-                        photoFile = createImageFile(mCurrentPhotoPath);
+                        photoFile = createImageFile(constructImageFilename());
                         photoFileUri = Uri.fromFile(photoFile);
                     } catch (IOException ex) {
                         ex.printStackTrace();
@@ -242,18 +240,18 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 if (snippet != null) {
                     if (snippet.getIsNoteShowing() == 0) {
                         /**
-                         * UPDATING BOOKMARK VIEWS HERE
+                         * UPDATING SNIPPET VIEWS HERE
                          */
-                        int bookmarkViews = bookmarkDAO.queryForId(snippet.getId()).getViews();
-                        snippet.setViews(bookmarkViews + 1);
-                        bookmarkDAO.update(snippet);
+                        int snippetViews = snippetDAO.queryForId(snippet.getId()).getViews();
+                        snippet.setViews(snippetViews + 1);
+                        snippetDAO.update(snippet);
 
                         Intent intent = new Intent(Snippets_Activity.this, View_Snippet_Activity.class);
                         intent.putExtra(Constants.EXTRAS_VIEWING_SNIPPETS_GALLERY, false);
                         intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
                         intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
                         intent.putExtra(Constants.EXTRAS_SEARCH_TERM, searchQueryForGlobalUse);
-                        intent.putExtra(Constants.EXTRAS_CURRENT_BOOKMARK_POSITION, position);
+                        intent.putExtra(Constants.EXTRAS_CURRENT_SNIPPET_POSITION, position);
                         startActivity(intent);
                     }
                 }
@@ -275,7 +273,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         MenuInflater inflater = getMenuInflater();
 
         if (!snippets.isEmpty()) {
-            inflater.inflate(R.menu.bookmarks_activity, menu);
+            inflater.inflate(R.menu.snippets_activity, menu);
 
             MenuItem byNumber = menu.getItem(1);
             SpannableString numberString = new SpannableString(byNumber.getTitle().toString());
@@ -328,22 +326,22 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 searchView.setIconified(false);
                 return true;
             case R.id.sort_by_name:
-                prepareSortedBookmarks(book_id, "name");
+                prepareSortedSnippets(book_id, "name");
                 prepareQueryBuilder(book_id);
-                snippets = bookmarkDAO.query(pq);
-                bookmarksAdapter.notifyDataSetChanged();
+                snippets = snippetDAO.query(pq);
+                snippetsAdapter.notifyDataSetChanged();
                 break;
             case R.id.sort_by_views:
-                prepareSortedBookmarks(book_id, "views");
+                prepareSortedSnippets(book_id, "views");
                 prepareQueryBuilder(book_id);
-                snippets = bookmarkDAO.query(pq);
-                bookmarksAdapter.notifyDataSetChanged();
+                snippets = snippetDAO.query(pq);
+                snippetsAdapter.notifyDataSetChanged();
                 break;
             case R.id.sort_page_number:
-                prepareSortedBookmarks(book_id, "page_number");
+                prepareSortedSnippets(book_id, "page_number");
                 prepareQueryBuilder(book_id);
-                snippets = bookmarkDAO.query(pq);
-                bookmarksAdapter.notifyDataSetChanged();
+                snippets = snippetDAO.query(pq);
+                snippetsAdapter.notifyDataSetChanged();
                 break;
         }
 
@@ -352,16 +350,17 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (resultCode != RESULT_OK)
-            return;
-
         switch (requestCode) {
             case REQUEST_IMAGE_CAPTURE:
-                Intent openCreateBookmark = new Intent(Snippets_Activity.this, Crop_Image_Activity.class);
-                openCreateBookmark.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
-                openCreateBookmark.putExtra(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, mCurrentPhotoPath);
-                openCreateBookmark.putExtra(Constants.EXTRAS_BOOK_COLOR, book_color_code);
-                startActivity(openCreateBookmark);
+                if (photoFile == null)
+                    Crouton.makeText(this, R.string.retake_picture_error, Style.ALERT).show();
+                else {
+                    Intent openCreateSnippet = new Intent(Snippets_Activity.this, Crop_Image_Activity.class);
+                    openCreateSnippet.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
+                    openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_IMAGE_PATH, photoFile.getAbsolutePath());
+                    openCreateSnippet.putExtra(Constants.EXTRAS_BOOK_COLOR, book_color_code);
+                    startActivity(openCreateSnippet);
+                }
                 break;
         }
     }
@@ -371,55 +370,35 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         String ebpMessage = ebp.getMessage();
 
         switch (ebpMessage) {
-            case "bookmark_favorited":
-                prepareForNotifyDataChanged(book_id);
-                bookmarksAdapter.notifyDataSetChanged();
-                Log.d("EVENTS", "bookmark_favorited - Bookmarks_Activity");
-                break;
-            case "bookmark_viewed":
-//                bookmarks = bookmarkDAO.query(pq);
-//                bookmarksAdapter.notifyDataSetChanged();
-                Log.d("EVENTS", "bookmark_viewed - Bookmarks_Activity");
-                break;
-            case "bookmark_added_bookmarks_activity":
-                if (createBookmarkShowcase != null)
-                    createBookmarkShowcase.hide();
+            case "snippet_added_snippets_activity":
+                if (createSnippetShowcase != null)
+                    createSnippetShowcase.hide();
 
                 prepareForNotifyDataChanged(book_id);
-                bookmarksAdapter.notifyDataSetChanged();
-                Log.d("EVENTS", "bookmark_added_bookmarks_activity - Bookmarks_Activity");
+                snippetsAdapter.notifyDataSetChanged();
+//                Log.d("EVENTS", "snippet_added_snippets_activity - Snippets_Activity");
                 break;
-            case "bookmark_deleted_bookmarks_activity":
+            case "snippet_deleted_snippets_activity":
                 prepareForNotifyDataChanged(book_id);
-                bookmarksAdapter.notifyDataSetChanged();
-                Log.d("EVENTS", "bookmark_deleted_bookmarks_activity - Bookmarks_Activity");
+                snippetsAdapter.notifyDataSetChanged();
+//                Log.d("EVENTS", "snippet_deleted_snippets_activity - Snippets_Activity");
                 break;
-            case "bookmark_image_updated":
+            case "snippet_image_updated":
                 Helper_Methods.delete_image_from_disk(ebp.getExtra());
                 prepareForNotifyDataChanged(book_id);
-                bookmarksAdapter.notifyDataSetChanged();
-                Log.d("EVENTS", "bookmark_image_updated - Bookmarks_Activity");
+                snippetsAdapter.notifyDataSetChanged();
+//                Log.d("EVENTS", "snippet_image_updated - Snippets_Activity");
                 break;
-            case "bookmark_name_page_edited":
+            case "snippet_name_page_edited":
                 prepareForNotifyDataChanged(book_id);
-                bookmarksAdapter.notifyDataSetChanged();
-                Log.d("EVENTS", "bookmark_name_page_edited - Bookmarks_Activity");
+                snippetsAdapter.notifyDataSetChanged();
+//                Log.d("EVENTS", "snippet_name_page_edited - Snippets_Activity");
                 break;
-            case "bookmark_note_changed":
+            case "snippet_note_changed":
                 prepareForNotifyDataChanged(book_id);
-                bookmarksAdapter.notifyDataSetChanged();
-                Log.d("EVENTS", "bookmark_note_changed - Bookmarks_Activity");
+                snippetsAdapter.notifyDataSetChanged();
+//                Log.d("EVENTS", "snippet_note_changed - Snippets_Activity");
                 break;
-//            if (ebp.getExtra() != null) {
-//                if (ebp.getExtra().equals("new_bookmark")) {
-//                    listView.smoothScrollToPosition(bookmarksAdapter.getCount() + 1, 0, 500);
-//                    YoYo.with(Techniques.Tada)
-//                            .duration(1500)
-//                            .playOn(bookmarksAdapter
-//                                    .getView(bookmarksAdapter.getCount() - 1, null, null));
-//                }
-//            }
-//                break;
         }
     }
 
@@ -429,7 +408,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         String imageFileName = "JPEG_" + timeStamp;
 
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "Atomic");
+                Environment.DIRECTORY_PICTURES), "Snipit");
 
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
@@ -449,20 +428,20 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     @DebugLog
     public void prepareForNotifyDataChanged(int book_id) {
         /**
-         * If a specific sorting order exists, follow that order when getting the bookmarks
+         * If a specific sorting order exists, follow that order when getting the snippets
          */
         if (!inSearchMode) {
             prepareQueryBuilder(book_id);
 
-            snippets = bookmarkDAO.query(pq);
+            snippets = snippetDAO.query(pq);
 
             handleEmptyUI(snippets);
         } else {
-            //Handle empty search results here, because this is the method that will be called when the bookmark is ACTUALLY deleted, the other method that just fakes the disappearance is handleEmptyUI
+            //Handle empty search results here, because this is the method that will be called when the snippet is ACTUALLY deleted, the other method that just fakes the disappearance is handleEmptyUI
 
             prepareSearchQueryBuilder(searchQueryForGlobalUse);
 
-            snippets = bookmarkDAO.query(pq);
+            snippets = snippetDAO.query(pq);
 
             if (snippets.isEmpty()) {
                 inSearchMode = false;
@@ -475,7 +454,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     public void handleEmptyOrPopulatedScreen(List<Snippet> snippets) {
         handleEmptyUI(snippets);
 
-        bookmarksAdapter = new Bookmarks_Adapter(this);
+        snippetsAdapter = new Snippets_Adapter(this);
 
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
@@ -487,75 +466,75 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         final LayoutAnimationController controller
                 = AnimationUtils.loadLayoutAnimation(
-                this, R.anim.bookmarks_list_layout_controller);
+                this, R.anim.snippets_list_layout_controller);
 
         // If animations are enabled
         Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
 
         if (animationsParam.isEnabled()) {
 //            listView.addHeaderView(listViewHeaderAd);
-            listView.setAdapter(bookmarksAdapter);
+            listView.setAdapter(snippetsAdapter);
             listView.setLayoutAnimation(controller);
         } else {
 //            listView.addHeaderView(listViewHeaderAd);
-            listView.setAdapter(bookmarksAdapter);
+            listView.setAdapter(snippetsAdapter);
         }
     }
 
     @DebugLog
-    public void showCreateBookmarkShowcase() {
-        //When a bookmark is deleted from inside Search Results Activity, leading up to this Activity having zero bookmarks and causing the coachmark to appear when the activity is not in focus. So make sure it is in focus first
-        final Param bookmarkTutorialParam = paramDAO.queryForId(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED);
+    public void showCreateSnippetShowcase() {
+        //When a snippet is deleted from inside Search Results Activity, leading up to this Activity having zero snippets and causing the coachmark to appear when the activity is not in focus. So make sure it is in focus first
+        final Param snippetTutorialParam = paramDAO.queryForId(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED);
 
-        if (bookmarkTutorialParam.isEnabled()) {
+        if (snippetTutorialParam.isEnabled()) {
             RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
             lps.setMargins(getResources().getDimensionPixelOffset(R.dimen.button_margin_left), 0, 0, getResources().getDimensionPixelOffset(R.dimen.button_margin_bottom));
 
-            ViewTarget target = new ViewTarget(R.id.createNewBookmarkBTN, Snippets_Activity.this);
+            ViewTarget target = new ViewTarget(R.id.createNewSnippetBTN, Snippets_Activity.this);
 
-            String showcaseTitle = getString(R.string.create_bookmark_showcase_title);
-            String showcaseDescription = getString(R.string.create_bookmark_showcase_description);
+            String showcaseTitle = getString(R.string.create_snippet_showcase_title);
+            String showcaseDescription = getString(R.string.create_snippet_showcase_description);
 
-            createBookmarkShowcase = new ShowcaseView.Builder(Snippets_Activity.this, getResources().getDimensionPixelSize(R.dimen.create_bookmark_showcase_inner_rad), getResources().getDimensionPixelSize(R.dimen.create_bookmark_showcase_outer_rad))
+            createSnippetShowcase = new ShowcaseView.Builder(Snippets_Activity.this, getResources().getDimensionPixelSize(R.dimen.create_snippet_showcase_inner_rad), getResources().getDimensionPixelSize(R.dimen.create_snippet_showcase_outer_rad))
                     .setTarget(target)
                     .setContentTitle(Helper_Methods.fontifyString(showcaseTitle))
                     .setContentText(Helper_Methods.fontifyString(showcaseDescription))
                     .setStyle(R.style.CustomShowcaseTheme)
                     .hasManualPosition(true)
-                    .xPostion(getResources().getDimensionPixelSize(R.dimen.create_bookmark_text_x))
-                    .yPostion(getResources().getDimensionPixelSize(R.dimen.create_bookmark_text_y))
+                    .xPostion(getResources().getDimensionPixelSize(R.dimen.create_snippet_text_x))
+                    .yPostion(getResources().getDimensionPixelSize(R.dimen.create_snippet_text_y))
                     .build();
-            createBookmarkShowcase.setButtonPosition(lps);
-            createBookmarkShowcase.findViewById(R.id.showcase_button).setOnClickListener(new View.OnClickListener() {
+            createSnippetShowcase.setButtonPosition(lps);
+            createSnippetShowcase.findViewById(R.id.showcase_button).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    createBookmarkShowcase.hide();
+                    createSnippetShowcase.hide();
 
-                    bookmarkTutorialParam.setEnabled(false);
-                    paramDAO.update(bookmarkTutorialParam);
+                    snippetTutorialParam.setEnabled(false);
+                    paramDAO.update(snippetTutorialParam);
 
                     handleEmptyUI(snippets);
                 }
             });
-            createBookmarkShowcase.show();
+            createSnippetShowcase.show();
         }
     }
 
     public void handleEmptyUI(List<Snippet> snippets) {
         if (!inSearchMode) {
             //Books are empty and the coachmark has been dismissed
-            final Param bookmarkTutorialParam = paramDAO.queryForId(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED);
+            final Param snippetTutorialParam = paramDAO.queryForId(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED);
 
             prepareQueryBuilder(book_id);
 
-            if (bookmarkDAO.query(pq).isEmpty() && !bookmarkTutorialParam.isEnabled()) {
+            if (snippetDAO.query(pq).isEmpty() && !snippetTutorialParam.isEnabled()) {
                 emptyListLayout.setVisibility(View.VISIBLE);
                 JumpingBeans.with((TextView) emptyListLayout.findViewById(R.id.emptyLayoutMessageTV)).appendJumpingDots().build();
-            } else if (bookmarkDAO.query(pq).isEmpty()) {
+            } else if (snippetDAO.query(pq).isEmpty()) {
                 emptyListLayout.setVisibility(View.GONE);
-                UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOKMARK_SHOWCASE, WAIT_DURATION_BFEORE_SHOW_BOOKMARK_SHOWCASE);
+                UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_SNIPPET_SHOWCASE, WAIT_DURATION_BFEORE_SHOW_SNIPPET_SHOWCASE);
             } else {
                 emptyListLayout.setVisibility(View.INVISIBLE);
             }
@@ -563,15 +542,15 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             invalidateOptionsMenu();
         } else {
             if (snippets.isEmpty()) {
-                //Bookmark was actually deleted, not just waiting for dismiss of Snackbar or leaving activity
+                //Snippet was actually deleted, not just waiting for dismiss of Snackbar or leaving activity
                 searchView.clearFocus();
                 invalidateOptionsMenu();
             }
         }
     }
 
-    private void deleteCell(final View bookmarkView, final int index) {
-        BookmarksViewHolder vh = (BookmarksViewHolder) bookmarkView.getTag();
+    private void deleteCell(final View snippetView, final int index) {
+        SnippetsViewHolder vh = (SnippetsViewHolder) snippetView.getTag();
         vh.needInflate = true;
 
         itemPendingDeleteDecision = true;
@@ -593,7 +572,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             }
         };
 
-        collapse(bookmarkView, collapseAL);
+        collapse(snippetView, collapseAL);
     }
 
     private void collapse(final View v, Animation.AnimationListener al) {
@@ -620,12 +599,12 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             anim.setAnimationListener(al);
         }
 
-        anim.setDuration(Constants.DELETE_BOOK_BOOKMARK_ANIMATION_DURATION);
+        anim.setDuration(Constants.DELETE_BOOK_SNIPPET_ANIMATION_DURATION);
         v.startAnimation(anim);
     }
 
     public void showUndeleteDialog(final Snippet tempSnippetToDelete) {
-        EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_deleted_books_activity"));
+        EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_deleted_books_activity"));
 
         tempSnippet = tempSnippetToDelete;
 
@@ -637,9 +616,9 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         snippets.remove(tempSnippetToDelete);
         handleEmptyUI(snippets);
-        bookmarksAdapter.notifyDataSetChanged();
+        snippetsAdapter.notifyDataSetChanged();
 
-        undoDeleteBookmarkSB =
+        undeleteSnippetSB =
                 Snackbar.with(getApplicationContext())
                         .actionLabel(R.string.undo_deletion_title)
                                 //So that we differentiate between explicitly dismissing the snackbar and having it go away due to pressing UNDO
@@ -663,7 +642,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                             @Override
                             public void onDismiss(Snackbar snackbar) {
                                 if (itemPendingDeleteDecision) {
-                                    finalizeBookmarkDeletion(tempSnippetToDelete);
+                                    finalizeSnippetDeletion(tempSnippetToDelete);
                                 }
                             }
 
@@ -678,21 +657,21 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                     @Override
                     public void onActionClicked(Snackbar snackbar) {
                         prepareForNotifyDataChanged(book_id);
-                        bookmarksAdapter.notifyDataSetChanged();
+                        snippetsAdapter.notifyDataSetChanged();
 
                         itemPendingDeleteDecision = false;
-                        undoDeleteBookmarkSB.dismiss();
+                        undeleteSnippetSB.dismiss();
                     }
                 });
 
-        undoDeleteBookmarkSB.show(Snippets_Activity.this);
+        undeleteSnippetSB.show(Snippets_Activity.this);
     }
 
-    public void finalizeBookmarkDeletion(Snippet tempSnippet) {
+    public void finalizeSnippetDeletion(Snippet tempSnippet) {
         Helper_Methods.delete_image_from_disk(tempSnippet.getImage_path());
-        bookmarkDAO.delete(tempSnippet);
+        snippetDAO.delete(tempSnippet);
         prepareForNotifyDataChanged(tempSnippet.getBookId());
-        bookmarksAdapter.notifyDataSetChanged();
+        snippetsAdapter.notifyDataSetChanged();
         itemPendingDeleteDecision = false;
     }
 
@@ -707,13 +686,13 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             if (!searchQuery.isEmpty()) {
                 searchQueryForGlobalUse = searchQuery;
                 prepareSearchQueryBuilder(searchQuery);
-                snippets = bookmarkDAO.query(pq);
+                snippets = snippetDAO.query(pq);
             } else {
                 prepareQueryBuilder(book_id);
-                snippets = bookmarkDAO.query(pq);
+                snippets = snippetDAO.query(pq);
             }
 
-            bookmarksAdapter.notifyDataSetChanged();
+            snippetsAdapter.notifyDataSetChanged();
         }
 
         return true;
@@ -721,26 +700,26 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
     public void prepareQueryBuilder(int book_id) {
         try {
-            bookmarkQueryBuilder.where().eq("book_id", book_id);
-            bookmarkQueryBuilder.orderBy("order", false);
-            pq = bookmarkQueryBuilder.prepare();
+            snippetQueryBuilder.where().eq("book_id", book_id);
+            snippetQueryBuilder.orderBy("order", false);
+            pq = snippetQueryBuilder.prepare();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void prepareSortedBookmarks(int book_id, String sortCriteria) {
+    public void prepareSortedSnippets(int book_id, String sortCriteria) {
         try {
-            bookmarkQueryBuilder.where().eq("book_id", book_id);
-            bookmarkQueryBuilder.orderBy(sortCriteria, false);
-            pq = bookmarkQueryBuilder.prepare();
+            snippetQueryBuilder.where().eq("book_id", book_id);
+            snippetQueryBuilder.orderBy(sortCriteria, false);
+            pq = snippetQueryBuilder.prepare();
 
-            List<Snippet> sortedSnippets = bookmarkDAO.query(pq);
+            List<Snippet> sortedSnippets = snippetDAO.query(pq);
 
             for (int i = 0; i < sortedSnippets.size(); i++) {
-                Log.d("SORT", "sortedBookmark " + sortedSnippets.get(i).getName());
+                Log.d("SORT", "sortedSnippet " + sortedSnippets.get(i).getName());
                 sortedSnippets.get(i).setOrder(i);
-                bookmarkDAO.update(sortedSnippets.get(i));
+                snippetDAO.update(sortedSnippets.get(i));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -752,8 +731,8 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             SelectArg nameSelectArg = new SelectArg("%" + searchQuery + "%");
             SelectArg noteSelectArg = new SelectArg("%" + searchQuery + "%");
 
-            bookmarkQueryBuilder.where().eq("book_id", book_id).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
-            pq = bookmarkQueryBuilder.prepare();
+            snippetQueryBuilder.where().eq("book_id", book_id).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
+            pq = snippetQueryBuilder.prepare();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -764,10 +743,10 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         super.onPause();
 
         if (itemPendingDeleteDecision) {
-            finalizeBookmarkDeletion(tempSnippet);
+            finalizeSnippetDeletion(tempSnippet);
 
-            if (undoDeleteBookmarkSB.isShowing()) {
-                undoDeleteBookmarkSB.dismiss();
+            if (undeleteSnippetSB.isShowing()) {
+                undeleteSnippetSB.dismiss();
             }
         }
     }
@@ -778,21 +757,21 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         EventBus_Singleton.getInstance().unregister(this);
     }
 
-    public class Bookmarks_Adapter extends BaseAdapter {
+    public class Snippets_Adapter extends BaseAdapter {
 
         private LayoutInflater inflater;
         private Context context;
-        private BookmarksViewHolder holder;
+        private SnippetsViewHolder holder;
         private PicassoImageLoadedCallback picassoImageLoadedCallback;
         private RoundedTransform roundedTransform;
 
-        public Bookmarks_Adapter(Context context) {
+        public Snippets_Adapter(Context context) {
             super();
             this.context = context;
             this.inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-            this.roundedTransform = new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.bookmark_image_shape_corners_padding_bottom));
+            this.roundedTransform = new RoundedTransform(context.getResources().getDimensionPixelSize(R.dimen.snippet_image_shape_corners_radius), context.getResources().getDimensionPixelSize(R.dimen.snippet_image_shape_corners_padding_bottom));
         }
 
         @Override
@@ -814,18 +793,18 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         public View getView(final int position, View convertView, final ViewGroup parent) {
             final View parentView;
 
-            if (convertView == null || ((BookmarksViewHolder) convertView.getTag()).needInflate) {
+            if (convertView == null || ((SnippetsViewHolder) convertView.getTag()).needInflate) {
                 parentView = inflater.inflate(R.layout.list_item_snippet, parent, false);
 
-                holder = new BookmarksViewHolder();
+                holder = new SnippetsViewHolder();
 
-                holder.bookmarkName = (AutofitTextView) parentView.findViewById(R.id.bookmarkNameTV);
-                holder.bookmarkActionLayout = (RelativeLayout) parentView.findViewById(R.id.bookmarkActionLayout);
-                holder.bookmarkIMG = (ImageView) parentView.findViewById(R.id.bookmarkIMG);
-                holder.bookmarkPageNumber = (TextView) parentView.findViewById(R.id.bookmarkPageNumberTV);
-                holder.bookmarkNoteBTN = (Button) parentView.findViewById(R.id.bookmarkNoteBTN);
-                holder.bookmarkNoteTV = (AutofitTextView) parentView.findViewById(R.id.bookmarkNoteTV);
-                holder.motherView = (RelativeLayout) parentView.findViewById(R.id.list_item_bookmark);
+                holder.snippetName = (AutofitTextView) parentView.findViewById(R.id.snippetNameTV);
+                holder.snippetActionLayout = (RelativeLayout) parentView.findViewById(R.id.snippetActionLayout);
+                holder.snippetIMG = (ImageView) parentView.findViewById(R.id.snippetIMG);
+                holder.snippetPageNumber = (TextView) parentView.findViewById(R.id.snippetPageNumberTV);
+                holder.snippetNoteBTN = (Button) parentView.findViewById(R.id.snippetNoteBTN);
+                holder.snippetNoteTV = (AutofitTextView) parentView.findViewById(R.id.snippetNoteTV);
+                holder.motherView = (RelativeLayout) parentView.findViewById(R.id.list_item_snippet);
                 holder.imageProgressLoader = (ProgressBar) parentView.findViewById(R.id.imageProgressLoader);
                 holder.needInflate = false;
 
@@ -850,13 +829,13 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 parentView = convertView;
             }
 
-            holder = (BookmarksViewHolder) parentView.getTag();
+            holder = (SnippetsViewHolder) parentView.getTag();
 
-            //If the bookmark doesn't have a note
+            //If the snippet doesn't have a note
             if (TextUtils.isEmpty(snippets.get(position).getNote())) {
-                holder.bookmarkNoteBTN.setVisibility(View.INVISIBLE);
+                holder.snippetNoteBTN.setVisibility(View.INVISIBLE);
             } else {
-                holder.bookmarkNoteBTN.setVisibility(View.VISIBLE);
+                holder.snippetNoteBTN.setVisibility(View.VISIBLE);
             }
 
             GradientDrawable gradient;
@@ -872,51 +851,51 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             if (snippets.get(position).getIsNoteShowing() == 0) {
                 gradient.setColor(context.getResources().getColor(R.color.white));
 
-                holder.bookmarkActionLayout.setAlpha(1f);
-                holder.bookmarkActionLayout.setVisibility(View.VISIBLE);
-                holder.bookmarkIMG.setAlpha(1f);
-                holder.bookmarkIMG.setVisibility(View.VISIBLE);
-                holder.bookmarkPageNumber.setAlpha(1f);
-                holder.bookmarkPageNumber.setVisibility(View.VISIBLE);
-                holder.bookmarkName.setVisibility(View.VISIBLE);
-                holder.bookmarkName.setAlpha(1f);
+                holder.snippetActionLayout.setAlpha(1f);
+                holder.snippetActionLayout.setVisibility(View.VISIBLE);
+                holder.snippetIMG.setAlpha(1f);
+                holder.snippetIMG.setVisibility(View.VISIBLE);
+                holder.snippetPageNumber.setAlpha(1f);
+                holder.snippetPageNumber.setVisibility(View.VISIBLE);
+                holder.snippetName.setVisibility(View.VISIBLE);
+                holder.snippetName.setAlpha(1f);
                 holder.imageProgressLoader.setAlpha(1f);
-                holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
+                holder.snippetNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
             } else {
                 gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
 
-                holder.bookmarkNoteTV.setText(snippets.get(position).getNote());
-                holder.bookmarkActionLayout.setVisibility(View.INVISIBLE);
-                holder.bookmarkIMG.setVisibility(View.INVISIBLE);
-                holder.bookmarkPageNumber.setVisibility(View.INVISIBLE);
-                holder.bookmarkName.setVisibility(View.INVISIBLE);
-                holder.bookmarkNoteTV.setVisibility(View.VISIBLE);
+                holder.snippetNoteTV.setText(snippets.get(position).getNote());
+                holder.snippetActionLayout.setVisibility(View.INVISIBLE);
+                holder.snippetIMG.setVisibility(View.INVISIBLE);
+                holder.snippetPageNumber.setVisibility(View.INVISIBLE);
+                holder.snippetName.setVisibility(View.INVISIBLE);
+                holder.snippetNoteTV.setVisibility(View.VISIBLE);
                 holder.imageProgressLoader.setVisibility(View.VISIBLE);
-                holder.bookmarkNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
+                holder.snippetNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
             }
 
-            holder.bookmarkName.setText(snippets.get(position).getName());
+            holder.snippetName.setText(snippets.get(position).getName());
 
-            if (snippets.get(position).getPage_number() == Constants.NO_BOOKMARK_PAGE_NUMBER)
-                holder.bookmarkPageNumber.setVisibility(View.INVISIBLE);
+            if (snippets.get(position).getPage_number() == Constants.NO_SNIPPET_PAGE_NUMBER)
+                holder.snippetPageNumber.setVisibility(View.INVISIBLE);
             else
-                holder.bookmarkPageNumber.setText(context.getResources().getText(R.string.bookmark_page_number_label) + " " + snippets.get(position).getPage_number());
+                holder.snippetPageNumber.setText(context.getResources().getText(R.string.snippet_page_number_label) + " " + snippets.get(position).getPage_number());
 
-//            holder.bookmarkViews.setText(context.getResources().getText(R.string.bookmark_views_label) + " " + bookmarks.get(position).getViews());
+//            holder.snippetViews.setText(context.getResources().getText(R.string.snippet_views_label) + " " + snippets.get(position).getViews());
 
             if (snippets.get(position).getImage_path().contains("http")) {
-                Picasso.with(Snippets_Activity.this).load(snippets.get(position).getImage_path()).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(roundedTransform).error(context.getResources().getDrawable(R.drawable.bookmark_not_found)).into(holder.bookmarkIMG, picassoImageLoadedCallback);
+                Picasso.with(Snippets_Activity.this).load(snippets.get(position).getImage_path()).resize(context.getResources().getDimensionPixelSize(R.dimen.snippet_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.snippet_thumb_height)).centerCrop().transform(roundedTransform).error(context.getResources().getDrawable(R.drawable.snippet_not_found)).into(holder.snippetIMG, picassoImageLoadedCallback);
             } else
-                Picasso.with(Snippets_Activity.this).load(new File(snippets.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.bookmark_thumb_height)).centerCrop().transform(roundedTransform).error(context.getResources().getDrawable(R.drawable.bookmark_not_found)).into(holder.bookmarkIMG, picassoImageLoadedCallback);
+                Picasso.with(Snippets_Activity.this).load(new File(snippets.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.snippet_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.snippet_thumb_height)).centerCrop().transform(roundedTransform).error(context.getResources().getDrawable(R.drawable.snippet_not_found)).into(holder.snippetIMG, picassoImageLoadedCallback);
 
-            holder.bookmarkActionLayout.setOnClickListener(new View.OnClickListener() {
+            holder.snippetActionLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    final View overflowButton = view.findViewById(R.id.bookmarkAction);
-                    overflowButton.findViewById(R.id.bookmarkAction).setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
+                    final View overflowButton = view.findViewById(R.id.snippetAction);
+                    overflowButton.findViewById(R.id.snippetAction).setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
 
                     PopupMenu popup = new PopupMenu(context, view);
-                    popup.getMenuInflater().inflate(R.menu.bookmark_list_item,
+                    popup.getMenuInflater().inflate(R.menu.snippet_list_item,
                             popup.getMenu());
                     for (int i = 0; i < popup.getMenu().size(); i++) {
                         MenuItem item = popup.getMenu().getItem(i);
@@ -930,19 +909,19 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                         public boolean onMenuItemClick(MenuItem item) {
                             switch (item.getItemId()) {
                                 case R.id.edit:
-                                    Intent editBookmarkIntent = new Intent(Snippets_Activity.this, Create_Snippet_Activity.class);
-                                    editBookmarkIntent.putExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, Constants.EDIT_BOOKMARK_PURPOSE_VALUE);
-                                    editBookmarkIntent.putExtra(Constants.EXTRAS_BOOK_COLOR, book_color_code);
-                                    editBookmarkIntent.putExtra(Constants.EXTRAS_BOOKMARK_ID, snippets.get(position).getId());
-                                    startActivity(editBookmarkIntent);
+                                    Intent editSnippetIntent = new Intent(Snippets_Activity.this, Create_Snippet_Activity.class);
+                                    editSnippetIntent.putExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING, Constants.EDIT_SNIPPET_PURPOSE_VALUE);
+                                    editSnippetIntent.putExtra(Constants.EXTRAS_BOOK_COLOR, book_color_code);
+                                    editSnippetIntent.putExtra(Constants.EXTRAS_SNIPPET_ID, snippets.get(position).getId());
+                                    startActivity(editSnippetIntent);
                                     break;
                                 case R.id.delete:
                                     //Dissmiss the UNDO Snackbar and handle the deletion of the previously awaiting item yourself
-                                    if (undoDeleteBookmarkSB != null && undoDeleteBookmarkSB.isShowing()) {
+                                    if (undeleteSnippetSB != null && undeleteSnippetSB.isShowing()) {
                                         //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
-                                        bookmarkDAO.delete(tempSnippet);
+                                        snippetDAO.delete(tempSnippet);
                                         itemPendingDeleteDecision = false;
-                                        undoDeleteBookmarkSB.dismiss();
+                                        undeleteSnippetSB.dismiss();
                                     }
 
                                     Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
@@ -962,25 +941,25 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                     popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
                         @Override
                         public void onDismiss(PopupMenu popupMenu) {
-                            overflowButton.findViewById(R.id.bookmarkAction).setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_fade));
+                            overflowButton.findViewById(R.id.snippetAction).setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_fade));
                         }
                     });
                 }
             });
 
-            holder.bookmarkNoteBTN.setOnClickListener(new View.OnClickListener() {
+            holder.snippetNoteBTN.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
                     ArrayList<ObjectAnimator> arrayListObjectAnimators = new ArrayList<ObjectAnimator>();
                     Animator[] objectAnimators;
 
                     RelativeLayout motherView = (RelativeLayout) view.getParent();
-                    TextView bookmarkNoteTV = (TextView) motherView.getChildAt(0);
+                    TextView snippetNoteTV = (TextView) motherView.getChildAt(0);
                     ProgressBar imageProgressLoader = (ProgressBar) ((RelativeLayout) motherView.getChildAt(1)).getChildAt(0);
-                    ImageView bookmarkIMG = (ImageView) ((RelativeLayout) motherView.getChildAt(1)).getChildAt(1);
-                    TextView bookmarkName = (TextView) motherView.getChildAt(2);
-                    RelativeLayout bookmarkActionLayout = (RelativeLayout) motherView.getChildAt(3);
-                    TextView bookmarkPageNumber = (TextView) motherView.getChildAt(6);
+                    ImageView snippetIMG = (ImageView) ((RelativeLayout) motherView.getChildAt(1)).getChildAt(1);
+                    TextView snippetName = (TextView) motherView.getChildAt(2);
+                    RelativeLayout snippetActionLayout = (RelativeLayout) motherView.getChildAt(3);
+                    TextView snippetPageNumber = (TextView) motherView.getChildAt(6);
 
                     int isNoteShowing = snippets.get(position).getIsNoteShowing();
 
@@ -1000,11 +979,11 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
                         gradient.setColor(context.getResources().getColor(R.color.white));
 
-                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkNoteTV));
-                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkActionLayout));
-                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkIMG));
-                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkPageNumber));
-                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkName));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetNoteTV));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(snippetActionLayout));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(snippetIMG));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(snippetPageNumber));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(snippetName));
                         arrayListObjectAnimators.add(helperMethods.showViewElement(imageProgressLoader));
 
                         snippets.get(position).setIsNoteShowing(0);
@@ -1013,13 +992,13 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
                         gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
 
-                        bookmarkNoteTV.setText(snippets.get(position).getNote());
+                        snippetNoteTV.setText(snippets.get(position).getNote());
 
-                        arrayListObjectAnimators.add(helperMethods.showViewElement(bookmarkNoteTV));
-                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkActionLayout));
-                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkIMG));
-                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkPageNumber));
-                        arrayListObjectAnimators.add(helperMethods.hideViewElement(bookmarkName));
+                        arrayListObjectAnimators.add(helperMethods.showViewElement(snippetNoteTV));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetActionLayout));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetIMG));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetPageNumber));
+                        arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetName));
                         arrayListObjectAnimators.add(helperMethods.hideViewElement(imageProgressLoader));
 
                         snippets.get(position).setIsNoteShowing(1);
@@ -1066,20 +1045,20 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 int tempNumber = snippets.get(from).getOrder();
                 snippets.get(from).setOrder(snippets.get(to).getOrder());
                 snippets.get(to).setOrder(tempNumber);
-                bookmarkDAO.update(snippets.get(from));
-                bookmarkDAO.update(snippets.get(to));
+                snippetDAO.update(snippets.get(from));
+                snippetDAO.update(snippets.get(to));
             }
         }
     }
 
-    public static class BookmarksViewHolder {
+    public static class SnippetsViewHolder {
         RelativeLayout motherView;
-        AutofitTextView bookmarkName;
-        ImageView bookmarkIMG;
-        RelativeLayout bookmarkActionLayout;
-        TextView bookmarkPageNumber;
-        Button bookmarkNoteBTN;
-        AutofitTextView bookmarkNoteTV;
+        AutofitTextView snippetName;
+        ImageView snippetIMG;
+        RelativeLayout snippetActionLayout;
+        TextView snippetPageNumber;
+        Button snippetNoteBTN;
+        AutofitTextView snippetNoteTV;
         ProgressBar imageProgressLoader;
         boolean needInflate;
     }

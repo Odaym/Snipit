@@ -29,11 +29,4 @@
     <color name="settings_toolbar_orange">#D77E47</color>
 
     <color name="background_list_back">#e3e3e3</color>
-
-    <array name="saveBookmarkProgressBarColors">
-        <item>@color/green</item>
-        <item>@color/yellow</item>
-        <item>@color/red</item>
-        <item>@color/blue</item>
-    </array>
 </resources>

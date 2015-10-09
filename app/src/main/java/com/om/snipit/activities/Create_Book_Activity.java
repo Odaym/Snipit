@@ -25,7 +25,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.om.atomic.R;
+import com.om.snipit.R;
 import com.om.snipit.classes.Book;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
@@ -240,21 +240,19 @@ public class Create_Book_Activity extends Base_Activity {
         book.setDate_added(month + " " + day + " " + year);
         book.setColorCode(rand.nextInt(7 - 1));
         book.setOrder((int) (bookDAO.countOf() + 1));
-        book.setPages_count(book_pages_count);
-        book.setPage_reached(0);
 
         bookDAO.create(book);
 
-        FlurryAgent.logEvent("Book_Create");
+        FlurryAgent.logEvent("Create_Book");
 
         EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
 
-        Intent takeToBookmarks = new Intent(Create_Book_Activity.this, Snippets_Activity.class);
-        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
-        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
-        takeToBookmarks.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
+        Intent takeToSnippets = new Intent(Create_Book_Activity.this, Snippets_Activity.class);
+        takeToSnippets.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
+        takeToSnippets.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
+        takeToSnippets.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
 
-        startActivity(takeToBookmarks);
+        startActivity(takeToSnippets);
 
         finish();
     }
@@ -387,7 +385,6 @@ public class Create_Book_Activity extends Base_Activity {
                 JSONArray bookArray = resultObject.getJSONArray("items");
                 JSONObject bookObject = bookArray.getJSONObject(0);
                 JSONObject volumeObject = bookObject.getJSONObject("volumeInfo");
-                book_pages_count = volumeObject.getInt("pageCount");
 
                 try {
                     titleET.setText(volumeObject.getString("title"));
@@ -470,7 +467,6 @@ public class Create_Book_Activity extends Base_Activity {
                 JSONObject bookObject = bookArray.getJSONObject(0);
                 JSONObject volumeObject = bookObject.getJSONObject("volumeInfo");
                 JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
-                book_pages_count = volumeObject.getInt("pageCount");
 
                 Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("thumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
 
@@ -483,7 +479,6 @@ public class Create_Book_Activity extends Base_Activity {
                 Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_image_not_found_error), Style.ALERT).show();
                 bookIMG.setImageResource(0);
                 bookImageFoundAtGoogle = true;
-                book_pages_count = Constants.NO_BOOKMARK_PAGE_NUMBER;
                 bookImagePath = Constants.NO_BOOK_IMAGE;
                 findingBookImageDialog.dismiss();
                 jse.printStackTrace();

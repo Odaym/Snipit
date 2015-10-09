@@ -26,7 +26,7 @@ import com.andreabaccega.widget.FormEditText;
 import com.flurry.android.FlurryAgent;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.om.atomic.R;
+import com.om.snipit.R;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.GMailSender;

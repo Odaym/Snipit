@@ -14,7 +14,7 @@ import com.andreabaccega.widget.FormEditText;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.ObjectAnimator;
-import com.om.atomic.R;
+import com.om.snipit.R;
 
 import java.io.File;
 import java.net.MalformedURLException;

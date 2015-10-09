@@ -7,11 +7,13 @@
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
-    <com.edmodo.cropper.CropImageView
+    <com.isseiaoki.simplecropview.CropImageView
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
         android:id="@+id/cropImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        custom:cropMode="ratio_free" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/doneBTN"

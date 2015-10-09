@@ -19,7 +19,7 @@ import com.bumptech.glide.Glide;
 import com.flurry.android.FlurryAgent;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.om.atomic.R;
+import com.om.snipit.R;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
@@ -52,12 +52,12 @@ public class Create_Snippet_Activity extends Base_Activity {
     FormEditText nameET;
     @InjectView(R.id.pageNumberET)
     EditText pageNumberET;
-    @InjectView(R.id.bookmarkIMG)
-    ImageView bookmarkIMG;
+    @InjectView(R.id.snippetIMG)
+    ImageView snippetIMG;
     @InjectView(R.id.doneBTN)
     FloatingActionButton doneBTN;
-    @InjectView(R.id.createNewBookmarkBTN)
-    FloatingActionButton createNewBookmarkBTN;
+    @InjectView(R.id.createNewSnippetBTN)
+    FloatingActionButton createNewSnippetBTN;
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
 
@@ -65,12 +65,12 @@ public class Create_Snippet_Activity extends Base_Activity {
     private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 
     private DatabaseHelper databaseHelper;
-    private RuntimeExceptionDao<Snippet, Integer> bookmarkDAO;
+    private RuntimeExceptionDao<Snippet, Integer> snippetDAO;
 
     private int CALL_PURPOSE;
     private Snippet snippet_from_list;
     private String tempImagePath, finalImagePath;
-    private EventBus_Poster ebpFromEditBookmark;
+    private EventBus_Poster ebpFromEditSnippet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +79,7 @@ public class Create_Snippet_Activity extends Base_Activity {
 
         ButterKnife.inject(this);
 
-        bookmarkDAO = getHelper().getSnipitDAO();
+        snippetDAO = getHelper().getSnipitDAO();
 
         allFields.add(nameET);
 
@@ -95,48 +95,48 @@ public class Create_Snippet_Activity extends Base_Activity {
             toolbar.setElevation(25f);
         }
 
-        CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, -1);
+        CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING, -1);
 
-        tempImagePath = getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH);
+        tempImagePath = getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_IMAGE_PATH);
         finalImagePath = tempImagePath;
 
-        //If it is a create operation, the path to the bookmark image is inside the extras that were sent to this activity (from Camera intent)
+        //If it is a create operation, the path to the snippet image is inside the extras that were sent to this activity (from Camera intent)
         try {
-            Picasso.with(this).load(new File(tempImagePath)).resize(2000, 2000).centerInside().into(bookmarkIMG);
+            Picasso.with(this).load(new File(tempImagePath)).resize(1000, 1000).centerInside().into(snippetIMG);
         } catch (NullPointerException NPE) {
             NPE.printStackTrace();
         }
 
-        //If it's an edit operation, the path to the bookmark image is inside the object being sent to this activity
-        if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
-            getSupportActionBar().setTitle(getString(R.string.edit_bookmark_activity_title));
+        //If it's an edit operation, the path to the snippet image is inside the object being sent to this activity
+        if (CALL_PURPOSE == Constants.EDIT_SNIPPET_PURPOSE_VALUE) {
+            getSupportActionBar().setTitle(getString(R.string.edit_snippet_activity_title));
 
-            snippet_from_list = bookmarkDAO.queryForId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1));
+            snippet_from_list = snippetDAO.queryForId(getIntent().getExtras().getInt(Constants.EXTRAS_SNIPPET_ID, -1));
 
             nameET.setText(snippet_from_list.getName());
             nameET.setSelection(nameET.getText().length());
 
-            if (snippet_from_list.getPage_number() != Constants.NO_BOOKMARK_PAGE_NUMBER)
+            if (snippet_from_list.getPage_number() != Constants.NO_SNIPPET_PAGE_NUMBER)
                 pageNumberET.setText(String.valueOf(snippet_from_list.getPage_number()));
 
             try {
-                //If the String was a URL then this bookmark is a sample
+                //If the String was a URL then this snippet is a sample
                 new URL(snippet_from_list.getImage_path());
-                Glide.with(Create_Snippet_Activity.this).load(snippet_from_list.getImage_path()).centerCrop().error(getResources().getDrawable(R.drawable.notfound_1)).into(bookmarkIMG);
+                Glide.with(Create_Snippet_Activity.this).load(snippet_from_list.getImage_path()).centerCrop().error(getResources().getDrawable(R.drawable.notfound_1)).into(snippetIMG);
             } catch (MalformedURLException e) {
                 //Else it's on disk
-                Picasso.with(this).load(new File(snippet_from_list.getImage_path())).into(bookmarkIMG);
+                Picasso.with(this).load(new File(snippet_from_list.getImage_path())).into(snippetIMG);
             }
         } else {
-            getSupportActionBar().setTitle(getString(R.string.create_bookmark_activity_title));
+            getSupportActionBar().setTitle(getString(R.string.create_snippet_activity_title));
         }
 
         doneBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (helperMethods.validateFields(allFields)) {
-                    //If you are editing an existing bookmark
-                    if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_PURPOSE_VALUE) {
+                    //If you are editing an existing snippet
+                    if (CALL_PURPOSE == Constants.EDIT_SNIPPET_PURPOSE_VALUE) {
                         try {
                             snippet_from_list.setName(nameET.getText().toString());
 
@@ -144,16 +144,16 @@ public class Create_Snippet_Activity extends Base_Activity {
                             if (!pageNumberET.getText().toString().isEmpty())
                                 snippet_from_list.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
                             else
-                                snippet_from_list.setPage_number(Constants.NO_BOOKMARK_PAGE_NUMBER);
+                                snippet_from_list.setPage_number(Constants.NO_SNIPPET_PAGE_NUMBER);
 
-                            if (ebpFromEditBookmark != null)
-                                snippet_from_list.setImage_path(ebpFromEditBookmark.getExtra());
+                            if (ebpFromEditSnippet != null)
+                                snippet_from_list.setImage_path(ebpFromEditSnippet.getExtra());
                             else
                                 snippet_from_list.setImage_path(snippet_from_list.getImage_path());
 
-                            bookmarkDAO.update(snippet_from_list);
+                            snippetDAO.update(snippet_from_list);
 
-                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_name_page_edited"));
+                            EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_name_page_edited"));
 
                             finish();
                         } catch (NumberFormatException e) {
@@ -161,7 +161,7 @@ public class Create_Snippet_Activity extends Base_Activity {
                             Crouton.makeText(Create_Snippet_Activity.this, getString(R.string.page_number_error), Style.ALERT).show();
                         }
                     } else {
-                        //If you are creating a new bookmark
+                        //If you are creating a new snippet
                         Date date = new Date();
                         String month = (String) android.text.format.DateFormat.format("MMM", date);
                         String day = (String) android.text.format.DateFormat.format("dd", date);
@@ -171,28 +171,27 @@ public class Create_Snippet_Activity extends Base_Activity {
                             Snippet snippet = new Snippet();
                             snippet.setName(nameET.getText().toString());
                             snippet.setBookId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
-                            snippet.setOrder(bookmarkDAO.queryForEq("book_id", getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID)).size() + 1);
-                            snippet.setFavorite(false);
+                            snippet.setOrder(snippetDAO.queryForEq("book_id", getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID)).size() + 1);
 
                             //Only try to parse if there was a number given
                             if (!pageNumberET.getText().toString().isEmpty())
                                 snippet.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
                             else
-                                snippet.setPage_number(Constants.NO_BOOKMARK_PAGE_NUMBER);
+                                snippet.setPage_number(Constants.NO_SNIPPET_PAGE_NUMBER);
 
-                            if (CALL_PURPOSE == Constants.EDIT_BOOKMARK_IMAGE_PURPOSE_VALUE)
-                                snippet.setImage_path(ebpFromEditBookmark.getExtra());
+                            if (CALL_PURPOSE == Constants.EDIT_SNIPPET_IMAGE_PURPOSE_VALUE)
+                                snippet.setImage_path(ebpFromEditSnippet.getExtra());
                             else
                                 snippet.setImage_path(finalImagePath);
 
                             snippet.setDate_added(month + " " + day + ", " + year);
 
-                            bookmarkDAO.create(snippet);
+                            snippetDAO.create(snippet);
 
-                            FlurryAgent.logEvent("Bookmark_Create");
+                            FlurryAgent.logEvent("Create_Snipit");
 
-                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_added_bookmarks_activity"));
-                            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_added_books_activity"));
+                            EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_added_snippets_activity"));
+                            EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_added_books_activity"));
 
                             finish();
                         } catch (NumberFormatException e) {
@@ -204,9 +203,9 @@ public class Create_Snippet_Activity extends Base_Activity {
             }
         });
 
-        createNewBookmarkBTN.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(helperMethods.determineFabButtonsColor(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR)))));
+        createNewSnippetBTN.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(helperMethods.determineFabButtonsColor(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR)))));
 
-        createNewBookmarkBTN.setOnClickListener(new View.OnClickListener() {
+        createNewSnippetBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -238,10 +237,10 @@ public class Create_Snippet_Activity extends Base_Activity {
 
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
-        if (ebp.getMessage().equals("bookmark_picture_changed")) {
+        if (ebp.getMessage().equals("snippet_picture_changed")) {
             try {
-                Picasso.with(this).load(new File(ebp.getExtra())).into(bookmarkIMG);
-                ebpFromEditBookmark = ebp;
+                Picasso.with(this).load(new File(ebp.getExtra())).into(snippetIMG);
+                ebpFromEditSnippet = ebp;
             } catch (NullPointerException NPE) {
                 NPE.printStackTrace();
             }
@@ -255,15 +254,15 @@ public class Create_Snippet_Activity extends Base_Activity {
 
         switch (requestCode) {
             case REQUEST_IMAGE_CAPTURE:
-                //If retaking the picture is being done from within an existing bookmark, set the flag to be so
-                if (CALL_PURPOSE != Constants.EDIT_BOOKMARK_PURPOSE_VALUE)
-                    CALL_PURPOSE = Constants.EDIT_BOOKMARK_IMAGE_PURPOSE_VALUE;
+                //If retaking the picture is being done from within an existing snippet, set the flag to be so
+                if (CALL_PURPOSE != Constants.EDIT_SNIPPET_PURPOSE_VALUE)
+                    CALL_PURPOSE = Constants.EDIT_SNIPPET_IMAGE_PURPOSE_VALUE;
 
                 Intent openCropImageActivity = new Intent(Create_Snippet_Activity.this, Crop_Image_Activity.class);
                 openCropImageActivity.putExtra(Constants.EXTRAS_BOOK_ID, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
                 openCropImageActivity.putExtra(Constants.EXTRAS_BOOK_COLOR, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
-                openCropImageActivity.putExtra(Constants.EDIT_BOOKMARK_PURPOSE_STRING, CALL_PURPOSE);
-                openCropImageActivity.putExtra(Constants.EXTRAS_BOOKMARK_IMAGE_PATH, tempImagePath);
+                openCropImageActivity.putExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING, CALL_PURPOSE);
+                openCropImageActivity.putExtra(Constants.EXTRAS_SNIPPET_IMAGE_PATH, tempImagePath);
                 startActivity(openCropImageActivity);
                 break;
         }
@@ -274,7 +273,7 @@ public class Create_Snippet_Activity extends Base_Activity {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp;
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "Atomic");
+                Environment.DIRECTORY_PICTURES), "Snipit");
 
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {

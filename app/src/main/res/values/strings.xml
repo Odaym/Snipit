@@ -4,12 +4,12 @@
     <string name="banner_ad_unit_id_testing">ca-app-pub-3940256099942544/6300978111</string>
 
     <string name="banner_ad_unit_id_books">ca-app-pub-7047539644799809/6004168294</string>
-    <string name="banner_ad_unit_id_bookmarks">ca-app-pub-7047539644799809/8957634697</string>
+    <string name="banner_ad_unit_id_snippets">ca-app-pub-7047539644799809/8957634697</string>
     <string name="banner_ad_unit_id_searchresults">ca-app-pub-7047539644799809/6418663895</string>
     <string name="banner_ad_unit_id_opensource_libs">ca-app-pub-7047539644799809/2417489494</string>
 
     <string name="app_name">Snipit</string>
-    <string name="app_tagline">Digitize the real world</string>
+    <string name="app_tagline">Digitize information from the real world</string>
     <string name="app_version">1.0.0</string>
     <string name="gotit">Got it</string>
     <string name="cancel">Cancel</string>
@@ -20,16 +20,15 @@
     <string name="edit">Edit</string>
     <string name="undo_deletion_title">UNDO</string>
     <string name="action_needs_internet">This action needs an Internet connection</string>
-
+    <string name="retake_picture_error">Something went wrong, please try re-taking that picture</string>
     <!-- SHARING -->
     <string name="sharing_message">I used Snipit to take this, have a look!</string>
 
     <!-- NAVDRAWER -->
-    <string name="navdrawer_favorite_bookmarks_item_primary">Favorites</string>
-    <string name="navdrawer_favorite_bookmarks_item_secondary">Your favorite snippets</string>
     <string name="navdrawer_snippets_gallery_primary">Gallery</string>
     <string name="navdrawer_snippets_gallery_secondary">View all snippets</string>
-    <string name="navdrawer_upgrade_premium_item">Upgrade to Premium</string>
+    <string name="navdrawer_addons_store">Add-ons Store</string>
+    <string name="navdrawer_channels">Channels</string>
     <string name="navdrawer_settings_item">Settings</string>
     <string name="navigation_drawer_open"></string>
     <string name="navigation_drawer_closed"></string>
@@ -59,25 +58,25 @@
     <string name="delete_book_confirmation_message">Deleted</string>
 
     <!-- BOOKMARKS_ACTIVITY -->
-    <string name="edit_bookmark_option">Edit</string>
-    <string name="remove_bookmark_option">Remove</string>
-    <string name="bookmark_views_label">Views:</string>
-    <string name="bookmark_page_number_label">page:</string>
+    <string name="edit_snippet_option">Edit</string>
+    <string name="remove_snippet_option">Remove</string>
+    <string name="snippet_views_label">Views:</string>
+    <string name="snippet_page_number_label">page:</string>
     <string name="sort_option_title">Sort</string>
     <string name="sort_action_by_page_number">Sort by Page</string>
     <string name="sort_action_by_name">Sort by Name</string>
     <string name="sort_action_by_date">Sort by Views</string>
     <string name="sort_order_override">Sorting preference override. Restoring previous order.</string>
-    <string name="empty_bookmarks_layout_hint">Snippets you add appear here</string>
-    <string name="delete_bookmark_confirmation_message">Deleted</string>
+    <string name="empty_snippets_layout_hint">Snippets you add appear here</string>
+    <string name="delete_snippet_confirmation_message">Deleted</string>
 
     <!-- CREATE_BOOKMARK_ACTIVITY -->
-    <string name="create_bookmark_activity_title">New Snippet</string>
-    <string name="edit_bookmark_activity_title">Edit Snippet</string>
-    <string name="bookmark_name">Snippet Name</string>
-    <string name="bookmark_page">Page</string>
+    <string name="create_snippet_activity_title">New Snippet</string>
+    <string name="edit_snippet_activity_title">Edit Snippet</string>
+    <string name="snippet_name">Snippet Name</string>
+    <string name="snippet_page">Page</string>
     <string name="page_number_error">Invalid page number</string>
-    <string name="empty_bookmark_name_error">Give it a good name</string>
+    <string name="empty_snippet_name_error">Give it a good name</string>
 
     <!-- CREATE_BOOK_ACTIVITY -->
     <string name="create_book_activity_title">New Book</string>
@@ -105,11 +104,10 @@
     <string name="rotate_left">Rotate Left</string>
     <string name="rotate_right">Rotate Right</string>
     <string name="page">page:</string>
-    <string name="share_bookmark">Share!</string>
+    <string name="share_snippet">Share!</string>
     <string name="set_brush_thickness">Set brush thickness</string>
     <string name="takeNote">Take a note</string>
     <string name="writeSomething">Write something here…</string>
-    <string name="favorite_bookmark">Favorite!</string>
 
     <!-- SEARCH_RESULTS_ACTIVITY -->
     <string name="search_results_activity_title">Search Results</string>
@@ -119,7 +117,7 @@
     <string name="seems_out_of_memory">Please try that again with a lower resolution setting for the camera.</string>
 
     <!-- PAINT_BOOKMARK_ACTIVITY -->
-    <string name="paint_bookmark_activity_title">Draw and Highlight</string>
+    <string name="paint_snippet_activity_title">Draw and Highlight</string>
     <string name="fab_action_clear">Clear</string>
     <string name="fab_action_color">Color</string>
     <string name="fab_action_undo">Undo</string>
@@ -128,22 +126,23 @@
     <string name="menu_action_save">SAVE</string>
     <string name="alert_dialog_save_action">Save</string>
     <string name="alert_dialog_save_title">Are you sure?</string>
-    <string name="bookmark_updated_successfully">Snippet updated successfully, wonderful!</string>
-    <string name="bookmark_failed_update">Couldn\'t update snippet, please try that again!</string>
-    <string name="bookmark_update_message">This will permanently overwrite the original snippet</string>
-    <string name="save_painted_bookmark_dialog_title">Just a moment</string>
-    <string name="save_painted_bookmark_dialog_message">Updating snippet…</string>
+    <string name="snippet_updated_successfully">Snippet updated successfully, wonderful!</string>
+    <string name="snippet_failed_update">Couldn\'t update snippet, please try that again!</string>
+    <string name="snippet_update_message">This will permanently overwrite the original snippet</string>
+    <string name="save_painted_snippet_dialog_title">Just a moment</string>
+    <string name="save_painted_snippet_dialog_message">Updating snippet…</string>
 
     <!-- ALL SNIPPETS ACTIVITY-->
-    <string name="all_snippets_activity_title">Snippets</string>
+    <string name="all_snippets_activity_title">All Snippets</string>
+    <string name="gallery_no_snippets_yet">No snippets yet!</string>
 
     <string name="create_book_showcase_title">No books yet!</string>
     <string name="create_book_showcase_description">\nAdd a new book to get started</string>
 
-    <string name="create_bookmark_showcase_title">No snippets yet!</string>
-    <string name="create_bookmark_showcase_description">\nAdd a new snippet to get started</string>
+    <string name="create_snippet_showcase_title">No snippets yet!</string>
+    <string name="create_snippet_showcase_description">\nAdd a new snippet to get started</string>
 
     <!-- ABOUT OPEN SOURCE LIBRARIES ACTIVITY -->
     <string name="about_open_source_libraries_activity_title">Open Source Libraries</string>
-    <string name="introduction_text">Snipit is made with ❤ by Atomic Software. And when love was not enough, these libraries came to the rescue.</string>
+    <string name="introduction_text">Snipit is made with ❤ by Oday Maleh. And when love was not enough, these libraries came to the rescue.</string>
 </resources>

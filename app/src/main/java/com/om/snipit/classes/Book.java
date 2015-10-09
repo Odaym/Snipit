@@ -19,10 +19,6 @@ public class Book {
     @DatabaseField
     String date_added;
     @DatabaseField
-    int pages_count;
-    @DatabaseField
-    int page_reached;
-    @DatabaseField
     int color_code;
     @DatabaseField
     int order;
@@ -30,14 +26,12 @@ public class Book {
     public Book() {
     }
 
-    public Book(int id, String title, String author, String image_path, String date_added, int pages_count, int page_reached, int color_code, int order) {
+    public Book(int id, String title, String author, String image_path, String date_added, int color_code, int order) {
         this.id = id;
         this.title = title;
         this.author = author;
         this.image_path = image_path;
         this.date_added = date_added;
-        this.pages_count = pages_count;
-        this.page_reached = page_reached;
         this.color_code = color_code;
         this.order = order;
     }
@@ -96,21 +90,5 @@ public class Book {
 
     public void setOrder(int order) {
         this.order = order;
-    }
-
-    public int getPages_count() {
-        return pages_count;
-    }
-
-    public int getPage_reached() {
-        return page_reached;
-    }
-
-    public void setPage_reached(int page_reached) {
-        this.page_reached = page_reached;
-    }
-
-    public void setPages_count(int pages_count) {
-        this.pages_count = pages_count;
     }
 }

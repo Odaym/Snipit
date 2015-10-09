@@ -7,7 +7,7 @@ import android.view.MenuItem;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.om.atomic.R;
+import com.om.snipit.R;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.Param;
@@ -61,7 +61,7 @@ public class Base_Activity extends ActionBarActivity {
         //If Animations are enabled
         if (animationsParam.isEnabled()) {
             //Only set this animation to the Activities that are NOT Paint_Bookmark and NOT Books
-            if (!activityName.equals(Constants.BOOKS_ACTIVITY_NAME) && !activityName.equals(Constants.PAINT_BOOKMARK_ACTIVITY_NAME))
+            if (!activityName.equals(Constants.BOOKS_ACTIVITY_NAME) && !activityName.equals(Constants.PAINT_SNIPPET_ACTIVITY_NAME))
                 overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
                 //Only set this animation to the Activities that ARE Paint_Bookmark because it takes a different animation than all the above cases (Books also gets a different animation, and that's NO animation) - 3 cases
             else if (!activityName.equals(Constants.BOOKS_ACTIVITY_NAME))
@@ -74,7 +74,7 @@ public class Base_Activity extends ActionBarActivity {
         //If Animations are enabled
         if (animationsParam.isEnabled()) {
             //Only set this animation to the Activities that are NOT Paint_Bookmark and NOT Books
-            if (!activityName.equals(Constants.BOOKS_ACTIVITY_NAME) && !activityName.equals(Constants.PAINT_BOOKMARK_ACTIVITY_NAME))
+            if (!activityName.equals(Constants.BOOKS_ACTIVITY_NAME) && !activityName.equals(Constants.PAINT_SNIPPET_ACTIVITY_NAME))
                 overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
                 //Only set this animation to the Activities that ARE Paint_Bookmark because it takes a different animation than all the above cases (Books also gets a different animation, and that's NO animation) - 3 cases
             else if (!activityName.equals(Constants.BOOKS_ACTIVITY_NAME))

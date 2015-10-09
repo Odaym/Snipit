@@ -11,25 +11,18 @@
         android:layout_centerInParent="true">
 
         <ImageView
-            android:id="@+id/bookmarkIMG"
+            android:id="@+id/snippetIMG"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:adjustViewBounds="true" />
 
-        <ImageView
-            android:id="@+id/savingBookmarkGIF"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/bookmarkIMG"
-            android:layout_alignTop="@+id/bookmarkIMG" />
-
         <com.om.snipit.classes.CanvasView
             android:id="@+id/canvasView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/bookmarkIMG"
-            android:layout_alignTop="@+id/bookmarkIMG" />
+            android:layout_alignBottom="@+id/snippetIMG"
+            android:layout_alignTop="@+id/snippetIMG" />
     </RelativeLayout>
 
     <ProgressBar

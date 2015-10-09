@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.om.atomic">
+    package="com.om.snipit">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -32,7 +32,15 @@
             android:name="com.crashlytics.ApiKey"
             android:value="36e136351325660be3ac92f428de565fcbdc3033" />
 
-        <!--<activity android:name=".activities.Login_Activity"/>-->
+        <!--<activity-->
+        <!--android:name="com.om.snipit.activities.Login_Activity"-->
+        <!--android:noHistory="true">-->
+        <!--<intent-filter>-->
+        <!--<action android:name="android.intent.action.MAIN" />-->
+
+        <!--<category android:name="android.intent.category.LAUNCHER" />-->
+        <!--</intent-filter>-->
+        <!--</activity>-->
 
         <activity
             android:name="com.om.snipit.activities.Books_Activity"
@@ -65,15 +73,15 @@
 
         <activity
             android:name="com.om.snipit.activities.Create_Snippet_Activity"
-            android:label="@string/create_bookmark_activity_title"
+            android:label="@string/create_snippet_activity_title"
             android:screenOrientation="portrait"
-            android:theme="@style/Create_Bookmark_Activity"
+            android:theme="@style/Create_Snippet_Activity"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name="com.om.snipit.activities.View_Snippet_Activity"
             android:screenOrientation="portrait"
-            android:theme="@style/View_Bookmark_Activity_Theme" />
+            android:theme="@style/View_Snippet_Activity_Theme" />
 
         <activity
             android:name="com.om.snipit.activities.Crop_Image_Activity"
@@ -82,7 +90,7 @@
         <activity
             android:name="com.om.snipit.activities.Paint_Snippet_Activity"
             android:screenOrientation="portrait"
-            android:theme="@style/View_Bookmark_Activity_Theme" />
+            android:theme="@style/View_Snippet_Activity_Theme" />
 
         <activity
             android:name="com.om.snipit.activities.Settings_Activity"

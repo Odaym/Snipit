@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -35,11 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.heinrichreimersoftware.materialdrawer.DrawerView;
-import com.heinrichreimersoftware.materialdrawer.structure.DrawerItem;
-import com.heinrichreimersoftware.materialdrawer.structure.DrawerProfile;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -47,8 +44,9 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.nispok.snackbar.listeners.EventListener;
-import com.om.atomic.R;
+import com.om.snipit.R;
 import com.om.snipit.classes.Book;
+import com.om.snipit.classes.CircleTransform;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
@@ -84,9 +82,21 @@ public class Books_Activity extends Base_Activity {
     @InjectView(R.id.drawerLayout)
     DrawerLayout drawerLayout;
     @InjectView(R.id.navDrawer)
-    DrawerView navDrawer;
+    NavigationView navDrawer;
+    @InjectView(R.id.navdrawer_header_user_profile_image)
+    ImageView navdrawer_header_user_profile_image;
+    @InjectView(R.id.navdrawer_header_user_full_name)
+    TextView navdrawer_header_user_full_name;
+    @InjectView(R.id.navdrawer_header_user_email)
+    TextView navdrawer_header_user_email;
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
+
+    int mCurrentSelectedPosition = 0;
+
+    private String user_photo_url;
+    private String user_full_name;
+    private String user_email_address;
 
     private ActionBarDrawerToggle drawerToggle;
 
@@ -105,7 +115,7 @@ public class Books_Activity extends Base_Activity {
     private RuntimeExceptionDao<Param, Integer> paramDAO;
 
     private QueryBuilder<Book, Integer> bookQueryBuilder;
-    private QueryBuilder<Snippet, Integer> bookmarkQueryBuilder;
+    private QueryBuilder<Snippet, Integer> snippetQueryBuilder;
     private PreparedQuery<Snippet> pq;
     private PreparedQuery<Book> pqBook;
 
@@ -144,7 +154,7 @@ public class Books_Activity extends Base_Activity {
         paramDAO = getHelper().getParamDAO();
 
         bookQueryBuilder = bookDAO.queryBuilder();
-        bookmarkQueryBuilder = snipitDAO.queryBuilder();
+        snippetQueryBuilder = snipitDAO.queryBuilder();
 
         ButterKnife.inject(this);
 
@@ -189,86 +199,47 @@ public class Books_Activity extends Base_Activity {
         drawerLayout.setDrawerListener(drawerToggle);
         drawerLayout.closeDrawer(GravityCompat.START);
 
-        navDrawer.setProfile(
-                new DrawerProfile()
-                        .setBackground(getResources().getDrawable(R.drawable.navdrawer_background))
-                        .setAvatar(getResources().getDrawable(R.drawable.ic_launcher))
-                        .setName(getResources().getString(R.string.app_name))
-                        .setDescription(getResources().getString(R.string.app_tagline))
-        );
+        if (getIntent().getExtras() != null) {
+            //User logged in successfully
+            if (getIntent().getExtras().getBoolean(Constants.USER_LOGGED_IN)) {
+                user_email_address = getIntent().getExtras().getString(Constants.USER_EMAIL_ADDRESS, "");
+                user_full_name = getIntent().getExtras().getString(Constants.USER_FULL_NAME, "");
+                user_photo_url = getIntent().getExtras().getString(Constants.USER_PHOTO_URL, "");
 
-        /**
-         * FAVORITE BOOKMARKS
-         */
-        navDrawer.addItem(
-                new DrawerItem()
-                        .setImage(getResources().getDrawable(R.drawable.favorites), DrawerItem.SMALL_AVATAR)
-                        .setTextPrimary(getResources().getString(R.string.navdrawer_favorite_bookmarks_item_primary))
-                        .setTextSecondary(getResources().getString(R.string.navdrawer_favorite_bookmarks_item_secondary))
-        );
+                Picasso.with(this).load(user_photo_url).fit().transform(new CircleTransform()).into(navdrawer_header_user_profile_image);
+                navdrawer_header_user_full_name.setText(user_full_name);
+                navdrawer_header_user_email.setText(user_email_address);
+            } else {
+                //TODO
+            }
+        } else {
+            Picasso.with(this).load(R.drawable.ic_launcher).fit().into(navdrawer_header_user_profile_image);
+            navdrawer_header_user_full_name.setText(R.string.app_name);
+            navdrawer_header_user_email.setText(R.string.app_tagline);
+        }
 
-        /**
-         * Snippets Gallery
-         */
-        navDrawer.addItem(
-                new DrawerItem()
-                        .setImage(getResources().getDrawable(R.drawable.trash), DrawerItem.SMALL_AVATAR)
-                        .setTextPrimary(getResources().getString(R.string.navdrawer_snippets_gallery_primary))
-                        .setTextSecondary(getResources().getString(R.string.navdrawer_snippets_gallery_secondary))
-        );
-
-        /**
-         * UPGRADE TO PREMIUM
-         */
-        navDrawer.addFixedItem(
-                new DrawerItem()
-                        .setImage(getResources().getDrawable(R.drawable.premium), DrawerItem.SMALL_AVATAR)
-                        .setTextPrimary(getResources().getString(R.string.navdrawer_upgrade_premium_item))
-        );
-
-        /**
-         * SETTINGS
-         */
-        navDrawer.addFixedItem(
-                new DrawerItem()
-                        .setImage(getResources().getDrawable(R.drawable.settings), DrawerItem.SMALL_AVATAR)
-                        .setTextPrimary(getResources().getString(R.string.settings))
-        );
-
-        navDrawer.setOnItemClickListener(new DrawerItem.OnItemClickListener() {
+        navDrawer.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public void onClick(DrawerItem drawerItem, int id, int position) {
-                navDrawer.selectItem(position);
-
-                switch (position) {
-                    case 0:
-                        Toast.makeText(Books_Activity.this, "Your favorite bookmarks will appear here", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 1:
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.navigation_drawer_item_snippets_gallery:
                         Intent openAllSnippets_Intent = new Intent(Books_Activity.this, Snippets_Gallery_Activity.class);
                         startActivity(openAllSnippets_Intent);
-                        break;
-                }
-            }
-        });
+                        mCurrentSelectedPosition = 0;
 
-        navDrawer.setOnFixedItemClickListener(new DrawerItem.OnItemClickListener() {
-            @Override
-            public void onClick(DrawerItem drawerItem, int id, int position) {
-                switch (position) {
-                    case 0:
-                        Toast.makeText(Books_Activity.this, "Upgrade to premium!", Toast.LENGTH_SHORT).show();
                         break;
-                    case 1:
+                    case R.id.navigation_drawer_item_settings:
                         Intent openSettingsIntent = new Intent(Books_Activity.this, Settings_Activity.class);
                         startActivity(openSettingsIntent);
+
                         break;
+                    default:
+                        return true;
                 }
+
+                return true;
             }
         });
-
-
-        navDrawer.setBackground(getResources().getDrawable(R.drawable.navdrawer_background_repeat));
 
         createNewBookBTN.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -281,16 +252,15 @@ public class Books_Activity extends Base_Activity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Intent openBookmarksForBook = new Intent(Books_Activity.this, Snippets_Activity.class);
+                Intent openSnippetsForBook = new Intent(Books_Activity.this, Snippets_Activity.class);
                 Book book = (Book) listView.getItemAtPosition(position);
 
                 //Clicking on an adview when there's no Internet connection will cause this condition to be satisfied because no Book will be found at the index of that adview
                 if (book != null) {
-                    openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
-                    openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
-                    openBookmarksForBook.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
-                    openBookmarksForBook.putExtra(Constants.EXTRAS_IS_FAVORITE_BOOKMARKS_FRAGMENT, false);
-                    startActivity(openBookmarksForBook);
+                    openSnippetsForBook.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
+                    openSnippetsForBook.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
+                    openSnippetsForBook.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
+                    startActivity(openSnippetsForBook);
                 }
             }
         });
@@ -357,13 +327,13 @@ public class Books_Activity extends Base_Activity {
                 handleBusEvents_ListRefresher();
                 Log.d("EVENTS", "book_added - Books_Activity");
                 break;
-            case "bookmark_added_books_activity":
+            case "snippet_added_books_activity":
                 handleBusEvents_ListRefresher();
-                Log.d("EVENTS", "bookmark_added_books_activity - Books_Activity");
+                Log.d("EVENTS", "snippet_added_books_activity - Books_Activity");
                 break;
-            case "bookmark_deleted_books_activity":
+            case "snippet_deleted_books_activity":
                 handleBusEvents_ListRefresher();
-                Log.d("EVENTS", "bookmark_deleted_books_activity - Books_Activity");
+                Log.d("EVENTS", "snippet_deleted_books_activity - Books_Activity");
                 break;
         }
     }
@@ -535,7 +505,7 @@ public class Books_Activity extends Base_Activity {
             anim.setAnimationListener(al);
         }
 
-        anim.setDuration(Constants.DELETE_BOOK_BOOKMARK_ANIMATION_DURATION);
+        anim.setDuration(Constants.DELETE_BOOK_SNIPPET_ANIMATION_DURATION);
         v.startAnimation(anim);
     }
 
@@ -673,7 +643,7 @@ public class Books_Activity extends Base_Activity {
                 holder.bookTitleTV = (AutofitTextView) parentView.findViewById(R.id.bookTitleTV);
                 holder.bookAuthorTV = (AutofitTextView) parentView.findViewById(R.id.bookAuthorTV);
                 holder.bookThumbIMG = (ImageView) parentView.findViewById(R.id.bookThumbIMG);
-                holder.bookmarksNumberTV = (TextView) parentView.findViewById(R.id.bookmarksNumberTV);
+                holder.snippetsNumberTV = (TextView) parentView.findViewById(R.id.snippetsNumberTV);
                 holder.bookActionLayout = (LinearLayout) parentView.findViewById(R.id.bookActionLayout);
                 holder.needInflate = false;
 
@@ -685,7 +655,7 @@ public class Books_Activity extends Base_Activity {
             holder = (BooksViewHolder) parentView.getTag();
 
             if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
-                holder.bookmarksNumberTV.setElevation(5f);
+                holder.snippetsNumberTV.setElevation(5f);
             }
 
             holder.bookTitleTV.setText(books.get(position).getTitle());
@@ -698,22 +668,22 @@ public class Books_Activity extends Base_Activity {
 
             switch (books.get(position).getColorCode()) {
                 case 0:
-                    holder.bookmarksNumberTV.setBackground(context.getResources().getDrawable(R.drawable.bookmark_pink));
+                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_pink));
                     break;
                 case 1:
-                    holder.bookmarksNumberTV.setBackground(context.getResources().getDrawable(R.drawable.bookmark_red));
+                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_red));
                     break;
                 case 2:
-                    holder.bookmarksNumberTV.setBackground(context.getResources().getDrawable(R.drawable.bookmark_purple));
+                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_purple));
                     break;
                 case 3:
-                    holder.bookmarksNumberTV.setBackground(context.getResources().getDrawable(R.drawable.bookmark_yellow));
+                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_yellow));
                     break;
                 case 4:
-                    holder.bookmarksNumberTV.setBackground(context.getResources().getDrawable(R.drawable.bookmark_blue));
+                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_blue));
                     break;
                 case 5:
-                    holder.bookmarksNumberTV.setBackground(context.getResources().getDrawable(R.drawable.bookmark_brown));
+                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_brown));
                     break;
             }
 
@@ -753,8 +723,8 @@ public class Books_Activity extends Base_Activity {
                                         //I am able to use tempBook h=ere because I am certain that it would have now been initialized inside deleteCell(), no way to reach this point without having been through deleteCell() first
 
                                         try {
-                                            bookmarkQueryBuilder.where().eq("book_id", tempBook.getId());
-                                            pq = bookmarkQueryBuilder.prepare();
+                                            snippetQueryBuilder.where().eq("book_id", tempBook.getId());
+                                            pq = snippetQueryBuilder.prepare();
                                             snipitDAO.delete(snipitDAO.query(pq));
                                         } catch (SQLException e) {
                                             e.printStackTrace();
@@ -789,7 +759,7 @@ public class Books_Activity extends Base_Activity {
             });
 
             snippets = snipitDAO.queryForEq("book_id", books.get(position).getId());
-            holder.bookmarksNumberTV.setText(snippets.size() + "");
+            holder.snippetsNumberTV.setText(snippets.size() + "");
 
             return parentView;
         }
@@ -813,7 +783,7 @@ public class Books_Activity extends Base_Activity {
         AutofitTextView bookTitleTV;
         AutofitTextView bookAuthorTV;
         ImageView bookThumbIMG;
-        TextView bookmarksNumberTV;
+        TextView snippetsNumberTV;
         LinearLayout bookActionLayout;
         boolean needInflate;
     }

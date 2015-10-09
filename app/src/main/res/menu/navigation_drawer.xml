@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:id="@+id/contentGroup"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/navigation_drawer_item_snippets_gallery"
+            android:icon="@drawable/ic_snippets_gallery_black"
+            android:title="@string/navdrawer_snippets_gallery_primary" />
+    </group>
+
+    <group
+        android:id="@+id/metaGroup"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/navigation_drawer_item_settings"
+            android:icon="@drawable/settings"
+            android:title="@string/navdrawer_settings_item" />
+    </group>
+</menu>

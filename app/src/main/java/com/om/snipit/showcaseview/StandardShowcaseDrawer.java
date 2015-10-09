@@ -8,8 +8,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.Drawable;
 
-import com.om.atomic.R;
-
+import com.om.snipit.R;
 
 class StandardShowcaseDrawer implements ShowcaseDrawer {
 

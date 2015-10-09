@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <RelativeLayout
-        android:id="@+id/bookmarkIMG_LoaderLayout"
+        android:id="@+id/snippetIMG_LoaderLayout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/snippet_grid_item_image_layout_height"
         android:paddingEnd="@dimen/snippets_gridview_padding_between"
@@ -21,7 +21,7 @@
             android:layout_centerInParent="true" />
 
         <ImageView
-            android:id="@+id/bookmarkIMG"
+            android:id="@+id/snippetIMG"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </RelativeLayout>
@@ -32,16 +32,16 @@
         android:layout_height="@dimen/snippet_grid_item_separator_height"
         android:layout_marginEnd="@dimen/snippet_grid_item_margin_end"
         android:layout_marginRight="@dimen/snippet_grid_item_margin_end"
-        android:background="@color/black_translucent" />
+        android:background="@color/black_transparent" />
 
     <LinearLayout
-        android:id="@+id/bookmarkNameLayout"
+        android:id="@+id/snippetNameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <me.grantland.widget.AutofitTextView
-            android:id="@+id/bookmarkNameTV"
-            android:layout_width="@dimen/bookmark_list_item_bookmark_name_width"
+            android:id="@+id/snippetNameTV"
+            android:layout_width="@dimen/snippet_list_item_snippet_name_width"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/snippets_gridview_padding_between"
             android:layout_marginLeft="@dimen/snippets_gridview_padding_between"
@@ -54,17 +54,4 @@
             android:textColor="@android:color/black"
             android:textSize="@dimen/snippet_name_grid_item_font_size" />
     </LinearLayout>
-    <!--<TextView-->
-    <!--android:id="@+id/bookmarkPageNumberTV"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_alignParentBottom="true"-->
-    <!--android:layout_alignParentEnd="true"-->
-    <!--android:layout_alignParentRight="true"-->
-    <!--android:paddingBottom="10dp"-->
-    <!--android:paddingEnd="10dp"-->
-    <!--android:paddingLeft="10dp"-->
-    <!--android:paddingRight="10dp"-->
-    <!--android:textColor="@color/mokhmal"-->
-    <!--android:textSize="@dimen/book_date_added_fsize" />-->
 </LinearLayout>

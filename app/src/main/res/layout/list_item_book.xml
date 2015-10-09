@@ -67,7 +67,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/bookmarksNumberTV"
+        android:id="@+id/snippetsNumberTV"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_alignParentEnd="true"
@@ -78,7 +78,7 @@
         android:layout_marginTop="5dp"
         android:gravity="center"
         android:textColor="@color/white"
-        android:textSize="@dimen/number_of_bookmarks_fsize" />
+        android:textSize="@dimen/number_of_snippets_fsize" />
 
     <TextView
         android:id="@+id/bookDateAddedTV"

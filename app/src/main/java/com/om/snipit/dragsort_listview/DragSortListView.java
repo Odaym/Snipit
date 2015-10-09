@@ -41,8 +41,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-
-import com.om.atomic.R;
+import com.om.snipit.R;
 
 import java.io.File;
 import java.io.FileWriter;

@@ -1,6 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:validator="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:validator="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -9,8 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:theme="@style/ToolBarStyle_Global" />
+        android:theme="@style/ToolBarStyle_Global"
+        app:navigationIcon="?attr/homeAsUpIndicator" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -30,13 +30,13 @@
                 android:id="@+id/nameET"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/bookmark_name"
+                android:hint="@string/snippet_name"
                 android:inputType="textCapWords"
                 android:singleLine="true"
                 android:textColor="@android:color/black"
                 android:textColorHint="@color/edittext_hint_color"
                 android:textCursorDrawable="@null"
-                validator:emptyErrorString="@string/empty_bookmark_name_error" />
+                validator:emptyErrorString="@string/empty_snippet_name_error" />
 
         </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 
@@ -50,7 +50,7 @@
                 android:id="@+id/pageNumberET"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/bookmark_page"
+                android:hint="@string/snippet_page"
                 android:inputType="numberSigned"
                 android:singleLine="true"
                 android:textColor="@android:color/black"
@@ -59,7 +59,7 @@
         </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 
         <ImageView
-            android:id="@+id/bookmarkIMG"
+            android:id="@+id/snippetIMG"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/pageNumberETFloating"
@@ -81,7 +81,7 @@
         app:fabSize="normal" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/createNewBookmarkBTN"
+        android:id="@+id/createNewSnippetBTN"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

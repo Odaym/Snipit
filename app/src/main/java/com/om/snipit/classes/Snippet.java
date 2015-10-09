@@ -4,6 +4,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "Bookmark")
+//@DatabaseTable(tableName = "Snipit")
 
 public class Snippet {
 
@@ -22,13 +23,9 @@ public class Snippet {
     @DatabaseField
     int order;
     @DatabaseField
-    boolean favorite;
-    @DatabaseField
     int views;
     @DatabaseField
     String note;
-    @DatabaseField
-    int times_painted;
     @DatabaseField
     int isNoteShowing;
 
@@ -83,14 +80,6 @@ public class Snippet {
         this.order = order;
     }
 
-    public boolean isFavorite() {
-        return favorite;
-    }
-
-    public void setFavorite(boolean favorite) {
-        this.favorite = favorite;
-    }
-
     public int getViews() {
         return views;
     }
@@ -121,13 +110,5 @@ public class Snippet {
 
     public void setIsNoteShowing(int isNoteShowing) {
         this.isNoteShowing = isNoteShowing;
-    }
-
-    public int getTimes_painted() {
-        return times_painted;
-    }
-
-    public void setTimes_painted(int times_painted) {
-        this.times_painted = times_painted;
     }
 }

@@ -9,11 +9,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:theme="@style/ToolBarStyle_Global" />
+        android:theme="@style/ToolBarStyle_Global"
+        app:navigationIcon="?attr/homeAsUpIndicator" />
 
     <com.om.snipit.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/bookmarksList"
+        android:id="@+id/snippetsList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/toolbar"
@@ -43,26 +43,26 @@
         android:visibility="gone">
 
         <ImageView
-            android:id="@+id/bookmarkIMG"
+            android:id="@+id/snippetIMG"
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:layout_centerInParent="true"
-            android:src="@drawable/bookmark_outline" />
+            android:src="@drawable/snippet_outline" />
 
         <me.grantland.widget.AutofitTextView
             android:id="@+id/emptyLayoutMessageTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/bookmarkIMG"
+            android:layout_below="@+id/snippetIMG"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/padding_bookmarks_activity_hint_above_image"
-            android:text="@string/empty_bookmarks_layout_hint"
+            android:layout_marginTop="@dimen/padding_snippets_activity_hint_above_image"
+            android:text="@string/empty_snippets_layout_hint"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
     </RelativeLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/createNewBookmarkBTN"
+        android:id="@+id/createNewSnippetBTN"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

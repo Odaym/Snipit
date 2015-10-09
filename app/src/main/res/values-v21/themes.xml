@@ -18,11 +18,11 @@
 
     <style name="Settings_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar"/>
 
-    <style name="Create_Bookmark_Activity" parent="Theme.AppCompat.Light.NoActionBar"/>
+    <style name="Create_Snippet_Activity" parent="Theme.AppCompat.Light.NoActionBar"/>
 
     <style name="Create_Book_Activity" parent="Theme.AppCompat.Light.NoActionBar"/>
 
-    <style name="View_Bookmark_Activity_Theme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="View_Snippet_Activity_Theme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:actionBarStyle">@style/MyTheme.ActionBarStyle</item>
         <item name="colorPrimary">@android:color/transparent</item>
         <item name="colorPrimaryDark">@android:color/transparent</item>

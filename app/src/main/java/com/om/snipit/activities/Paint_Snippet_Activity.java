@@ -28,7 +28,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.om.atomic.R;
+import com.om.snipit.R;
 import com.om.snipit.classes.CanvasView;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
@@ -56,10 +56,8 @@ import hugo.weaving.DebugLog;
 public class Paint_Snippet_Activity extends Base_Activity {
     @InjectView(R.id.canvasView)
     CanvasView canvasView;
-    @InjectView(R.id.bookmarkIMG)
-    ImageView bookmarkIMG;
-    @InjectView(R.id.savingBookmarkGIF)
-    ImageView savingBookmarkGIF;
+    @InjectView(R.id.snippetIMG)
+    ImageView snippetIMG;
     @InjectView(R.id.imageProgressBar)
     ProgressBar imageProgressBar;
     @InjectView(R.id.multiple_actions_fab)
@@ -79,14 +77,14 @@ public class Paint_Snippet_Activity extends Base_Activity {
     private SharedPreferences.Editor prefsEditor;
 
     private DatabaseHelper databaseHelper;
-    private RuntimeExceptionDao<Snippet, Integer> bookmarkDAO;
+    private RuntimeExceptionDao<Snippet, Integer> snippetDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_paint_snippet);
 
-        bookmarkDAO = getHelper().getSnipitDAO();
+        snippetDAO = getHelper().getSnipitDAO();
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefsEditor = prefs.edit();
@@ -95,7 +93,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
         ButterKnife.inject(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(getString(R.string.paint_bookmark_activity_title));
+        getSupportActionBar().setTitle(getString(R.string.paint_snippet_activity_title));
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
@@ -126,7 +124,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
             }
         };
 
-        Picasso.with(Paint_Snippet_Activity.this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH))).resize(2000, 2000).centerInside().into(bookmarkIMG, picassoCallback);
+        Picasso.with(Paint_Snippet_Activity.this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_IMAGE_PATH))).resize(1000, 1000).centerInside().into(snippetIMG, picassoCallback);
 
         fabActionUndo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -249,7 +247,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.paint_bookmark, menu);
+        inflater.inflate(R.menu.paint_snippet, menu);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -260,7 +258,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
             case R.id.menu_action_save:
                 new AlertDialog.Builder(Paint_Snippet_Activity.this)
                         .setTitle(R.string.alert_dialog_save_title)
-                        .setMessage(R.string.bookmark_update_message)
+                        .setMessage(R.string.snippet_update_message)
                         .setPositiveButton(R.string.alert_dialog_save_action, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -316,8 +314,8 @@ public class Paint_Snippet_Activity extends Base_Activity {
     private class SavePaintedBookmark_Task extends AsyncTask<String, String, Boolean> {
 
         private Helper_Methods helperMethods;
-        private int bookmark_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOKMARK_ID, -1);
-        private Snippet snippetBeingPainted = bookmarkDAO.queryForId(bookmark_id);
+        private int snippet_id = getIntent().getExtras().getInt(Constants.EXTRAS_SNIPPET_ID, -1);
+        private Snippet snippetBeingPainted = snippetDAO.queryForId(snippet_id);
         private Bitmap mBitmapOriginal, mBitmapNew;
         private ProgressDialog savePaintedSnippetDialog;
 
@@ -334,10 +332,10 @@ public class Paint_Snippet_Activity extends Base_Activity {
             if (floatingColorsMenu.isExpanded())
                 floatingColorsMenu.collapse();
 
-            savePaintedSnippetDialog = ProgressDialog.show(Paint_Snippet_Activity.this, getResources().getString(R.string.save_painted_bookmark_dialog_title),
-                    getResources().getString(R.string.save_painted_bookmark_dialog_message), true);
+            savePaintedSnippetDialog = ProgressDialog.show(Paint_Snippet_Activity.this, getResources().getString(R.string.save_painted_snippet_dialog_title),
+                    getResources().getString(R.string.save_painted_snippet_dialog_message), true);
 
-            mBitmapOriginal = ((BitmapDrawable) bookmarkIMG.getDrawable()).getBitmap();
+            mBitmapOriginal = ((BitmapDrawable) snippetIMG.getDrawable()).getBitmap();
             mBitmapNew = canvasView.getScaleBitmap(mBitmapOriginal.getWidth(), mBitmapOriginal.getHeight());
         }
 
@@ -356,9 +354,9 @@ public class Paint_Snippet_Activity extends Base_Activity {
 
                 snippetBeingPainted.setImage_path(finalImagePathAfterPaint);
 
-                bookmarkDAO.update(snippetBeingPainted);
+                snippetDAO.update(snippetBeingPainted);
 
-                publishProgress(getIntent().getExtras().getString(Constants.EXTRAS_BOOKMARK_IMAGE_PATH), finalImagePathAfterPaint);
+                publishProgress(getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_IMAGE_PATH), finalImagePathAfterPaint);
 
             } catch (Exception e) {
                 return true;
@@ -370,14 +368,13 @@ public class Paint_Snippet_Activity extends Base_Activity {
         @Override
         protected void onPostExecute(Boolean errorSaving) {
             if (errorSaving) {
-                Crouton.makeText(Paint_Snippet_Activity.this, getResources().getString(R.string.bookmark_failed_update), Style.ALERT).show();
-                helperMethods.hideViewElement(savingBookmarkGIF);
-                helperMethods.showViewElement(bookmarkIMG);
+                Crouton.makeText(Paint_Snippet_Activity.this, getResources().getString(R.string.snippet_failed_update), Style.ALERT).show();
+                helperMethods.showViewElement(snippetIMG);
                 helperMethods.showViewElement(canvasView);
 
                 savePaintedSnippetDialog.dismiss();
             } else {
-                FlurryAgent.logEvent("Bookmark_Paint");
+                FlurryAgent.logEvent("Paint_Snipit");
 
                 savePaintedSnippetDialog.dismiss();
 
@@ -388,13 +385,13 @@ public class Paint_Snippet_Activity extends Base_Activity {
         @Override
         protected void onProgressUpdate(String... values) {
             //Notify Snippets Activity to update the newly-painted image and delete the old one - send old path
-            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_image_updated", values[0]));
+            EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_image_updated", values[0]));
 
             //Notify Snippets Gallery Activity to update the newly-painted image and delete the old one - send old path
             EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_image_updated", values[0]));
 
             //Notify View Snippets Activity to update the newly-painted image - send new path
-            EventBus_Singleton.getInstance().post(new EventBus_Poster("bookmark_image_needs_reload", values[1]));
+            EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_image_needs_reload", values[1]));
 
             super.onProgressUpdate(values);
         }

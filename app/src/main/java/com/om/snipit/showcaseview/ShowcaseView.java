@@ -18,7 +18,7 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
-import com.om.atomic.R;
+import com.om.snipit.R;
 import com.om.snipit.showcaseview.targets.ActionViewTarget;
 import com.om.snipit.showcaseview.targets.Target;
 
