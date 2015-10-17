@@ -11,6 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/snippet_grid_item_image_layout_height"
         android:paddingEnd="@dimen/snippets_gridview_padding_between"
+        android:paddingLeft="@dimen/snippets_gridview_padding_between"
+        android:paddingRight="@dimen/snippets_gridview_padding_between"
         android:paddingStart="@dimen/snippets_gridview_padding_between">
 
         <ProgressBar

@@ -10,8 +10,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.MenuItemCompat;
@@ -29,10 +27,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
-import android.view.animation.Transformation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -60,12 +54,10 @@ import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
-import com.om.snipit.classes.Param;
 import com.om.snipit.classes.RoundedTransform;
-import com.om.snipit.classes.Snippet;
 import com.om.snipit.dragsort_listview.DragSortListView;
-import com.om.snipit.showcaseview.ShowcaseView;
-import com.om.snipit.showcaseview.ViewTarget;
+import com.om.snipit.models.Book;
+import com.om.snipit.models.Snippet;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -106,7 +98,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     private QueryBuilder<Snippet, Integer> snippetQueryBuilder;
     private PreparedQuery<Snippet> pq;
     private RuntimeExceptionDao<Snippet, Integer> snippetDAO;
-    private RuntimeExceptionDao<Param, Integer> paramDAO;
 
     private boolean inSearchMode = false;
     private String searchQueryForGlobalUse = Constants.EXTRAS_NO_SEARCH_TERM;
@@ -118,7 +109,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     private SearchView searchView;
 
     private Snippets_Adapter snippetsAdapter;
-    private int book_id;
 
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
@@ -138,19 +128,14 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     private Snackbar undeleteSnippetSB;
     private boolean itemPendingDeleteDecision = false;
 
-    private final static int SHOW_CREATE_SNIPPET_SHOWCASE = 1;
-    private final static int WAIT_DURATION_BFEORE_SHOW_SNIPPET_SHOWCASE = 200;
     private final static int WAIT_DURATION_BFEORE_HIDE_CLUTTER_ANIMATION = 200;
 
-    private String book_title;
-    private int book_color_code;
+    private Book book;
 
-    private ShowcaseView createSnippetShowcase;
     private List<Snippet> snippets;
     private File photoFile;
     private Uri photoFileUri;
     private Helper_Methods helperMethods;
-    private Handler UIHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,18 +143,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         setContentView(R.layout.activity_snippets);
 
         ButterKnife.inject(this);
-
-        UIHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case SHOW_CREATE_SNIPPET_SHOWCASE:
-                        showCreateSnippetShowcase();
-                        break;
-                }
-                super.handleMessage(msg);
-            }
-        };
 
         EventBus_Singleton.getInstance().register(this);
 
@@ -180,33 +153,30 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         helperMethods = new Helper_Methods(this);
 
-        snippetDAO = getHelper().getSnipitDAO();
-        paramDAO = getHelper().getParamDAO();
+        snippetDAO = getHelper().getSnippetDAO();
 
         snippetQueryBuilder = snippetDAO.queryBuilder();
 
         Helper_Methods helperMethods = new Helper_Methods(this);
 
-        book_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID);
-        book_title = getIntent().getStringExtra(Constants.EXTRAS_BOOK_TITLE);
-        book_color_code = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR);
+        book = getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(book_title);
-        helperMethods.setUpActionbarColors(this, book_color_code);
+        getSupportActionBar().setTitle(book.getTitle());
+        helperMethods.setUpActionbarColors(this, book.getColorCode());
 
-        if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             toolbar.setElevation(25f);
         }
 
-        prepareQueryBuilder(book_id);
+        prepareQueryBuilder(book.getId());
 
         snippets = snippetDAO.query(pq);
 
         handleEmptyOrPopulatedScreen(snippets);
 
-        createNewSnippetBTN.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(helperMethods.determineFabButtonsColor(book_color_code))));
+        createNewSnippetBTN.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(helperMethods.determineFabButtonsColor(book.getColorCode()))));
 
         createNewSnippetBTN.invalidate();
 
@@ -234,7 +204,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Snippet snippet = ((Snippet) listView.getItemAtPosition(position));
+                final Snippet snippet = ((Snippet) listView.getItemAtPosition(position));
 
                 //Clicking on an adview when there's no Internet connection will cause this condition to be satisfied because no Book will be found at the index of that adview
                 if (snippet != null) {
@@ -247,9 +217,8 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                         snippetDAO.update(snippet);
 
                         Intent intent = new Intent(Snippets_Activity.this, View_Snippet_Activity.class);
+                        intent.putExtra(Constants.EXTRAS_BOOK, book);
                         intent.putExtra(Constants.EXTRAS_VIEWING_SNIPPETS_GALLERY, false);
-                        intent.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
-                        intent.putExtra(Constants.EXTRAS_BOOK_TITLE, book_title);
                         intent.putExtra(Constants.EXTRAS_SEARCH_TERM, searchQueryForGlobalUse);
                         intent.putExtra(Constants.EXTRAS_CURRENT_SNIPPET_POSITION, position);
                         startActivity(intent);
@@ -326,20 +295,20 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 searchView.setIconified(false);
                 return true;
             case R.id.sort_by_name:
-                prepareSortedSnippets(book_id, "name");
-                prepareQueryBuilder(book_id);
+                prepareSortedSnippets(book.getId(), "name");
+                prepareQueryBuilder(book.getId());
                 snippets = snippetDAO.query(pq);
                 snippetsAdapter.notifyDataSetChanged();
                 break;
             case R.id.sort_by_views:
-                prepareSortedSnippets(book_id, "views");
-                prepareQueryBuilder(book_id);
+                prepareSortedSnippets(book.getId(), "views");
+                prepareQueryBuilder(book.getId());
                 snippets = snippetDAO.query(pq);
                 snippetsAdapter.notifyDataSetChanged();
                 break;
             case R.id.sort_page_number:
-                prepareSortedSnippets(book_id, "page_number");
-                prepareQueryBuilder(book_id);
+                prepareSortedSnippets(book.getId(), "page_number");
+                prepareQueryBuilder(book.getId());
                 snippets = snippetDAO.query(pq);
                 snippetsAdapter.notifyDataSetChanged();
                 break;
@@ -359,9 +328,8 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                     Crouton.makeText(this, R.string.retake_picture_error, Style.ALERT).show();
                 else {
                     Intent openCreateSnippet = new Intent(Snippets_Activity.this, Crop_Image_Activity.class);
-                    openCreateSnippet.putExtra(Constants.EXTRAS_BOOK_ID, book_id);
-                    openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_IMAGE_PATH, photoFile.getAbsolutePath());
-                    openCreateSnippet.putExtra(Constants.EXTRAS_BOOK_COLOR, book_color_code);
+                    openCreateSnippet.putExtra(Constants.EXTRAS_BOOK, book);
+                    openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, photoFile.getAbsolutePath());
                     startActivity(openCreateSnippet);
                 }
                 break;
@@ -374,31 +342,33 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         switch (ebpMessage) {
             case "snippet_added_snippets_activity":
-                if (createSnippetShowcase != null)
-                    createSnippetShowcase.hide();
-
-                prepareForNotifyDataChanged(book_id);
+                prepareForNotifyDataChanged(book.getId());
                 snippetsAdapter.notifyDataSetChanged();
 //                Log.d("EVENTS", "snippet_added_snippets_activity - Snippets_Activity");
                 break;
             case "snippet_deleted_snippets_activity":
-                prepareForNotifyDataChanged(book_id);
+                prepareForNotifyDataChanged(book.getId());
                 snippetsAdapter.notifyDataSetChanged();
 //                Log.d("EVENTS", "snippet_deleted_snippets_activity - Snippets_Activity");
                 break;
             case "snippet_image_updated":
                 Helper_Methods.delete_image_from_disk(ebp.getExtra());
-                prepareForNotifyDataChanged(book_id);
+                prepareForNotifyDataChanged(book.getId());
                 snippetsAdapter.notifyDataSetChanged();
 //                Log.d("EVENTS", "snippet_image_updated - Snippets_Activity");
                 break;
             case "snippet_name_page_edited":
-                prepareForNotifyDataChanged(book_id);
+                prepareForNotifyDataChanged(book.getId());
                 snippetsAdapter.notifyDataSetChanged();
 //                Log.d("EVENTS", "snippet_name_page_edited - Snippets_Activity");
                 break;
             case "snippet_note_changed":
-                prepareForNotifyDataChanged(book_id);
+                prepareForNotifyDataChanged(book.getId());
+                snippetsAdapter.notifyDataSetChanged();
+//                Log.d("EVENTS", "snippet_note_changed - Snippets_Activity");
+                break;
+            case "snippet_ocr_content_changed":
+                prepareForNotifyDataChanged(book.getId());
                 snippetsAdapter.notifyDataSetChanged();
 //                Log.d("EVENTS", "snippet_note_changed - Snippets_Activity");
                 break;
@@ -441,7 +411,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             handleEmptyUI(snippets);
         } else {
             //Handle empty search results here, because this is the method that will be called when the snippet is ACTUALLY deleted, the other method that just fakes the disappearance is handleEmptyUI
-
             prepareSearchQueryBuilder(searchQueryForGlobalUse);
 
             snippets = snippetDAO.query(pq);
@@ -467,77 +436,20 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 //        AdRequest adRequest = new AdRequest.Builder().build();
 //        mAdView.loadAd(adRequest);
 
-        final LayoutAnimationController controller
-                = AnimationUtils.loadLayoutAnimation(
-                this, R.anim.snippets_list_layout_controller);
-
-        // If animations are enabled
-        Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
-
-        if (animationsParam.isEnabled()) {
 //            listView.addHeaderView(listViewHeaderAd);
-            listView.setAdapter(snippetsAdapter);
-            listView.setLayoutAnimation(controller);
-        } else {
-//            listView.addHeaderView(listViewHeaderAd);
-            listView.setAdapter(snippetsAdapter);
-        }
-    }
-
-    @DebugLog
-    public void showCreateSnippetShowcase() {
-        //When a snippet is deleted from inside Search Results Activity, leading up to this Activity having zero snippets and causing the coachmark to appear when the activity is not in focus. So make sure it is in focus first
-        final Param snippetTutorialParam = paramDAO.queryForId(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED);
-
-        if (snippetTutorialParam.isEnabled()) {
-            RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-            lps.setMargins(getResources().getDimensionPixelOffset(R.dimen.button_margin_left), 0, 0, getResources().getDimensionPixelOffset(R.dimen.button_margin_bottom));
-
-            ViewTarget target = new ViewTarget(R.id.createNewSnippetBTN, Snippets_Activity.this);
-
-            String showcaseTitle = getString(R.string.create_snippet_showcase_title);
-            String showcaseDescription = getString(R.string.create_snippet_showcase_description);
-
-            createSnippetShowcase = new ShowcaseView.Builder(Snippets_Activity.this, getResources().getDimensionPixelSize(R.dimen.create_snippet_showcase_inner_rad), getResources().getDimensionPixelSize(R.dimen.create_snippet_showcase_outer_rad))
-                    .setTarget(target)
-                    .setContentTitle(Helper_Methods.fontifyString(showcaseTitle))
-                    .setContentText(Helper_Methods.fontifyString(showcaseDescription))
-                    .setStyle(R.style.CustomShowcaseTheme)
-                    .hasManualPosition(true)
-                    .xPostion(getResources().getDimensionPixelSize(R.dimen.create_snippet_text_x))
-                    .yPostion(getResources().getDimensionPixelSize(R.dimen.create_snippet_text_y))
-                    .build();
-            createSnippetShowcase.setButtonPosition(lps);
-            createSnippetShowcase.findViewById(R.id.showcase_button).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    createSnippetShowcase.hide();
-
-                    snippetTutorialParam.setEnabled(false);
-                    paramDAO.update(snippetTutorialParam);
-
-                    handleEmptyUI(snippets);
-                }
-            });
-            createSnippetShowcase.show();
-        }
+        listView.setAdapter(snippetsAdapter);
     }
 
     public void handleEmptyUI(List<Snippet> snippets) {
         if (!inSearchMode) {
-            //Books are empty and the coachmark has been dismissed
-            final Param snippetTutorialParam = paramDAO.queryForId(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED);
 
-            prepareQueryBuilder(book_id);
+            prepareQueryBuilder(book.getId());
 
-            if (snippetDAO.query(pq).isEmpty() && !snippetTutorialParam.isEnabled()) {
+            if (snippetDAO.query(pq).isEmpty()) {
                 emptyListLayout.setVisibility(View.VISIBLE);
                 JumpingBeans.with((TextView) emptyListLayout.findViewById(R.id.emptyLayoutMessageTV)).appendJumpingDots().build();
             } else if (snippetDAO.query(pq).isEmpty()) {
                 emptyListLayout.setVisibility(View.GONE);
-                UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_SNIPPET_SHOWCASE, WAIT_DURATION_BFEORE_SHOW_SNIPPET_SHOWCASE);
             } else {
                 emptyListLayout.setVisibility(View.INVISIBLE);
             }
@@ -550,60 +462,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 invalidateOptionsMenu();
             }
         }
-    }
-
-    private void deleteCell(final View snippetView, final int index) {
-        SnippetsViewHolder vh = (SnippetsViewHolder) snippetView.getTag();
-        vh.needInflate = true;
-
-        itemPendingDeleteDecision = true;
-
-        tempSnippet = snippets.get(index);
-
-        Animation.AnimationListener collapseAL = new Animation.AnimationListener() {
-            @Override
-            public void onAnimationEnd(Animation arg0) {
-                showUndeleteDialog(tempSnippet);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationStart(Animation animation) {
-            }
-        };
-
-        collapse(snippetView, collapseAL);
-    }
-
-    private void collapse(final View v, Animation.AnimationListener al) {
-        final int initialHeight = v.getMeasuredHeight();
-
-        Animation anim = new Animation() {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if (interpolatedTime == 1) {
-                    v.setVisibility(View.GONE);
-                } else {
-                    v.getLayoutParams().height = initialHeight - (int) (initialHeight * interpolatedTime);
-                    v.requestLayout();
-                }
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        if (al != null) {
-            anim.setAnimationListener(al);
-        }
-
-        anim.setDuration(Constants.DELETE_BOOK_SNIPPET_ANIMATION_DURATION);
-        v.startAnimation(anim);
     }
 
     public void showUndeleteDialog(final Snippet tempSnippetToDelete) {
@@ -659,7 +517,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                         }).actionListener(new ActionClickListener() {
                     @Override
                     public void onActionClicked(Snackbar snackbar) {
-                        prepareForNotifyDataChanged(book_id);
+                        prepareForNotifyDataChanged(book.getId());
                         snippetsAdapter.notifyDataSetChanged();
 
                         itemPendingDeleteDecision = false;
@@ -673,7 +531,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     public void finalizeSnippetDeletion(Snippet tempSnippet) {
         Helper_Methods.delete_image_from_disk(tempSnippet.getImage_path());
         snippetDAO.delete(tempSnippet);
-        prepareForNotifyDataChanged(tempSnippet.getBookId());
+        prepareForNotifyDataChanged(tempSnippet.getBook().getId());
         snippetsAdapter.notifyDataSetChanged();
         itemPendingDeleteDecision = false;
     }
@@ -691,7 +549,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 prepareSearchQueryBuilder(searchQuery);
                 snippets = snippetDAO.query(pq);
             } else {
-                prepareQueryBuilder(book_id);
+                prepareQueryBuilder(book.getId());
                 snippets = snippetDAO.query(pq);
             }
 
@@ -734,7 +592,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             SelectArg nameSelectArg = new SelectArg("%" + searchQuery + "%");
             SelectArg noteSelectArg = new SelectArg("%" + searchQuery + "%");
 
-            snippetQueryBuilder.where().eq("book_id", book_id).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
+            snippetQueryBuilder.where().eq("book_id", book.getId()).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
             pq = snippetQueryBuilder.prepare();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -865,7 +723,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 holder.imageProgressLoader.setAlpha(1f);
                 holder.snippetNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
             } else {
-                gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book.getColorCode())));
 
                 holder.snippetNoteTV.setText(snippets.get(position).getNote());
                 holder.snippetActionLayout.setVisibility(View.INVISIBLE);
@@ -884,12 +742,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             else
                 holder.snippetPageNumber.setText(context.getResources().getText(R.string.snippet_page_number_label) + " " + snippets.get(position).getPage_number());
 
-//            holder.snippetViews.setText(context.getResources().getText(R.string.snippet_views_label) + " " + snippets.get(position).getViews());
-
-            if (snippets.get(position).getImage_path().contains("http")) {
-                Picasso.with(Snippets_Activity.this).load(snippets.get(position).getImage_path()).resize(context.getResources().getDimensionPixelSize(R.dimen.snippet_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.snippet_thumb_height)).centerCrop().transform(roundedTransform).error(context.getResources().getDrawable(R.drawable.snippet_not_found)).into(holder.snippetIMG, picassoImageLoadedCallback);
-            } else
-                Picasso.with(Snippets_Activity.this).load(new File(snippets.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.snippet_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.snippet_thumb_height)).centerCrop().transform(roundedTransform).error(context.getResources().getDrawable(R.drawable.snippet_not_found)).into(holder.snippetIMG, picassoImageLoadedCallback);
+            Picasso.with(Snippets_Activity.this).load(new File(snippets.get(position).getImage_path())).resize(context.getResources().getDimensionPixelSize(R.dimen.snippet_thumb_width), context.getResources().getDimensionPixelSize(R.dimen.snippet_thumb_height)).centerCrop().transform(roundedTransform).error(context.getResources().getDrawable(R.drawable.snippet_not_found)).into(holder.snippetIMG, picassoImageLoadedCallback);
 
             holder.snippetActionLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -914,8 +767,8 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                                 case R.id.edit:
                                     Intent editSnippetIntent = new Intent(Snippets_Activity.this, Create_Snippet_Activity.class);
                                     editSnippetIntent.putExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING, Constants.EDIT_SNIPPET_PURPOSE_VALUE);
-                                    editSnippetIntent.putExtra(Constants.EXTRAS_BOOK_COLOR, book_color_code);
-                                    editSnippetIntent.putExtra(Constants.EXTRAS_SNIPPET_ID, snippets.get(position).getId());
+                                    editSnippetIntent.putExtra(Constants.EXTRAS_BOOK, book);
+                                    editSnippetIntent.putExtra(Constants.EXTRAS_SNIPPET, snippets.get(position));
                                     startActivity(editSnippetIntent);
                                     break;
                                 case R.id.delete:
@@ -927,13 +780,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                                         undeleteSnippetSB.dismiss();
                                     }
 
-                                    Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
-
-                                    if (animationsParam.isEnabled()) {
-                                        deleteCell(parentView, position);
-                                    } else {
-                                        showUndeleteDialog(snippets.get(position));
-                                    }
+                                    showUndeleteDialog(snippets.get(position));
 
                                     break;
                             }
@@ -993,7 +840,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                     } else {
                         view.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
 
-                        gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book_color_code)));
+                        gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book.getColorCode())));
 
                         snippetNoteTV.setText(snippets.get(position).getNote());
 

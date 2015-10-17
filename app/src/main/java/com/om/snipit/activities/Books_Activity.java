@@ -1,17 +1,19 @@
 package com.om.snipit.activities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
@@ -24,11 +26,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
-import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -45,18 +42,15 @@ import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.nispok.snackbar.listeners.EventListener;
 import com.om.snipit.R;
-import com.om.snipit.classes.Book;
 import com.om.snipit.classes.CircleTransform;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
-import com.om.snipit.classes.Param;
-import com.om.snipit.classes.Snippet;
 import com.om.snipit.dragsort_listview.DragSortListView;
-import com.om.snipit.showcaseview.ShowcaseView;
-import com.om.snipit.showcaseview.ViewTarget;
+import com.om.snipit.models.Book;
+import com.om.snipit.models.Snippet;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
@@ -71,7 +65,7 @@ import butterknife.InjectView;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 
-public class Books_Activity extends Base_Activity {
+public class Books_Activity extends ActionBarActivity {
 
     @InjectView(R.id.booksList)
     DragSortListView listView;
@@ -92,18 +86,9 @@ public class Books_Activity extends Base_Activity {
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
 
-    int mCurrentSelectedPosition = 0;
-
-    private String user_photo_url;
-    private String user_full_name;
-    private String user_email_address;
+    private SharedPreferences prefs;
 
     private ActionBarDrawerToggle drawerToggle;
-
-    private LayoutAnimationController controller;
-
-    private final static int SHOW_CREATE_BOOK_SHOWCASE = 1;
-    private static Handler UIHandler = new Handler();
 
     private Books_Adapter booksAdapter;
     private List<Book> books;
@@ -111,16 +96,12 @@ public class Books_Activity extends Base_Activity {
 
     private DatabaseHelper databaseHelper = null;
     private RuntimeExceptionDao<Book, Integer> bookDAO;
-    private RuntimeExceptionDao<Snippet, Integer> snipitDAO;
-    private RuntimeExceptionDao<Param, Integer> paramDAO;
+    private RuntimeExceptionDao<Snippet, Integer> snippetDAO;
 
     private QueryBuilder<Book, Integer> bookQueryBuilder;
     private QueryBuilder<Snippet, Integer> snippetQueryBuilder;
     private PreparedQuery<Snippet> pq;
     private PreparedQuery<Book> pqBook;
-
-    private ShowcaseView createBookShowcase;
-    private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 
     private Snackbar undoDeleteBookSB;
     private boolean itemPendingDeleteDecision = false;
@@ -149,26 +130,15 @@ public class Books_Activity extends Base_Activity {
 
         Helper_Methods helperMethods = new Helper_Methods(this);
 
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
         bookDAO = getHelper().getBookDAO();
-        snipitDAO = getHelper().getSnipitDAO();
-        paramDAO = getHelper().getParamDAO();
+        snippetDAO = getHelper().getSnippetDAO();
 
         bookQueryBuilder = bookDAO.queryBuilder();
-        snippetQueryBuilder = snipitDAO.queryBuilder();
+        snippetQueryBuilder = snippetDAO.queryBuilder();
 
         ButterKnife.inject(this);
-
-        UIHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case SHOW_CREATE_BOOK_SHOWCASE:
-                        showCreateBookShowcase();
-                        break;
-                }
-                super.handleMessage(msg);
-            }
-        };
 
         prepareQueryBuilder();
 
@@ -179,7 +149,7 @@ public class Books_Activity extends Base_Activity {
         setSupportActionBar(toolbar);
         helperMethods.setUpActionbarColors(this, Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS);
 
-        if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             toolbar.setElevation(25f);
         } else {
             listView.setDrawSelectorOnTop(true);
@@ -199,19 +169,10 @@ public class Books_Activity extends Base_Activity {
         drawerLayout.setDrawerListener(drawerToggle);
         drawerLayout.closeDrawer(GravityCompat.START);
 
-        if (getIntent().getExtras() != null) {
-            //User logged in successfully
-            if (getIntent().getExtras().getBoolean(Constants.USER_LOGGED_IN)) {
-                user_email_address = getIntent().getExtras().getString(Constants.USER_EMAIL_ADDRESS, "");
-                user_full_name = getIntent().getExtras().getString(Constants.USER_FULL_NAME, "");
-                user_photo_url = getIntent().getExtras().getString(Constants.USER_PHOTO_URL, "");
-
-                Picasso.with(this).load(user_photo_url).fit().transform(new CircleTransform()).into(navdrawer_header_user_profile_image);
-                navdrawer_header_user_full_name.setText(user_full_name);
-                navdrawer_header_user_email.setText(user_email_address);
-            } else {
-                //TODO
-            }
+        if (prefs.getBoolean(Constants.USER_LOGGED_IN, false)) {
+            Picasso.with(this).load(prefs.getString(Constants.USER_PHOTO_URL, "")).fit().transform(new CircleTransform()).into(navdrawer_header_user_profile_image);
+            navdrawer_header_user_full_name.setText(prefs.getString(Constants.USER_FULL_NAME, ""));
+            navdrawer_header_user_email.setText(prefs.getString(Constants.USER_EMAIL_ADDRESS, ""));
         } else {
             Picasso.with(this).load(R.drawable.ic_launcher).fit().into(navdrawer_header_user_profile_image);
             navdrawer_header_user_full_name.setText(R.string.app_name);
@@ -225,7 +186,6 @@ public class Books_Activity extends Base_Activity {
                     case R.id.navigation_drawer_item_snippets_gallery:
                         Intent openAllSnippets_Intent = new Intent(Books_Activity.this, Snippets_Gallery_Activity.class);
                         startActivity(openAllSnippets_Intent);
-                        mCurrentSelectedPosition = 0;
 
                         break;
                     case R.id.navigation_drawer_item_settings:
@@ -257,9 +217,7 @@ public class Books_Activity extends Base_Activity {
 
                 //Clicking on an adview when there's no Internet connection will cause this condition to be satisfied because no Book will be found at the index of that adview
                 if (book != null) {
-                    openSnippetsForBook.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
-                    openSnippetsForBook.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
-                    openSnippetsForBook.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
+                    openSnippetsForBook.putExtra(Constants.EXTRAS_BOOK, book);
                     startActivity(openSnippetsForBook);
                 }
             }
@@ -321,9 +279,6 @@ public class Books_Activity extends Base_Activity {
 
         switch (ebpMessage) {
             case "book_added":
-                if (createBookShowcase != null)
-                    createBookShowcase.hide();
-
                 handleBusEvents_ListRefresher();
                 Log.d("EVENTS", "book_added - Books_Activity");
                 break;
@@ -340,20 +295,7 @@ public class Books_Activity extends Base_Activity {
 
     public void handleBusEvents_ListRefresher() {
         prepareForNotifyDataChanged();
-
-        //If animations are disabled
-        Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
-        if (animationsParam.isEnabled()) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    listView.setLayoutAnimation(controller);
-                    booksAdapter.notifyDataSetChanged();
-                }
-            }, 100);
-        } else {
-            booksAdapter.notifyDataSetChanged();
-        }
+        booksAdapter.notifyDataSetChanged();
     }
 
     @DebugLog
@@ -376,137 +318,19 @@ public class Books_Activity extends Base_Activity {
 //        AdRequest adRequest = new AdRequest.Builder().build();
 //        mAdView.loadAd(adRequest);
 
-        controller
-                = AnimationUtils.loadLayoutAnimation(
-                this, R.anim.books_list_layout_controller);
-
-        //If animations are enabled
-        Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
-        if (animationsParam.isEnabled()) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-//                    listView.addFooterView(listViewHeaderAd);
-                    listView.setAdapter(booksAdapter);
-                    listView.setLayoutAnimation(controller);
-                }
-            }, 100);
-        } else {
-//            listView.addFooterView(listViewHeaderAd);
-            listView.setAdapter(booksAdapter);
-        }
-    }
-
-    @DebugLog
-    public void showCreateBookShowcase() {
-        Param tutorialMode = paramDAO.queryForId(Constants.TUTORIAL_MODE_DATABASE_VALUE);
-
-        if (tutorialMode.isEnabled()) {
-            RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-            lps.setMargins(getResources().getDimensionPixelOffset(R.dimen.button_margin_left), 0, 0, getResources().getDimensionPixelOffset(R.dimen.button_margin_bottom));
-
-            ViewTarget target = new ViewTarget(R.id.createNewBookBTN, Books_Activity.this);
-
-            String showcaseTitle = getString(R.string.create_book_showcase_title);
-
-            String showcaseDescription = getString(R.string.create_book_showcase_description);
-
-            createBookShowcase = new ShowcaseView.Builder(Books_Activity.this, getResources().getDimensionPixelSize(R.dimen.create_book_showcase_inner_rad), getResources().getDimensionPixelSize(R.dimen.create_book_showcase_outer_rad))
-                    .setTarget(target)
-                    .setContentTitle(Helper_Methods.fontifyString(showcaseTitle))
-                    .setContentText(Helper_Methods.fontifyString(showcaseDescription))
-                    .setStyle(R.style.CustomShowcaseTheme)
-                    .hasManualPosition(true)
-                    .xPostion(getResources().getDimensionPixelSize(R.dimen.create_book_text_x))
-                    .yPostion(getResources().getDimensionPixelSize(R.dimen.create_book_text_y))
-                    .build();
-            createBookShowcase.setButtonPosition(lps);
-            createBookShowcase.findViewById(R.id.showcase_button).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    createBookShowcase.hide();
-
-                    Param bookTutorialParam = paramDAO.queryForId(Constants.BOOK_TUTORIAL_DATABASE_VALUE_ENABLED);
-                    bookTutorialParam.setEnabled(false);
-                    paramDAO.update(bookTutorialParam);
-
-                    handleEmptyUI();
-                }
-            });
-            createBookShowcase.show();
-        }
+//        listView.addFooterView(listViewHeaderAd);
+        listView.setAdapter(booksAdapter);
     }
 
     public void handleEmptyUI() {
-        //Books are empty and the coachmark has been dismissed
-
-        Param bookTutorialParam = paramDAO.queryForId(Constants.BOOK_TUTORIAL_DATABASE_VALUE_ENABLED);
-
-        if (bookDAO.queryForAll().isEmpty() && !bookTutorialParam.isEnabled()) {
+        if (bookDAO.queryForAll().isEmpty()) {
             emptyListLayout.setVisibility(View.VISIBLE);
             JumpingBeans.with((TextView) emptyListLayout.findViewById(R.id.emptyLayoutMessageTV)).appendJumpingDots().build();
         } else if (bookDAO.queryForAll().isEmpty()) {
             emptyListLayout.setVisibility(View.GONE);
-            UIHandler.sendEmptyMessageDelayed(SHOW_CREATE_BOOK_SHOWCASE, 200);
         } else {
             emptyListLayout.setVisibility(View.INVISIBLE);
         }
-    }
-
-    private void deleteCell(final View bookView, final int index) {
-        BooksViewHolder vh = (BooksViewHolder) bookView.getTag();
-        vh.needInflate = true;
-
-        tempBook = books.get(index);
-
-        itemPendingDeleteDecision = true;
-
-        Animation.AnimationListener collapseAL = new Animation.AnimationListener() {
-            @Override
-            public void onAnimationEnd(Animation arg0) {
-                showUndeleteDialog(tempBook);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationStart(Animation animation) {
-            }
-        };
-
-        collapse(bookView, collapseAL);
-    }
-
-    private void collapse(final View v, AnimationListener al) {
-        final int initialHeight = v.getMeasuredHeight();
-
-        Animation anim = new Animation() {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if (interpolatedTime == 1) {
-                    v.setVisibility(View.GONE);
-                } else {
-                    v.getLayoutParams().height = initialHeight - (int) (initialHeight * interpolatedTime);
-                    v.requestLayout();
-                }
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        if (al != null) {
-            anim.setAnimationListener(al);
-        }
-
-        anim.setDuration(Constants.DELETE_BOOK_SNIPPET_ANIMATION_DURATION);
-        v.startAnimation(anim);
     }
 
     public void showUndeleteDialog(final Book tempBookToDelete) {
@@ -572,7 +396,7 @@ public class Books_Activity extends Base_Activity {
     }
 
     public void finalizeBookDeletion(Book tempBook) {
-        snipitDAO.delete(snipitDAO.queryForEq("book_id", tempBook.getId()));
+        snippetDAO.delete(snippetDAO.queryForEq("book_id", tempBook.getId()));
         bookDAO.delete(tempBook);
         prepareForNotifyDataChanged();
         booksAdapter.notifyDataSetChanged();
@@ -605,6 +429,7 @@ public class Books_Activity extends Base_Activity {
         private Context context;
         private BooksViewHolder holder;
         private List<Snippet> snippets;
+        private ProgressDialog uploadingSnippets_AWS;
 
         public Books_Adapter(Context context) {
             super();
@@ -654,7 +479,7 @@ public class Books_Activity extends Base_Activity {
 
             holder = (BooksViewHolder) parentView.getTag();
 
-            if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 holder.snippetsNumberTV.setElevation(5f);
             }
 
@@ -708,12 +533,64 @@ public class Books_Activity extends Base_Activity {
                         public boolean onMenuItemClick(MenuItem item) {
 
                             switch (item.getItemId()) {
+//                                case R.id.share:
+//                                    uploadingSnippets_AWS = new ProgressDialog(Books_Activity.this);
+//                                    if (snippets.size() == 1)
+//                                        uploadingSnippets_AWS.setMessage("Uploading " + snippets.size() + " image to AWS");
+//                                    else
+//                                        uploadingSnippets_AWS.setMessage("Uploading " + snippets.size() + " images to AWS");
+//                                    uploadingSnippets_AWS.setIndeterminate(false);
+//                                    uploadingSnippets_AWS.setMax(snippets.size());
+//                                    uploadingSnippets_AWS.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+//                                    uploadingSnippets_AWS.setCancelable(true);
+//                                    uploadingSnippets_AWS.show();
+//
+//                                    final AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(Constants.AMAZON_ACCESS_KEY, Constants.AMAZON_SECRET_ACCESS_KEY));
+
+//                                    Thread t = new Thread(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//
+//                                            for (final Snippet snippet : snippets) {
+//
+//                                                PutObjectRequest por = new PutObjectRequest("snippet-images", snippet.getName(), new File(snippet.getImage_path()));
+//                                                por.setGeneralProgressListener(new ProgressListener() {
+//                                                    @Override
+//                                                    public void progressChanged(ProgressEvent progressEvent) {
+//
+//                                                        if (progressEvent.getEventCode() == ProgressEvent.COMPLETED_EVENT_CODE) {
+//                                                            uploadingSnippets_AWS.setProgress(uploadingSnippets_AWS.getProgress() + 1);
+//
+//                                                            Log.d("PROGRESS", "COMPLETED");
+//
+//                                                            ResponseHeaderOverrides override = new ResponseHeaderOverrides();
+//                                                            override.setContentType("image/jpeg");
+//                                                            GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest("snippet-images", snippet.getName());
+//                                                            urlRequest.setResponseHeaders(override);
+//                                                            URL url = s3Client.generatePresignedUrl(urlRequest);
+//                                                            try {
+//                                                                Log.d("URL", "FINAL URL OF AWS IMAGE is : " + Uri.parse(url.toURI().toString()).toString());
+//                                                                snippet.setAWS_image_path(Uri.parse(url.toURI().toString()).toString());
+//                                                            } catch (URISyntaxException e) {
+//                                                                e.printStackTrace();
+//                                                            }
+//
+//                                                            if (uploadingSnippets_AWS.getProgress() == uploadingSnippets_AWS.getMax())
+//                                                                uploadingSnippets_AWS.dismiss();
+//                                                        }
+//                                                    }
+//                                                });
+//
+//                                                s3Client.putObject(por);
+//                                            }
+//                                        }
+//                                    });
+//                                    t.start();
+//                                    break;
                                 case R.id.edit:
                                     Intent editBookIntent = new Intent(Books_Activity.this, Create_Book_Activity.class);
+                                    editBookIntent.putExtra(Constants.EXTRAS_BOOK, books.get(position));
                                     editBookIntent.putExtra(Constants.EDIT_BOOK_PURPOSE_STRING, Constants.EDIT_BOOK_PURPOSE_VALUE);
-                                    editBookIntent.putExtra(Constants.EXTRAS_BOOK_ID, books.get(position).getId());
-//                                    editBookIntent.putExtra(Constants.EXTRAS_BOOK_COLOR, books.get(position).getColorCode());
-//                                    editBookIntent.putExtra("book", Parcels.wrap(books.get(position)));
                                     startActivity(editBookIntent);
                                     break;
                                 case R.id.delete:
@@ -725,7 +602,7 @@ public class Books_Activity extends Base_Activity {
                                         try {
                                             snippetQueryBuilder.where().eq("book_id", tempBook.getId());
                                             pq = snippetQueryBuilder.prepare();
-                                            snipitDAO.delete(snipitDAO.query(pq));
+                                            snippetDAO.delete(snippetDAO.query(pq));
                                         } catch (SQLException e) {
                                             e.printStackTrace();
                                         }
@@ -735,13 +612,7 @@ public class Books_Activity extends Base_Activity {
                                         undoDeleteBookSB.dismiss();
                                     }
 
-                                    Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
-
-                                    if (animationsParam.isEnabled()) {
-                                        deleteCell(parentView, position);
-                                    } else {
-                                        showUndeleteDialog(books.get(position));
-                                    }
+                                    showUndeleteDialog(books.get(position));
 
                                     break;
                             }
@@ -758,7 +629,7 @@ public class Books_Activity extends Base_Activity {
                 }
             });
 
-            snippets = snipitDAO.queryForEq("book_id", books.get(position).getId());
+            snippets = snippetDAO.queryForEq("book_id", books.get(position).getId());
             holder.snippetsNumberTV.setText(snippets.size() + "");
 
             return parentView;

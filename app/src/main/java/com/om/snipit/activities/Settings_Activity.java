@@ -23,15 +23,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.andreabaccega.widget.FormEditText;
-import com.flurry.android.FlurryAgent;
-import com.j256.ormlite.android.apptools.OpenHelperManager;
-import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.om.snipit.R;
 import com.om.snipit.classes.Constants;
-import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.GMailSender;
 import com.om.snipit.classes.Helper_Methods;
-import com.om.snipit.classes.Param;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
@@ -39,33 +34,23 @@ import de.keyboardsurfer.android.widget.crouton.Style;
 public class Settings_Activity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private ProgressDialog sendEmailFeedbackDialog;
-    private DatabaseHelper databaseHelper;
-    private RuntimeExceptionDao<Param, Integer> paramDAO;
-    private Param animationsParam;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        paramDAO = getHelper().getParamDAO();
-
-        animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
-
-        if (animationsParam.isEnabled())
-            overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
-
-        final Helper_Methods helperMethods = new Helper_Methods(this);
-
         final LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
 
         Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
 
-        if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(getResources().getColor(R.color.darker_red));
             toolbar.setElevation(25f);
         }
 
         toolbar.setBackgroundColor(getResources().getColor(R.color.red));
+        toolbar.setTitleTextColor(getResources().getColor(R.color.white));
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white);
 
         root.addView(toolbar, 0);
 
@@ -73,9 +58,6 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
             @Override
             public void onClick(View v) {
                 onBackPressed();
-
-                if (animationsParam.isEnabled())
-                    overridePendingTransition(R.anim.right_slide_in_back, R.anim.right_slide_out_back);
             }
         });
 
@@ -151,64 +133,27 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
                 return false;
             }
         });
+
+//        Preference signOut = findPreference("pref_key_sign_out");
+//
+//        signOut.setSummary(prefs.getString(Constants.USER_EMAIL_ADDRESS, ""));
+//        signOut.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+//            @Override
+//            public boolean onPreferenceClick(Preference preference) {
+//                prefsEditor = prefs.edit();
+//                prefsEditor.putBoolean(Constants.USER_LOGGED_IN, false);
+//                prefsEditor.apply();
+//
+//                startActivity(new Intent(Settings_Activity.this, Login_Activity.class));
+//
+//                return false;
+//            }
+//        });
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-        switch (key) {
-            case "pref_key_tutorial_mode":
-                Param tutorialParam = paramDAO.queryForId(Constants.TUTORIAL_MODE_DATABASE_VALUE);
-
-                Param bookTutorialParam = paramDAO.queryForId(Constants.BOOK_TUTORIAL_DATABASE_VALUE_ENABLED);
-                Param snippetTutorialParam = paramDAO.queryForId(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED);
-                Param createBookTutorialParam = paramDAO.queryForId(Constants.CREATE_BOOK_TUTORIAL_DATABASE_VALUE_ENABLED);
-
-                if (sharedPreferences.getBoolean("pref_key_tutorial_mode", true)) {
-                    FlurryAgent.logEvent("Tutorial_Mode_ON");
-
-                    //Set all coachmarks to Unseen
-                    bookTutorialParam.setEnabled(true);
-                    snippetTutorialParam.setEnabled(true);
-                    createBookTutorialParam.setEnabled(true);
-
-                    tutorialParam.setEnabled(true);
-                } else {
-                    FlurryAgent.logEvent("Tutorial_Mode_OFF");
-
-                    //Set all coachmarks to Seen
-                    bookTutorialParam.setEnabled(false);
-                    snippetTutorialParam.setEnabled(false);
-                    createBookTutorialParam.setEnabled(false);
-
-                    tutorialParam.setEnabled(false);
-                }
-
-                paramDAO.update(bookTutorialParam);
-                paramDAO.update(snippetTutorialParam);
-                paramDAO.update(createBookTutorialParam);
-
-                paramDAO.update(tutorialParam);
-
-                break;
-            case "pref_key_animations_mode":
-                Param animationsParam = paramDAO.queryForId(Constants.ANIMATIONS_DATABASE_VALUE);
-
-                //Reflect the change in the database because this preference has already changed
-                if (sharedPreferences.getBoolean("pref_key_animations_mode", true)) {
-                    FlurryAgent.logEvent("Layout_Animations_ON");
-
-                    animationsParam.setEnabled(true);
-                } else {
-                    FlurryAgent.logEvent("Layout_Animations_OFF");
-
-                    animationsParam.setEnabled(false);
-                }
-
-                paramDAO.update(animationsParam);
-
-                break;
-        }
     }
 
     private class SendFeedbackEmail extends AsyncTask<String, Void, Void> {
@@ -239,14 +184,5 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
             sendEmailFeedbackDialog.hide();
             Crouton.makeText(Settings_Activity.this, getResources().getString(R.string.feedback_sent_alert), Style.CONFIRM).show();
         }
-    }
-
-    public DatabaseHelper getHelper() {
-        if (databaseHelper == null) {
-            databaseHelper =
-                    OpenHelperManager.getHelper(this, DatabaseHelper.class);
-        }
-
-        return databaseHelper;
     }
 }

@@ -1,11 +1,14 @@
-package com.om.snipit.classes;
+package com.om.snipit.models;
+
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "Book")
 
-public class Book {
+public class Book implements Parcelable {
 
     @DatabaseField (generatedId = true, index = true)
     int id;
@@ -24,6 +27,26 @@ public class Book {
 
     public Book() {
     }
+
+    private Book (Parcel in){
+        id = in.readInt();
+        title = in.readString();
+        author = in.readString();
+        image_path = in.readString();
+        date_added = in.readString();
+        color_code = in.readInt();
+        order = in.readInt();
+    }
+
+    public static final Parcelable.Creator<Book> CREATOR = new Parcelable.Creator<Book>() {
+        public Book createFromParcel(Parcel in) {
+            return new Book(in);
+        }
+
+        public Book[] newArray(int size) {
+            return new Book[size];
+        }
+    };
 
     public Book(int id, String title, String author, String image_path, String date_added, int color_code, int order) {
         this.id = id;
@@ -89,5 +112,21 @@ public class Book {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(id);
+        out.writeString(title);
+        out.writeString(author);
+        out.writeString(image_path);
+        out.writeString(date_added);
+        out.writeInt(color_code);
+        out.writeInt(order);
     }
 }

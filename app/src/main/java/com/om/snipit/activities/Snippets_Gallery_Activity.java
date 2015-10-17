@@ -26,7 +26,7 @@ import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
 import com.om.snipit.classes.RoundedTransform;
-import com.om.snipit.classes.Snippet;
+import com.om.snipit.models.Snippet;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -60,8 +60,6 @@ public class Snippets_Gallery_Activity extends Base_Activity {
 
         ButterKnife.inject(this);
 
-        Helper_Methods helperMethods = new Helper_Methods(this);
-
         EventBus_Singleton.getInstance().register(this);
 
         setSupportActionBar(toolbar);
@@ -69,12 +67,12 @@ public class Snippets_Gallery_Activity extends Base_Activity {
         getSupportActionBar().setTitle(getString(R.string.all_snippets_activity_title));
         getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.color.blue));
 
-        if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(getResources().getColor(R.color.darker_blue));
             toolbar.setElevation(25f);
         }
 
-        snippetDAO = getHelper().getSnipitDAO();
+        snippetDAO = getHelper().getSnippetDAO();
 
         snippets = snippetDAO.queryForAll();
 
@@ -91,6 +89,7 @@ public class Snippets_Gallery_Activity extends Base_Activity {
                     Intent openViewSnippetActivity_Intent = new Intent(Snippets_Gallery_Activity.this, View_Snippet_Activity.class);
                     openViewSnippetActivity_Intent.putExtra(Constants.EXTRAS_CURRENT_SNIPPET_POSITION, position);
                     openViewSnippetActivity_Intent.putExtra(Constants.EXTRAS_VIEWING_SNIPPETS_GALLERY, true);
+                    openViewSnippetActivity_Intent.putExtra(Constants.EXTRAS_BOOK, snippets.get(position).getBook());
                     startActivity(openViewSnippetActivity_Intent);
                 }
             });

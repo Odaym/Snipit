@@ -35,7 +35,7 @@ import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
-import com.om.snipit.classes.Snippet;
+import com.om.snipit.models.Snippet;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -79,12 +79,14 @@ public class Paint_Snippet_Activity extends Base_Activity {
     private DatabaseHelper databaseHelper;
     private RuntimeExceptionDao<Snippet, Integer> snippetDAO;
 
+    private Snippet snippet;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_paint_snippet);
 
-        snippetDAO = getHelper().getSnipitDAO();
+        snippetDAO = getHelper().getSnippetDAO();
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefsEditor = prefs.edit();
@@ -97,6 +99,8 @@ public class Paint_Snippet_Activity extends Base_Activity {
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+
+        snippet = getIntent().getParcelableExtra(Constants.EXTRAS_SNIPPET);
 
         Callback picassoCallback = new Callback() {
             @Override
@@ -124,7 +128,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
             }
         };
 
-        Picasso.with(Paint_Snippet_Activity.this).load(new File(getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_IMAGE_PATH))).resize(1000, 1000).centerInside().into(snippetIMG, picassoCallback);
+        Picasso.with(Paint_Snippet_Activity.this).load(new File(snippet.getImage_path())).resize(1000, 1000).centerInside().into(snippetIMG, picassoCallback);
 
         fabActionUndo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -314,7 +318,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
     private class SavePaintedBookmark_Task extends AsyncTask<String, String, Boolean> {
 
         private Helper_Methods helperMethods;
-        private int snippet_id = getIntent().getExtras().getInt(Constants.EXTRAS_SNIPPET_ID, -1);
+        private int snippet_id = snippet.getId();
         private Snippet snippetBeingPainted = snippetDAO.queryForId(snippet_id);
         private Bitmap mBitmapOriginal, mBitmapNew;
         private ProgressDialog savePaintedSnippetDialog;
@@ -356,7 +360,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
 
                 snippetDAO.update(snippetBeingPainted);
 
-                publishProgress(getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_IMAGE_PATH), finalImagePathAfterPaint);
+                publishProgress(snippet.getImage_path(), finalImagePathAfterPaint);
 
             } catch (Exception e) {
                 return true;

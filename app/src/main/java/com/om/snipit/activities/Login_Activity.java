@@ -3,18 +3,21 @@ package com.om.snipit.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
-import android.widget.Button;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.om.snipit.R;
 import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.Helper_Methods;
+import com.om.snipit.models.User;
+import com.parse.ParseObject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -26,7 +29,7 @@ public class Login_Activity extends Activity implements
         GoogleApiClient.OnConnectionFailedListener {
 
     @InjectView(R.id.sign_in_button)
-    Button signInBTN;
+    SignInButton signInBTN;
 
     /* Request code used to invoke sign in user interactions. */
     private static final int RC_SIGN_IN = 0;
@@ -49,32 +52,35 @@ public class Login_Activity extends Activity implements
      */
     private ConnectionResult mConnectionResult;
 
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor prefsEditor;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         ButterKnife.inject(this);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API)
-                .addScope(new Scope(Scopes.PROFILE))
-                .addScope(new Scope(Scopes.EMAIL))
-                .build();
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         signInBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!mGoogleApiClient.isConnecting()) {
-                    mSignInClicked = true;
-                    resolveSignInError();
-                } else if (view.getId() == R.id.sign_out_button) {
-                    if (mGoogleApiClient.isConnected()) {
-                        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-                        mGoogleApiClient.disconnect();
-                        mGoogleApiClient.connect();
+                if (Helper_Methods.isInternetAvailable(Login_Activity.this)) {
+                    if (!mGoogleApiClient.isConnecting()) {
+                        mSignInClicked = true;
+                        resolveSignInError();
                     }
+//                    else if (view.getId() == R.id.sign_out_button) {
+
+//                        if (mGoogleApiClient.isConnected()) {
+//                            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+//                            mGoogleApiClient.disconnect();
+//                            mGoogleApiClient.connect();
+//                        }
+//                    }
+                } else {
+                    Crouton.makeText(Login_Activity.this, R.string.action_needs_internet, Style.ALERT).show();
                 }
             }
         });
@@ -102,16 +108,37 @@ public class Login_Activity extends Activity implements
         if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
             Person currentPerson = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
 
-            open_MainActivity.putExtra(Constants.USER_LOGGED_IN, true);
-            open_MainActivity.putExtra(Constants.USER_FULL_NAME, currentPerson.getDisplayName());
-            open_MainActivity.putExtra(Constants.USER_EMAIL_ADDRESS, Plus.AccountApi.getAccountName(mGoogleApiClient));
-            open_MainActivity.putExtra(Constants.USER_PHOTO_URL, currentPerson.getImage().getUrl());
+            User user = new User();
+            user.setFull_name(currentPerson.getDisplayName());
+            user.setEmail_address(Plus.AccountApi.getAccountName(mGoogleApiClient));
+            user.setPhoto_url(currentPerson.getImage().getUrl());
+
+            open_MainActivity.putExtra(Constants.EXTRAS_USER, user);
+            saveLoggedInPreference(user);
+//            saveUserToParse(user);
+
+            startActivity(open_MainActivity);
         } else {
             //TODO
             open_MainActivity.putExtra(Constants.USER_LOGGED_IN, false);
         }
+    }
 
-        startActivity(open_MainActivity);
+    public void saveLoggedInPreference(User userLoggedIn) {
+        prefsEditor = prefs.edit();
+        prefsEditor.putBoolean(Constants.USER_LOGGED_IN, true);
+        prefsEditor.putString(Constants.USER_FULL_NAME, userLoggedIn.getFull_name());
+        prefsEditor.putString(Constants.USER_EMAIL_ADDRESS, userLoggedIn.getEmail_address());
+        prefsEditor.putString(Constants.USER_PHOTO_URL, userLoggedIn.getPhoto_url());
+        prefsEditor.apply();
+    }
+
+    public void saveUserToParse(User userLoggedIn) {
+        ParseObject userObject = new ParseObject("User");
+        userObject.put("full_name", userLoggedIn.getFull_name());
+        userObject.put("email", userLoggedIn.getEmail_address());
+        userObject.put("photo_url", userLoggedIn.getPhoto_url());
+        userObject.saveInBackground();
     }
 
     @Override

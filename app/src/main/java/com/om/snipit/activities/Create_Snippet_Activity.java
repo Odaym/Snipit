@@ -9,13 +9,13 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.andreabaccega.widget.FormEditText;
-import com.bumptech.glide.Glide;
 import com.flurry.android.FlurryAgent;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -25,14 +25,13 @@ import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
-import com.om.snipit.classes.Snippet;
+import com.om.snipit.models.Book;
+import com.om.snipit.models.Snippet;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,8 +60,9 @@ public class Create_Snippet_Activity extends Base_Activity {
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
 
+    private Book book;
+
     private ArrayList<FormEditText> allFields = new ArrayList<>();
-    private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 
     private DatabaseHelper databaseHelper;
     private RuntimeExceptionDao<Snippet, Integer> snippetDAO;
@@ -79,7 +79,7 @@ public class Create_Snippet_Activity extends Base_Activity {
 
         ButterKnife.inject(this);
 
-        snippetDAO = getHelper().getSnipitDAO();
+        snippetDAO = getHelper().getSnippetDAO();
 
         allFields.add(nameET);
 
@@ -87,17 +87,19 @@ public class Create_Snippet_Activity extends Base_Activity {
 
         EventBus_Singleton.getInstance().register(this);
 
+        book = getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
+        helperMethods.setUpActionbarColors(this, book.getColorCode());
 
-        if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             toolbar.setElevation(25f);
         }
 
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING, -1);
 
-        tempImagePath = getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_IMAGE_PATH);
+        tempImagePath = getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH);
         finalImagePath = tempImagePath;
 
         //If it is a create operation, the path to the snippet image is inside the extras that were sent to this activity (from Camera intent)
@@ -111,7 +113,7 @@ public class Create_Snippet_Activity extends Base_Activity {
         if (CALL_PURPOSE == Constants.EDIT_SNIPPET_PURPOSE_VALUE) {
             getSupportActionBar().setTitle(getString(R.string.edit_snippet_activity_title));
 
-            snippet_from_list = snippetDAO.queryForId(getIntent().getExtras().getInt(Constants.EXTRAS_SNIPPET_ID, -1));
+            snippet_from_list = getIntent().getParcelableExtra(Constants.EXTRAS_SNIPPET);
 
             nameET.setText(snippet_from_list.getName());
             nameET.setSelection(nameET.getText().length());
@@ -119,14 +121,7 @@ public class Create_Snippet_Activity extends Base_Activity {
             if (snippet_from_list.getPage_number() != Constants.NO_SNIPPET_PAGE_NUMBER)
                 pageNumberET.setText(String.valueOf(snippet_from_list.getPage_number()));
 
-            try {
-                //If the String was a URL then this snippet is a sample
-                new URL(snippet_from_list.getImage_path());
-                Glide.with(Create_Snippet_Activity.this).load(snippet_from_list.getImage_path()).centerCrop().error(getResources().getDrawable(R.drawable.notfound_1)).into(snippetIMG);
-            } catch (MalformedURLException e) {
-                //Else it's on disk
-                Picasso.with(this).load(new File(snippet_from_list.getImage_path())).into(snippetIMG);
-            }
+            Picasso.with(this).load(new File(snippet_from_list.getImage_path())).into(snippetIMG);
         } else {
             getSupportActionBar().setTitle(getString(R.string.create_snippet_activity_title));
         }
@@ -151,6 +146,8 @@ public class Create_Snippet_Activity extends Base_Activity {
                             else
                                 snippet_from_list.setImage_path(snippet_from_list.getImage_path());
 
+                            snippet_from_list.setBook(book);
+
                             snippetDAO.update(snippet_from_list);
 
                             EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_name_page_edited"));
@@ -163,15 +160,14 @@ public class Create_Snippet_Activity extends Base_Activity {
                     } else {
                         //If you are creating a new snippet
                         Date date = new Date();
-                        String month = (String) android.text.format.DateFormat.format("MMM", date);
-                        String day = (String) android.text.format.DateFormat.format("dd", date);
-                        String year = (String) android.text.format.DateFormat.format("yyyy", date);
+                        String month = (String) DateFormat.format("MMM", date);
+                        String day = (String) DateFormat.format("dd", date);
+                        String year = (String) DateFormat.format("yyyy", date);
 
                         try {
                             Snippet snippet = new Snippet();
                             snippet.setName(nameET.getText().toString());
-                            snippet.setBookId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
-                            snippet.setOrder(snippetDAO.queryForEq("book_id", getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID)).size() + 1);
+                            snippet.setOrder(snippetDAO.queryForEq("book_id", book.getId()).size() + 1);
 
                             //Only try to parse if there was a number given
                             if (!pageNumberET.getText().toString().isEmpty())
@@ -185,6 +181,8 @@ public class Create_Snippet_Activity extends Base_Activity {
                                 snippet.setImage_path(finalImagePath);
 
                             snippet.setDate_added(month + " " + day + ", " + year);
+
+                            snippet.setBook(book);
 
                             snippetDAO.create(snippet);
 
@@ -203,7 +201,7 @@ public class Create_Snippet_Activity extends Base_Activity {
             }
         });
 
-        createNewSnippetBTN.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(helperMethods.determineFabButtonsColor(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR)))));
+        createNewSnippetBTN.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(helperMethods.determineFabButtonsColor(book.getColorCode()))));
 
         createNewSnippetBTN.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -259,10 +257,9 @@ public class Create_Snippet_Activity extends Base_Activity {
                     CALL_PURPOSE = Constants.EDIT_SNIPPET_IMAGE_PURPOSE_VALUE;
 
                 Intent openCropImageActivity = new Intent(Create_Snippet_Activity.this, Crop_Image_Activity.class);
-                openCropImageActivity.putExtra(Constants.EXTRAS_BOOK_ID, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
-                openCropImageActivity.putExtra(Constants.EXTRAS_BOOK_COLOR, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
+                openCropImageActivity.putExtra(Constants.EXTRAS_BOOK, book);
                 openCropImageActivity.putExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING, CALL_PURPOSE);
-                openCropImageActivity.putExtra(Constants.EXTRAS_SNIPPET_IMAGE_PATH, tempImagePath);
+                openCropImageActivity.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, tempImagePath);
                 startActivity(openCropImageActivity);
                 break;
         }

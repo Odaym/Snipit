@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
+import com.om.snipit.R;
 import com.om.snipit.activities.View_Snippet_Activity;
+import com.om.snipit.classes.Constants;
 
 import java.io.FileOutputStream;
 
@@ -68,9 +70,9 @@ public class AsyncTask_ProcessOCR extends AsyncTask<String, String, Boolean> {
                         android.provider.Settings.Secure.ANDROID_ID);
 
                 // Obtain installation id from server
-                publishProgress("First run: obtaining installation id..");
+                publishProgress(activity.getString(R.string.ocr_first_run_message));
                 String installationId = restClient.activateNewInstallation(deviceId);
-                publishProgress("Done. Installation id is '" + installationId + "'");
+//                publishProgress("Done. Installation id is '" + installationId + "'");
 
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString(instIdName, installationId);
@@ -80,15 +82,15 @@ public class AsyncTask_ProcessOCR extends AsyncTask<String, String, Boolean> {
             String installationId = settings.getString(instIdName, "");
             restClient.applicationId += installationId;
 
-            publishProgress("Uploading image...");
+            publishProgress(activity.getString(R.string.ocr_uploading_snippet));
 
             String language = "English"; // Comma-separated list: Japanese,English or German,French,Spanish etc.
 
             ProcessingSettings processingSettings = new ProcessingSettings();
             processingSettings.setOutputFormat(ProcessingSettings.OutputFormat.txt);
-            processingSettings.setLanguage(language);
+//            processingSettings.setLanguage(language);
 
-            publishProgress("Uploading..");
+//            publishProgress("Uploading..");
 
             // If you want to process business cards, uncomment this
             /*
@@ -108,13 +110,14 @@ public class AsyncTask_ProcessOCR extends AsyncTask<String, String, Boolean> {
                 // it's recommended that you use listFinishedTasks instead (which is described
                 // at http://ocrsdk.com/documentation/apireference/listFinishedTasks/).
 
-                Thread.sleep(5000);
-                publishProgress("Waiting..");
+//                Thread.sleep(5000);
+                publishProgress(activity.getString(R.string.ocr_almost_done));
+
                 task = restClient.getTaskStatus(task.Id);
             }
 
             if (task.Status == Task.TaskStatus.Completed) {
-                publishProgress("Downloading..");
+                publishProgress(activity.getString(R.string.ocr_downloading_result));
                 FileOutputStream fos = activity.openFileOutput(outputFile, Context.MODE_PRIVATE);
 
                 try {
@@ -123,7 +126,7 @@ public class AsyncTask_ProcessOCR extends AsyncTask<String, String, Boolean> {
                     fos.close();
                 }
 
-                publishProgress("Ready");
+                publishProgress(activity.getString(R.string.ocr_setup_finished));
             } else if (task.Status == Task.TaskStatus.NotEnoughCredits) {
                 throw new Exception("Not enough credits to process task. Add more pages to your application's account.");
             } else {
@@ -132,9 +135,9 @@ public class AsyncTask_ProcessOCR extends AsyncTask<String, String, Boolean> {
 
             return true;
         } catch (Exception e) {
-            final String message = "Error: " + e.getMessage();
-            publishProgress(message);
-            activity.displayMessage(message);
+//            final String message = "Error: " + e.getMessage();
+//            publishProgress(message);
+            activity.displayMessage(Constants.OCR_SCAN_ERROR, activity.getString(R.string.ocr_scan_error));
             return false;
         }
     }

@@ -4,10 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Build;
-import android.support.v7.app.ActionBarActivity;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.TypefaceSpan;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.andreabaccega.widget.FormEditText;
@@ -17,15 +14,12 @@ import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.snipit.R;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import hugo.weaving.DebugLog;
 
 public class Helper_Methods {
     private Context context;
-    private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 
     public Helper_Methods(Context context) {
         this.context = context;
@@ -39,17 +33,17 @@ public class Helper_Methods {
         }
     }
 
-    public boolean isBookmarkOnDisk(String bookmarkImagePath) {
-        try {
-            //If the String was a URL then this bookmark is a sample
-            new URL(bookmarkImagePath);
-        } catch (MalformedURLException e) {
-            //Else it's on disk
-            return true;
-        }
-
-        return false;
-    }
+//    public boolean isBookmarkOnDisk(String bookmarkImagePath) {
+//        try {
+//            //If the String was a URL then this bookmark is a sample
+//            new URL(bookmarkImagePath);
+//        } catch (MalformedURLException e) {
+//            //Else it's on disk
+//            return true;
+//        }
+//
+//        return false;
+//    }
 
     public boolean validateFields(ArrayList<FormEditText> allFields) {
         boolean allValid = true;
@@ -97,62 +91,54 @@ public class Helper_Methods {
                 cm.getActiveNetworkInfo().isConnectedOrConnecting();
     }
 
-    //Used for Showcase Views
-    public static Spannable fontifyString(String string) {
-        Spannable finalSpan = new SpannableString(string);
-        finalSpan.setSpan(new TypefaceSpan("sans-serif-light"), 0, string.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        return finalSpan;
-    }
-
     public void setUpActionbarColors(Activity activityReference, int book_color_code) {
-        ActionBarActivity activity = (ActionBarActivity) activityReference;
+        AppCompatActivity activity = (AppCompatActivity) activityReference;
 
         switch (book_color_code) {
             case Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS:
-                if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                     activity.getWindow().setStatusBarColor(context.getResources().getColor(R.color.darker_green));
                 if (activity.getSupportActionBar() != null)
                     activity.getSupportActionBar().setBackgroundDrawable(context.getResources().getDrawable(R.color.green));
                 break;
             case Constants.OPEN_SOURCE_LIBS_ACTIVITY_TOOLBAR_COLORS:
-                if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                     activity.getWindow().setStatusBarColor(context.getResources().getColor(R.color.darker_purple));
                 if (activity.getSupportActionBar() != null)
                     activity.getSupportActionBar().setBackgroundDrawable(context.getResources().getDrawable(R.color.purple));
                 break;
             case 0:
-                if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                     activity.getWindow().setStatusBarColor(context.getResources().getColor(R.color.darker_pink));
                 if (activity.getSupportActionBar() != null)
                     activity.getSupportActionBar().setBackgroundDrawable(context.getResources().getDrawable(R.color.pink));
                 break;
             case 1:
-                if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                     activity.getWindow().setStatusBarColor(context.getResources().getColor(R.color.darker_red));
                 if (activity.getSupportActionBar() != null)
                     activity.getSupportActionBar().setBackgroundDrawable(context.getResources().getDrawable(R.color.red));
                 break;
             case 2:
-                if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                     activity.getWindow().setStatusBarColor(context.getResources().getColor(R.color.darker_purple));
                 if (activity.getSupportActionBar() != null)
                     activity.getSupportActionBar().setBackgroundDrawable(context.getResources().getDrawable(R.color.purple));
                 break;
             case 3:
-                if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                     activity.getWindow().setStatusBarColor(context.getResources().getColor(R.color.darker_yellow));
                 if (activity.getSupportActionBar() != null)
                     activity.getSupportActionBar().setBackgroundDrawable(context.getResources().getDrawable(R.color.yellow));
                 break;
             case 4:
-                if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                     activity.getWindow().setStatusBarColor(context.getResources().getColor(R.color.darker_blue));
                 if (activity.getSupportActionBar() != null)
                     activity.getSupportActionBar().setBackgroundDrawable(context.getResources().getDrawable(R.color.blue));
                 break;
             case 5:
-                if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                     activity.getWindow().setStatusBarColor(context.getResources().getColor(R.color.darker_brown));
                 if (activity.getSupportActionBar() != null)
                     activity.getSupportActionBar().setBackgroundDrawable(context.getResources().getDrawable(R.color.brown));
@@ -220,9 +206,5 @@ public class Helper_Methods {
         });
 
         return elementAnimator;
-    }
-
-    public int getCurrentapiVersion() {
-        return currentapiVersion;
     }
 }

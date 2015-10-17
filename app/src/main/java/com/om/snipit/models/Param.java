@@ -1,4 +1,4 @@
-package com.om.snipit.classes;
+package com.om.snipit.models;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;

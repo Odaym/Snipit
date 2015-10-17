@@ -10,4 +10,12 @@
 
     <dimen name="bookmark_list_item_height">100dp</dimen>
 
+    <dimen name="fab_buttons_margins">16dp</dimen>
+
+    <dimen name="fab_buttons_right_left_margins">10dp</dimen>
+
+    <dimen name="navdrawer_profile_image_top_padding">40dp</dimen>
+
+    <dimen name="navdrawer_header_height">170dp</dimen>
+
 </resources>

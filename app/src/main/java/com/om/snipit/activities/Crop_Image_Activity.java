@@ -15,6 +15,7 @@ import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
+import com.om.snipit.models.Book;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -40,6 +41,8 @@ public class Crop_Image_Activity extends Base_Activity {
     @InjectView(R.id.cropImageView)
     CropImageView cropImageView;
 
+    private Book book;
+
     private String tempImagePath_fromIntent;
     private int CALL_PURPOSE;
 
@@ -52,9 +55,11 @@ public class Crop_Image_Activity extends Base_Activity {
 
         Helper_Methods helperMethods = new Helper_Methods(this);
 
-        helperMethods.setUpActionbarColors(this, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
+        book = getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
 
-        tempImagePath_fromIntent = getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_IMAGE_PATH);
+        helperMethods.setUpActionbarColors(this, book.getColorCode());
+
+        tempImagePath_fromIntent = getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH);
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING, -1);
 
         try {
@@ -77,11 +82,10 @@ public class Crop_Image_Activity extends Base_Activity {
                 if (CALL_PURPOSE == Constants.EDIT_SNIPPET_PURPOSE_VALUE || CALL_PURPOSE == Constants.EDIT_SNIPPET_IMAGE_PURPOSE_VALUE) {
                     EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_picture_changed", finalImagePath));
                 } else {
-                    Intent openCreateBookmark = new Intent(Crop_Image_Activity.this, Create_Snippet_Activity.class);
-                    openCreateBookmark.putExtra(Constants.EXTRAS_BOOK_ID, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
-                    openCreateBookmark.putExtra(Constants.EXTRAS_SNIPPET_IMAGE_PATH, finalImagePath);
-                    openCreateBookmark.putExtra(Constants.EXTRAS_BOOK_COLOR, getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_COLOR));
-                    startActivity(openCreateBookmark);
+                    Intent openCreateSnippet = new Intent(Crop_Image_Activity.this, Create_Snippet_Activity.class);
+                    openCreateSnippet.putExtra(Constants.EXTRAS_BOOK, book);
+                    openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, finalImagePath);
+                    startActivity(openCreateSnippet);
                 }
 
                 finish();

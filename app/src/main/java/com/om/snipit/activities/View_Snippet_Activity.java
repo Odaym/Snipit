@@ -22,6 +22,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,13 +36,15 @@ import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.om.snipit.R;
+import com.om.snipit.abbyy_ocr.AsyncTask_ProcessOCR;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.HackyViewPager;
 import com.om.snipit.classes.Helper_Methods;
-import com.om.snipit.classes.Snippet;
+import com.om.snipit.models.Book;
+import com.om.snipit.models.Snippet;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -57,6 +60,8 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -64,8 +69,7 @@ public class View_Snippet_Activity extends Base_Activity {
 
     private String extras_search_term;
     private boolean extras_viewing_snippets_gallery = false;
-    private int book_id;
-    private String book_title;
+    private Book book;
 
     private List<Snippet> snippets;
     private int NUM_PAGES;
@@ -92,23 +96,18 @@ public class View_Snippet_Activity extends Base_Activity {
 
         ButterKnife.inject(this);
 
-        snippetDAO = getHelper().getSnipitDAO();
+        snippetDAO = getHelper().getSnippetDAO();
         snippetQueryBuilder = snippetDAO.queryBuilder();
 
         //These two fields are common amongst both Intents that lead up to this Activity. Whether we are in Snippets Gallery or not, and what the position of the current Snippet is within the list of all grabbed snippets, perfect.
         extras_viewing_snippets_gallery = getIntent().getExtras().getBoolean(Constants.EXTRAS_VIEWING_SNIPPETS_GALLERY);
         current_snippet_position = getIntent().getExtras().getInt(Constants.EXTRAS_CURRENT_SNIPPET_POSITION);
+        book = getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
+        getSupportActionBar().setTitle(book.getTitle());
 
-        if (extras_viewing_snippets_gallery) {
-            //If viewing snippets from Snippets Gallery
-            getSupportActionBar().setTitle(getResources().getString(R.string.all_snippets_activity_title));
-        } else {
-            //If viewing snippets from a Collection, not from Snippets Gallery
-            book_title = getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
-            book_id = getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID);
+        //If viewing snippets from a Collection, not from Snippets Gallery
+        if (!extras_viewing_snippets_gallery)
             extras_search_term = getIntent().getExtras().getString(Constants.EXTRAS_SEARCH_TERM, Constants.EXTRAS_NO_SEARCH_TERM);
-            getSupportActionBar().setTitle(book_title);
-        }
 
         handleWhichBookmarksToLoad();
 
@@ -125,11 +124,17 @@ public class View_Snippet_Activity extends Base_Activity {
 
     @Subscribe
     public void handle_BusEvents(EventBus_Poster ebp) {
-        if (ebp.getMessage().equals("snippet_image_needs_reload")) {
+        switch (ebp.getMessage()) {
+            case "snippet_image_needs_reload":
+                handleWhichBookmarksToLoad();
 
-            handleWhichBookmarksToLoad();
+                mPagerAdapter.notifyDataSetChanged();
+                break;
+            case "snippet_ocr_content_changed":
+                handleWhichBookmarksToLoad();
 
-            mPagerAdapter.notifyDataSetChanged();
+                mPagerAdapter.notifyDataSetChanged();
+                break;
         }
     }
 
@@ -143,7 +148,7 @@ public class View_Snippet_Activity extends Base_Activity {
             try {
                 Reader reader = new InputStreamReader(fis, "UTF-8");
                 BufferedReader bufReader = new BufferedReader(reader);
-                String text = null;
+                String text;
                 while ((text = bufReader.readLine()) != null) {
                     contents.append(text).append(System.getProperty("line.separator"));
                 }
@@ -151,23 +156,67 @@ public class View_Snippet_Activity extends Base_Activity {
                 fis.close();
             }
 
-            displayMessage(contents.toString());
+            if (contents.toString().length() == 0 || contents.toString().length() == 2)
+                displayMessage(Constants.OCR_SCAN_SUCCESS_EMPTY, getString(R.string.ocr_scan_empty));
+            else
+                displayMessage(Constants.OCR_SCAN_SUCCESS, contents.toString());
         } catch (Exception e) {
-            displayMessage("Error: " + e.getMessage());
+            displayMessage(Constants.OCR_SCAN_ERROR, getString(R.string.ocr_scan_error));
         }
     }
 
-    public void displayMessage(String text) {
+    public void displayMessage(int ocrResultCode, final String ocrResult) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("OCR Scan Results")
-                .setMessage(text)
-                .setCancelable(false)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        //do things
+        AlertDialog alert;
+        LinearLayout lay = new LinearLayout(this);
+        lay.setOrientation(LinearLayout.VERTICAL);
+        lay.setPadding(getResources().getDimensionPixelSize(R.dimen.ocr_scan_result_layout_padding_sides), 0, getResources().getDimensionPixelSize(R.dimen.ocr_scan_result_layout_padding_sides), 0);
+
+        switch (ocrResultCode) {
+            case Constants.OCR_SCAN_SUCCESS:
+                final EditText ocrResultET = new EditText(this);
+
+                ocrResultET.setText(ocrResult);
+
+                lay.addView(ocrResultET);
+
+                builder.setTitle(R.string.ocr_scan_result);
+                builder.setView(lay);
+                builder.setPositiveButton(R.string.SAVE, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        snippets.get(mPager.getCurrentItem()).setOcr_content(ocrResultET.getText().toString());
+                        snippetDAO.update(snippets.get(mPager.getCurrentItem()));
+
+                        EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_ocr_content_changed"));
+
+                        invalidateOptionsMenu();
                     }
                 });
-        AlertDialog alert = builder.create();
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+                break;
+            case Constants.OCR_SCAN_SUCCESS_EMPTY:
+            case Constants.OCR_SCAN_ERROR:
+                TextView ocrErrorResultTV = new TextView(this);
+
+                ocrErrorResultTV.setText(ocrResult);
+
+                builder.setTitle(R.string.ocr_scan_result);
+                builder.setMessage(ocrResult);
+                builder.setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                });
+                break;
+        }
+
+        alert = builder.create();
         alert.show();
     }
 
@@ -176,7 +225,7 @@ public class View_Snippet_Activity extends Base_Activity {
             if (extras_viewing_snippets_gallery) {
                 snippets = snippetDAO.queryForAll();
             } else if (extras_search_term.equals(Constants.EXTRAS_NO_SEARCH_TERM)) {
-                snippetQueryBuilder.where().eq("book_id", book_id);
+                snippetQueryBuilder.where().eq("book_id", book.getId());
                 snippetQueryBuilder.orderBy("order", false);
 
                 pq = snippetQueryBuilder.prepare();
@@ -185,7 +234,7 @@ public class View_Snippet_Activity extends Base_Activity {
                 SelectArg nameSelectArg = new SelectArg("%" + extras_search_term + "%");
                 SelectArg noteSelectArg = new SelectArg("%" + extras_search_term + "%");
 
-                snippetQueryBuilder.where().eq("book_id", book_id).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
+                snippetQueryBuilder.where().eq("book_id", book.getId()).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
                 snippetQueryBuilder.orderBy("order", false);
 
                 pq = snippetQueryBuilder.prepare();
@@ -231,8 +280,7 @@ public class View_Snippet_Activity extends Base_Activity {
         private Helper_Methods helperMethods;
         private Context context;
 
-        private String snippet_imagepath, snippet_name, snippet_dateAdded;
-        private int snippet_pagenumber, snippet_id;
+        private Snippet snippet;
 
         private boolean clutterHidden = false;
 
@@ -245,7 +293,7 @@ public class View_Snippet_Activity extends Base_Activity {
             setHasOptionsMenu(true);
 
             helperMethods = new Helper_Methods(context);
-            snippetDAO = getHelper().getSnipitDAO();
+            snippetDAO = getHelper().getSnippetDAO();
 
             picassoCallback = new Callback() {
                 @Override
@@ -273,14 +321,13 @@ public class View_Snippet_Activity extends Base_Activity {
 
                             final EditText inputNoteET = (EditText) alertCreateNoteView.findViewById(R.id.snippetNoteET);
                             inputNoteET.setHintTextColor(getActivity().getResources().getColor(R.color.edittext_hint_color));
-                            inputNoteET.setText(snippetDAO.queryForId(snippet_id).getNote());
+                            inputNoteET.setText(snippetDAO.queryForId(snippet.getId()).getNote());
                             inputNoteET.setSelection(inputNoteET.getText().length());
 
                             alert.setPositiveButton(context.getResources().getString(R.string.OK), new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                    Snippet snippetToUpdate = snippetDAO.queryForId(snippet_id);
-                                    snippetToUpdate.setNote(inputNoteET.getText().toString());
-                                    snippetDAO.update(snippetToUpdate);
+                                    snippet.setNote(inputNoteET.getText().toString());
+                                    snippetDAO.update(snippet);
 
                                     EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_note_changed"));
                                 }
@@ -310,10 +357,7 @@ public class View_Snippet_Activity extends Base_Activity {
                         @Override
                         public void onClick(View view) {
                             Intent openPaintActivity = new Intent(context, Paint_Snippet_Activity.class);
-                            openPaintActivity.putExtra(Constants.EXTRAS_SNIPPET_IMAGE_PATH, snippet_imagepath);
-//                            openPaintActivity.putExtra(Constants.EXTRAS_CURRENT_SNIPPET_POSITION, mPager.getCurrentItem())
-                            //Send the ID of the snippet to be used in case the snippet image needs to be updated
-                            openPaintActivity.putExtra(Constants.EXTRAS_SNIPPET_ID, snippet_id);
+                            openPaintActivity.putExtra(Constants.EXTRAS_SNIPPET, snippet);
                             startActivity(openPaintActivity);
                         }
                     });
@@ -329,7 +373,6 @@ public class View_Snippet_Activity extends Base_Activity {
                     paintBookmarkBTN.setAlpha(0.2f);
                 }
             };
-
         }
 
         public DatabaseHelper getHelper() {
@@ -343,7 +386,11 @@ public class View_Snippet_Activity extends Base_Activity {
 
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.view_snippet, menu);
+            if (snippet.getOcr_content() == null) {
+                inflater.inflate(R.menu.view_snippet_ocr_empty, menu);
+            } else {
+                inflater.inflate(R.menu.view_snippet, menu);
+            }
 
             super.onCreateOptionsMenu(menu, inflater);
         }
@@ -351,27 +398,67 @@ public class View_Snippet_Activity extends Base_Activity {
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
-//                case R.id.run_ocr:
-//                    if (Helper_Methods.isInternetAvailable(getActivity())) {
-//                        new AsyncTask_ProcessOCR((View_Snippet_Activity) getActivity()).execute(snippet_imagepath, "results.txt");
-//                    } else {
-//                        Crouton.makeText(getActivity(), getString(R.string.action_needs_internet), Style.ALERT).show();
-//                    }
-//                    break;
+                case R.id.run_ocr:
+                    if (Helper_Methods.isInternetAvailable(getActivity())) {
+                        new AsyncTask_ProcessOCR((View_Snippet_Activity) getActivity()).execute(snippet.getImage_path(), "results.txt");
+                    } else {
+                        Crouton.makeText(getActivity(), getString(R.string.action_needs_internet), Style.ALERT).show();
+                    }
+                    break;
+                case R.id.view_ocr_results:
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    LinearLayout lay = new LinearLayout(getActivity());
+                    final EditText ocrResultET = new EditText(getActivity());
+
+                    ocrResultET.setText(snippet.getOcr_content());
+
+                    lay.setOrientation(LinearLayout.VERTICAL);
+                    lay.addView(ocrResultET);
+
+                    builder.setTitle(R.string.ocr_scan_result);
+                    builder.setPositiveButton(R.string.SAVE, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            snippet.setOcr_content(ocrResultET.getText().toString());
+                            snippetDAO.update(snippet);
+
+                            EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_ocr_content_changed"));
+                        }
+                    });
+                    builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    builder.setView(lay);
+
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                    break;
+                case R.id.clear_ocr_results:
+                    snippet.setOcr_content(null);
+                    snippetDAO.update(snippet);
+
+                    EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_ocr_content_changed"));
+
+                    ((Activity) context).invalidateOptionsMenu();
+                    break;
                 case R.id.share_snippet:
-                    String book_title = getActivity().getIntent().getExtras().getString(Constants.EXTRAS_BOOK_TITLE);
-                    Uri imageURI = Uri.parse(snippet_imagepath);
+                    Book book = getActivity().getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
+
+                    Uri imageURI = Uri.parse(snippet.getImage_path());
 
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
                     sendIntent.putExtra(Intent.EXTRA_STREAM, imageURI);
 
                     //Include the page number in the sharing message if a page number exists, otherwise don't
-                    if (snippet_pagenumber == Constants.NO_SNIPPET_PAGE_NUMBER) {
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.sharing_message) + "\nTitle: \"" + snippet_name + "\"\nFrom: \"" + book_title + "\"");
-                    } else {
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.sharing_message) + "\nTitle: \"" + snippet_name + "\"\nFrom: \"" + book_title + "\"\nPage: " + snippet_pagenumber);
-                    }
+//                    if (snippet.getPage_number() == Constants.NO_SNIPPET_PAGE_NUMBER) {
+//                        sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.sharing_message) + "\nTitle: \"" + snippet.getName() + "\"\nFrom: \"" + book.getTitle() + "\"");
+//                    } else {
+//                        sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.sharing_message) + "\nTitle: \"" + snippet.getName() + "\"\nFrom: \"" + book.getTitle() + "\"\nPage: " + snippet.getPage_number());
+//                    }
 
                     sendIntent.setType("image/*");
                     startActivity(Intent.createChooser(sendIntent, "Share using:"));
@@ -387,11 +474,7 @@ public class View_Snippet_Activity extends Base_Activity {
 
             context = activity;
 
-            snippet_id = getArguments().getInt(Constants.EXTRAS_SNIPPET_ID);
-            snippet_imagepath = getArguments().getString(Constants.EXTRAS_SNIPPET_IMAGE_PATH);
-            snippet_name = getArguments().getString(Constants.EXTRAS_SNIPPET_NAME);
-            snippet_pagenumber = getArguments().getInt(Constants.EXTRAS_SNIPPET_PAGENUMBER);
-            snippet_dateAdded = getArguments().getString(Constants.EXTRAS_SNIPPET_DATE_ADDED);
+            snippet = getArguments().getParcelable(Constants.EXTRAS_SNIPPET);
         }
 
         @Override
@@ -406,45 +489,41 @@ public class View_Snippet_Activity extends Base_Activity {
             ((View_Snippet_Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             ((View_Snippet_Activity) context).getSupportActionBar().show();
 
-            snippetNameTV.setText(snippet_name);
+            snippetNameTV.setText(snippet.getName());
 
-            if (snippet_pagenumber == Constants.NO_SNIPPET_PAGE_NUMBER) {
+            if (snippet.getPage_number() == Constants.NO_SNIPPET_PAGE_NUMBER) {
                 snippetPageNumberLabelTV.setVisibility(View.INVISIBLE);
                 snippetPageNumberTV.setVisibility(View.INVISIBLE);
             } else {
                 snippetPageNumberLabelTV.setText(getString(R.string.page));
-                snippetPageNumberTV.setText(" " + String.valueOf(snippet_pagenumber));
+                snippetPageNumberTV.setText(" " + String.valueOf(snippet.getPage_number()));
             }
 
-            snippetDateAddedTV.setText(snippet_dateAdded);
+            snippetDateAddedTV.setText(snippet.getDate_added());
 
-            if (helperMethods.isBookmarkOnDisk(snippet_imagepath)) {
-                paintBookmarkBTN.setVisibility(View.VISIBLE);
-            } else {
-                paintBookmarkBTN.setVisibility(View.GONE);
-            }
-
-            Picasso.with(context).load(new File(snippet_imagepath)).error(getResources().getDrawable(R.drawable.snippet_not_found)).resize(1500, 1500).centerInside().into(snippetIMG, picassoCallback);
+            Picasso.with(context).load(new File(snippet.getImage_path())).error(getResources().getDrawable(R.drawable.snippet_not_found)).resize(1500, 1500).centerInside().into(snippetIMG, picassoCallback);
 
             PhotoViewAttacher mAttacher = new PhotoViewAttacher(snippetIMG);
             mAttacher.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
                 @Override
                 public void onPhotoTap(View view, float v, float v2) {
                     if (!clutterHidden) {
-                        dealWithClutter(clutterHidden, view, snippet_imagepath);
+                        dealWithClutter(clutterHidden, view);
                     } else {
-                        dealWithClutter(clutterHidden, view, snippet_imagepath);
+                        dealWithClutter(clutterHidden, view);
                     }
 
                     clutterHidden = !clutterHidden;
                 }
             });
 
+            getActivity().invalidateOptionsMenu();
+
             return rootView;
         }
 
         @DebugLog
-        public void dealWithClutter(final boolean wasHidden, final View view, String snippet_imagepath) {
+        public void dealWithClutter(final boolean wasHidden, final View view) {
             ArrayList<ObjectAnimator> arrayListObjectAnimators = new ArrayList<ObjectAnimator>();
             Animator[] objectAnimators;
 
@@ -515,15 +594,8 @@ public class View_Snippet_Activity extends Base_Activity {
         public Fragment getItem(int position) {
             View_Bookmark_Fragment imageFragment = new View_Bookmark_Fragment();
             Bundle bundle = new Bundle();
-            bundle.putInt(Constants.EXTRAS_BOOK_ID, snippets.get(position).getBookId());
-            bundle.putInt(Constants.EXTRAS_SNIPPET_ID, snippets.get(position).getId());
-            bundle.putString(Constants.EXTRAS_SNIPPET_IMAGE_PATH, snippets.get(position).getImage_path());
-            bundle.putString(Constants.EXTRAS_SNIPPET_NAME, snippets.get(position).getName());
-            bundle.putInt(Constants.EXTRAS_SNIPPET_PAGENUMBER, snippets.get(position).getPage_number());
-            bundle.putString(Constants.EXTRAS_SNIPPET_DATE_ADDED, snippets.get(position).getDate_added());
-            bundle.putString(Constants.EXTRAS_SNIPPET_NOTE, snippets.get(position).getNote());
-            bundle.putInt(Constants.EXTRAS_SNIPPET_VIEWS, snippets.get(position).getViews());
-            bundle.putInt(Constants.EXTRAS_SNIPPET_ISNOTESHOWING, snippets.get(position).getIsNoteShowing());
+            bundle.putParcelable(Constants.EXTRAS_BOOK, snippets.get(position).getBook());
+            bundle.putParcelable(Constants.EXTRAS_SNIPPET, snippets.get(position));
             imageFragment.setArguments(bundle);
 
             return imageFragment;

@@ -1,23 +1,19 @@
 package com.om.snipit.activities;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 import com.andreabaccega.widget.FormEditText;
 import com.flurry.android.FlurryAgent;
@@ -26,15 +22,12 @@ import com.google.zxing.integration.android.IntentResult;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.om.snipit.R;
-import com.om.snipit.classes.Book;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
-import com.om.snipit.classes.Param;
-import com.om.snipit.showcaseview.ShowcaseView;
-import com.om.snipit.showcaseview.ViewTarget;
+import com.om.snipit.models.Book;
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.HttpEntity;
@@ -60,7 +53,7 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 
-public class Create_Book_Activity extends Base_Activity {
+public class Create_Book_Activity extends ActionBarActivity {
 
     @InjectView(R.id.titleET)
     FormEditText titleET;
@@ -81,9 +74,6 @@ public class Create_Book_Activity extends Base_Activity {
 
     private DatabaseHelper databaseHelper;
     private RuntimeExceptionDao<Book, Integer> bookDAO;
-    private RuntimeExceptionDao<Param, Integer> paramDAO;
-
-    private ShowcaseView scanBookShowcase;
 
     private ArrayList<FormEditText> allFields = new ArrayList<>();
 
@@ -91,8 +81,6 @@ public class Create_Book_Activity extends Base_Activity {
     private Book book_from_list;
     private ProgressDialog loadingBookInfoDialog;
     private ProgressDialog findingBookImageDialog;
-
-    private static final int SHOW_SCAN_BOOK_SHOWCASE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,34 +90,19 @@ public class Create_Book_Activity extends Base_Activity {
         ButterKnife.inject(this);
 
         bookDAO = getHelper().getBookDAO();
-        paramDAO = getHelper().getParamDAO();
 
         allFields.add(titleET);
         allFields.add(authorET);
-
-        Handler UIHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case SHOW_SCAN_BOOK_SHOWCASE:
-                        showScanBookHintShowcase();
-                        break;
-                }
-                super.handleMessage(msg);
-            }
-        };
 
         final Helper_Methods helperMethods = new Helper_Methods(this);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        if (helperMethods.getCurrentapiVersion() >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             scanBTN.setElevation(15f);
             toolbar.setElevation(25f);
         }
-
-        UIHandler.sendEmptyMessageDelayed(SHOW_SCAN_BOOK_SHOWCASE, 500);
 
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_BOOK_PURPOSE_STRING, -1);
 
@@ -137,7 +110,7 @@ public class Create_Book_Activity extends Base_Activity {
         if (CALL_PURPOSE == Constants.EDIT_BOOK_PURPOSE_VALUE) {
             getSupportActionBar().setTitle(getString(R.string.edit_book_activity_title));
 
-            book_from_list = bookDAO.queryForId(getIntent().getExtras().getInt(Constants.EXTRAS_BOOK_ID));
+            book_from_list = getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
 
             helperMethods.setUpActionbarColors(this, book_from_list.getColorCode());
 
@@ -197,9 +170,6 @@ public class Create_Book_Activity extends Base_Activity {
         scanBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (scanBookShowcase != null)
-                    scanBookShowcase.hide();
-
                 if (Helper_Methods.isInternetAvailable(Create_Book_Activity.this)) {
                     IntentIntegrator scanIntegrator = new IntentIntegrator(Create_Book_Activity.this);
                     scanIntegrator.initiateScan();
@@ -248,10 +218,7 @@ public class Create_Book_Activity extends Base_Activity {
         EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
 
         Intent takeToSnippets = new Intent(Create_Book_Activity.this, Snippets_Activity.class);
-        takeToSnippets.putExtra(Constants.EXTRAS_BOOK_ID, book.getId());
-        takeToSnippets.putExtra(Constants.EXTRAS_BOOK_TITLE, book.getTitle());
-        takeToSnippets.putExtra(Constants.EXTRAS_BOOK_COLOR, book.getColorCode());
-
+        takeToSnippets.putExtra(Constants.EXTRAS_BOOK, book);
         startActivity(takeToSnippets);
 
         finish();
@@ -268,48 +235,6 @@ public class Create_Book_Activity extends Base_Activity {
 
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             bookImageFoundAtGoogle = false;
-        }
-    }
-
-    @DebugLog
-    public void showScanBookHintShowcase() {
-        final Param createBookTutorialParam = paramDAO.queryForId(Constants.CREATE_BOOK_TUTORIAL_DATABASE_VALUE_ENABLED);
-        if (createBookTutorialParam.isEnabled()) {
-
-            RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            lps.addRule(RelativeLayout.CENTER_HORIZONTAL);
-            lps.setMargins(0, 0, 0, getResources().getDimensionPixelOffset(R.dimen.button_margin_bottom));
-
-            ViewTarget target = new ViewTarget(R.id.scanBTN, Create_Book_Activity.this);
-
-            String showcaseDescription = getString(R.string.scan_books_showcase);
-
-            scanBookShowcase = new ShowcaseView.Builder(Create_Book_Activity.this, getResources().getDimensionPixelSize(R.dimen.scan_books_showcase_inner_rad), getResources().getDimensionPixelSize(R.dimen.scan_books_showcase_outer_rad))
-                    .setTarget(target)
-                    .setContentText(Helper_Methods.fontifyString(showcaseDescription))
-                    .setStyle(R.style.CustomShowcaseTheme)
-                    .hasManualPosition(true)
-                    .xPostion(getResources().getDimensionPixelSize(R.dimen.scan_books_showcase_text_x))
-                    .yPostion(getResources().getDimensionPixelSize(R.dimen.scan_books_showcase_text_y))
-                    .build();
-            scanBookShowcase.setButtonPosition(lps);
-            scanBookShowcase.findViewById(R.id.showcase_button).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    scanBookShowcase.hide();
-                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputMethodManager.toggleSoftInputFromWindow(scanBookShowcase.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
-
-                    createBookTutorialParam.setEnabled(false);
-                    paramDAO.update(createBookTutorialParam);
-                }
-            });
-            scanBookShowcase.setShouldCentreText(true);
-            scanBookShowcase.show();
-        } else {
-            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
-                    .showSoftInput(titleET, InputMethodManager.SHOW_FORCED);
         }
     }
 

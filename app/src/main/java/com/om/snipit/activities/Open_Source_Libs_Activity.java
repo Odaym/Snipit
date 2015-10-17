@@ -1,6 +1,7 @@
 package com.om.snipit.activities;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
@@ -25,6 +26,8 @@ import butterknife.InjectView;
 public class Open_Source_Libs_Activity extends Base_Activity {
     @InjectView(R.id.librariesList)
     ListView librariesList;
+    @InjectView(R.id.introductionTextTV)
+    TextView introductionTextTV;
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
 
@@ -41,6 +44,12 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getResources().getString(R.string.about_open_source_libraries_activity_title));
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            toolbar.setElevation(25f);
+        }
+
+        introductionTextTV.setMovementMethod(LinkMovementMethod.getInstance());
+
         helperMethods.setUpActionbarColors(this, Constants.OPEN_SOURCE_LIBS_ACTIVITY_TOOLBAR_COLORS);
 
         ArrayList<Open_Source_Library> libraries = new ArrayList<>();
@@ -48,12 +57,10 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         libraries.add(new Open_Source_Library("Picasso", "https://github.com/square/picasso", "A powerful image downloading and caching library for Android."));
         libraries.add(new Open_Source_Library("Otto", "http://square.github.io/otto/", "An enhanced event bus with emphasis on Android support."));
         libraries.add(new Open_Source_Library("ButterKnife", "https://github.com/JakeWharton/butterknife/", "Field and method binding for Android views which uses annotation processing to generate boilerplate code for you."));
-        libraries.add(new Open_Source_Library("DrawableView", "https://github.com/PaNaVTEC/DrawableView", "An Android view that allows to paint with a finger in the screen and saves the result as a Bitmap."));
         libraries.add(new Open_Source_Library("PhotoView", "https://github.com/chrisbanes/PhotoView", "PhotoView aims to help produce an easily usable implementation of a zooming Android ImageView. It is currently being used in photup."));
         libraries.add(new Open_Source_Library("SimpleCropView", "https://github.com/IsseiAoki/SimpleCropView", "SimpleCropView is an image cropping library for Android."));
         libraries.add(new Open_Source_Library("Crouton", "https://github.com/keyboardsurfer/Crouton", "Context sensitive notifications for Android."));
         libraries.add(new Open_Source_Library("Autofit TextView", "https://github.com/grantland/android-autofittextview", "A TextView that automatically resizes text to fit perfectly within its bounds."));
-        libraries.add(new Open_Source_Library("Glide", "https://github.com/bumptech/glide", "Glide is a fast and efficient open source media management and image loading framework for Android that wraps media decoding, memory and disk caching, and resource pooling into a simple and easy to use interface."));
         libraries.add(new Open_Source_Library("Android Form EditText", "https://github.com/vekexasia/android-edittext-validator", "Android form edit text is an extension of EditText that brings data validation facilities to the edittext."));
 
 //        final View listViewFooterAd = View.inflate(this, R.layout.open_source_libs_list_adview_footer, null);

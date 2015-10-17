@@ -14,8 +14,10 @@
     <string name="gotit">Got it</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
+    <string name="SAVE">SAVE</string>
     <string name="about">About</string>
     <string name="settings">Settings</string>
+    <string name="share">Share</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="undo_deletion_title">UNDO</string>
@@ -41,6 +43,8 @@
     <string name="pref_tutorial_summary">Hint screens will show up to help you get started</string>
     <string name="pref_about_section_title">About</string>
     <string name="pref_about_title">About Snipit</string>
+    <string name="pref_advanced_section_title">Advanced</string>
+    <string name="pref_advanced_sign_out_title">Sign out</string>
     <string name="pref_feedback_title">Send feedback</string>
     <string name="pref_send_feedback_button_title">SEND</string>
     <string name="pref_sendfeedback_alert_hint_tell_us_what_you_think">Don\'t hold back!</string>
@@ -94,7 +98,6 @@
     <string name="book_author_not_found_error">Couldn\'t find book author</string>
     <string name="book_title_not_found_error">Couldn\'t find book title</string>
     <string name="no_scan_data">No scan data received!</string>
-    <string name="scan_books_showcase">You can also add a book by scanning its barcode</string>
     <string name="empty_book_title_error">Book title required</string>
     <string name="empty_author_name_error">Author name required</string>
     <string name="pages_count_error_label">Pages count</string>
@@ -108,6 +111,18 @@
     <string name="set_brush_thickness">Set brush thickness</string>
     <string name="takeNote">Take a note</string>
     <string name="writeSomething">Write something here…</string>
+    <string name="run_ocr">Run OCR</string>
+    <string name="view_ocr_results">View OCR Result</string>
+    <string name="clear_ocr_result">Clear OCR Result</string>
+    <string name="ocr_scan_result">OCR Scan Result</string>
+    <string name="ocr_scan_error">Something went wrong while trying to scan your snippet, it\'s probably nothing but please try that again</string>
+    <string name="ocr_scan_empty">OCR scan came up with nothing. Make sure to take the picture in a good light where the text is clearly visible and try again</string>
+    <string name="ocr_first_run_message">Setting you up for first run…</string>
+    <string name="ocr_setup_finished">All set!</string>
+    <string name="ocr_uploading_snippet">Uploading snippet for processing…</string>
+    <string name="ocr_processing">Processing snippet…</string>
+    <string name="ocr_almost_done">Almost done…</string>
+    <string name="ocr_downloading_result">Downloading result…</string>
 
     <!-- SEARCH_RESULTS_ACTIVITY -->
     <string name="search_results_activity_title">Search Results</string>
@@ -136,13 +151,7 @@
     <string name="all_snippets_activity_title">All Snippets</string>
     <string name="gallery_no_snippets_yet">No snippets yet!</string>
 
-    <string name="create_book_showcase_title">No books yet!</string>
-    <string name="create_book_showcase_description">\nAdd a new book to get started</string>
-
-    <string name="create_snippet_showcase_title">No snippets yet!</string>
-    <string name="create_snippet_showcase_description">\nAdd a new snippet to get started</string>
-
     <!-- ABOUT OPEN SOURCE LIBRARIES ACTIVITY -->
     <string name="about_open_source_libraries_activity_title">Open Source Libraries</string>
-    <string name="introduction_text">Snipit is made with ❤ by Oday Maleh. And when love was not enough, these libraries came to the rescue.</string>
+    <string name="introduction_text">Snipit is made with ❤ by <a href="http://odaymaleh.com">Oday Maleh</a>. And when love was not enough, these libraries came to the rescue.</string>
 </resources>

@@ -22,6 +22,8 @@
         android:listSelector="@android:color/transparent"
         android:numColumns="2"
         android:paddingEnd="@dimen/snippets_gridview_padding_between"
+        android:paddingLeft="@dimen/snippets_gridview_padding_between"
+        android:paddingRight="@dimen/snippets_gridview_padding_between"
         android:paddingStart="@dimen/snippets_gridview_padding_between"
         android:paddingTop="@dimen/snippets_gridview_padding_between"
         android:scrollbars="none"

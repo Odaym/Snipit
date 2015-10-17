@@ -41,38 +41,43 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="50dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="10dp"
         android:layout_marginRight="10dp"
         fab:fab_addButtonColorNormal="@color/blue"
-        fab:fab_expandDirection="up">
+        fab:fab_expandDirection="up"
+        fab:fab_addButtonSize="mini">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_undo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/red"
-            fab:fab_icon="@drawable/ic_undo_white" />
+            fab:fab_icon="@drawable/ic_undo_white"
+            fab:fab_size="mini"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_drawing_mode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/green"
-            fab:fab_icon="@drawable/ic_square_white" />
+            fab:fab_icon="@drawable/ic_square_white"
+            fab:fab_size="mini"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/yellow"
-            fab:fab_icon="@drawable/ic_color_lens_white" />
+            fab:fab_icon="@drawable/ic_color_lens_white"
+            fab:fab_size="mini"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_action_thickness"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/purple"
-            fab:fab_icon="@drawable/ic_border_color_white" />
+            fab:fab_icon="@drawable/ic_border_color_white"
+            fab:fab_size="mini"/>
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 

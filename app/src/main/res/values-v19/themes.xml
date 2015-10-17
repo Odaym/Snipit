@@ -4,30 +4,31 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/green</item>
         <item name="colorPrimaryDark">@color/darker_green</item>
-        <item name="android:actionModeBackground">@color/transparent</item>
         <item name="android:windowBackground">@color/light_gray</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeBackground">@color/black_transparent</item>
     </style>
 
-    <style name="Books_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Books_Activity_Theme" parent="AppTheme" />
 
-    <style name="Snippets_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Snippets_Activity_Theme" parent="AppTheme" />
 
-    <style name="Snippets_Gallery_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar"/>
+    <style name="Snippets_Gallery_Activity_Theme" parent="AppTheme"/>
 
-    <style name="Settings_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar"/>
+    <style name="Settings_Activity_Theme" parent="AppTheme"/>
 
-    <style name="Create_Snippet_Activity" parent="Theme.AppCompat.Light.NoActionBar"/>
+    <style name="Create_Snippet_Activity" parent="AppTheme"/>
 
-    <style name="Create_Book_Activity" parent="Theme.AppCompat.Light.NoActionBar"/>
+    <style name="Create_Book_Activity" parent="AppTheme"/>
 
     <style name="View_Snippet_Activity_Theme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/black_transparent</item>
         <item name="android:windowBackground">@color/black_transparent</item>
     </style>
 
-    <style name="Crop_Image_Activity_Theme" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Crop_Image_Activity_Theme" parent="AppTheme" />
 
-    <style name="ToolBarStyle_Global" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="ToolBarStyle_Global" parent="AppTheme">
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorSecondary">@android:color/white</item>
         <item name="android:actionMenuTextColor">@android:color/white</item>

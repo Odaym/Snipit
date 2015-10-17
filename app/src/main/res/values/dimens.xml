@@ -19,7 +19,15 @@
     <dimen name="snippet_thumb_height">100dp</dimen>
     <dimen name="snippet_thumb_width">100dp</dimen>
 
-    <dimen name="create_book_snippet_fab_buttons_margins">10dp</dimen>
+    <!--<dimen name="create_book_snippet_fab_buttons_margins">10dp</dimen>-->
+
+    <dimen name="snippet_image_shape_corners_radius">3dp</dimen>
+    <dimen name="snippet_image_shape_corners_padding_bottom">3dp</dimen>
+
+    <dimen name="fab_buttons_margins">0dp</dimen>
+    <dimen name="fab_buttons_right_left_margins">0dp</dimen>
+
+    <dimen name="navdrawer_header_height">150dp</dimen>
 
     <!-- FONT SIZES -->
     <dimen name="book_name_fsize">18dp</dimen>
@@ -29,40 +37,12 @@
     <dimen name="books_snippets_activity_hint_fsize">20dp</dimen>
     <dimen name="snippet_list_item_snippet_page_fsize">13dp</dimen>
 
-    <!-- SHOWCASE VIEW -->
-    <dimen name="button_margin_left">50dp</dimen>
-    <dimen name="button_margin_bottom">70dp</dimen>
-    <dimen name="text_padding">0dp</dimen>
-    <dimen name="action_bar_offset">66dp</dimen>
-    <dimen name="showcase_radius">5dp</dimen>
-    <dimen name="showcase_radius_inner">50dp</dimen>
-    <dimen name="showcase_radius_outer">80dp</dimen>
-
-    <!-- Create Book Showcase -->
-    <dimen name="create_book_text_y">150dp</dimen>
-    <dimen name="create_book_text_x">50dp</dimen>
-    <dimen name="create_book_showcase_inner_rad">50dp</dimen>
-    <dimen name="create_book_showcase_outer_rad">70dp</dimen>
-
-    <dimen name="snippet_image_shape_corners_radius">3dp</dimen>
-    <dimen name="snippet_image_shape_corners_padding_bottom">3dp</dimen>
-
-    <dimen name="create_snippet_text_y">150dp</dimen>
-    <dimen name="create_snippet_text_x">50dp</dimen>
-    <dimen name="create_snippet_showcase_inner_rad">50dp</dimen>
-    <dimen name="create_snippet_showcase_outer_rad">70dp</dimen>
-
-    <dimen name="scan_books_showcase_text_y">250dp</dimen>
-    <dimen name="scan_books_showcase_text_x">70dp</dimen>
-    <dimen name="scan_books_showcase_inner_rad">50dp</dimen>
-    <dimen name="scan_books_showcase_outer_rad">70dp</dimen>
-
     <dimen name="push_fab_button_y_distance">100dp</dimen>
     <dimen name="push_fab_button_y_distance_negative">-100dp</dimen>
 
     <!-- BOOKS ACTIVITY -->
     <dimen name="toolbar_top_padding">0dp</dimen>
-    <dimen name="navdrawer_profile_image_top_padding">40dp</dimen>
+    <dimen name="navdrawer_profile_image_top_padding">20dp</dimen>
 
     <!-- SNIPPETS GALLERY-->
     <dimen name="snippet_grid_item_margin_end">1dp</dimen>
@@ -86,4 +66,7 @@
 
     <dimen name="listview_padding_left_right">5dp</dimen>
     <dimen name="listview_padding_between">10dp</dimen>
+
+    <!-- VIEW SNIPPET ACTIVITY -->
+    <dimen name="ocr_scan_result_layout_padding_sides">10dp</dimen>
 </resources>

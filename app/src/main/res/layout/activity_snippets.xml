@@ -68,7 +68,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/fab_buttons_margins"
         android:src="@drawable/ic_camera_white"
         app:borderWidth="0dp"
         app:elevation="6dp"

@@ -9,36 +9,37 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:theme="@style/ToolBarStyle_Global" />
+        android:theme="@style/ToolBarStyle_Global" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"
+        android:orientation="vertical"
         android:paddingBottom="@dimen/activity_horizontal_margin"
         android:paddingEnd="@dimen/activity_vertical_margin"
-        android:paddingStart="@dimen/activity_vertical_margin">
+        android:paddingRight="@dimen/activity_vertical_margin"
+        android:paddingStart="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_vertical_margin">
 
         <ImageView
             android:id="@+id/full_feature_logo"
-            android:layout_width="170dp"
-            android:layout_height="170dp"
-            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="150dp"
+            android:layout_gravity="center_horizontal"
             android:src="@drawable/full_feature_logo" />
 
         <TextView
             android:id="@+id/appVersionTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/full_feature_logo"
-            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
             android:text="@string/app_version" />
 
         <TextView
             android:id="@+id/introductionTextTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/appVersionTV"
             android:layout_marginTop="10dp"
             android:text="@string/introduction_text" />
 
@@ -46,9 +47,9 @@
             android:id="@+id/librariesList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/introductionTextTV"
             android:layout_marginTop="10dp"
             android:drawSelectorOnTop="true"
+            android:scrollbars="none"
             android:footerDividersEnabled="false" />
-    </RelativeLayout>
+    </LinearLayout>
 </RelativeLayout>

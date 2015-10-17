@@ -24,6 +24,8 @@
         android:layout_alignParentBottom="true"
         android:background="@drawable/snippet_details_gradient"
         android:paddingEnd="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:paddingStart="10dp">
 
         <TextView
@@ -73,12 +75,12 @@
         android:layout_above="@id/snippetDetailsView"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_margin="16dp"
+        android:layout_marginEnd="@dimen/fab_buttons_right_left_margins"
+        android:layout_marginRight="@dimen/fab_buttons_right_left_margins"
         android:src="@drawable/ic_note_white"
         app:backgroundTint="@color/red"
         app:borderWidth="0dp"
-        app:elevation="6dp"
-        app:fabSize="mini" />
+        app:elevation="6dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/paintBookmarkBTN"
@@ -87,12 +89,12 @@
         android:layout_above="@id/snippetDetailsView"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_margin="16dp"
+        android:layout_marginLeft="@dimen/fab_buttons_right_left_margins"
+        android:layout_marginStart="@dimen/fab_buttons_right_left_margins"
         android:src="@drawable/ic_gesture_white"
         app:backgroundTint="@color/blue"
         app:borderWidth="0dp"
-        app:elevation="6dp"
-        app:fabSize="mini" />
+        app:elevation="6dp" />
 
 
 </RelativeLayout>

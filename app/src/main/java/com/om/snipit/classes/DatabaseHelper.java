@@ -8,6 +8,9 @@ import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import com.om.snipit.models.Book;
+import com.om.snipit.models.Channel;
+import com.om.snipit.models.Snippet;
 
 import java.sql.SQLException;
 
@@ -21,8 +24,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
     private RuntimeExceptionDao<Book, Integer> bookRuntimeDAO = null;
-    private RuntimeExceptionDao<Snippet, Integer> snipitRuntimeDAO = null;
-    private RuntimeExceptionDao<Param, Integer> paramRuntimeDAO = null;
+    private RuntimeExceptionDao<Snippet, Integer> snippetRuntimeDAO = null;
+    private RuntimeExceptionDao<Channel, Integer> channelRuntimeDAO = null;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -33,15 +36,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         try {
             TableUtils.createTable(connectionSource, Book.class);
             TableUtils.createTable(connectionSource, Snippet.class);
-            TableUtils.createTable(connectionSource, Param.class);
-
-            paramRuntimeDAO = getParamDAO();
-            paramRuntimeDAO.createIfNotExists(new Param(Constants.BOOK_TUTORIAL_DATABASE_VALUE_ENABLED, true));
-            paramRuntimeDAO.createIfNotExists(new Param(Constants.SNIPIT_TUTORIAL_DATABASE_VALUE_ENABLED, true));
-            paramRuntimeDAO.createIfNotExists(new Param(Constants.CREATE_BOOK_TUTORIAL_DATABASE_VALUE_ENABLED, true));
-            paramRuntimeDAO.createIfNotExists(new Param(Constants.TUTORIAL_MODE_DATABASE_VALUE, true));
-            paramRuntimeDAO.createIfNotExists(new Param(Constants.ANIMATIONS_DATABASE_VALUE, false));
-
+            TableUtils.createTable(connectionSource, Channel.class);
         } catch (SQLException e) {
             Log.e(DatabaseHelper.class.getName(), "Can't create database", e);
             throw new RuntimeException(e);
@@ -59,25 +54,25 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         return bookRuntimeDAO;
     }
 
-    public RuntimeExceptionDao<Snippet, Integer> getSnipitDAO() {
-        if (snipitRuntimeDAO == null) {
-            snipitRuntimeDAO = getRuntimeExceptionDao(Snippet.class);
+    public RuntimeExceptionDao<Snippet, Integer> getSnippetDAO() {
+        if (snippetRuntimeDAO == null) {
+            snippetRuntimeDAO = getRuntimeExceptionDao(Snippet.class);
         }
-        return snipitRuntimeDAO;
+        return snippetRuntimeDAO;
     }
 
-    public RuntimeExceptionDao<Param, Integer> getParamDAO() {
-        if (paramRuntimeDAO == null) {
-            paramRuntimeDAO = getRuntimeExceptionDao(Param.class);
+    public RuntimeExceptionDao<Channel, Integer> getChannelDAO() {
+        if (channelRuntimeDAO == null) {
+            channelRuntimeDAO = getRuntimeExceptionDao(Channel.class);
         }
-        return paramRuntimeDAO;
+        return channelRuntimeDAO;
     }
 
     @Override
     public void close() {
         super.close();
         bookRuntimeDAO = null;
-        snipitRuntimeDAO = null;
-        paramRuntimeDAO = null;
+        snippetRuntimeDAO = null;
+        channelRuntimeDAO = null;
     }
 }
