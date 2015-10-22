@@ -7,7 +7,6 @@
         <item name="android:windowBackground">@color/light_gray</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeBackground">@color/black_transparent</item>
-
     </style>
 
     <style name="Books_Activity_Theme" parent="AppTheme">
@@ -23,6 +22,8 @@
     <style name="Create_Snippet_Activity" parent="AppTheme"/>
 
     <style name="Create_Book_Activity" parent="AppTheme"/>
+
+    <style name="Barcode_Capture_Activtity" parent="AppTheme" />
 
     <style name="View_Snippet_Activity_Theme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:actionBarStyle">@style/MyTheme.ActionBarStyle</item>

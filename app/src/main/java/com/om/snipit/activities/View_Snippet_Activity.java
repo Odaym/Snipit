@@ -226,7 +226,7 @@ public class View_Snippet_Activity extends Base_Activity {
                 snippets = snippetDAO.queryForAll();
             } else if (extras_search_term.equals(Constants.EXTRAS_NO_SEARCH_TERM)) {
                 snippetQueryBuilder.where().eq("book_id", book.getId());
-                snippetQueryBuilder.orderBy("order", false);
+                snippetQueryBuilder.orderBy("order", true);
 
                 pq = snippetQueryBuilder.prepare();
                 snippets = snippetDAO.query(pq);
@@ -235,7 +235,7 @@ public class View_Snippet_Activity extends Base_Activity {
                 SelectArg noteSelectArg = new SelectArg("%" + extras_search_term + "%");
 
                 snippetQueryBuilder.where().eq("book_id", book.getId()).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
-                snippetQueryBuilder.orderBy("order", false);
+                snippetQueryBuilder.orderBy("order", true);
 
                 pq = snippetQueryBuilder.prepare();
                 snippets = snippetDAO.query(pq);

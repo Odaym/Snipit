@@ -138,7 +138,7 @@ public class Crop_Image_Activity extends Base_Activity {
             f.createNewFile();
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            inImage.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            inImage.compress(Bitmap.CompressFormat.PNG, 0, bos);
             byte[] bitmapdata = bos.toByteArray();
 
             FileOutputStream fos;

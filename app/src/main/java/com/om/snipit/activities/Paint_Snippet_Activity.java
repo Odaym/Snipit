@@ -94,8 +94,8 @@ public class Paint_Snippet_Activity extends Base_Activity {
 
         ButterKnife.inject(this);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.paint_snippet_activity_title));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
@@ -207,6 +207,8 @@ public class Paint_Snippet_Activity extends Base_Activity {
     }
 
     public void onFabColorButtonClicked(View view) {
+        floatingColorsMenu.collapse();
+
         switch (view.getId()) {
             case R.id.fab_color_blue:
                 canvasView.setPaintStrokeColor(getResources().getColor(R.color.blue));
@@ -236,6 +238,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
                 floatingActionsMenu.expand();
                 break;
         }
+
         prefsEditor.apply();
     }
 

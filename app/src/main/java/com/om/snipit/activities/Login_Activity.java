@@ -17,7 +17,6 @@ import com.om.snipit.R;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.Helper_Methods;
 import com.om.snipit.models.User;
-import com.parse.ParseObject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -133,13 +132,13 @@ public class Login_Activity extends Activity implements
         prefsEditor.apply();
     }
 
-    public void saveUserToParse(User userLoggedIn) {
-        ParseObject userObject = new ParseObject("User");
-        userObject.put("full_name", userLoggedIn.getFull_name());
-        userObject.put("email", userLoggedIn.getEmail_address());
-        userObject.put("photo_url", userLoggedIn.getPhoto_url());
-        userObject.saveInBackground();
-    }
+//    public void saveUserToParse(User userLoggedIn) {
+//        ParseObject userObject = new ParseObject("User");
+//        userObject.put("full_name", userLoggedIn.getFull_name());
+//        userObject.put("email", userLoggedIn.getEmail_address());
+//        userObject.put("photo_url", userLoggedIn.getPhoto_url());
+//        userObject.saveInBackground();
+//    }
 
     @Override
     public void onConnectionSuspended(int i) {

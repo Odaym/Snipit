@@ -90,18 +90,28 @@
     <string name="book_pages_count">Pages</string>
     <string name="done_and_create_book">Done</string>
     <string name="loading_book_info_title">Hang on</string>
-    <string name="loading_book_info_msg">Gathering book data</string>
+    <string name="loading_book_info_msg">Gathering book data…</string>
     <string name="finding_book_image">Finding book cover art</string>
     <string name="scan_result_error">Scan result was not a book</string>
     <string name="book_not_found">Couldn\'t find that book</string>
     <string name="book_image_not_found_error">Couldn\'t find book image</string>
     <string name="book_author_not_found_error">Couldn\'t find book author</string>
     <string name="book_title_not_found_error">Couldn\'t find book title</string>
-    <string name="no_scan_data">No scan data received!</string>
+    <string name="no_scan_data">No barcode captured</string>
     <string name="empty_book_title_error">Book title required</string>
     <string name="empty_author_name_error">Author name required</string>
-    <string name="pages_count_error_label">Pages count</string>
-    <string name="pages_count_page_reached_difference_error">Pages count cannot be smaller than page reached!</string>
+    <!--<string name="pages_count_error_label">Pages count</string>-->
+    <!--<string name="pages_count_page_reached_difference_error">Pages count cannot be smaller than page reached!</string>-->
+    <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
+    <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
+    <string name="no_camera_permission">To scan barcodes, Snipit needs permission to use the camera</string>
+
+    <!-- BARCODE_CAPTURE_ACTIVITY-->
+    <string name="barcode_capture_activity">Barcode Capture</string>
+    <string name="capture_barcode_instructions">Tap to capture. Pinch/Stretch to zoom.</string>
+    <!--<string name="camera_service_failed_alert_title">Camera Failed</string>-->
+    <!--<string name="camera_service_failed_alert_message">This is one of those rare cases where the Android Camera Service has failed, try launching the normal Camera app to confirm this</string>-->
+    <string name="no_barcode_detected_here">No barcode detected here</string>
 
     <!-- VIEW_BOOKMARKS_ACTIVITY -->
     <string name="rotate_left">Rotate Left</string>
@@ -129,6 +139,7 @@
     <string name="search_not_found">Couldn\'t find anything for</string>
 
     <!-- CROP_IMAGE_ACTIVITY -->
+    <string name="crop_image_activity_title">Crop Snippet</string>
     <string name="seems_out_of_memory">Please try that again with a lower resolution setting for the camera.</string>
 
     <!-- PAINT_BOOKMARK_ACTIVITY -->

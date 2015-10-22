@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -17,8 +18,8 @@ import android.widget.ImageView;
 
 import com.andreabaccega.widget.FormEditText;
 import com.flurry.android.FlurryAgent;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.om.snipit.R;
@@ -68,6 +69,8 @@ public class Create_Book_Activity extends ActionBarActivity {
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
 
+    private static final int RC_BARCODE_CAPTURE = 9001;
+
     private String bookImagePath;
     private int book_pages_count;
     private boolean bookImageFoundAtGoogle = false;
@@ -96,9 +99,6 @@ public class Create_Book_Activity extends ActionBarActivity {
 
         final Helper_Methods helperMethods = new Helper_Methods(this);
 
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             scanBTN.setElevation(15f);
             toolbar.setElevation(25f);
@@ -108,7 +108,8 @@ public class Create_Book_Activity extends ActionBarActivity {
 
         //If it's an edit operation
         if (CALL_PURPOSE == Constants.EDIT_BOOK_PURPOSE_VALUE) {
-            getSupportActionBar().setTitle(getString(R.string.edit_book_activity_title));
+            toolbar.setTitle(getString(R.string.edit_book_activity_title));
+            setSupportActionBar(toolbar);
 
             book_from_list = getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
 
@@ -123,7 +124,8 @@ public class Create_Book_Activity extends ActionBarActivity {
                     Picasso.with(Create_Book_Activity.this).load(book_from_list.getImagePath()).into(bookIMG);
             }
         } else {
-            getSupportActionBar().setTitle(getString(R.string.create_book_activity_title));
+            toolbar.setTitle(getString(R.string.create_book_activity_title));
+            setSupportActionBar(toolbar);
             helperMethods.setUpActionbarColors(this, -1);
         }
 
@@ -171,8 +173,11 @@ public class Create_Book_Activity extends ActionBarActivity {
             @Override
             public void onClick(View view) {
                 if (Helper_Methods.isInternetAvailable(Create_Book_Activity.this)) {
-                    IntentIntegrator scanIntegrator = new IntentIntegrator(Create_Book_Activity.this);
-                    scanIntegrator.initiateScan();
+                    Intent intent = new Intent(Create_Book_Activity.this, BarcodeCapture_Activity.class);
+                    intent.putExtra(BarcodeCapture_Activity.AutoFocus, true);
+                    intent.putExtra(BarcodeCapture_Activity.UseFlash, false);
+
+                    startActivityForResult(intent, RC_BARCODE_CAPTURE);
                 } else {
                     Crouton.makeText(Create_Book_Activity.this, getString(R.string.action_needs_internet), Style.ALERT).show();
                 }
@@ -239,25 +244,30 @@ public class Create_Book_Activity extends ActionBarActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        String scanContent;
 
-        IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-        if (scanningResult != null) {
+        if (requestCode == RC_BARCODE_CAPTURE) {
+            if (resultCode == CommonStatusCodes.SUCCESS) {
+                if (data != null) {
+                    Barcode barcode = data.getParcelableExtra(BarcodeCapture_Activity.BarcodeObject);
+                    scanContent = barcode.displayValue;
 
-            String scanContent = scanningResult.getContents();
-            String scanFormat = scanningResult.getFormatName();
+                    String bookSearchString = "https://www.googleapis.com/books/v1/volumes?" +
+                            "q=isbn:" + scanContent + "&key=" + Constants.GOOGLE_BOOKS_API_KEY;
 
-            if (scanContent != null && scanFormat != null && scanFormat.equalsIgnoreCase("EAN_13")) {
-                String bookSearchString = "https://www.googleapis.com/books/v1/volumes?" +
-                        "q=isbn:" + scanContent + "&key=" + Constants.GOOGLE_BOOKS_API_KEY;
+                    new GetBookInfo().execute(bookSearchString);
+                } else {
+                    Crouton.makeText(Create_Book_Activity.this, getString(R.string.no_scan_data), Style.ALERT).show();
 
-                new GetBookInfo().execute(bookSearchString);
+                    Log.d(Constants.DEBUG_TAG, "No barcode captured, intent data is null");
+                }
             } else {
                 Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_not_found), Style.ALERT).show();
+
+//                statusMessage.setText(String.format(getString(R.string.barcode_error),
+//                        CommonStatusCodes.getStatusCodeString(resultCode)));
             }
-        } else {
-            Crouton.makeText(Create_Book_Activity.this, getString(R.string.no_scan_data), Style.ALERT).show();
         }
     }
 

@@ -296,20 +296,14 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 return true;
             case R.id.sort_by_name:
                 prepareSortedSnippets(book.getId(), "name");
-                prepareQueryBuilder(book.getId());
-                snippets = snippetDAO.query(pq);
                 snippetsAdapter.notifyDataSetChanged();
                 break;
             case R.id.sort_by_views:
                 prepareSortedSnippets(book.getId(), "views");
-                prepareQueryBuilder(book.getId());
-                snippets = snippetDAO.query(pq);
                 snippetsAdapter.notifyDataSetChanged();
                 break;
             case R.id.sort_page_number:
                 prepareSortedSnippets(book.getId(), "page_number");
-                prepareQueryBuilder(book.getId());
-                snippets = snippetDAO.query(pq);
                 snippetsAdapter.notifyDataSetChanged();
                 break;
         }
@@ -562,7 +556,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     public void prepareQueryBuilder(int book_id) {
         try {
             snippetQueryBuilder.where().eq("book_id", book_id);
-            snippetQueryBuilder.orderBy("order", false);
+            snippetQueryBuilder.orderBy("order", true);
             pq = snippetQueryBuilder.prepare();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -572,15 +566,14 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     public void prepareSortedSnippets(int book_id, String sortCriteria) {
         try {
             snippetQueryBuilder.where().eq("book_id", book_id);
-            snippetQueryBuilder.orderBy(sortCriteria, false);
+            snippetQueryBuilder.orderByRaw(sortCriteria);
             pq = snippetQueryBuilder.prepare();
 
-            List<Snippet> sortedSnippets = snippetDAO.query(pq);
+            snippets = snippetDAO.query(pq);
 
-            for (int i = 0; i < sortedSnippets.size(); i++) {
-                Log.d("SORT", "sortedSnippet " + sortedSnippets.get(i).getName());
-                sortedSnippets.get(i).setOrder(i);
-                snippetDAO.update(sortedSnippets.get(i));
+            for (int i = 0; i < snippets.size(); i++) {
+                snippets.get(i).setOrder(i);
+                snippetDAO.update(snippets.get(i));
             }
         } catch (SQLException e) {
             e.printStackTrace();

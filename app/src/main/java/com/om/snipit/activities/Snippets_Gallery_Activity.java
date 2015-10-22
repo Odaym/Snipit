@@ -62,10 +62,9 @@ public class Snippets_Gallery_Activity extends Base_Activity {
 
         EventBus_Singleton.getInstance().register(this);
 
+        toolbar.setTitle(getString(R.string.all_snippets_activity_title));
+        toolbar.setBackgroundColor(getResources().getColor(R.color.blue));
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(getString(R.string.all_snippets_activity_title));
-        getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.color.blue));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(getResources().getColor(R.color.darker_blue));

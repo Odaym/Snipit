@@ -40,9 +40,8 @@ public class Open_Source_Libs_Activity extends Base_Activity {
 
         Helper_Methods helperMethods = new Helper_Methods(this);
 
+        toolbar.setTitle(getResources().getString(R.string.about_open_source_libraries_activity_title));
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(getResources().getString(R.string.about_open_source_libraries_activity_title));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             toolbar.setElevation(25f);

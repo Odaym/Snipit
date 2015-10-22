@@ -21,6 +21,8 @@
 
     <style name="Create_Book_Activity" parent="AppTheme"/>
 
+    <style name="Barcode_Capture_Activtity" parent="AppTheme" />
+
     <style name="View_Snippet_Activity_Theme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/black_transparent</item>
         <item name="android:windowBackground">@color/black_transparent</item>

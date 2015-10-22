@@ -90,7 +90,6 @@ public class Create_Snippet_Activity extends Base_Activity {
         book = getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         helperMethods.setUpActionbarColors(this, book.getColorCode());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
