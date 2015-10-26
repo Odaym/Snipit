@@ -37,9 +37,6 @@
     <dimen name="books_snippets_activity_hint_fsize">20dp</dimen>
     <dimen name="snippet_list_item_snippet_page_fsize">13dp</dimen>
 
-    <dimen name="push_fab_button_y_distance">100dp</dimen>
-    <dimen name="push_fab_button_y_distance_negative">-100dp</dimen>
-
     <!-- BOOKS ACTIVITY -->
     <dimen name="toolbar_top_padding">0dp</dimen>
     <dimen name="navdrawer_profile_image_top_padding">20dp</dimen>

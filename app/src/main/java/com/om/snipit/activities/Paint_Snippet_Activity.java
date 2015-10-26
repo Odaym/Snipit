@@ -128,7 +128,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
             }
         };
 
-        Picasso.with(Paint_Snippet_Activity.this).load(new File(snippet.getImage_path())).resize(1000, 1000).centerInside().into(snippetIMG, picassoCallback);
+        Picasso.with(Paint_Snippet_Activity.this).load(new File(snippet.getImage_path())).resize(1200, 1200).centerInside().into(snippetIMG, picassoCallback);
 
         fabActionUndo.setOnClickListener(new View.OnClickListener() {
             @Override

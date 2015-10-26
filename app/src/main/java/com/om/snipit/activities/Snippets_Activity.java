@@ -584,8 +584,9 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         try {
             SelectArg nameSelectArg = new SelectArg("%" + searchQuery + "%");
             SelectArg noteSelectArg = new SelectArg("%" + searchQuery + "%");
+            SelectArg ocrSelectArg = new SelectArg("%" + searchQuery + "%");
 
-            snippetQueryBuilder.where().eq("book_id", book.getId()).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
+            snippetQueryBuilder.where().eq("book_id", book.getId()).and().like("name", nameSelectArg).or().like("note", noteSelectArg).or().like("ocr_content", ocrSelectArg);
             pq = snippetQueryBuilder.prepare();
         } catch (SQLException e) {
             e.printStackTrace();

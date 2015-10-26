@@ -23,5 +23,4 @@
         android:title="@string/clear_ocr_result"
         app:showAsAction="collapseActionView" />
 
-
 </menu>

@@ -12,7 +12,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.andreabaccega.widget.FormEditText;
@@ -50,7 +49,7 @@ public class Create_Snippet_Activity extends Base_Activity {
     @InjectView(R.id.nameET)
     FormEditText nameET;
     @InjectView(R.id.pageNumberET)
-    EditText pageNumberET;
+    FormEditText pageNumberET;
     @InjectView(R.id.snippetIMG)
     ImageView snippetIMG;
     @InjectView(R.id.doneBTN)
@@ -103,7 +102,7 @@ public class Create_Snippet_Activity extends Base_Activity {
 
         //If it is a create operation, the path to the snippet image is inside the extras that were sent to this activity (from Camera intent)
         try {
-            Picasso.with(this).load(new File(tempImagePath)).resize(1000, 1000).centerInside().into(snippetIMG);
+            Picasso.with(this).load(new File(tempImagePath)).resize(500, 500).centerInside().into(snippetIMG);
         } catch (NullPointerException NPE) {
             NPE.printStackTrace();
         }

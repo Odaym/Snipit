@@ -22,7 +22,7 @@
     <string name="edit">Edit</string>
     <string name="undo_deletion_title">UNDO</string>
     <string name="action_needs_internet">This action needs an Internet connection</string>
-    <string name="retake_picture_error">Something went wrong, please try re-taking that picture</string>
+    <string name="retake_picture_error">Something went wrong, please try re-taking that picture. If that doesn\'t help, try lowering the max resolution by 1 level from your Camera settings.</string>
     <!-- SHARING -->
     <string name="sharing_message">I used Snipit to take this, have a look!</string>
 
@@ -133,6 +133,7 @@
     <string name="ocr_processing">Processing snippet…</string>
     <string name="ocr_almost_done">Almost done…</string>
     <string name="ocr_downloading_result">Downloading result…</string>
+    <string name="ocr_recognition_languages_alert_title">Recognition languages</string>
 
     <!-- SEARCH_RESULTS_ACTIVITY -->
     <string name="search_results_activity_title">Search Results</string>

@@ -45,6 +45,7 @@ public class AsyncTask_ProcessOCR extends AsyncTask<String, String, Boolean> {
 
         String inputFile = args[0];
         String outputFile = args[1];
+        String language = args[2];
 
         try {
             Client restClient = new Client();
@@ -84,11 +85,9 @@ public class AsyncTask_ProcessOCR extends AsyncTask<String, String, Boolean> {
 
             publishProgress(activity.getString(R.string.ocr_uploading_snippet));
 
-            String language = "English"; // Comma-separated list: Japanese,English or German,French,Spanish etc.
-
             ProcessingSettings processingSettings = new ProcessingSettings();
             processingSettings.setOutputFormat(ProcessingSettings.OutputFormat.txt);
-//            processingSettings.setLanguage(language);
+            processingSettings.setLanguage(language);
 
 //            publishProgress("Uploading..");
 

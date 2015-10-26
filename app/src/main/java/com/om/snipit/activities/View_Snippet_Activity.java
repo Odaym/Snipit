@@ -27,6 +27,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.flurry.android.FlurryAgent;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -233,8 +234,9 @@ public class View_Snippet_Activity extends Base_Activity {
             } else {
                 SelectArg nameSelectArg = new SelectArg("%" + extras_search_term + "%");
                 SelectArg noteSelectArg = new SelectArg("%" + extras_search_term + "%");
+                SelectArg ocrSelectArg = new SelectArg("%" + extras_search_term + "%");
 
-                snippetQueryBuilder.where().eq("book_id", book.getId()).and().like("name", nameSelectArg).or().like("note", noteSelectArg);
+                snippetQueryBuilder.where().eq("book_id", book.getId()).and().like("name", nameSelectArg).or().like("note", noteSelectArg).or().like("ocr_content", ocrSelectArg);
                 snippetQueryBuilder.orderBy("order", true);
 
                 pq = snippetQueryBuilder.prepare();
@@ -400,12 +402,114 @@ public class View_Snippet_Activity extends Base_Activity {
             switch (item.getItemId()) {
                 case R.id.run_ocr:
                     if (Helper_Methods.isInternetAvailable(getActivity())) {
-                        new AsyncTask_ProcessOCR((View_Snippet_Activity) getActivity()).execute(snippet.getImage_path(), "results.txt");
+                        AlertDialog.Builder ocrLanguagePickerDialog = new AlertDialog.Builder(getActivity());
+                        ocrLanguagePickerDialog.setTitle(R.string.ocr_recognition_languages_alert_title);
+                        final String[] types = {"Albanian",
+                                "Arabic",
+                                "Armenian (Eastern)",
+                                "Armenian (Grabar)",
+                                "Armenian (Western)",
+                                "Azerbaijani (Cyrillic)",
+                                "Azerbaijani (Latin)",
+                                "Belarussian",
+                                "Bulgarian",
+                                "Catalan",
+                                "Chechen",
+                                "Chinese Simplified",
+                                "Chinese Traditional",
+                                "Corsican",
+                                "Croatian",
+                                "Czech",
+                                "Danish",
+                                "Dutch (Netherlands)",
+                                "Dutch (Belgium)",
+                                "English",
+                                "Eskimo (Cyrillic)",
+                                "Eskimo (Latin)",
+                                "Estonian",
+                                "Finnish",
+                                "French",
+                                "Ganda",
+                                "German",
+                                "German (New spelling)",
+                                "German (Luxembourg)",
+                                "Greek",
+                                "Hawaiian",
+                                "Hebrew",
+                                "Hungarian",
+                                "Icelandic",
+                                "Indonesian",
+                                "Irish",
+                                "Italian",
+                                "Japanese",
+                                "Kazakh",
+                                "Kongo",
+                                "Korean",
+                                "Korean (Hangul)",
+                                "Koryak",
+                                "Kurdish",
+                                "Lak",
+                                "Latin",
+                                "Latvian",
+                                "Lithuanian",
+                                "Macedonian",
+                                "Malay (Malaysian)",
+                                "Mongol",
+                                "Nahuatl",
+                                "Norwegian (Bokmal)",
+                                "Norwegian (Nynorsk)",
+                                "Old English",
+                                "Old French",
+                                "Old German",
+                                "Old Italian",
+                                "Old Slavonic",
+                                "Old Spanish",
+                                "Polish",
+                                "Portuguese (Brazil)",
+                                "Portuguese (Portugal)",
+                                "Romanian",
+                                "Romanian (Moldavia)",
+                                "Russian (Old Spelling)",
+                                "Russian",
+                                "Samoan",
+                                "Serbian (Cyrillic)",
+                                "Serbian (Latin)",
+                                "Slovenian",
+                                "Somali",
+                                "Spanish",
+                                "Swedish",
+                                "Thai",
+                                "Turkish",
+                                "Ukrainian",
+                                "Uzbek (Cyrillic)",
+                                "Uzbek (Latin)",
+                                "Vietnamese",
+                                "Yiddish"};
+                        ocrLanguagePickerDialog.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        });
+                        ocrLanguagePickerDialog.setItems(types, new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                new AsyncTask_ProcessOCR((View_Snippet_Activity) getActivity()).execute(snippet.getImage_path(), "results.txt", types[which]);
+                                FlurryAgent.logEvent("OCR_Scan_Run_Language_" + types[which]);
+                            }
+
+                        });
+
+                        ocrLanguagePickerDialog.show();
                     } else {
                         Crouton.makeText(getActivity(), getString(R.string.action_needs_internet), Style.ALERT).show();
                     }
                     break;
                 case R.id.view_ocr_results:
+                    FlurryAgent.logEvent("OCR_Scan_Viewed");
+
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     LinearLayout lay = new LinearLayout(getActivity());
                     final EditText ocrResultET = new EditText(getActivity());
