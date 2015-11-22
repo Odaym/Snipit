@@ -61,10 +61,6 @@
             android:theme="@style/Snippets_Activity_Theme" />
 
         <activity
-            android:name="com.om.snipit.activities.Snippets_Gallery_Activity"
-            android:theme="@style/Snippets_Gallery_Activity_Theme" />
-
-        <activity
             android:name="com.om.snipit.activities.Create_Book_Activity"
             android:screenOrientation="portrait"
             android:theme="@style/Create_Book_Activity"
@@ -79,7 +75,6 @@
 
         <activity
             android:name="com.om.snipit.activities.View_Snippet_Activity"
-            android:screenOrientation="portrait"
             android:theme="@style/View_Snippet_Activity_Theme" />
 
         <activity
@@ -103,6 +98,16 @@
             android:name=".activities.BarcodeCapture_Activity"
             android:screenOrientation="portrait"
             android:theme="@style/Barcode_Capture_Activtity" />
+
+        <activity
+            android:name=".activities.Share_Snippet_Activity"
+            android:noHistory="true"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
+
+        <activity
+            android:name=".activities.Snippet_Stream_Activity"
+            android:screenOrientation="portrait" />
 
         <!--<activity-->
         <!--android:name="com.google.android.gms.ads.AdActivity"-->

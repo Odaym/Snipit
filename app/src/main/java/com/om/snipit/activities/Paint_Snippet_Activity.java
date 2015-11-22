@@ -23,7 +23,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
-import com.flurry.android.FlurryAgent;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -128,7 +127,11 @@ public class Paint_Snippet_Activity extends Base_Activity {
             }
         };
 
-        Picasso.with(Paint_Snippet_Activity.this).load(new File(snippet.getImage_path())).resize(1200, 1200).centerInside().into(snippetIMG, picassoCallback);
+        if (snippet != null) {
+            Picasso.with(Paint_Snippet_Activity.this).load(new File(snippet.getImage_path())).resize(1200, 1200).centerInside().into(snippetIMG, picassoCallback);
+        } else {
+            finish();
+        }
 
         fabActionUndo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -204,10 +207,15 @@ public class Paint_Snippet_Activity extends Base_Activity {
                 alert.show();
             }
         });
+
+        floatingActionsMenu.expand();
     }
 
     public void onFabColorButtonClicked(View view) {
         floatingColorsMenu.collapse();
+        floatingColorsMenu.setVisibility(View.INVISIBLE);
+
+        floatingActionsMenu.setVisibility(View.VISIBLE);
 
         switch (view.getId()) {
             case R.id.fab_color_blue:
@@ -381,7 +389,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
 
                 savePaintedSnippetDialog.dismiss();
             } else {
-                FlurryAgent.logEvent("Paint_Snipit");
+                Helper_Methods.logEvent("Painted Snippet", null);
 
                 savePaintedSnippetDialog.dismiss();
 

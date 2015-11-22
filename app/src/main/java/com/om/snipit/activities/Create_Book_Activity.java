@@ -17,7 +17,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 
 import com.andreabaccega.widget.FormEditText;
-import com.flurry.android.FlurryAgent;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -72,7 +71,6 @@ public class Create_Book_Activity extends ActionBarActivity {
     private static final int RC_BARCODE_CAPTURE = 9001;
 
     private String bookImagePath;
-    private int book_pages_count;
     private boolean bookImageFoundAtGoogle = false;
 
     private DatabaseHelper databaseHelper;
@@ -113,7 +111,11 @@ public class Create_Book_Activity extends ActionBarActivity {
 
             book_from_list = getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
 
-            helperMethods.setUpActionbarColors(this, book_from_list.getColorCode());
+            if (book_from_list != null) {
+                helperMethods.setUpActionbarColors(this, book_from_list.getColorCode());
+            } else {
+                finish();
+            }
 
             if (book_from_list != null) {
                 titleET.setText(book_from_list.getTitle());
@@ -126,7 +128,7 @@ public class Create_Book_Activity extends ActionBarActivity {
         } else {
             toolbar.setTitle(getString(R.string.create_book_activity_title));
             setSupportActionBar(toolbar);
-            helperMethods.setUpActionbarColors(this, -1);
+            helperMethods.setUpActionbarColors(this, Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS);
         }
 
         doneBTN.setOnClickListener(new View.OnClickListener() {
@@ -218,7 +220,7 @@ public class Create_Book_Activity extends ActionBarActivity {
 
         bookDAO.create(book);
 
-        FlurryAgent.logEvent("Create_Book");
+        Helper_Methods.logEvent("Created Book", new String[]{book.getTitle()});
 
         EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
 

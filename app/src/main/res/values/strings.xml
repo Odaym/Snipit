@@ -10,8 +10,7 @@
 
     <string name="app_name">Snipit</string>
     <string name="app_tagline">Digitize information from the real world</string>
-    <string name="app_version">1.0.0</string>
-    <string name="gotit">Got it</string>
+    <string name="app_version">2.1.5</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
     <string name="SAVE">SAVE</string>
@@ -23,14 +22,12 @@
     <string name="undo_deletion_title">UNDO</string>
     <string name="action_needs_internet">This action needs an Internet connection</string>
     <string name="retake_picture_error">Something went wrong, please try re-taking that picture. If that doesn\'t help, try lowering the max resolution by 1 level from your Camera settings.</string>
+    
     <!-- SHARING -->
     <string name="sharing_message">I used Snipit to take this, have a look!</string>
 
     <!-- NAVDRAWER -->
-    <string name="navdrawer_snippets_gallery_primary">Gallery</string>
-    <string name="navdrawer_snippets_gallery_secondary">View all snippets</string>
-    <string name="navdrawer_addons_store">Add-ons Store</string>
-    <string name="navdrawer_channels">Channels</string>
+    <string name="navdrawer_snippets_global_stream">Global Stream</string>
     <string name="navdrawer_settings_item">Settings</string>
     <string name="navigation_drawer_open"></string>
     <string name="navigation_drawer_closed"></string>
@@ -61,12 +58,13 @@
     <string name="empty_books_layout_hint">Books you add appear here</string>
     <string name="delete_book_confirmation_message">Deleted</string>
 
-    <!-- BOOKMARKS_ACTIVITY -->
+    <!-- SNIPPETS_ACTIVITY -->
     <string name="edit_snippet_option">Edit</string>
     <string name="remove_snippet_option">Remove</string>
     <string name="snippet_views_label">Views:</string>
     <string name="snippet_page_number_label">page:</string>
     <string name="sort_option_title">Sort</string>
+    <string name="search_icon_title">Search</string>
     <string name="sort_action_by_page_number">Sort by Page</string>
     <string name="sort_action_by_name">Sort by Name</string>
     <string name="sort_action_by_date">Sort by Views</string>
@@ -133,7 +131,7 @@
     <string name="ocr_processing">Processing snippet…</string>
     <string name="ocr_almost_done">Almost done…</string>
     <string name="ocr_downloading_result">Downloading result…</string>
-    <string name="ocr_recognition_languages_alert_title">Recognition languages</string>
+    <string name="ocr_recognition_languages_alert_title">OCR Recognition languages</string>
 
     <!-- SEARCH_RESULTS_ACTIVITY -->
     <string name="search_results_activity_title">Search Results</string>
@@ -159,11 +157,37 @@
     <string name="save_painted_snippet_dialog_title">Just a moment</string>
     <string name="save_painted_snippet_dialog_message">Updating snippet…</string>
 
-    <!-- ALL SNIPPETS ACTIVITY-->
-    <string name="all_snippets_activity_title">All Snippets</string>
-    <string name="gallery_no_snippets_yet">No snippets yet!</string>
-
     <!-- ABOUT OPEN SOURCE LIBRARIES ACTIVITY -->
     <string name="about_open_source_libraries_activity_title">Open Source Libraries</string>
     <string name="introduction_text">Snipit is made with ❤ by <a href="http://odaymaleh.com">Oday Maleh</a>. And when love was not enough, these libraries came to the rescue.</string>
+
+    <!-- SHARE SNIPPET ACTIVITY -->
+    <string name="share_snippet_activity_title">Share Snippet</string>
+    <string name="screen_name_empty_error">Gotta have a screen name!</string>
+    <string name="screen_name_too_short_too_long">length: 5 – 20 with no spaces</string>
+    <string name="screen_name">Choose a screen name (Share as)</string>
+    <string name="alert_already_shared_snippet_title">Snippet exists</string>
+    <string name="uploading_snippet_server">Uploading snippet to server…</string>
+    <string name="progress_checking_existing_snippets_title">One moment</string>
+    <string name="progress_checking_existing_snippets_message">Checking for existing snippets…</string>
+    <string name="alert_already_shared_snippet_message">A snippet with these same details already exists.</string>
+    <string name="publish_snippet">Publish Snippet</string>
+
+    <!-- SNIPPETS STREAM ACTIVITY -->
+    <string name="snippets_stream_activity_title">Snippets Global Stream</string>
+    <string name="no_internet_connection">Check your Internet connection and try again</string>
+    <string name="loading_snippets_stream">Snippets from around the world!</string>
+    <string name="load_more_snippets_message_1">Loading more snippets…</string>
+    <string name="load_more_snippets_message_2">More is coming…</string>
+    <string name="load_more_snippets_message_3">Here\'s some more snippets!</string>
+    <string name="load_more_snippets_message_4">Share your own snippets!</string>
+    <string name="load_more_snippets_message_5">Thank you for using Snipit</string>
+    <string name="load_more_snippets_message_6">Knowledge is power</string>
+    <string name="load_more_snippets_message_7">If not today, then tomorrow!</string>
+    <string name="load_more_snippets_message_8">We read to know we\'re not alone</string>
+    <string name="load_more_snippets_message_9">Today a reader, tomorrow a leader!</string>
+    <string name="load_more_snippets_message_10">I love the smell of books in the morning…</string>
+    <string name="shared_by_label">shared by:</string>
+    <string name="book_title_label">book:</string>
+    <string name="book_author_label">author:</string>
 </resources>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/list_item_snippet"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/list_item_snippet_stream_height"
+    android:layout_marginBottom="@dimen/list_snippets_stream_padding_bottom"
+    card_view:cardCornerRadius="4dp"
+    card_view:cardElevation="4dp"
+    card_view:cardUseCompatPadding="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/snippetIMG_LoaderLayout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/list_item_snippet_stream_thumb_height"
+            android:layout_alignParentTop="true">
+
+            <ProgressBar
+                android:id="@+id/imageProgressLoader"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true" />
+
+            <ImageView
+                android:id="@+id/snippetIMG"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/snippetIMG_LoaderLayout"
+            android:orientation="vertical"
+            android:paddingEnd="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingStart="10dp">
+
+            <me.grantland.widget.AutofitTextView
+                android:id="@+id/snippetNameTV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/book_author_fsize" />
+
+            <me.grantland.widget.AutofitTextView
+                android:id="@+id/bookTitleTV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/mokhmal"
+                android:textSize="@dimen/book_date_added_fsize" />
+
+            <me.grantland.widget.AutofitTextView
+                android:id="@+id/bookAuthorTV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/mokhmal"
+                android:textSize="@dimen/book_date_added_fsize" />
+
+            <TextView
+                android:id="@+id/snippetByScreenNameTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/mokhmal"
+                android:textSize="@dimen/book_date_added_fsize" />
+        </LinearLayout>
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

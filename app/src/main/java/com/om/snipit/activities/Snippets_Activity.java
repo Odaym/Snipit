@@ -76,8 +76,6 @@ import java.util.Locale;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import de.keyboardsurfer.android.widget.crouton.Crouton;
-import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 
@@ -103,8 +101,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     private String searchQueryForGlobalUse = Constants.EXTRAS_NO_SEARCH_TERM;
 
     private Snippet tempSnippet;
-
-    private int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 
     private SearchView searchView;
 
@@ -146,7 +142,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         EventBus_Singleton.getInstance().register(this);
 
-        if (currentapiVersion < Build.VERSION_CODES.LOLLIPOP) {
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             listView.setDrawSelectorOnTop(true);
             listView.setSelector(R.drawable.abc_list_selector_holo_dark);
         }
@@ -161,9 +157,8 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         book = getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
 
+        toolbar.setTitle(book.getTitle());
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(book.getTitle());
         helperMethods.setUpActionbarColors(this, book.getColorCode());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -192,6 +187,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
+
                     if (photoFile != null) {
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                                 photoFileUri);
@@ -238,26 +234,29 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (photoFile != null)
+            outState.putString("photoFilePath", photoFile.getAbsolutePath());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        try {
+            photoFile = new File(savedInstanceState.getString("photoFilePath"));
+        } catch (NullPointerException e) {
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
 
         if (!snippets.isEmpty()) {
             inflater.inflate(R.menu.snippets_activity, menu);
-
-            MenuItem byNumber = menu.getItem(1);
-            SpannableString numberString = new SpannableString(byNumber.getTitle().toString());
-            numberString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, numberString.length(), 0);
-            byNumber.setTitle(numberString);
-
-            MenuItem byName = menu.getItem(2);
-            SpannableString nameString = new SpannableString(byName.getTitle().toString());
-            nameString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, nameString.length(), 0);
-            byName.setTitle(nameString);
-
-            MenuItem byViews = menu.getItem(3);
-            SpannableString viewsString = new SpannableString(byViews.getTitle().toString());
-            viewsString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, viewsString.length(), 0);
-            byViews.setTitle(viewsString);
 
             MenuItem searchItem = menu.findItem(R.id.search);
             searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
@@ -294,18 +293,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             case R.id.search:
                 searchView.setIconified(false);
                 return true;
-            case R.id.sort_by_name:
-                prepareSortedSnippets(book.getId(), "name");
-                snippetsAdapter.notifyDataSetChanged();
-                break;
-            case R.id.sort_by_views:
-                prepareSortedSnippets(book.getId(), "views");
-                snippetsAdapter.notifyDataSetChanged();
-                break;
-            case R.id.sort_page_number:
-                prepareSortedSnippets(book.getId(), "page_number");
-                snippetsAdapter.notifyDataSetChanged();
-                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -318,26 +305,23 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         switch (requestCode) {
             case REQUEST_IMAGE_CAPTURE:
-                if (photoFile == null)
-                    Crouton.makeText(this, R.string.retake_picture_error, Style.ALERT).show();
-                else {
-                    Intent openCreateSnippet = new Intent(Snippets_Activity.this, Crop_Image_Activity.class);
-                    openCreateSnippet.putExtra(Constants.EXTRAS_BOOK, book);
-                    openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, photoFile.getAbsolutePath());
-                    startActivity(openCreateSnippet);
-                }
+                Intent openCreateSnippet = new Intent(Snippets_Activity.this, Crop_Image_Activity.class);
+                openCreateSnippet.putExtra(Constants.EXTRAS_BOOK, book);
+                openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, photoFile.getAbsolutePath());
+                startActivity(openCreateSnippet);
                 break;
         }
     }
 
     @Subscribe
-    public void handle_BusEvents(EventBus_Poster ebp) {
+    public void onBusEvents(EventBus_Poster ebp) {
         String ebpMessage = ebp.getMessage();
 
         switch (ebpMessage) {
             case "snippet_added_snippets_activity":
                 prepareForNotifyDataChanged(book.getId());
                 snippetsAdapter.notifyDataSetChanged();
+                listView.smoothScrollToPosition(snippets.size());
 //                Log.d("EVENTS", "snippet_added_snippets_activity - Snippets_Activity");
                 break;
             case "snippet_deleted_snippets_activity":
@@ -563,23 +547,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         }
     }
 
-    public void prepareSortedSnippets(int book_id, String sortCriteria) {
-        try {
-            snippetQueryBuilder.where().eq("book_id", book_id);
-            snippetQueryBuilder.orderByRaw(sortCriteria);
-            pq = snippetQueryBuilder.prepare();
-
-            snippets = snippetDAO.query(pq);
-
-            for (int i = 0; i < snippets.size(); i++) {
-                snippets.get(i).setOrder(i);
-                snippetDAO.update(snippets.get(i));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void prepareSearchQueryBuilder(String searchQuery) {
         try {
             SelectArg nameSelectArg = new SelectArg("%" + searchQuery + "%");
@@ -695,7 +662,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
             GradientDrawable gradient;
 
-            if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 LayerDrawable drawable = (LayerDrawable) ((LayerDrawable) holder.motherView
                         .getBackground()).findDrawableByLayerId(R.id.content);
                 gradient = (GradientDrawable) drawable.findDrawableByLayerId(R.id.innerView);
@@ -715,7 +682,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 holder.snippetName.setVisibility(View.VISIBLE);
                 holder.snippetName.setAlpha(1f);
                 holder.imageProgressLoader.setAlpha(1f);
-                holder.snippetNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
+                holder.snippetNoteBTN.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.gray_bookmark));
             } else {
                 gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book.getColorCode())));
 
@@ -726,7 +693,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 holder.snippetName.setVisibility(View.INVISIBLE);
                 holder.snippetNoteTV.setVisibility(View.VISIBLE);
                 holder.imageProgressLoader.setVisibility(View.VISIBLE);
-                holder.snippetNoteBTN.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
+                holder.snippetNoteBTN.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.white_bookmark));
             }
 
             holder.snippetName.setText(snippets.get(position).getName());
@@ -742,7 +709,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 @Override
                 public void onClick(View view) {
                     final View overflowButton = view.findViewById(R.id.snippetAction);
-                    overflowButton.findViewById(R.id.snippetAction).setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
+                    overflowButton.findViewById(R.id.snippetAction).setBackgroundDrawable(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
 
                     PopupMenu popup = new PopupMenu(context, view);
                     popup.getMenuInflater().inflate(R.menu.snippet_list_item,
@@ -785,7 +752,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                     popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
                         @Override
                         public void onDismiss(PopupMenu popupMenu) {
-                            overflowButton.findViewById(R.id.snippetAction).setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_fade));
+                            overflowButton.findViewById(R.id.snippetAction).setBackgroundDrawable(context.getResources().getDrawable(R.drawable.menu_overflow_fade));
                         }
                     });
                 }
@@ -809,7 +776,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
                     GradientDrawable gradient;
 
-                    if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         LayerDrawable drawable = (LayerDrawable) ((LayerDrawable) motherView
                                 .getBackground()).findDrawableByLayerId(R.id.content);
                         gradient = (GradientDrawable) drawable.findDrawableByLayerId(R.id.innerView);
@@ -819,7 +786,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
                     //Note was showing, hide
                     if (isNoteShowing == 1) {
-                        view.setBackground(context.getResources().getDrawable(R.drawable.gray_bookmark));
+                        view.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.gray_bookmark));
 
                         gradient.setColor(context.getResources().getColor(R.color.white));
 
@@ -832,7 +799,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
                         snippets.get(position).setIsNoteShowing(0);
                     } else {
-                        view.setBackground(context.getResources().getDrawable(R.drawable.white_bookmark));
+                        view.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.white_bookmark));
 
                         gradient.setColor(context.getResources().getColor(helperMethods.determineNoteViewBackground(book.getColorCode())));
 

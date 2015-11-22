@@ -19,7 +19,7 @@
     <RelativeLayout
         android:id="@+id/snippetDetailsView"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/snippet_details_layout_height"
+        android:layout_height="@dimen/snippet_details_layout_height_landscape"
         android:layout_alignParentBottom="true"
         android:background="@drawable/snippet_details_gradient"
         android:paddingEnd="10dp"
@@ -63,6 +63,8 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/snippetNameTV"
+            android:layout_marginEnd="@dimen/snippet_details_margins_end_landscape"
+            android:layout_marginRight="@dimen/snippet_details_margins_end_landscape"
             android:textColor="@android:color/white"
             android:textSize="@dimen/book_date_added_fsize" />
     </RelativeLayout>
@@ -75,9 +77,9 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="100dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginBottom="@dimen/snippet_details_layout_height_landscape"
+        android:layout_marginEnd="@dimen/snippet_details_margins_end_landscape"
+        android:layout_marginRight="@dimen/snippet_details_margins_end_landscape"
         fab:fab_addButtonColorNormal="@color/blue"
         fab:fab_addButtonSize="mini"
         fab:fab_expandDirection="up">
@@ -86,25 +88,25 @@
             android:id="@+id/ocrSnippetBTN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_size="mini"
             fab:fab_colorNormal="@color/yellow"
-            fab:fab_icon="@drawable/ic_ocr_white" />
+            fab:fab_icon="@drawable/ic_ocr_white"
+            fab:fab_size="mini" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/paintSnippetBTN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_size="mini"
             fab:fab_colorNormal="@color/green"
-            fab:fab_icon="@drawable/ic_gesture_white" />
+            fab:fab_icon="@drawable/ic_gesture_white"
+            fab:fab_size="mini" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/createNewNoteBTN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_size="mini"
             fab:fab_colorNormal="@color/red"
-            fab:fab_icon="@drawable/ic_note_white" />
+            fab:fab_icon="@drawable/ic_note_white"
+            fab:fab_size="mini" />
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
 </RelativeLayout>

@@ -1,0 +1,59 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ToolBarStyle_Global"
+        app:navigationIcon="?attr/homeAsUpIndicator" />
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/contentViewSwipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:layout_centerInParent="true">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/snippetsStreamList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/light_gray"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="@dimen/listview_padding_between"
+            android:paddingLeft="@dimen/listview_padding_left_right"
+            android:paddingRight="@dimen/listview_padding_left_right"
+            android:paddingTop="@dimen/listview_padding_between"
+            android:scrollbars="vertical" />
+
+        <RelativeLayout
+            android:id="@+id/noConnectionlayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:alpha="0.5"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/noConnectionIMG"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/no_internet_connection" />
+
+            <me.grantland.widget.AutofitTextView
+                android:id="@+id/noConnectionLayoutMessage"
+                android:layout_width="wrap_content"
+                android:layout_below="@+id/noConnectionIMG"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/padding_snippets_activity_hint_above_image"
+                android:text="@string/no_internet_connection"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </RelativeLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
+</RelativeLayout>

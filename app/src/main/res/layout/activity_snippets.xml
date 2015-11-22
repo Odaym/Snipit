@@ -69,10 +69,9 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/fab_buttons_margins"
-        android:src="@drawable/ic_camera_white"
+        android:src="@drawable/ic_snippet_add_white"
         app:borderWidth="0dp"
         app:elevation="6dp"
         app:fabSize="normal" />
-
 
 </RelativeLayout>

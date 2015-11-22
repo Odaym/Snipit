@@ -14,12 +14,11 @@
     <dimen name="snippet_list_item_height">100dp</dimen>
     <dimen name="snippet_details_layout_height">100dp</dimen>
     <dimen name="snippet_details_layout_height_landscape">50dp</dimen>
+    <dimen name="snippet_details_margins_end_landscape">40dp</dimen>
     <dimen name="padding_end_landscape">35dp</dimen>
 
     <dimen name="snippet_thumb_height">100dp</dimen>
     <dimen name="snippet_thumb_width">100dp</dimen>
-
-    <!--<dimen name="create_book_snippet_fab_buttons_margins">10dp</dimen>-->
 
     <dimen name="snippet_image_shape_corners_radius">3dp</dimen>
     <dimen name="snippet_image_shape_corners_padding_bottom">3dp</dimen>
@@ -27,7 +26,9 @@
     <dimen name="fab_buttons_margins">0dp</dimen>
     <dimen name="fab_buttons_right_left_margins">0dp</dimen>
 
-    <dimen name="navdrawer_header_height">150dp</dimen>
+    <dimen name="navdrawer_header_height">160dp</dimen>
+    <dimen name="navdrawer_header_email_fontsize">15dp</dimen>
+    <dimen name="navdrawer_header_username_fontsize">17dp</dimen>
 
     <!-- FONT SIZES -->
     <dimen name="book_name_fsize">18dp</dimen>
@@ -66,4 +67,11 @@
 
     <!-- VIEW SNIPPET ACTIVITY -->
     <dimen name="ocr_scan_result_layout_padding_sides">10dp</dimen>
+
+    <!-- SNIPPETS STREAM ACTIVITY -->
+    <dimen name="list_item_snippet_stream_height">420dp</dimen>
+    <dimen name="list_item_snippet_stream_thumb_height">300dp</dimen>
+    <dimen name="list_snippets_stream_padding_bottom">5dp</dimen>
+    <dimen name="snippet_stream_list_item_snippet_name_width">200dp</dimen>
+    <dimen name="shared_label_font_size">12dp</dimen>
 </resources>

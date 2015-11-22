@@ -183,10 +183,9 @@ public class Books_Activity extends ActionBarActivity {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.navigation_drawer_item_snippets_gallery:
-                        Intent openAllSnippets_Intent = new Intent(Books_Activity.this, Snippets_Gallery_Activity.class);
-                        startActivity(openAllSnippets_Intent);
-
+                    case R.id.navigation_drawer_item_snippets_global_stream:
+                        Intent openSnippetStreamActivity = new Intent(Books_Activity.this, Snippet_Stream_Activity.class);
+                        startActivity(openSnippetStreamActivity);
                         break;
                     case R.id.navigation_drawer_item_settings:
                         Intent openSettingsIntent = new Intent(Books_Activity.this, Settings_Activity.class);
@@ -494,22 +493,22 @@ public class Books_Activity extends ActionBarActivity {
 
             switch (books.get(position).getColorCode()) {
                 case 0:
-                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_pink));
+                    holder.snippetsNumberTV.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.snippet_pink));
                     break;
                 case 1:
-                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_red));
+                    holder.snippetsNumberTV.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.snippet_red));
                     break;
                 case 2:
-                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_purple));
+                    holder.snippetsNumberTV.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.snippet_purple));
                     break;
                 case 3:
-                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_yellow));
+                    holder.snippetsNumberTV.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.snippet_yellow));
                     break;
                 case 4:
-                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_blue));
+                    holder.snippetsNumberTV.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.snippet_blue));
                     break;
                 case 5:
-                    holder.snippetsNumberTV.setBackground(context.getResources().getDrawable(R.drawable.snippet_brown));
+                    holder.snippetsNumberTV.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.snippet_brown));
                     break;
             }
 
@@ -517,7 +516,7 @@ public class Books_Activity extends ActionBarActivity {
                 @Override
                 public void onClick(View view) {
                     final View overflowButton = view.findViewById(R.id.bookAction);
-                    overflowButton.findViewById(R.id.bookAction).setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
+                    overflowButton.findViewById(R.id.bookAction).setBackgroundDrawable(context.getResources().getDrawable(R.drawable.menu_overflow_focus));
 
                     PopupMenu popup = new PopupMenu(context, view);
                     popup.getMenuInflater().inflate(R.menu.book_list_item,
@@ -624,7 +623,7 @@ public class Books_Activity extends ActionBarActivity {
                     popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
                         @Override
                         public void onDismiss(PopupMenu popupMenu) {
-                            overflowButton.findViewById(R.id.bookAction).setBackground(context.getResources().getDrawable(R.drawable.menu_overflow_fade));
+                            overflowButton.findViewById(R.id.bookAction).setBackgroundDrawable(context.getResources().getDrawable(R.drawable.menu_overflow_fade));
                         }
                     });
                 }

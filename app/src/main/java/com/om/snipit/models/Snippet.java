@@ -23,6 +23,8 @@ public class Snippet implements Parcelable {
     @DatabaseField
     String image_path;
     @DatabaseField
+    String aws_image_path;
+    @DatabaseField
     String ocr_content;
     @DatabaseField
     String date_added;
@@ -34,6 +36,8 @@ public class Snippet implements Parcelable {
     String note;
     @DatabaseField
     int isNoteShowing;
+    @DatabaseField
+    String screen_name;
 
     public Snippet() {
     }
@@ -43,12 +47,14 @@ public class Snippet implements Parcelable {
         name = in.readString();
         page_number = in.readInt();
         image_path = in.readString();
+        aws_image_path = in.readString();
         ocr_content = in.readString();
         date_added = in.readString();
         order = in.readInt();
         views = in.readInt();
         note = in.readString();
         isNoteShowing = in.readInt();
+        screen_name = in.readString();
     }
 
     public static final Parcelable.Creator<Snippet> CREATOR = new Parcelable.Creator<Snippet>() {
@@ -91,6 +97,14 @@ public class Snippet implements Parcelable {
 
     public void setImage_path(String image_path) {
         this.image_path = image_path;
+    }
+
+    public String getAws_image_path() {
+        return aws_image_path;
+    }
+
+    public void setAws_image_path(String aws_image_path) {
+        this.aws_image_path = aws_image_path;
     }
 
     public String getOcr_content() {
@@ -149,6 +163,14 @@ public class Snippet implements Parcelable {
         this.isNoteShowing = isNoteShowing;
     }
 
+    public String getScreen_name() {
+        return screen_name;
+    }
+
+    public void setScreen_name(String screen_name) {
+        this.screen_name = screen_name;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -160,11 +182,13 @@ public class Snippet implements Parcelable {
         out.writeString(name);
         out.writeInt(page_number);
         out.writeString(image_path);
+        out.writeString(aws_image_path);
         out.writeString(ocr_content);
         out.writeString(date_added);
         out.writeInt(order);
         out.writeInt(views);
         out.writeString(note);
         out.writeInt(isNoteShowing);
+        out.writeString(screen_name);
     }
 }

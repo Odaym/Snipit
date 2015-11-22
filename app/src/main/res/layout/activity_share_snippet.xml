@@ -1,0 +1,117 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/navdrawer_background_repeat"
+    android:orientation="vertical"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin">
+
+        <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="@style/ToolBarStyle_Global"
+            app:navigationIcon="?attr/homeAsUpIndicator" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="32dp"
+            android:paddingLeft="@dimen/activity_vertical_margin"
+            android:paddingRight="@dimen/activity_vertical_margin"
+            android:paddingTop="@dimen/activity_vertical_margin">
+
+            <com.wrapp.floatlabelededittext.FloatLabeledEditText
+                android:id="@+id/titleETFloating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.andreabaccega.widget.FormEditText
+                    android:id="@+id/titleET"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:editable="false"
+                    android:enabled="false"
+                    android:hint="@string/book_title"
+                    android:singleLine="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@color/edittext_hint_color"
+                    android:textCursorDrawable="@null" />
+
+            </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+
+            <com.wrapp.floatlabelededittext.FloatLabeledEditText
+                android:id="@+id/authorETFloating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.andreabaccega.widget.FormEditText
+                    android:id="@+id/authorET"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:editable="false"
+                    android:enabled="false"
+                    android:hint="@string/book_author"
+                    android:singleLine="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@color/edittext_hint_color"
+                    android:textCursorDrawable="@null" />
+            </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+
+            <com.wrapp.floatlabelededittext.FloatLabeledEditText
+                android:id="@+id/snippetNameETFloating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.andreabaccega.widget.FormEditText
+                    android:id="@+id/snippetNameET"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:hint="@string/snippet_name"
+                    android:singleLine="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@color/edittext_hint_color"
+                    android:textCursorDrawable="@null"
+                    app:emptyErrorString="@string/empty_snippet_name_error" />
+            </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+
+            <com.wrapp.floatlabelededittext.FloatLabeledEditText
+                android:id="@+id/screenNameETFloating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.andreabaccega.widget.FormEditText
+                    android:id="@+id/screenNameET"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:hint="@string/screen_name"
+                    android:singleLine="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@color/edittext_hint_color"
+                    android:textCursorDrawable="@null"
+                    app:customRegexp="^([a-zA-Z0-9._-]){5,20}$"
+                    app:emptyErrorString="@string/screen_name_empty_error"
+                    app:testErrorString="@string/screen_name_too_short_too_long"
+                    app:testType="regexp" />
+            </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/snippetIMG"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal|center_vertical" />
+
+    </LinearLayout>
+</ScrollView>

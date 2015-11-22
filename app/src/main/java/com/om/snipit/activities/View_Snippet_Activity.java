@@ -5,9 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -27,7 +25,8 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.flurry.android.FlurryAgent;
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -104,7 +103,12 @@ public class View_Snippet_Activity extends Base_Activity {
         extras_viewing_snippets_gallery = getIntent().getExtras().getBoolean(Constants.EXTRAS_VIEWING_SNIPPETS_GALLERY);
         current_snippet_position = getIntent().getExtras().getInt(Constants.EXTRAS_CURRENT_SNIPPET_POSITION);
         book = getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
-        getSupportActionBar().setTitle(book.getTitle());
+
+        if (book != null) {
+            getSupportActionBar().setTitle(book.getTitle());
+        } else {
+            finish();
+        }
 
         //If viewing snippets from a Collection, not from Snippets Gallery
         if (!extras_viewing_snippets_gallery)
@@ -190,8 +194,6 @@ public class View_Snippet_Activity extends Base_Activity {
                         snippetDAO.update(snippets.get(mPager.getCurrentItem()));
 
                         EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_ocr_content_changed"));
-
-                        invalidateOptionsMenu();
                     }
                 });
                 builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -270,10 +272,14 @@ public class View_Snippet_Activity extends Base_Activity {
         TextView snippetNameTV;
         @InjectView(R.id.snippetDetailsView)
         RelativeLayout snippetDetailsView;
+        @InjectView(R.id.snippet_actions_fab)
+        FloatingActionsMenu snippetActionsBTN;
         @InjectView(R.id.createNewNoteBTN)
         FloatingActionButton createNewNoteBTN;
-        @InjectView(R.id.paintBookmarkBTN)
-        FloatingActionButton paintBookmarkBTN;
+        @InjectView(R.id.paintSnippetBTN)
+        FloatingActionButton paintSnippetBTN;
+        @InjectView(R.id.ocrSnippetBTN)
+        FloatingActionButton ocrSnippetBTN;
         @InjectView(R.id.imageProgressBar)
         ProgressBar imageProgressBar;
 
@@ -283,6 +289,7 @@ public class View_Snippet_Activity extends Base_Activity {
         private Context context;
 
         private Snippet snippet;
+        private Book book;
 
         private boolean clutterHidden = false;
 
@@ -301,13 +308,9 @@ public class View_Snippet_Activity extends Base_Activity {
                 @Override
                 public void onSuccess() {
                     //Because they become disabled if an error occurred while loading the image
-                    if (!createNewNoteBTN.isEnabled()) {
-                        createNewNoteBTN.setEnabled(true);
-                        createNewNoteBTN.setAlpha(1f);
-                    }
-                    if (!paintBookmarkBTN.isEnabled()) {
-                        paintBookmarkBTN.setEnabled(true);
-                        paintBookmarkBTN.setAlpha(1f);
+                    if (!snippetActionsBTN.isEnabled()) {
+                        snippetActionsBTN.setEnabled(true);
+                        snippetActionsBTN.setAlpha(1f);
                     }
 
                     imageProgressBar.setVisibility(View.INVISIBLE);
@@ -355,12 +358,158 @@ public class View_Snippet_Activity extends Base_Activity {
                         }
                     });
 
-                    paintBookmarkBTN.setOnClickListener(new View.OnClickListener() {
+                    paintSnippetBTN.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             Intent openPaintActivity = new Intent(context, Paint_Snippet_Activity.class);
                             openPaintActivity.putExtra(Constants.EXTRAS_SNIPPET, snippet);
                             startActivity(openPaintActivity);
+                        }
+                    });
+
+                    ocrSnippetBTN.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if ((snippet.getOcr_content() != null && snippet.getOcr_content().isEmpty()) || snippet.getOcr_content() == null) {
+                                if (Helper_Methods.isInternetAvailable(getActivity())) {
+                                    AlertDialog.Builder ocrLanguagePickerDialog = new AlertDialog.Builder(getActivity());
+                                    ocrLanguagePickerDialog.setTitle(R.string.ocr_recognition_languages_alert_title);
+                                    final String[] types = {"English",
+                                            "Arabic",
+                                            "Albanian",
+                                            "Armenian (Eastern)",
+                                            "Armenian (Grabar)",
+                                            "Armenian (Western)",
+                                            "Azerbaijani (Cyrillic)",
+                                            "Azerbaijani (Latin)",
+                                            "Belarussian",
+                                            "Bulgarian",
+                                            "Catalan",
+                                            "Chechen",
+                                            "Chinese Simplified",
+                                            "Chinese Traditional",
+                                            "Corsican",
+                                            "Croatian",
+                                            "Czech",
+                                            "Danish",
+                                            "Dutch (Netherlands)",
+                                            "Dutch (Belgium)",
+                                            "Eskimo (Cyrillic)",
+                                            "Eskimo (Latin)",
+                                            "Estonian",
+                                            "Finnish",
+                                            "French",
+                                            "Ganda",
+                                            "German",
+                                            "German (New spelling)",
+                                            "German (Luxembourg)",
+                                            "Greek",
+                                            "Hawaiian",
+                                            "Hebrew",
+                                            "Hungarian",
+                                            "Icelandic",
+                                            "Indonesian",
+                                            "Irish",
+                                            "Italian",
+                                            "Japanese",
+                                            "Kazakh",
+                                            "Kongo",
+                                            "Korean",
+                                            "Korean (Hangul)",
+                                            "Koryak",
+                                            "Kurdish",
+                                            "Lak",
+                                            "Latin",
+                                            "Latvian",
+                                            "Lithuanian",
+                                            "Macedonian",
+                                            "Malay (Malaysian)",
+                                            "Mongol",
+                                            "Nahuatl",
+                                            "Norwegian (Bokmal)",
+                                            "Norwegian (Nynorsk)",
+                                            "Old English",
+                                            "Old French",
+                                            "Old German",
+                                            "Old Italian",
+                                            "Old Slavonic",
+                                            "Old Spanish",
+                                            "Polish",
+                                            "Portuguese (Brazil)",
+                                            "Portuguese (Portugal)",
+                                            "Romanian",
+                                            "Romanian (Moldavia)",
+                                            "Russian (Old Spelling)",
+                                            "Russian",
+                                            "Samoan",
+                                            "Serbian (Cyrillic)",
+                                            "Serbian (Latin)",
+                                            "Slovenian",
+                                            "Somali",
+                                            "Spanish",
+                                            "Swedish",
+                                            "Thai",
+                                            "Turkish",
+                                            "Ukrainian",
+                                            "Uzbek (Cyrillic)",
+                                            "Uzbek (Latin)",
+                                            "Vietnamese",
+                                            "Yiddish"};
+                                    ocrLanguagePickerDialog.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                                        }
+                                    });
+                                    ocrLanguagePickerDialog.setItems(types, new DialogInterface.OnClickListener() {
+
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                            new AsyncTask_ProcessOCR((View_Snippet_Activity) getActivity()).execute(snippet.getImage_path(), "results.txt", types[which]);
+
+                                            Helper_Methods.logEvent("OCR Scan Run", new String[]{types[which]});
+                                        }
+
+                                    });
+
+                                    ocrLanguagePickerDialog.show();
+                                } else {
+                                    Crouton.makeText(getActivity(), getString(R.string.action_needs_internet), Style.ALERT).show();
+                                }
+                            } else {
+                                Helper_Methods.logEvent("OCR Scan Viewed", null);
+
+                                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                LinearLayout lay = new LinearLayout(getActivity());
+                                final EditText ocrResultET = new EditText(getActivity());
+
+                                ocrResultET.setText(snippet.getOcr_content());
+
+                                lay.setOrientation(LinearLayout.VERTICAL);
+                                lay.addView(ocrResultET);
+
+                                builder.setTitle(R.string.ocr_scan_result);
+                                builder.setPositiveButton(R.string.SAVE, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        snippet.setOcr_content(ocrResultET.getText().toString());
+                                        snippetDAO.update(snippet);
+
+                                        EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_ocr_content_changed"));
+                                    }
+                                });
+                                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.dismiss();
+                                    }
+                                });
+                                builder.setView(lay);
+
+                                AlertDialog alert = builder.create();
+                                alert.show();
+                            }
                         }
                     });
                 }
@@ -369,10 +518,8 @@ public class View_Snippet_Activity extends Base_Activity {
                 public void onError() {
                     imageProgressBar.setVisibility(View.INVISIBLE);
 
-                    createNewNoteBTN.setEnabled(false);
-                    createNewNoteBTN.setAlpha(0.2f);
-                    paintBookmarkBTN.setEnabled(false);
-                    paintBookmarkBTN.setAlpha(0.2f);
+                    snippetActionsBTN.setEnabled(false);
+                    snippetActionsBTN.setAlpha(0.2f);
                 }
             };
         }
@@ -388,11 +535,7 @@ public class View_Snippet_Activity extends Base_Activity {
 
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            if (snippet.getOcr_content() == null) {
-                inflater.inflate(R.menu.view_snippet_ocr_empty, menu);
-            } else {
-                inflater.inflate(R.menu.view_snippet, menu);
-            }
+            inflater.inflate(R.menu.view_snippet, menu);
 
             super.onCreateOptionsMenu(menu, inflater);
         }
@@ -400,172 +543,11 @@ public class View_Snippet_Activity extends Base_Activity {
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.run_ocr:
-                    if (Helper_Methods.isInternetAvailable(getActivity())) {
-                        AlertDialog.Builder ocrLanguagePickerDialog = new AlertDialog.Builder(getActivity());
-                        ocrLanguagePickerDialog.setTitle(R.string.ocr_recognition_languages_alert_title);
-                        final String[] types = {"Albanian",
-                                "Arabic",
-                                "Armenian (Eastern)",
-                                "Armenian (Grabar)",
-                                "Armenian (Western)",
-                                "Azerbaijani (Cyrillic)",
-                                "Azerbaijani (Latin)",
-                                "Belarussian",
-                                "Bulgarian",
-                                "Catalan",
-                                "Chechen",
-                                "Chinese Simplified",
-                                "Chinese Traditional",
-                                "Corsican",
-                                "Croatian",
-                                "Czech",
-                                "Danish",
-                                "Dutch (Netherlands)",
-                                "Dutch (Belgium)",
-                                "English",
-                                "Eskimo (Cyrillic)",
-                                "Eskimo (Latin)",
-                                "Estonian",
-                                "Finnish",
-                                "French",
-                                "Ganda",
-                                "German",
-                                "German (New spelling)",
-                                "German (Luxembourg)",
-                                "Greek",
-                                "Hawaiian",
-                                "Hebrew",
-                                "Hungarian",
-                                "Icelandic",
-                                "Indonesian",
-                                "Irish",
-                                "Italian",
-                                "Japanese",
-                                "Kazakh",
-                                "Kongo",
-                                "Korean",
-                                "Korean (Hangul)",
-                                "Koryak",
-                                "Kurdish",
-                                "Lak",
-                                "Latin",
-                                "Latvian",
-                                "Lithuanian",
-                                "Macedonian",
-                                "Malay (Malaysian)",
-                                "Mongol",
-                                "Nahuatl",
-                                "Norwegian (Bokmal)",
-                                "Norwegian (Nynorsk)",
-                                "Old English",
-                                "Old French",
-                                "Old German",
-                                "Old Italian",
-                                "Old Slavonic",
-                                "Old Spanish",
-                                "Polish",
-                                "Portuguese (Brazil)",
-                                "Portuguese (Portugal)",
-                                "Romanian",
-                                "Romanian (Moldavia)",
-                                "Russian (Old Spelling)",
-                                "Russian",
-                                "Samoan",
-                                "Serbian (Cyrillic)",
-                                "Serbian (Latin)",
-                                "Slovenian",
-                                "Somali",
-                                "Spanish",
-                                "Swedish",
-                                "Thai",
-                                "Turkish",
-                                "Ukrainian",
-                                "Uzbek (Cyrillic)",
-                                "Uzbek (Latin)",
-                                "Vietnamese",
-                                "Yiddish"};
-                        ocrLanguagePickerDialog.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                            }
-                        });
-                        ocrLanguagePickerDialog.setItems(types, new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                new AsyncTask_ProcessOCR((View_Snippet_Activity) getActivity()).execute(snippet.getImage_path(), "results.txt", types[which]);
-                                FlurryAgent.logEvent("OCR_Scan_Run_Language_" + types[which]);
-                            }
-
-                        });
-
-                        ocrLanguagePickerDialog.show();
-                    } else {
-                        Crouton.makeText(getActivity(), getString(R.string.action_needs_internet), Style.ALERT).show();
-                    }
-                    break;
-                case R.id.view_ocr_results:
-                    FlurryAgent.logEvent("OCR_Scan_Viewed");
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    LinearLayout lay = new LinearLayout(getActivity());
-                    final EditText ocrResultET = new EditText(getActivity());
-
-                    ocrResultET.setText(snippet.getOcr_content());
-
-                    lay.setOrientation(LinearLayout.VERTICAL);
-                    lay.addView(ocrResultET);
-
-                    builder.setTitle(R.string.ocr_scan_result);
-                    builder.setPositiveButton(R.string.SAVE, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            snippet.setOcr_content(ocrResultET.getText().toString());
-                            snippetDAO.update(snippet);
-
-                            EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_ocr_content_changed"));
-                        }
-                    });
-                    builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.dismiss();
-                        }
-                    });
-                    builder.setView(lay);
-
-                    AlertDialog alert = builder.create();
-                    alert.show();
-                    break;
-                case R.id.clear_ocr_results:
-                    snippet.setOcr_content(null);
-                    snippetDAO.update(snippet);
-
-                    EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_ocr_content_changed"));
-
-                    ((Activity) context).invalidateOptionsMenu();
-                    break;
                 case R.id.share_snippet:
-                    Book book = getActivity().getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
-
-                    Uri imageURI = Uri.parse(snippet.getImage_path());
-
-                    Intent sendIntent = new Intent();
-                    sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.putExtra(Intent.EXTRA_STREAM, imageURI);
-
-                    //Include the page number in the sharing message if a page number exists, otherwise don't
-//                    if (snippet.getPage_number() == Constants.NO_SNIPPET_PAGE_NUMBER) {
-//                        sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.sharing_message) + "\nTitle: \"" + snippet.getName() + "\"\nFrom: \"" + book.getTitle() + "\"");
-//                    } else {
-//                        sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.sharing_message) + "\nTitle: \"" + snippet.getName() + "\"\nFrom: \"" + book.getTitle() + "\"\nPage: " + snippet.getPage_number());
-//                    }
-
-                    sendIntent.setType("image/*");
-                    startActivity(Intent.createChooser(sendIntent, "Share using:"));
+                    Intent shareSnippetIntent = new Intent(getActivity(), Share_Snippet_Activity.class);
+                    shareSnippetIntent.putExtra(Constants.EXTRAS_SNIPPET, snippet);
+                    shareSnippetIntent.putExtra(Constants.EXTRAS_BOOK, book);
+                    startActivity(shareSnippetIntent);
                     break;
             }
 
@@ -579,6 +561,7 @@ public class View_Snippet_Activity extends Base_Activity {
             context = activity;
 
             snippet = getArguments().getParcelable(Constants.EXTRAS_SNIPPET);
+            book = getArguments().getParcelable(Constants.EXTRAS_BOOK);
         }
 
         @Override
@@ -636,8 +619,7 @@ public class View_Snippet_Activity extends Base_Activity {
                 ((View_Snippet_Activity) context).getSupportActionBar().show();
 
                 arrayListObjectAnimators.add(helperMethods.showViewElement(snippetDetailsView));
-                arrayListObjectAnimators.add(helperMethods.showViewElement(createNewNoteBTN));
-                arrayListObjectAnimators.add(helperMethods.showViewElement(paintBookmarkBTN));
+                arrayListObjectAnimators.add(helperMethods.showViewElement(snippetActionsBTN));
 
             } else {
                 ((View_Snippet_Activity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -645,8 +627,7 @@ public class View_Snippet_Activity extends Base_Activity {
                 ((View_Snippet_Activity) context).getSupportActionBar().hide();
 
                 arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetDetailsView));
-                arrayListObjectAnimators.add(helperMethods.hideViewElement(createNewNoteBTN));
-                arrayListObjectAnimators.add(helperMethods.hideViewElement(paintBookmarkBTN));
+                arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetActionsBTN));
             }
 
             objectAnimators = arrayListObjectAnimators

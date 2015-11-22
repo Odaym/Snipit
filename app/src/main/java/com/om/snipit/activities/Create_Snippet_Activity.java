@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.andreabaccega.widget.FormEditText;
-import com.flurry.android.FlurryAgent;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.om.snipit.R;
@@ -182,11 +181,11 @@ public class Create_Snippet_Activity extends Base_Activity {
 
                             snippet.setBook(book);
 
-                            snippetDAO.create(snippet);
+                            int snippet_id = snippetDAO.create(snippet);
 
-                            FlurryAgent.logEvent("Create_Snipit");
+                            Helper_Methods.logEvent("Created Snippet", new String[]{snippet.getName()});
 
-                            EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_added_snippets_activity"));
+                            EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_added_snippets_activity", String.valueOf(snippet_id)));
                             EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_added_books_activity"));
 
                             finish();

@@ -13,7 +13,7 @@
             android:title="@string/pref_rate_google_play">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="https://play.google.com/store/apps/details?id=com.cura" />
+                android:data="https://play.google.com/store/apps/details?id=com.om.snipit" />
         </Preference>
         <Preference
             android:key="pref_key_open_source_libs"

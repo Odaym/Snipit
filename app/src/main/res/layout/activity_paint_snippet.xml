@@ -89,7 +89,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="50dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="10dp"
         android:layout_marginRight="10dp"
         android:visibility="gone"
         fab:fab_addButtonColorNormal="@color/blue"

@@ -4,9 +4,9 @@
         android:id="@+id/contentGroup"
         android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_drawer_item_snippets_gallery"
-            android:icon="@drawable/ic_snippets_gallery_black"
-            android:title="@string/navdrawer_snippets_gallery_primary" />
+            android:id="@+id/navigation_drawer_item_snippets_global_stream"
+            android:icon="@drawable/ic_global_stream_black"
+            android:title="@string/navdrawer_snippets_global_stream"/>
     </group>
 
     <group

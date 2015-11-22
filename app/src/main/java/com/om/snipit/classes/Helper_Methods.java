@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.andreabaccega.widget.FormEditText;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.ObjectAnimator;
@@ -23,6 +25,29 @@ public class Helper_Methods {
 
     public Helper_Methods(Context context) {
         this.context = context;
+    }
+
+    public static void logEvent(String eventName, String[] eventValue) {
+        CustomEvent customEvent = new CustomEvent(eventName);
+
+        switch (eventName) {
+            case "Created Book":
+                customEvent.putCustomAttribute("Book name", eventValue[0]);
+                break;
+            case "Created Snippet":
+                customEvent.putCustomAttribute("Snippet name", eventValue[0]);
+                break;
+            case "OCR Scan Run":
+                customEvent.putCustomAttribute("OCR Language", eventValue[0]);
+                break;
+            case "Shared Snippet":
+                customEvent.putCustomAttribute("Snippet name", eventValue[0]);
+                customEvent.putCustomAttribute("Screen name", eventValue[1]);
+                break;
+        }
+
+        if (Constants.APPLICATION_CODE_STATE.equals("PRODUCTION"))
+            Answers.getInstance().logCustom(customEvent);
     }
 
     @DebugLog

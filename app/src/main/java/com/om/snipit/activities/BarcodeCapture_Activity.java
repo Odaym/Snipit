@@ -48,6 +48,8 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.om.snipit.R;
 import com.om.snipit.barcode_reader.BarcodeGraphic;
 import com.om.snipit.barcode_reader.BarcodeTrackerFactory;
+import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.Helper_Methods;
 import com.om.snipit.classes.ui.camera.CameraSource;
 import com.om.snipit.classes.ui.camera.CameraSourcePreview;
 import com.om.snipit.classes.ui.camera.GraphicOverlay;
@@ -81,6 +83,8 @@ public final class BarcodeCapture_Activity extends Base_Activity {
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
+    private Helper_Methods helperMethods;
+
     /**
      * Initializes the UI and creates the detector pipeline.
      */
@@ -89,19 +93,21 @@ public final class BarcodeCapture_Activity extends Base_Activity {
         super.onCreate(icicle);
         setContentView(R.layout.activity_barcode_capture);
 
+        helperMethods = new Helper_Methods(this);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<BarcodeGraphic>) findViewById(R.id.graphicOverlay);
 
         toolbar.setTitle(R.string.barcode_capture_activity);
-        toolbar.setBackgroundColor(getResources().getColor(R.color.green));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             toolbar.setElevation(25f);
-            getWindow().setStatusBarColor(getResources().getColor(R.color.darker_green));
         }
 
         setSupportActionBar(toolbar);
+
+        helperMethods.setUpActionbarColors(this, Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS);
 
         // read parameters from the intent used to launch the activity.
         boolean autoFocus = getIntent().getBooleanExtra(AutoFocus, false);
@@ -111,7 +117,7 @@ public final class BarcodeCapture_Activity extends Base_Activity {
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED) {
-                createCameraSource(autoFocus, useFlash);
+            createCameraSource(autoFocus, useFlash);
         } else {
             requestCameraPermission();
         }

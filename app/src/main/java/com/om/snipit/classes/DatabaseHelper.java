@@ -9,7 +9,6 @@ import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import com.om.snipit.models.Book;
-import com.om.snipit.models.Channel;
 import com.om.snipit.models.Snippet;
 
 import java.sql.SQLException;
@@ -21,11 +20,10 @@ import java.sql.SQLException;
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private static final String DATABASE_NAME = "Snipit.db";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private RuntimeExceptionDao<Book, Integer> bookRuntimeDAO = null;
     private RuntimeExceptionDao<Snippet, Integer> snippetRuntimeDAO = null;
-    private RuntimeExceptionDao<Channel, Integer> channelRuntimeDAO = null;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -36,7 +34,6 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         try {
             TableUtils.createTable(connectionSource, Book.class);
             TableUtils.createTable(connectionSource, Snippet.class);
-            TableUtils.createTable(connectionSource, Channel.class);
         } catch (SQLException e) {
             Log.e(DatabaseHelper.class.getName(), "Can't create database", e);
             throw new RuntimeException(e);
@@ -45,6 +42,10 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, ConnectionSource connectionSource, int oldVersion, int newVersion) {
+        if (oldVersion < 2) {
+            snippetRuntimeDAO.executeRaw("ALTER TABLE `Snippet` ADD COLUMN screen_name STRING NULL;");
+            snippetRuntimeDAO.executeRaw("ALTER TABLE `Snippet` ADD COLUMN aws_image_path STRING NULL;");
+        }
     }
 
     public RuntimeExceptionDao<Book, Integer> getBookDAO() {
@@ -61,18 +62,10 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         return snippetRuntimeDAO;
     }
 
-    public RuntimeExceptionDao<Channel, Integer> getChannelDAO() {
-        if (channelRuntimeDAO == null) {
-            channelRuntimeDAO = getRuntimeExceptionDao(Channel.class);
-        }
-        return channelRuntimeDAO;
-    }
-
     @Override
     public void close() {
         super.close();
         bookRuntimeDAO = null;
         snippetRuntimeDAO = null;
-        channelRuntimeDAO = null;
     }
 }
