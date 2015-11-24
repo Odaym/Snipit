@@ -1,16 +1,10 @@
 package com.om.snipit.activities;
 
-import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -25,25 +19,18 @@ import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
 import com.om.snipit.models.Book;
 import com.om.snipit.models.Snippet;
-import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
-import hugo.weaving.DebugLog;
 
 public class Create_Snippet_Activity extends Base_Activity {
-
-    static final int REQUEST_IMAGE_CAPTURE = 1;
 
     @InjectView(R.id.nameET)
     FormEditText nameET;
@@ -53,8 +40,6 @@ public class Create_Snippet_Activity extends Base_Activity {
     ImageView snippetIMG;
     @InjectView(R.id.doneBTN)
     FloatingActionButton doneBTN;
-    @InjectView(R.id.createNewSnippetBTN)
-    FloatingActionButton createNewSnippetBTN;
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
 
@@ -67,8 +52,7 @@ public class Create_Snippet_Activity extends Base_Activity {
 
     private int CALL_PURPOSE;
     private Snippet snippet_from_list;
-    private String tempImagePath, finalImagePath;
-    private EventBus_Poster ebpFromEditSnippet;
+    private String snippetImagePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,12 +80,11 @@ public class Create_Snippet_Activity extends Base_Activity {
 
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING, -1);
 
-        tempImagePath = getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH);
-        finalImagePath = tempImagePath;
+        snippetImagePath = getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH);
 
         //If it is a create operation, the path to the snippet image is inside the extras that were sent to this activity (from Camera intent)
         try {
-            Picasso.with(this).load(new File(tempImagePath)).resize(500, 500).centerInside().into(snippetIMG);
+            Picasso.with(this).load(new File(snippetImagePath)).resize(500, 500).centerInside().into(snippetIMG);
         } catch (NullPointerException NPE) {
             NPE.printStackTrace();
         }
@@ -138,11 +121,6 @@ public class Create_Snippet_Activity extends Base_Activity {
                             else
                                 snippet_from_list.setPage_number(Constants.NO_SNIPPET_PAGE_NUMBER);
 
-                            if (ebpFromEditSnippet != null)
-                                snippet_from_list.setImage_path(ebpFromEditSnippet.getExtra());
-                            else
-                                snippet_from_list.setImage_path(snippet_from_list.getImage_path());
-
                             snippet_from_list.setBook(book);
 
                             snippetDAO.update(snippet_from_list);
@@ -172,10 +150,7 @@ public class Create_Snippet_Activity extends Base_Activity {
                             else
                                 snippet.setPage_number(Constants.NO_SNIPPET_PAGE_NUMBER);
 
-                            if (CALL_PURPOSE == Constants.EDIT_SNIPPET_IMAGE_PURPOSE_VALUE)
-                                snippet.setImage_path(ebpFromEditSnippet.getExtra());
-                            else
-                                snippet.setImage_path(finalImagePath);
+                            snippet.setImage_path(snippetImagePath);
 
                             snippet.setDate_added(month + " " + day + ", " + year);
 
@@ -197,28 +172,6 @@ public class Create_Snippet_Activity extends Base_Activity {
                 }
             }
         });
-
-        createNewSnippetBTN.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(helperMethods.determineFabButtonsColor(book.getColorCode()))));
-
-        createNewSnippetBTN.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    File photoFile = null;
-                    try {
-                        photoFile = createImageFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    if (photoFile != null) {
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                                Uri.fromFile(photoFile));
-                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                    }
-                }
-            }
-        });
     }
 
     public DatabaseHelper getHelper() {
@@ -228,58 +181,5 @@ public class Create_Snippet_Activity extends Base_Activity {
         }
 
         return databaseHelper;
-    }
-
-    @Subscribe
-    public void handle_BusEvents(EventBus_Poster ebp) {
-        if (ebp.getMessage().equals("snippet_picture_changed")) {
-            try {
-                Picasso.with(this).load(new File(ebp.getExtra())).into(snippetIMG);
-                ebpFromEditSnippet = ebp;
-            } catch (NullPointerException NPE) {
-                NPE.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (resultCode != RESULT_OK)
-            return;
-
-        switch (requestCode) {
-            case REQUEST_IMAGE_CAPTURE:
-                //If retaking the picture is being done from within an existing snippet, set the flag to be so
-                if (CALL_PURPOSE != Constants.EDIT_SNIPPET_PURPOSE_VALUE)
-                    CALL_PURPOSE = Constants.EDIT_SNIPPET_IMAGE_PURPOSE_VALUE;
-
-                Intent openCropImageActivity = new Intent(Create_Snippet_Activity.this, Crop_Image_Activity.class);
-                openCropImageActivity.putExtra(Constants.EXTRAS_BOOK, book);
-                openCropImageActivity.putExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING, CALL_PURPOSE);
-                openCropImageActivity.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, tempImagePath);
-                startActivity(openCropImageActivity);
-                break;
-        }
-    }
-
-    @DebugLog
-    private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp;
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "Snipit");
-
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
-                Log.d(Constants.DEBUG_TAG, "failed to create directory");
-                return null;
-            }
-        }
-
-        File image = new File(mediaStorageDir.getPath() + File.separator + imageFileName);
-
-        tempImagePath = image.getAbsolutePath();
-
-        return image;
     }
 }

@@ -10,7 +10,7 @@
 
     <string name="app_name">Snipit</string>
     <string name="app_tagline">Digitize information from the real world</string>
-    <string name="app_version">2.1.5</string>
+    <string name="app_version">2.1.6</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
     <string name="SAVE">SAVE</string>
@@ -71,6 +71,9 @@
     <string name="sort_order_override">Sorting preference override. Restoring previous order.</string>
     <string name="empty_snippets_layout_hint">Snippets you add appear here</string>
     <string name="delete_snippet_confirmation_message">Deleted</string>
+    <string name="add_snippet_camera">Capture</string>
+    <string name="add_snippet_voice">Record</string>
+    <string name="add_snippet_from_gallery">Browse</string>
 
     <!-- CREATE_BOOKMARK_ACTIVITY -->
     <string name="create_snippet_activity_title">New Snippet</string>

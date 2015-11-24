@@ -346,8 +346,8 @@ public class Create_Book_Activity extends ActionBarActivity {
                 }
                 try {
                     JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
-                    Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("smallThumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
-                    bookImagePath = imageInfo.getString("smallThumbnail");
+                    Picasso.with(Create_Book_Activity.this).load(imageInfo.getString("thumbnail")).error(getResources().getDrawable(R.drawable.notfound_1)).into(bookIMG);
+                    bookImagePath = imageInfo.getString("thumbnail");
                 } catch (JSONException jse) {
                     Crouton.makeText(Create_Book_Activity.this, getString(R.string.book_image_not_found_error), Style.ALERT).show();
                     loadingBookInfoDialog.dismiss();

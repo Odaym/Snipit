@@ -2,7 +2,7 @@ package com.om.snipit.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -37,6 +36,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -82,9 +82,10 @@ import me.grantland.widget.AutofitTextView;
 public class Snippets_Activity extends Base_Activity implements SearchView.OnQueryTextListener {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_PICK_IMAGE_GALLERY = 2;
 
     @InjectView(R.id.createNewSnippetBTN)
-    FloatingActionButton createNewSnippetBTN;
+    FloatingActionsMenu createNewSnippetBTN;
     @InjectView(R.id.emptyListLayout)
     RelativeLayout emptyListLayout;
     @InjectView(R.id.snippetsList)
@@ -171,32 +172,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         handleEmptyOrPopulatedScreen(snippets);
 
-        createNewSnippetBTN.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(helperMethods.determineFabButtonsColor(book.getColorCode()))));
-
-        createNewSnippetBTN.invalidate();
-
-        createNewSnippetBTN.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    photoFile = null;
-                    try {
-                        photoFile = createImageFile(constructImageFilename());
-                        photoFileUri = Uri.fromFile(photoFile);
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-
-                    if (photoFile != null) {
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                                photoFileUri);
-                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                    }
-                }
-            }
-        });
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -222,6 +197,39 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 }
             }
         });
+    }
+
+    public void onAddSnippetMenuBtnClicked(View view) {
+        createNewSnippetBTN.collapse();
+
+        switch (view.getId()) {
+            case R.id.addSnippetCameraBTN:
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    photoFile = null;
+                    try {
+                        photoFile = createImageFile(constructImageFilename());
+                        photoFileUri = Uri.fromFile(photoFile);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+
+                    if (photoFile != null) {
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                                photoFileUri);
+                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                    }
+                }
+                break;
+//            case R.id.addSnippetVoiceBTN:
+//
+//                break;
+            case R.id.addSnippetFromGalleryBTN:
+                Intent galleryIntent = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(galleryIntent, REQUEST_PICK_IMAGE_GALLERY);
+                break;
+        }
     }
 
     public DatabaseHelper getHelper() {
@@ -303,14 +311,32 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         if (resultCode != RESULT_OK)
             return;
 
+        Intent openCreateSnippet = new Intent(Snippets_Activity.this, Crop_Image_Activity.class);
+        openCreateSnippet.putExtra(Constants.EXTRAS_BOOK, book);
+
         switch (requestCode) {
             case REQUEST_IMAGE_CAPTURE:
-                Intent openCreateSnippet = new Intent(Snippets_Activity.this, Crop_Image_Activity.class);
-                openCreateSnippet.putExtra(Constants.EXTRAS_BOOK, book);
                 openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, photoFile.getAbsolutePath());
-                startActivity(openCreateSnippet);
+                break;
+            case REQUEST_PICK_IMAGE_GALLERY:
+                Uri selectedImage = intent.getData();
+                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+                // Get the cursor
+                Cursor cursor = getContentResolver().query(selectedImage,
+                        filePathColumn, null, null, null);
+                // Move to first row
+                cursor.moveToFirst();
+
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                String imgDecodableString = cursor.getString(columnIndex);
+                cursor.close();
+
+                openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, imgDecodableString);
                 break;
         }
+
+        startActivity(openCreateSnippet);
     }
 
     @Subscribe

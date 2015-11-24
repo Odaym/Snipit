@@ -9,6 +9,7 @@
 
     <dimen name="snippet_list_item_snippet_name_width">170dp</dimen>
     <dimen name="snippet_list_item_snippet_page_width">170dp</dimen>
+    <dimen name="snippet_list_item_snippet_name_width_land">370dp</dimen>
     <dimen name="snippet_list_item_snippet_pagenumber_width">100dp</dimen>
 
     <dimen name="snippet_list_item_height">100dp</dimen>
@@ -25,6 +26,8 @@
 
     <dimen name="fab_buttons_margins">0dp</dimen>
     <dimen name="fab_buttons_right_left_margins">0dp</dimen>
+    <dimen name="invis_fab_menu_button_margin_end">3dp</dimen>
+    <dimen name="invis_fab_menu_button_margin_bottom">6dp</dimen>
 
     <dimen name="navdrawer_header_height">160dp</dimen>
     <dimen name="navdrawer_header_email_fontsize">15dp</dimen>

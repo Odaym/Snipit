@@ -11,6 +11,8 @@
     <dimen name="bookmark_list_item_height">100dp</dimen>
 
     <dimen name="fab_buttons_margins">0dp</dimen>
+    <dimen name="invis_fab_menu_button_margin_end">3dp</dimen>
+    <dimen name="invis_fab_menu_button_margin_bottom">6dp</dimen>
 
     <dimen name="fab_buttons_right_left_margins">0dp</dimen>
 

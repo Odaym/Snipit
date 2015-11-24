@@ -30,13 +30,6 @@
 -keep class com.crashlytics.** { *; }
 -keepattributes SourceFile,LineNumberTable
 
--keep class com.flurry.** { *; }
--dontwarn com.flurry.**
--keepattributes *Annotation*,EnclosingMethod
--keepclasseswithmembers class * {
-	public <init>(android.content.Context, android.util.AttributeSet, int); 
-}
-
 -keep public class * implements com.bumptech.glide.module.GlideModule
 -keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
     **[] $VALUES;
@@ -64,15 +57,11 @@
 
 -dontwarn me.panavtec.drawableview.**
 
--dontwarn org.apache.awt.datatransfer.DataProxy
-
--dontwarn org.apache.awt.datatransfer.NativeClipBoard
+-keep class org.apache.** {*;}
 
 -dontwarn com.sun.mail.imap.protocol.**
 
 -dontwarn javax.activation.CommandInfo
-
--dontwarn org.apache.harmony.awt.**
 
 -keepclassmembers class ** {
     @com.squareup.otto.Subscribe public *;
@@ -84,3 +73,12 @@
 -keep class com.squareup.okhttp.** { *; }
 -keep interface com.squareup.okhttp.** { *; }
 -dontwarn com.squareup.okhttp.**
+
+-keep class com.amazonaws.*
+
+-keep class com.parse.*
+
+-dontwarn java.nio.file.Files
+-dontwarn java.nio.file.Path
+-dontwarn java.nio.file.OpenOption
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
