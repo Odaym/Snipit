@@ -21,14 +21,14 @@ import com.om.snipit.classes.Open_Source_Library;
 import java.util.ArrayList;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 
 public class Open_Source_Libs_Activity extends Base_Activity {
-    @InjectView(R.id.librariesList)
+    @Bind(R.id.librariesList)
     ListView librariesList;
-    @InjectView(R.id.introductionTextTV)
+    @Bind(R.id.introductionTextTV)
     TextView introductionTextTV;
-    @InjectView(R.id.toolbar)
+    @Bind(R.id.toolbar)
     Toolbar toolbar;
 
     @Override
@@ -36,7 +36,7 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_source_libs);
 
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         Helper_Methods helperMethods = new Helper_Methods(this);
 
@@ -62,7 +62,7 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         libraries.add(new Open_Source_Library("Autofit TextView", "https://github.com/grantland/android-autofittextview", "A TextView that automatically resizes text to fit perfectly within its bounds."));
         libraries.add(new Open_Source_Library("Android Form EditText", "https://github.com/vekexasia/android-edittext-validator", "Android form edit text is an extension of EditText that brings data validation facilities to the edittext."));
 
-//        final View listViewFooterAd = View.inflate(this, R.layout.open_source_libs_list_adview_footer, null);
+//        final View listViewFooterAd = View.inflate(this, R.layout.adview_open_source_libs_list_footer, null);
 //        AdView mAdView = (AdView) listViewFooterAd.findViewById(R.id.adView);
 //        AdRequest adRequest = new AdRequest.Builder().build();
 //        mAdView.loadAd(adRequest);
@@ -104,7 +104,7 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         public View getView(final int position, View convertView, final ViewGroup parent) {
 
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.open_source_libs_list_item, parent, false);
+                convertView = inflater.inflate(R.layout.list_item_open_source_libs, parent, false);
 
                 holder = new LibrariesViewHolder();
                 holder.libraryNameTV = (TextView) convertView.findViewById(R.id.libraryNameTV);

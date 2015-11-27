@@ -26,21 +26,21 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class Create_Snippet_Activity extends Base_Activity {
 
-    @InjectView(R.id.nameET)
+    @Bind(R.id.nameET)
     FormEditText nameET;
-    @InjectView(R.id.pageNumberET)
+    @Bind(R.id.pageNumberET)
     FormEditText pageNumberET;
-    @InjectView(R.id.snippetIMG)
+    @Bind(R.id.snippetIMG)
     ImageView snippetIMG;
-    @InjectView(R.id.doneBTN)
+    @Bind(R.id.doneBTN)
     FloatingActionButton doneBTN;
-    @InjectView(R.id.toolbar)
+    @Bind(R.id.toolbar)
     Toolbar toolbar;
 
     private Book book;
@@ -59,7 +59,7 @@ public class Create_Snippet_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_snippet);
 
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         snippetDAO = getHelper().getSnippetDAO();
 

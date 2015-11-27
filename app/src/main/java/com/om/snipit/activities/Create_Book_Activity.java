@@ -48,24 +48,24 @@ import java.util.Date;
 import java.util.Random;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 
 public class Create_Book_Activity extends ActionBarActivity {
 
-    @InjectView(R.id.titleET)
+    @Bind(R.id.titleET)
     FormEditText titleET;
-    @InjectView(R.id.authorET)
+    @Bind(R.id.authorET)
     FormEditText authorET;
-    @InjectView(R.id.bookIMG)
+    @Bind(R.id.bookIMG)
     ImageView bookIMG;
-    @InjectView(R.id.doneBTN)
+    @Bind(R.id.doneBTN)
     FloatingActionButton doneBTN;
-    @InjectView(R.id.scanBTN)
+    @Bind(R.id.scanBTN)
     ImageView scanBTN;
-    @InjectView(R.id.toolbar)
+    @Bind(R.id.toolbar)
     Toolbar toolbar;
 
     private static final int RC_BARCODE_CAPTURE = 9001;
@@ -88,7 +88,7 @@ public class Create_Book_Activity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_book);
 
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         bookDAO = getHelper().getBookDAO();
 

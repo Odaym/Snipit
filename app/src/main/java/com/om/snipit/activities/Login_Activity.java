@@ -19,7 +19,7 @@
 //import com.om.snipit.models.User;
 //
 //import butterknife.ButterKnife;
-//import butterknife.InjectView;
+//import butterknife.Bind;
 //import de.keyboardsurfer.android.widget.crouton.Crouton;
 //import de.keyboardsurfer.android.widget.crouton.Style;
 //
@@ -27,7 +27,7 @@
 //        GoogleApiClient.ConnectionCallbacks,
 //        GoogleApiClient.OnConnectionFailedListener {
 //
-//    @InjectView(R.id.sign_in_button)
+//    @Bind(R.id.sign_in_button)
 //    SignInButton signInBTN;
 //
 //    /* Request code used to invoke sign in user interactions. */
@@ -58,7 +58,7 @@
 //        super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_login);
 //
-//        ButterKnife.inject(this);
+//        ButterKnife.bind(this);
 //
 //        prefs = PreferenceManager.getDefaultSharedPreferences(this);
 //

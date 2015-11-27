@@ -59,7 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
@@ -81,7 +81,7 @@ public class View_Snippet_Activity extends Base_Activity {
     private QueryBuilder<Snippet, Integer> snippetQueryBuilder;
     private PreparedQuery<Snippet> pq;
 
-    @InjectView(R.id.pager)
+    @Bind(R.id.pager)
     HackyViewPager mPager;
 
     @Override
@@ -94,7 +94,7 @@ public class View_Snippet_Activity extends Base_Activity {
 
         EventBus_Singleton.getInstance().register(this);
 
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         snippetDAO = getHelper().getSnippetDAO();
         snippetQueryBuilder = snippetDAO.queryBuilder();
@@ -260,27 +260,27 @@ public class View_Snippet_Activity extends Base_Activity {
      * Fragment used to represent each image in the scrolling gallery
      */
     public static class View_Bookmark_Fragment extends Fragment {
-        @InjectView(R.id.snippetIMG)
+        @Bind(R.id.snippetIMG)
         ImageView snippetIMG;
-        @InjectView(R.id.snippetPageNumberLabelTV)
+        @Bind(R.id.snippetPageNumberLabelTV)
         TextView snippetPageNumberLabelTV;
-        @InjectView(R.id.snippetPageNumberTV)
+        @Bind(R.id.snippetPageNumberTV)
         TextView snippetPageNumberTV;
-        @InjectView(R.id.snippetDateAddedTV)
+        @Bind(R.id.snippetDateAddedTV)
         TextView snippetDateAddedTV;
-        @InjectView(R.id.snippetNameTV)
+        @Bind(R.id.snippetNameTV)
         TextView snippetNameTV;
-        @InjectView(R.id.snippetDetailsView)
+        @Bind(R.id.snippetDetailsView)
         RelativeLayout snippetDetailsView;
-        @InjectView(R.id.snippet_actions_fab)
+        @Bind(R.id.snippet_actions_fab)
         FloatingActionsMenu snippetActionsBTN;
-        @InjectView(R.id.createNewNoteBTN)
+        @Bind(R.id.createNewNoteBTN)
         FloatingActionButton createNewNoteBTN;
-        @InjectView(R.id.paintSnippetBTN)
+        @Bind(R.id.paintSnippetBTN)
         FloatingActionButton paintSnippetBTN;
-        @InjectView(R.id.ocrSnippetBTN)
+        @Bind(R.id.ocrSnippetBTN)
         FloatingActionButton ocrSnippetBTN;
-        @InjectView(R.id.imageProgressBar)
+        @Bind(R.id.imageProgressBar)
         ProgressBar imageProgressBar;
 
         private Callback picassoCallback;
@@ -571,7 +571,7 @@ public class View_Snippet_Activity extends Base_Activity {
             final ViewGroup rootView = (ViewGroup) inflater.inflate(
                     R.layout.fragment_snippets, container, false);
 
-            ButterKnife.inject(this, rootView);
+            ButterKnife.bind(this, rootView);
 
             ((View_Snippet_Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             ((View_Snippet_Activity) context).getSupportActionBar().show();

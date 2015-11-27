@@ -74,8 +74,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 
@@ -84,13 +84,13 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_PICK_IMAGE_GALLERY = 2;
 
-    @InjectView(R.id.createNewSnippetBTN)
+    @Bind(R.id.createNewSnippetBTN)
     FloatingActionsMenu createNewSnippetBTN;
-    @InjectView(R.id.emptyListLayout)
+    @Bind(R.id.emptyListLayout)
     RelativeLayout emptyListLayout;
-    @InjectView(R.id.snippetsList)
+    @Bind(R.id.snippetsList)
     DragSortListView listView;
-    @InjectView(R.id.toolbar)
+    @Bind(R.id.toolbar)
     Toolbar toolbar;
 
     private DatabaseHelper databaseHelper;
@@ -139,7 +139,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snippets);
 
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         EventBus_Singleton.getInstance().register(this);
 
@@ -435,7 +435,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
 
-//        final View listViewHeaderAd = View.inflate(this, R.layout.snippets_list_adview_header, null);
+//        final View listViewHeaderAd = View.inflate(this, R.layout.adview_snippets_list_header, null);
 //        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
 //        AdRequest adRequest = new AdRequest.Builder().build();
 //        mAdView.loadAd(adRequest);

@@ -60,30 +60,30 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 
 public class Books_Activity extends ActionBarActivity {
 
-    @InjectView(R.id.booksList)
+    @Bind(R.id.booksList)
     DragSortListView listView;
-    @InjectView(R.id.emptyListLayout)
+    @Bind(R.id.emptyListLayout)
     RelativeLayout emptyListLayout;
-    @InjectView(R.id.createNewBookBTN)
+    @Bind(R.id.createNewBookBTN)
     FloatingActionButton createNewBookBTN;
-    @InjectView(R.id.drawerLayout)
+    @Bind(R.id.drawerLayout)
     DrawerLayout drawerLayout;
-    @InjectView(R.id.navDrawer)
+    @Bind(R.id.navDrawer)
     NavigationView navDrawer;
-    @InjectView(R.id.navdrawer_header_user_profile_image)
+    @Bind(R.id.navdrawer_header_user_profile_image)
     ImageView navdrawer_header_user_profile_image;
-    @InjectView(R.id.navdrawer_header_user_full_name)
+    @Bind(R.id.navdrawer_header_user_full_name)
     TextView navdrawer_header_user_full_name;
-    @InjectView(R.id.navdrawer_header_user_email)
+    @Bind(R.id.navdrawer_header_user_email)
     TextView navdrawer_header_user_email;
-    @InjectView(R.id.toolbar)
+    @Bind(R.id.toolbar)
     Toolbar toolbar;
 
     private SharedPreferences prefs;
@@ -126,6 +126,8 @@ public class Books_Activity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_books);
 
+        ButterKnife.bind(this);
+
         EventBus_Singleton.getInstance().register(this);
 
         Helper_Methods helperMethods = new Helper_Methods(this);
@@ -137,8 +139,6 @@ public class Books_Activity extends ActionBarActivity {
 
         bookQueryBuilder = bookDAO.queryBuilder();
         snippetQueryBuilder = snippetDAO.queryBuilder();
-
-        ButterKnife.inject(this);
 
         prepareQueryBuilder();
 
@@ -312,7 +312,7 @@ public class Books_Activity extends ActionBarActivity {
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
 
-//        final View listViewHeaderAd = View.inflate(this, R.layout.books_list_adview_footer, null);
+//        final View listViewHeaderAd = View.inflate(this, R.layout.adview_books_list_footer, null);
 //        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
 //        AdRequest adRequest = new AdRequest.Builder().build();
 //        mAdView.loadAd(adRequest);

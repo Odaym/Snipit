@@ -22,7 +22,7 @@ repositories {
 
 android {
     compileSdkVersion 22
-    buildToolsVersion "22.0.0"
+    buildToolsVersion "23.0.2"
 
     packagingOptions {
         exclude 'META-INF/LICENSE'
@@ -36,15 +36,14 @@ android {
         targetSdkVersion 22
         versionCode 9
         versionName "2.1.6"
-//        multiDexEnabled true
     }
 
     buildTypes {
         release {
-//            minifyEnabled true
-//            shrinkResources true
+            minifyEnabled true
+            shrinkResources true
 //            applicationIdSuffix ".release"
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
 //        debug {
@@ -73,11 +72,10 @@ dependencies {
     compile 'com.getbase:floatingactionbutton:1.9.0'
     compile 'com.android.support:support-v4:22.2.0'
     compile 'com.amazonaws:aws-android-sdk-s3:2.+'
-    //    compile 'com.android.support:multidex:1.0.1'
     compile 'me.grantland:autofittextview:0.2.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.isseiaoki:simplecropview:1.0.8'
-    compile 'com.jakewharton:butterknife:6.1.0'
+    compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.android.support:design:22.2.1'
     compile 'net.frakbot:jumpingbeans:1.2.0'
     compile 'com.parse:parse-android:1.10.3'

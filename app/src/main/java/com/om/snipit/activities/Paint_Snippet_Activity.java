@@ -47,29 +47,29 @@ import java.util.Date;
 import java.util.Locale;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 
 public class Paint_Snippet_Activity extends Base_Activity {
-    @InjectView(R.id.canvasView)
+    @Bind(R.id.canvasView)
     CanvasView canvasView;
-    @InjectView(R.id.snippetIMG)
+    @Bind(R.id.snippetIMG)
     ImageView snippetIMG;
-    @InjectView(R.id.imageProgressBar)
+    @Bind(R.id.imageProgressBar)
     ProgressBar imageProgressBar;
-    @InjectView(R.id.multiple_actions_fab)
+    @Bind(R.id.multiple_actions_fab)
     FloatingActionsMenu floatingActionsMenu;
-    @InjectView(R.id.color_actions_fab)
+    @Bind(R.id.color_actions_fab)
     FloatingActionsMenu floatingColorsMenu;
-    @InjectView(R.id.fab_action_color)
+    @Bind(R.id.fab_action_color)
     FloatingActionButton fabActionColor;
-    @InjectView(R.id.fab_action_drawing_mode)
+    @Bind(R.id.fab_action_drawing_mode)
     FloatingActionButton fabActionDrawingMode;
-    @InjectView(R.id.fab_action_undo)
+    @Bind(R.id.fab_action_undo)
     FloatingActionButton fabActionUndo;
-    @InjectView(R.id.fab_action_thickness)
+    @Bind(R.id.fab_action_thickness)
     FloatingActionButton fabActionThickness;
 
     private SharedPreferences prefs;
@@ -91,7 +91,7 @@ public class Paint_Snippet_Activity extends Base_Activity {
         prefsEditor = prefs.edit();
         prefsEditor.apply();
 
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         getSupportActionBar().setTitle(getString(R.string.paint_snippet_activity_title));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

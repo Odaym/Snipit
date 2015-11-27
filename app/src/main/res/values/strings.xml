@@ -143,6 +143,7 @@
     <!-- CROP_IMAGE_ACTIVITY -->
     <string name="crop_image_activity_title">Crop Snippet</string>
     <string name="seems_out_of_memory">Please try that again with a lower resolution setting for the camera.</string>
+    <string name="wrong_photo_gallery">Something went wrong, please try attaching the photo again</string>
 
     <!-- PAINT_BOOKMARK_ACTIVITY -->
     <string name="paint_snippet_activity_title">Draw and Highlight</string>

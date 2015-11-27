@@ -41,7 +41,7 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
 
         final LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
 
-        Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
+        Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.toolbar_settings, root, false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(getResources().getColor(R.color.darker_red));

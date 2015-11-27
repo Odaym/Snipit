@@ -36,23 +36,23 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class Share_Snippet_Activity extends Base_Activity {
 
-    @InjectView(R.id.toolbar)
+    @Bind(R.id.toolbar)
     Toolbar toolbar;
-    @InjectView(R.id.titleET)
+    @Bind(R.id.titleET)
     FormEditText book_title_ET;
-    @InjectView(R.id.authorET)
+    @Bind(R.id.authorET)
     FormEditText book_author_ET;
-    @InjectView(R.id.snippetNameET)
+    @Bind(R.id.snippetNameET)
     FormEditText snippetNameET;
-    @InjectView(R.id.screenNameET)
+    @Bind(R.id.screenNameET)
     FormEditText screenNameET;
-    @InjectView(R.id.snippetIMG)
+    @Bind(R.id.snippetIMG)
     ImageView snippetIMG;
 
     private ArrayList<FormEditText> allFields = new ArrayList<>();
@@ -71,7 +71,7 @@ public class Share_Snippet_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_share_snippet);
 
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 

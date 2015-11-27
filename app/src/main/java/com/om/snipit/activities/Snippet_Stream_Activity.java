@@ -40,18 +40,18 @@ import java.util.Locale;
 import java.util.Random;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 import me.grantland.widget.AutofitTextView;
 
 public class Snippet_Stream_Activity extends Base_Activity {
 
-    @InjectView(R.id.snippetsStreamList)
+    @Bind(R.id.snippetsStreamList)
     RecyclerView snippetsStreamList;
-    @InjectView(R.id.noConnectionlayout)
+    @Bind(R.id.noConnectionlayout)
     RelativeLayout noConnectionLayout;
-    @InjectView(R.id.contentViewSwipeRefresh)
+    @Bind(R.id.contentViewSwipeRefresh)
     SwipeRefreshLayout contentViewSwipeRefresh;
-    @InjectView(R.id.toolbar)
+    @Bind(R.id.toolbar)
     Toolbar toolbar;
 
     private LinearLayoutManager mLayoutManager;
@@ -68,7 +68,7 @@ public class Snippet_Stream_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snippets_stream);
 
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         EventBus_Singleton.getInstance().register(this);
 
@@ -311,7 +311,7 @@ public class Snippet_Stream_Activity extends Base_Activity {
                     break;
                 case VIEW_PROG:
                     view = LayoutInflater.from(parent.getContext())
-                            .inflate(R.layout.snippets_stream_load_more_item, parent, false);
+                            .inflate(R.layout.list_item_snippets_stream_load_more, parent, false);
                     vh = new ProgressViewHolder(view);
                     break;
             }

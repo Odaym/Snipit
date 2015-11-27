@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.isseiaoki.simplecropview.CropImageView;
 import com.om.snipit.R;
@@ -27,18 +28,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 
 public class Crop_Image_Activity extends Base_Activity {
-    @InjectView(R.id.doneBTN)
+    @Bind(R.id.doneBTN)
     FloatingActionButton doneBTN;
-    @InjectView(R.id.rotateImageBTN)
+    @Bind(R.id.rotateImageBTN)
     FloatingActionButton rotateImageBTN;
-    @InjectView(R.id.cropImageView)
+    @Bind(R.id.cropImageView)
     CropImageView cropImageView;
 
     private Book book;
@@ -51,7 +52,7 @@ public class Crop_Image_Activity extends Base_Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crop_image);
 
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         Helper_Methods helperMethods = new Helper_Methods(this);
 
@@ -75,20 +76,25 @@ public class Crop_Image_Activity extends Base_Activity {
         doneBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String finalImagePath = create_CroppedImageFile(cropImageView.getCroppedBitmap());
+                try {
+                    String finalImagePath = create_CroppedImageFile(cropImageView.getCroppedBitmap());
 
-                Helper_Methods.delete_image_from_disk(tempImagePath_fromIntent);
+                    Helper_Methods.delete_image_from_disk(tempImagePath_fromIntent);
 
-                if (CALL_PURPOSE == Constants.EDIT_SNIPPET_PURPOSE_VALUE || CALL_PURPOSE == Constants.EDIT_SNIPPET_IMAGE_PURPOSE_VALUE) {
-                    EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_picture_changed", finalImagePath));
-                } else {
-                    Intent openCreateSnippet = new Intent(Crop_Image_Activity.this, Create_Snippet_Activity.class);
-                    openCreateSnippet.putExtra(Constants.EXTRAS_BOOK, book);
-                    openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, finalImagePath);
-                    startActivity(openCreateSnippet);
+                    if (CALL_PURPOSE == Constants.EDIT_SNIPPET_PURPOSE_VALUE || CALL_PURPOSE == Constants.EDIT_SNIPPET_IMAGE_PURPOSE_VALUE) {
+                        EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_picture_changed", finalImagePath));
+                    } else {
+                        Intent openCreateSnippet = new Intent(Crop_Image_Activity.this, Create_Snippet_Activity.class);
+                        openCreateSnippet.putExtra(Constants.EXTRAS_BOOK, book);
+                        openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, finalImagePath);
+                        startActivity(openCreateSnippet);
+                    }
+
+                    finish();
+                } catch (IllegalArgumentException e) {
+                    Toast.makeText(Crop_Image_Activity.this, R.string.wrong_photo_gallery, Toast.LENGTH_LONG).show();
+                    finish();
                 }
-
-                finish();
             }
         });
 
