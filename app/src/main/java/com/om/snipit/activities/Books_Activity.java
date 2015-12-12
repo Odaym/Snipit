@@ -3,12 +3,10 @@ package com.om.snipit.activities;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -34,6 +32,8 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -42,7 +42,6 @@ import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.nispok.snackbar.listeners.EventListener;
 import com.om.snipit.R;
-import com.om.snipit.classes.CircleTransform;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
@@ -85,8 +84,6 @@ public class Books_Activity extends ActionBarActivity {
     TextView navdrawer_header_user_email;
     @Bind(R.id.toolbar)
     Toolbar toolbar;
-
-    private SharedPreferences prefs;
 
     private ActionBarDrawerToggle drawerToggle;
 
@@ -132,8 +129,6 @@ public class Books_Activity extends ActionBarActivity {
 
         Helper_Methods helperMethods = new Helper_Methods(this);
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
         bookDAO = getHelper().getBookDAO();
         snippetDAO = getHelper().getSnippetDAO();
 
@@ -169,15 +164,9 @@ public class Books_Activity extends ActionBarActivity {
         drawerLayout.setDrawerListener(drawerToggle);
         drawerLayout.closeDrawer(GravityCompat.START);
 
-        if (prefs.getBoolean(Constants.USER_LOGGED_IN, false)) {
-            Picasso.with(this).load(prefs.getString(Constants.USER_PHOTO_URL, "")).fit().transform(new CircleTransform()).into(navdrawer_header_user_profile_image);
-            navdrawer_header_user_full_name.setText(prefs.getString(Constants.USER_FULL_NAME, ""));
-            navdrawer_header_user_email.setText(prefs.getString(Constants.USER_EMAIL_ADDRESS, ""));
-        } else {
-            Picasso.with(this).load(R.drawable.ic_launcher).fit().into(navdrawer_header_user_profile_image);
-            navdrawer_header_user_full_name.setText(R.string.app_name);
-            navdrawer_header_user_email.setText(R.string.app_tagline);
-        }
+        Picasso.with(this).load(R.drawable.ic_launcher).fit().into(navdrawer_header_user_profile_image);
+        navdrawer_header_user_full_name.setText(R.string.app_name);
+        navdrawer_header_user_email.setText(R.string.app_tagline);
 
         navDrawer.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -312,12 +301,12 @@ public class Books_Activity extends ActionBarActivity {
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
 
-//        final View listViewHeaderAd = View.inflate(this, R.layout.adview_books_list_footer, null);
-//        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
-//        AdRequest adRequest = new AdRequest.Builder().build();
-//        mAdView.loadAd(adRequest);
+        final View listViewHeaderAd = View.inflate(this, R.layout.adview_books_list_footer, null);
+        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
-//        listView.addFooterView(listViewHeaderAd);
+        listView.addFooterView(listViewHeaderAd);
         listView.setAdapter(booksAdapter);
     }
 
@@ -533,60 +522,6 @@ public class Books_Activity extends ActionBarActivity {
                         public boolean onMenuItemClick(MenuItem item) {
 
                             switch (item.getItemId()) {
-//                                case R.id.share:
-//                                    uploadingSnippets_AWS = new ProgressDialog(Books_Activity.this);
-//                                    if (snippets.size() == 1)
-//                                        uploadingSnippets_AWS.setMessage("Uploading " + snippets.size() + " image to AWS");
-//                                    else
-//                                        uploadingSnippets_AWS.setMessage("Uploading " + snippets.size() + " images to AWS");
-//                                    uploadingSnippets_AWS.setIndeterminate(false);
-//                                    uploadingSnippets_AWS.setMax(snippets.size());
-//                                    uploadingSnippets_AWS.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-//                                    uploadingSnippets_AWS.setCancelable(true);
-//                                    uploadingSnippets_AWS.show();
-//
-//                                    final AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(Constants.AMAZON_ACCESS_KEY, Constants.AMAZON_SECRET_ACCESS_KEY));
-
-//                                    Thread t = new Thread(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//
-//                                            for (final Snippet snippet : snippets) {
-//
-//                                                PutObjectRequest por = new PutObjectRequest("snippet-images", snippet.getName(), new File(snippet.getImage_path()));
-//                                                por.setGeneralProgressListener(new ProgressListener() {
-//                                                    @Override
-//                                                    public void progressChanged(ProgressEvent progressEvent) {
-//
-//                                                        if (progressEvent.getEventCode() == ProgressEvent.COMPLETED_EVENT_CODE) {
-//                                                            uploadingSnippets_AWS.setProgress(uploadingSnippets_AWS.getProgress() + 1);
-//
-//                                                            Log.d("PROGRESS", "COMPLETED");
-//
-//                                                            ResponseHeaderOverrides override = new ResponseHeaderOverrides();
-//                                                            override.setContentType("image/jpeg");
-//                                                            GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest("snippet-images", snippet.getName());
-//                                                            urlRequest.setResponseHeaders(override);
-//                                                            URL url = s3Client.generatePresignedUrl(urlRequest);
-//                                                            try {
-//                                                                Log.d("URL", "FINAL URL OF AWS IMAGE is : " + Uri.parse(url.toURI().toString()).toString());
-//                                                                snippet.setAWS_image_path(Uri.parse(url.toURI().toString()).toString());
-//                                                            } catch (URISyntaxException e) {
-//                                                                e.printStackTrace();
-//                                                            }
-//
-//                                                            if (uploadingSnippets_AWS.getProgress() == uploadingSnippets_AWS.getMax())
-//                                                                uploadingSnippets_AWS.dismiss();
-//                                                        }
-//                                                    }
-//                                                });
-//
-//                                                s3Client.putObject(por);
-//                                            }
-//                                        }
-//                                    });
-//                                    t.start();
-//                                    break;
                                 case R.id.edit:
                                     Intent editBookIntent = new Intent(Books_Activity.this, Create_Book_Activity.class);
                                     editBookIntent.putExtra(Constants.EXTRAS_BOOK, books.get(position));
@@ -597,7 +532,7 @@ public class Books_Activity extends ActionBarActivity {
                                     //Dissmiss the UNDO Snackbar and handle the deletion of the previously awaiting item yourself
                                     if (undoDeleteBookSB != null && undoDeleteBookSB.isShowing()) {
                                         //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
-                                        //I am able to use tempBook h=ere because I am certain that it would have now been initialized inside deleteCell(), no way to reach this point without having been through deleteCell() first
+                                        //I am able to use tempBook here because I am certain that it would have now been initialized inside deleteCell(), no way to reach this point without having been through deleteCell() first
 
                                         try {
                                             snippetQueryBuilder.where().eq("book_id", tempBook.getId());
@@ -612,7 +547,11 @@ public class Books_Activity extends ActionBarActivity {
                                         undoDeleteBookSB.dismiss();
                                     }
 
-                                    showUndeleteDialog(books.get(position));
+                                    try {
+                                        showUndeleteDialog(books.get(position));
+                                    } catch (IndexOutOfBoundsException e) {
+                                        Log.d(Constants.DEBUG_TAG, "Error: " + e.getMessage());
+                                    }
 
                                     break;
                             }

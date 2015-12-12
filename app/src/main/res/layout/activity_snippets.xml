@@ -62,18 +62,6 @@
 
     </RelativeLayout>
 
-    <!--<android.support.design.widget.FloatingActionButton-->
-        <!--android:id="@+id/createNewSnippetBTN"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_alignParentEnd="true"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_margin="@dimen/fab_buttons_margins"-->
-        <!--android:src="@drawable/ic_snippet_add_white"-->
-        <!--app:borderWidth="0dp"-->
-        <!--app:fabSize="normal" />-->
-
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/createNewSnippetBTN"
         android:layout_width="wrap_content"
@@ -99,16 +87,6 @@
             fab:fab_title="@string/add_snippet_camera"
             fab:fab_size="mini" />
 
-        <!--<com.getbase.floatingactionbutton.FloatingActionButton-->
-            <!--android:id="@+id/addSnippetVoiceBTN"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:onClick="onAddSnippetMenuBtnClicked"-->
-            <!--fab:fab_title="@string/add_snippet_voice"-->
-            <!--fab:fab_colorNormal="@color/red"-->
-            <!--fab:fab_icon="@drawable/ic_voice_note_white"-->
-            <!--fab:fab_size="mini" />-->
-
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/addSnippetFromGalleryBTN"
             android:layout_width="wrap_content"
@@ -120,6 +98,4 @@
             fab:fab_size="mini" />
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
-
-
 </RelativeLayout>

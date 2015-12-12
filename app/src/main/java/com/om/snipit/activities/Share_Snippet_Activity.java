@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.event.ProgressListener;
@@ -21,6 +22,8 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.andreabaccega.widget.FormEditText;
 import com.om.snipit.R;
 import com.om.snipit.classes.Constants;
+import com.om.snipit.classes.EventBus_Poster;
+import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
 import com.om.snipit.models.Book;
 import com.om.snipit.models.Snippet;
@@ -28,6 +31,7 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -35,8 +39,8 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 
-import butterknife.ButterKnife;
 import butterknife.Bind;
+import butterknife.ButterKnife;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 
@@ -73,6 +77,8 @@ public class Share_Snippet_Activity extends Base_Activity {
 
         ButterKnife.bind(this);
 
+        EventBus_Singleton.getInstance().register(this);
+
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         helperMethods = new Helper_Methods(this);
@@ -104,6 +110,15 @@ public class Share_Snippet_Activity extends Base_Activity {
         snippetNameET.requestFocus();
     }
 
+    @Subscribe
+    public void handle_BusEvents(EventBus_Poster ebp) {
+        switch (ebp.getMessage()) {
+            case "amazon_exception_connection_too_slow":
+                Crouton.makeText(Share_Snippet_Activity.this, getString(R.string.amazon_upload_error_connection_too_slow), Style.ALERT).show();
+                break;
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.share_snippet, menu);
@@ -120,7 +135,7 @@ public class Share_Snippet_Activity extends Base_Activity {
                         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                         inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 
-                        final ProgressDialog checkingExistingSnippets = ProgressDialog.show(this, getString(R.string.progress_checking_existing_snippets_title), getString(R.string.progress_checking_existing_snippets_message), true, true);
+                        final ProgressDialog checkingExistingSnippets = ProgressDialog.show(this, getString(R.string.progress_checking_existing_snippets_title), getString(R.string.progress_checking_existing_snippets_message), true, false);
 
                         snippet.setScreen_name(screenNameET.getText().toString());
 
@@ -203,7 +218,17 @@ public class Share_Snippet_Activity extends Base_Activity {
                                                     }
                                                 });
 
-                                                s3Client.putObject(por);
+                                                try {
+                                                    s3Client.putObject(por);
+                                                } catch (AmazonClientException e) {
+                                                    runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            uploadingSnippets_AWS.dismiss();
+                                                            EventBus_Singleton.getInstance().post(new EventBus_Poster("amazon_exception_connection_too_slow"));
+                                                        }
+                                                    });
+                                                }
                                             }
                                         });
                                         t.start();
@@ -222,5 +247,11 @@ public class Share_Snippet_Activity extends Base_Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        EventBus_Singleton.getInstance().unregister(this);
+        super.onDestroy();
     }
 }

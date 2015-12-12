@@ -13,6 +13,8 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.om.snipit.R;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.Helper_Methods;
@@ -20,8 +22,8 @@ import com.om.snipit.classes.Open_Source_Library;
 
 import java.util.ArrayList;
 
-import butterknife.ButterKnife;
 import butterknife.Bind;
+import butterknife.ButterKnife;
 
 public class Open_Source_Libs_Activity extends Base_Activity {
     @Bind(R.id.librariesList)
@@ -62,12 +64,12 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         libraries.add(new Open_Source_Library("Autofit TextView", "https://github.com/grantland/android-autofittextview", "A TextView that automatically resizes text to fit perfectly within its bounds."));
         libraries.add(new Open_Source_Library("Android Form EditText", "https://github.com/vekexasia/android-edittext-validator", "Android form edit text is an extension of EditText that brings data validation facilities to the edittext."));
 
-//        final View listViewFooterAd = View.inflate(this, R.layout.adview_open_source_libs_list_footer, null);
-//        AdView mAdView = (AdView) listViewFooterAd.findViewById(R.id.adView);
-//        AdRequest adRequest = new AdRequest.Builder().build();
-//        mAdView.loadAd(adRequest);
+        final View listViewFooterAd = View.inflate(this, R.layout.adview_open_source_libs_list_footer, null);
+        AdView mAdView = (AdView) listViewFooterAd.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
-//        librariesList.addFooterView(listViewFooterAd);
+        librariesList.addFooterView(listViewFooterAd);
         librariesList.setAdapter(new Libraries_Adapter(this, libraries));
     }
 

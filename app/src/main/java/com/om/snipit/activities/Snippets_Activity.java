@@ -37,6 +37,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -191,7 +193,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                         intent.putExtra(Constants.EXTRAS_BOOK, book);
                         intent.putExtra(Constants.EXTRAS_VIEWING_SNIPPETS_GALLERY, false);
                         intent.putExtra(Constants.EXTRAS_SEARCH_TERM, searchQueryForGlobalUse);
-                        intent.putExtra(Constants.EXTRAS_CURRENT_SNIPPET_POSITION, position);
+                        intent.putExtra(Constants.EXTRAS_CURRENT_SNIPPET_POSITION, position - 1);
                         startActivity(intent);
                     }
                 }
@@ -311,32 +313,39 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         if (resultCode != RESULT_OK)
             return;
 
-        Intent openCreateSnippet = new Intent(Snippets_Activity.this, Crop_Image_Activity.class);
-        openCreateSnippet.putExtra(Constants.EXTRAS_BOOK, book);
+        Intent openCropSnippetIntent = new Intent(Snippets_Activity.this, Crop_Image_Activity.class);
+        openCropSnippetIntent.putExtra(Constants.EXTRAS_BOOK, book);
 
         switch (requestCode) {
             case REQUEST_IMAGE_CAPTURE:
-                openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, photoFile.getAbsolutePath());
+                openCropSnippetIntent.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, photoFile.getAbsolutePath());
                 break;
             case REQUEST_PICK_IMAGE_GALLERY:
-                Uri selectedImage = intent.getData();
-                String[] filePathColumn = {MediaStore.Images.Media.DATA};
-
-                // Get the cursor
-                Cursor cursor = getContentResolver().query(selectedImage,
-                        filePathColumn, null, null, null);
-                // Move to first row
-                cursor.moveToFirst();
-
-                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                String imgDecodableString = cursor.getString(columnIndex);
-                cursor.close();
-
-                openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, imgDecodableString);
+                Uri selectedImageUri = intent.getData();
+                String selectedImagePath = getPhotoPathFromGallery(selectedImageUri);
+                openCropSnippetIntent.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, selectedImagePath);
                 break;
         }
 
-        startActivity(openCreateSnippet);
+        startActivity(openCropSnippetIntent);
+    }
+
+    public String getPhotoPathFromGallery(Uri uri) {
+        if (uri == null) {
+            // TODO perform some logging or show user feedback
+            return null;
+        }
+
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        if (cursor != null) {
+            int column_index = cursor
+                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        }
+
+        return uri.getPath();
     }
 
     @Subscribe
@@ -435,12 +444,12 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
 
-//        final View listViewHeaderAd = View.inflate(this, R.layout.adview_snippets_list_header, null);
-//        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
-//        AdRequest adRequest = new AdRequest.Builder().build();
-//        mAdView.loadAd(adRequest);
+        final View listViewHeaderAd = View.inflate(this, R.layout.adview_snippets_list_header, null);
+        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
-//            listView.addHeaderView(listViewHeaderAd);
+        listView.addHeaderView(listViewHeaderAd);
         listView.setAdapter(snippetsAdapter);
     }
 

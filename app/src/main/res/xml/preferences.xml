@@ -19,14 +19,4 @@
             android:key="pref_key_open_source_libs"
             android:title="@string/pref_open_source_libraries_title" />
     </PreferenceCategory>
-
-    <!--<PreferenceCategory-->
-        <!--android:key="pref_key_advanced"-->
-        <!--android:title="@string/pref_advanced_section_title">-->
-        <!--<Preference-->
-            <!--android:key="pref_key_sign_out"-->
-            <!--android:title="@string/pref_advanced_sign_out_title">-->
-        <!--</Preference>-->
-    <!--</PreferenceCategory>-->
-
 </PreferenceScreen>

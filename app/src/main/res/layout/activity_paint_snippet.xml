@@ -44,7 +44,7 @@
         android:layout_marginEnd="10dp"
         android:layout_marginRight="10dp"
         fab:fab_addButtonColorNormal="@color/blue"
-        fab:fab_expandDirection="up"
+        fab:fab_expandDirection="left"
         fab:fab_addButtonSize="mini">
 
         <com.getbase.floatingactionbutton.FloatingActionButton

@@ -10,7 +10,7 @@
 
     <string name="app_name">Snipit</string>
     <string name="app_tagline">Digitize information from the real world</string>
-    <string name="app_version">2.1.6</string>
+    <string name="app_version">2.1.7</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
     <string name="SAVE">SAVE</string>
@@ -21,8 +21,7 @@
     <string name="edit">Edit</string>
     <string name="undo_deletion_title">UNDO</string>
     <string name="action_needs_internet">This action needs an Internet connection</string>
-    <string name="retake_picture_error">Something went wrong, please try re-taking that picture. If that doesn\'t help, try lowering the max resolution by 1 level from your Camera settings.</string>
-    
+
     <!-- SHARING -->
     <string name="sharing_message">I used Snipit to take this, have a look!</string>
 
@@ -114,7 +113,7 @@
     <!--<string name="camera_service_failed_alert_message">This is one of those rare cases where the Android Camera Service has failed, try launching the normal Camera app to confirm this</string>-->
     <string name="no_barcode_detected_here">No barcode detected here</string>
 
-    <!-- VIEW_BOOKMARKS_ACTIVITY -->
+    <!-- VIEW_SNIPPET_ACTIVITY -->
     <string name="rotate_left">Rotate Left</string>
     <string name="rotate_right">Rotate Right</string>
     <string name="page">page:</string>
@@ -135,6 +134,7 @@
     <string name="ocr_almost_done">Almost done…</string>
     <string name="ocr_downloading_result">Downloading result…</string>
     <string name="ocr_recognition_languages_alert_title">OCR Recognition languages</string>
+    <string name="ocr_not_available_for_text_to_speech">This snippet has to be scanned for OCR text before it can be read out loud, would you like to do that now?</string>
 
     <!-- SEARCH_RESULTS_ACTIVITY -->
     <string name="search_results_activity_title">Search Results</string>
@@ -143,7 +143,7 @@
     <!-- CROP_IMAGE_ACTIVITY -->
     <string name="crop_image_activity_title">Crop Snippet</string>
     <string name="seems_out_of_memory">Please try that again with a lower resolution setting for the camera.</string>
-    <string name="wrong_photo_gallery">Something went wrong, please try attaching the photo again</string>
+    <string name="wrong_photo_gallery">We\'re sorry, that image was not accessible, attach photos from your own photo gallery and try again</string>
 
     <!-- PAINT_BOOKMARK_ACTIVITY -->
     <string name="paint_snippet_activity_title">Draw and Highlight</string>
@@ -176,6 +176,7 @@
     <string name="progress_checking_existing_snippets_message">Checking for existing snippets…</string>
     <string name="alert_already_shared_snippet_message">A snippet with these same details already exists.</string>
     <string name="publish_snippet">Publish Snippet</string>
+    <string name="amazon_upload_error_connection_too_slow">Encountered network problems while trying to upload, please try that again</string>
 
     <!-- SNIPPETS STREAM ACTIVITY -->
     <string name="snippets_stream_activity_title">Snippets Global Stream</string>

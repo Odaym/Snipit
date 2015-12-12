@@ -339,7 +339,7 @@ public class Snippet_Stream_Activity extends Base_Activity {
 
                 ((SnippetsViewHolder) holder).bookAuthorTV.setText(bookAuthorText);
 
-                Picasso.with(Snippet_Stream_Activity.this).load(snippets.get(position).getString("aws_image_path")).error(context.getResources().getDrawable(R.drawable.snippet_not_found)).fit().into(((SnippetsViewHolder) holder).snippetIMG, picassoImageLoadedCallback);
+                Picasso.with(Snippet_Stream_Activity.this).load(snippets.get(position).getString("aws_image_path")).error(context.getResources().getDrawable(R.drawable.snippet_not_found)).fit().centerInside().into(((SnippetsViewHolder) holder).snippetIMG, picassoImageLoadedCallback);
 
                 this.picassoImageLoadedCallback = new PicassoImageLoadedCallback(((SnippetsViewHolder) holder).imageProgressLoader) {
                     @Override

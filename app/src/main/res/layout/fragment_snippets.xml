@@ -80,7 +80,15 @@
         android:layout_marginRight="10dp"
         fab:fab_addButtonColorNormal="@color/blue"
         fab:fab_addButtonSize="mini"
-        fab:fab_expandDirection="up">
+        fab:fab_expandDirection="left">
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/textToSpeechOCRBTN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_size="mini"
+            fab:fab_colorNormal="@color/pink"
+            fab:fab_icon="@drawable/ic_text_to_speech_ocr" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/ocrSnippetBTN"
