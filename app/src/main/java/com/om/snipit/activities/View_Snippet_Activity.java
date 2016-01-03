@@ -2,6 +2,7 @@ package com.om.snipit.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -60,6 +62,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import butterknife.Bind;
@@ -405,15 +408,42 @@ public class View_Snippet_Activity extends Base_Activity {
             };
         }
 
+        public void beginTextToSpeech() {
+            Intent checkTTSIntent = new Intent();
+            checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+            startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
+        }
+
         @Override
         public void onInit(int initStatus) {
             if (initStatus == TextToSpeech.SUCCESS) {
-//                if (myTTS.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE) {
-//                    myTTS.setLanguage(Locale.US);
-//                }
 
                 if (snippet.getOcr_content() != null && !snippet.getOcr_content().isEmpty()) {
-                    myTTS.speak(snippet.getOcr_content(), TextToSpeech.QUEUE_FLUSH, null);
+                    final ProgressDialog waitingToSpeak = new ProgressDialog(getActivity());
+                    waitingToSpeak.setMessage(getString(R.string.waiting_text_to_speech_loader));
+                    waitingToSpeak.setIndeterminate(true);
+                    waitingToSpeak.setCancelable(true);
+                    waitingToSpeak.show();
+
+                    myTTS.speak(snippet.getOcr_content(), TextToSpeech.QUEUE_FLUSH, new HashMap<String, String>() {{
+                        put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID");
+                    }});
+
+                    myTTS.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                        @Override
+                        public void onStart(String s) {
+                            waitingToSpeak.dismiss();
+                        }
+
+                        @Override
+                        public void onDone(String s) {
+                        }
+
+                        @Override
+                        public void onError(String s) {
+                            waitingToSpeak.dismiss();
+                        }
+                    });
                 } else {
                     new AlertDialog.Builder(getActivity())
                             .setMessage(R.string.ocr_not_available_for_text_to_speech)
@@ -427,7 +457,7 @@ public class View_Snippet_Activity extends Base_Activity {
                             .show();
                 }
             } else if (initStatus == TextToSpeech.ERROR) {
-                Toast.makeText(getActivity(), "Sorry! Text To Speech failed...", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), R.string.text_to_speech_failed, Toast.LENGTH_LONG).show();
             }
         }
 
@@ -438,10 +468,18 @@ public class View_Snippet_Activity extends Base_Activity {
                     //the user has the necessary data - create the TTS
                     myTTS = new TextToSpeech(getActivity(), this);
                 } else {
-                    //no data - install it now
-                    Intent installTTSIntent = new Intent();
-                    installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                    startActivity(installTTSIntent);
+                    new AlertDialog.Builder(getActivity())
+                            .setMessage(R.string.tts_language_not_available_downloading_now)
+                            .setCancelable(false)
+                            .setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    //no data - install it now
+                                    Intent installTTSIntent = new Intent();
+                                    installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                                    startActivity(installTTSIntent);
+                                }
+                            })
+                            .show();
                 }
             }
         }
@@ -508,12 +546,6 @@ public class View_Snippet_Activity extends Base_Activity {
                 AlertDialog alert = builder.create();
                 alert.show();
             }
-        }
-
-        public void beginTextToSpeech() {
-            Intent checkTTSIntent = new Intent();
-            checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-            startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
         }
 
         public DatabaseHelper getHelper() {

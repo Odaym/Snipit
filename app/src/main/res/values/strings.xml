@@ -9,8 +9,8 @@
     <string name="banner_ad_unit_id_opensource_libs">ca-app-pub-7047539644799809/2417489494</string>
 
     <string name="app_name">Snipit</string>
-    <string name="app_tagline">Digitize information from the real world</string>
-    <string name="app_version">2.1.7</string>
+    <string name="app_tagline">Digitize documents and textbooks</string>
+    <string name="app_version">2.1.8</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
     <string name="SAVE">SAVE</string>
@@ -135,6 +135,9 @@
     <string name="ocr_downloading_result">Downloading result…</string>
     <string name="ocr_recognition_languages_alert_title">OCR Recognition languages</string>
     <string name="ocr_not_available_for_text_to_speech">This snippet has to be scanned for OCR text before it can be read out loud, would you like to do that now?</string>
+    <string name="waiting_text_to_speech_loader">Waiting for Android Text To Speech…</string>
+    <string name="tts_language_not_available_downloading_now">Your current locale language is not supported natively. Allow Android to download the required language files now?</string>
+    <string name="text_to_speech_failed">Sorry! Text To Speech failed…</string>
 
     <!-- SEARCH_RESULTS_ACTIVITY -->
     <string name="search_results_activity_title">Search Results</string>
@@ -163,7 +166,7 @@
 
     <!-- ABOUT OPEN SOURCE LIBRARIES ACTIVITY -->
     <string name="about_open_source_libraries_activity_title">Open Source Libraries</string>
-    <string name="introduction_text">Snipit is made with ❤ by <a href="http://odaymaleh.com">Oday Maleh</a>. And when love was not enough, these libraries came to the rescue.</string>
+    <string name="introduction_text">Snipit is made with ❤ by <a href="http://odaymaleh.com">Oday Maleh</a>. App intro slides graciously provided by <a href="http://risingsunv1.deviantart.com/">Rami Kobeissi</a>. And when love was not enough, these libraries came to the rescue.</string>
 
     <!-- SHARE SNIPPET ACTIVITY -->
     <string name="share_snippet_activity_title">Share Snippet</string>
@@ -192,6 +195,7 @@
     <string name="load_more_snippets_message_8">We read to know we\'re not alone</string>
     <string name="load_more_snippets_message_9">Today a reader, tomorrow a leader!</string>
     <string name="load_more_snippets_message_10">I love the smell of books in the morning…</string>
+    <string name="you_are_offline">You are offline</string>
     <string name="shared_by_label">shared by:</string>
     <string name="book_title_label">book:</string>
     <string name="book_author_label">author:</string>

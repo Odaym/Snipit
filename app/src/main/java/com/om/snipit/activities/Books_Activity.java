@@ -32,8 +32,6 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -76,11 +74,12 @@ public class Books_Activity extends ActionBarActivity {
     DrawerLayout drawerLayout;
     @Bind(R.id.navDrawer)
     NavigationView navDrawer;
-    @Bind(R.id.navdrawer_header_user_profile_image)
+    View navDrawerheaderLayout;
+    //    @Bind(R.id.navdrawer_header_user_profile_image)
     ImageView navdrawer_header_user_profile_image;
-    @Bind(R.id.navdrawer_header_user_full_name)
+    //    @Bind(R.id.navdrawer_header_user_full_name)
     TextView navdrawer_header_user_full_name;
-    @Bind(R.id.navdrawer_header_user_email)
+    //    @Bind(R.id.navdrawer_header_user_email)
     TextView navdrawer_header_user_email;
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -124,6 +123,12 @@ public class Books_Activity extends ActionBarActivity {
         setContentView(R.layout.activity_books);
 
         ButterKnife.bind(this);
+
+        navDrawerheaderLayout = navDrawer.inflateHeaderView(R.layout.navigation_drawer_header);
+
+        navdrawer_header_user_email = (TextView) navDrawerheaderLayout.findViewById(R.id.navdrawer_header_user_email);
+        navdrawer_header_user_profile_image = (ImageView) navDrawerheaderLayout.findViewById(R.id.navdrawer_header_user_profile_image);
+        navdrawer_header_user_full_name = (TextView) navDrawerheaderLayout.findViewById(R.id.navdrawer_header_user_full_name);
 
         EventBus_Singleton.getInstance().register(this);
 
@@ -301,12 +306,12 @@ public class Books_Activity extends ActionBarActivity {
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
 
-        final View listViewHeaderAd = View.inflate(this, R.layout.adview_books_list_footer, null);
-        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+//        final View listViewHeaderAd = View.inflate(this, R.layout.adview_books_list_footer, null);
+//        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//        mAdView.loadAd(adRequest);
 
-        listView.addFooterView(listViewHeaderAd);
+//        listView.addFooterView(listViewHeaderAd);
         listView.setAdapter(booksAdapter);
     }
 

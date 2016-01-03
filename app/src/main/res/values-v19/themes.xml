@@ -9,17 +9,19 @@
         <item name="actionModeBackground">@color/black_transparent</item>
     </style>
 
+    <style name="IntroSlider_Activity" parent="AppTheme" />
+
     <style name="Books_Activity_Theme" parent="AppTheme" />
 
     <style name="Snippets_Activity_Theme" parent="AppTheme" />
 
-    <style name="Snippets_Gallery_Activity_Theme" parent="AppTheme"/>
+    <style name="Snippets_Gallery_Activity_Theme" parent="AppTheme" />
 
-    <style name="Settings_Activity_Theme" parent="AppTheme"/>
+    <style name="Settings_Activity_Theme" parent="AppTheme" />
 
-    <style name="Create_Snippet_Activity" parent="AppTheme"/>
+    <style name="Create_Snippet_Activity" parent="AppTheme" />
 
-    <style name="Create_Book_Activity" parent="AppTheme"/>
+    <style name="Create_Book_Activity" parent="AppTheme" />
 
     <style name="Barcode_Capture_Activtity" parent="AppTheme" />
 

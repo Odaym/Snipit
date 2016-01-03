@@ -90,7 +90,6 @@
         android:layout_gravity="start"
         android:background="@drawable/navdrawer_background_repeat"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/navigation_drawer_header"
         app:menu="@menu/navigation_drawer" />
 
 </android.support.v4.widget.DrawerLayout>

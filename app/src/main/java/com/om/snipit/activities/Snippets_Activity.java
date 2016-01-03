@@ -37,8 +37,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -193,7 +191,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                         intent.putExtra(Constants.EXTRAS_BOOK, book);
                         intent.putExtra(Constants.EXTRAS_VIEWING_SNIPPETS_GALLERY, false);
                         intent.putExtra(Constants.EXTRAS_SEARCH_TERM, searchQueryForGlobalUse);
-                        intent.putExtra(Constants.EXTRAS_CURRENT_SNIPPET_POSITION, position - 1);
+                        intent.putExtra(Constants.EXTRAS_CURRENT_SNIPPET_POSITION, position);
                         startActivity(intent);
                     }
                 }
@@ -444,12 +442,12 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         listView.setDropListener(onDrop);
         listView.setDragListener(onDrag);
 
-        final View listViewHeaderAd = View.inflate(this, R.layout.adview_snippets_list_header, null);
-        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-
-        listView.addHeaderView(listViewHeaderAd);
+//        final View listViewHeaderAd = View.inflate(this, R.layout.adview_snippets_list_header, null);
+//        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//        mAdView.loadAd(adRequest);
+//
+//        listView.addHeaderView(listViewHeaderAd);
         listView.setAdapter(snippetsAdapter);
     }
 

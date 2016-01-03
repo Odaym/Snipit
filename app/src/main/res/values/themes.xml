@@ -9,6 +9,8 @@
         <item name="actionModeBackground">@color/black_transparent</item>
     </style>
 
+    <style name="IntroSlider_Activity" parent="AppTheme" />
+
     <style name="Books_Activity_Theme" parent="AppTheme" />
 
     <style name="Snippets_Activity_Theme" parent="AppTheme" />

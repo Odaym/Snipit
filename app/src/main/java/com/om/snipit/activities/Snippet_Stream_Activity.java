@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.om.snipit.R;
 import com.om.snipit.classes.EventBus_Singleton;
@@ -39,8 +40,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-import butterknife.ButterKnife;
 import butterknife.Bind;
+import butterknife.ButterKnife;
 import me.grantland.widget.AutofitTextView;
 
 public class Snippet_Stream_Activity extends Base_Activity {
@@ -83,20 +84,20 @@ public class Snippet_Stream_Activity extends Base_Activity {
         setSupportActionBar(toolbar);
         helperMethods.setUpActionbarColors(this, -1);
 
-        contentViewSwipeRefresh.post(new Runnable() {
-            @Override
-            public void run() {
-                contentViewSwipeRefresh.setRefreshing(true);
-            }
-        });
-
-        contentViewSwipeRefresh.setColorSchemeColors(getResources().getColor(R.color.red), getResources().getColor(R.color.green), getResources().getColor(R.color.blue), getResources().getColor(R.color.yellow));
-
         handler = new Handler();
 
         initializeRecyclerViewLayoutManager();
 
         if (Helper_Methods.isInternetAvailable(this)) {
+            contentViewSwipeRefresh.post(new Runnable() {
+                @Override
+                public void run() {
+                    contentViewSwipeRefresh.setRefreshing(true);
+                }
+            });
+
+            contentViewSwipeRefresh.setColorSchemeColors(getResources().getColor(R.color.red), getResources().getColor(R.color.green), getResources().getColor(R.color.blue), getResources().getColor(R.color.yellow));
+
             fetchSnippetsFromParse();
         } else {
             fetchSnippetsFromLocalDataStore();
@@ -169,6 +170,7 @@ public class Snippet_Stream_Activity extends Base_Activity {
                         snippetsAdapter.notifyItemInserted(0);
                         snippetsStreamList.scrollToPosition(0);
                     }
+
                     contentViewSwipeRefresh.setRefreshing(false);
                 } else {
                     // handle Parse Exception here
@@ -189,7 +191,6 @@ public class Snippet_Stream_Activity extends Base_Activity {
                         currentSnippets.addAll(foundSnippets);
                         snippetsAdapter.notifyDataSetChanged();
                         snippetsAdapter.setLoaded();
-                        snippetsStreamList.smoothScrollToPosition(currentSnippets.size() - 3);
                     }
                 } else {
                     // handle Parse Exception here
@@ -213,6 +214,18 @@ public class Snippet_Stream_Activity extends Base_Activity {
                         snippetsAdapter = new Snippets_Adapter(Snippet_Stream_Activity.this, foundSnippets, snippetsStreamList);
                         snippetsStreamList.setAdapter(snippetsAdapter);
 
+                        contentViewSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                            @Override
+                            public void onRefresh() {
+                                contentViewSwipeRefresh.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        contentViewSwipeRefresh.setRefreshing(false);
+                                        Toast.makeText(Snippet_Stream_Activity.this, R.string.you_are_offline, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        });
                     }
                 } else {
                     // handle Parse Exception here
@@ -238,7 +251,7 @@ public class Snippet_Stream_Activity extends Base_Activity {
 
         private int[] loadMoreSnippetsMessages = new int[]{R.string.load_more_snippets_message_1, R.string.load_more_snippets_message_2, R.string.load_more_snippets_message_3, R.string.load_more_snippets_message_4, R.string.load_more_snippets_message_5, R.string.load_more_snippets_message_6, R.string.load_more_snippets_message_7, R.string.load_more_snippets_message_8, R.string.load_more_snippets_message_9, R.string.load_more_snippets_message_10};
 
-        Random randomNumber = new Random();
+        private Random randomNumber = new Random();
 
         public class SnippetsViewHolder extends RecyclerView.ViewHolder {
             public CardView list_item_snippet;
