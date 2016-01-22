@@ -36,7 +36,7 @@
         <activity
             android:name=".activities.Launcher_Activity"
             android:noHistory="true"
-            android:theme="@android:style/Theme.NoDisplay">
+            android:theme="@style/Launcher_Activity_Theme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -48,7 +48,7 @@
             android:name=".activities.IntroSlider_Activity"
             android:noHistory="true"
             android:screenOrientation="portrait"
-            android:theme="@style/IntroSlider_Activity" />
+            android:theme="@style/IntroSlider_Activity_Theme" />
 
         <!--<activity android:name="com.om.snipit.activities.Login_Activity" />-->
 
@@ -58,9 +58,9 @@
             android:theme="@style/Books_Activity_Theme"
             android:windowSoftInputMode="stateAlwaysHidden">
             <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
+            <!--<action android:name="android.intent.action.MAIN" />-->
 
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--<category android:name="android.intent.category.LAUNCHER" />-->
             <!--</intent-filter>-->
         </activity>
 

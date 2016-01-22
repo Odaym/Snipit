@@ -32,15 +32,9 @@
     <string name="navigation_drawer_closed"></string>
 
     <!-- PREFERENCE ACTIVITY-->
-    <string name="pref_display_section_title">Display</string>
-    <string name="pref_display_animations_title">Enable Animations</string>
-    <string name="pref_tutorial_section_title">Tutorial</string>
-    <string name="pref_tutorial_title">Tutorial Mode</string>
-    <string name="pref_tutorial_summary">Hint screens will show up to help you get started</string>
+    <string name="pref_configuration_section_title">Configuration</string>
+    <string name="pref_configuration_keep_introduction_slider">Show app intro slider</string>
     <string name="pref_about_section_title">About</string>
-    <string name="pref_about_title">About Snipit</string>
-    <string name="pref_advanced_section_title">Advanced</string>
-    <string name="pref_advanced_sign_out_title">Sign out</string>
     <string name="pref_feedback_title">Send feedback</string>
     <string name="pref_send_feedback_button_title">SEND</string>
     <string name="pref_sendfeedback_alert_hint_tell_us_what_you_think">Don\'t hold back!</string>

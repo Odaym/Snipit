@@ -221,9 +221,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                     }
                 }
                 break;
-//            case R.id.addSnippetVoiceBTN:
-//
-//                break;
             case R.id.addSnippetFromGalleryBTN:
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);

@@ -9,7 +9,11 @@
         <item name="actionModeBackground">@color/black_transparent</item>
     </style>
 
-    <style name="IntroSlider_Activity" parent="AppTheme" />
+    <style name="Launcher_Activity_Theme" parent="@android:style/Theme.NoDisplay">
+        <item name="android:windowBackground">@color/light_gray</item>
+    </style>
+
+    <style name="IntroSlider_Activity_Theme" parent="AppTheme" />
 
     <style name="Books_Activity_Theme" parent="AppTheme" />
 

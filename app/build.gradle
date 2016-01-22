@@ -12,8 +12,8 @@ buildscript {
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
 apply plugin: 'com.jakewharton.hugo'
+apply plugin: 'io.fabric'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -25,6 +25,10 @@ android {
     buildToolsVersion "23.0.2"
 
     useLibrary 'org.apache.http.legacy'
+
+    dataBinding {
+        enabled = true
+    }
 
     packagingOptions {
         exclude 'META-INF/LICENSE'

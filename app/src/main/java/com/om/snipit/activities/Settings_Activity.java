@@ -134,6 +134,16 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
             }
         });
 
+        Preference keepIntroSlider = findPreference("pref_key_configuration_intro_slider");
+
+        keepIntroSlider.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object o) {
+
+                return false;
+            }
+        });
+
 //        Preference signOut = findPreference("pref_key_sign_out");
 //
 //        signOut.setSummary(prefs.getString(Constants.USER_EMAIL_ADDRESS, ""));
