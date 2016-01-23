@@ -52,10 +52,10 @@ android {
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 //        }
 
-//        debug {
-//            debuggable true
-//            applicationIdSuffix ".debug"
-//        }
+        debug {
+            debuggable true
+            applicationIdSuffix ".debug"
+        }
     }
 }
 
@@ -70,7 +70,6 @@ dependencies {
     compile 'de.keyboardsurfer.android.widget:crouton:1.8.5@aar'
     compile 'com.google.android.gms:play-services-vision:8.4.0'
     compile 'com.andreabaccega:android-form-edittext:1.1.0@aar'
-//    compile 'com.google.android.gms:play-services-plus:8.1.0'
     compile 'com.google.android.gms:play-services-ads:8.4.0'
     compile 'com.wrapp.floatlabelededittext:library:0.0.6'
     compile 'com.android.support:appcompat-v7:23.1.1'

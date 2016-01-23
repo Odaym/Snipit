@@ -12,6 +12,7 @@ import com.om.snipit.classes.Constants;
 
 public class IntroSlider_Activity extends AppIntro {
     private SharedPreferences prefs;
+    private SharedPreferences.Editor prefsEditor;
 
     @Override
     public void init(Bundle savedInstanceState) {
@@ -24,8 +25,8 @@ public class IntroSlider_Activity extends AppIntro {
     }
 
     private void loadMainActivity() {
-        SharedPreferences.Editor prefsEditor = prefs.edit();
-        prefsEditor.putBoolean(Constants.SEEN_APP_INTRO_PREF, true);
+        prefsEditor = prefs.edit();
+        prefsEditor.putBoolean(Constants.APP_INTRO_ENABLED, false);
         prefsEditor.apply();
 
         Intent intent = new Intent(this, Books_Activity.class);

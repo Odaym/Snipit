@@ -6,10 +6,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.om.snipit.R;
 import com.om.snipit.activities.View_Snippet_Activity;
-import com.om.snipit.classes.Constants;
 
 import java.io.FileOutputStream;
 
@@ -59,11 +59,12 @@ public class AsyncTask_ProcessOCR extends AsyncTask<String, String, Boolean> {
             // http://ocrsdk.com/documentation/faq/#faq3
 
             // Name of application you created
-            restClient.applicationId = "Snipit Android 2";
+            restClient.applicationId = "Snipit Android";
             // You should get e-mail from ABBYY Cloud OCR SDK service with the application password
 
-            restClient.password = "6jj1l6TAq5PtC4R6rmfrZiQy";
+            //Password for Snipit Android 2
 //            restClient.password = "nDcFcmhWc5bfznqmGQKJWSSd";
+            restClient.password = "M8B5oLCzW8Q6Vclfkxvy61N3";
 
             // Obtain installation id when running the application for the first time
             SharedPreferences settings = activity.getPreferences(Activity.MODE_PRIVATE);
@@ -137,9 +138,7 @@ public class AsyncTask_ProcessOCR extends AsyncTask<String, String, Boolean> {
 
             return true;
         } catch (Exception e) {
-//            final String message = "Error: " + e.getMessage();
-//            publishProgress(message);
-            activity.displayMessage(Constants.OCR_SCAN_ERROR, activity.getString(R.string.ocr_scan_error));
+            Log.d("OCR_SCAN", "Error: " + e.getMessage());
             return false;
         }
     }
