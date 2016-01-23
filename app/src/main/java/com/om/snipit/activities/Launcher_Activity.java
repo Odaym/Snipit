@@ -19,4 +19,10 @@ public class Launcher_Activity extends Activity {
         else
             startActivity(new Intent(Launcher_Activity.this, Books_Activity.class));
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        finish();
+    }
 }
