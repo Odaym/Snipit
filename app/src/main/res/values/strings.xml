@@ -33,7 +33,7 @@
 
     <!-- PREFERENCE ACTIVITY-->
     <string name="pref_configuration_section_title">Configuration</string>
-    <string name="pref_configuration_keep_introduction_slider">Show app intro slider</string>
+    <string name="pref_configuration_keep_introduction_slider">Enable app intro</string>
     <string name="pref_about_section_title">About</string>
     <string name="pref_feedback_title">Send feedback</string>
     <string name="pref_send_feedback_button_title">SEND</string>
