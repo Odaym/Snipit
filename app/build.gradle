@@ -40,8 +40,8 @@ android {
         applicationId "com.om.snipit"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 11
-        versionName "2.1.8"
+        versionCode 12
+        versionName "2.1.9"
     }
 
     buildTypes {
