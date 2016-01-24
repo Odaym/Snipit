@@ -1,7 +1,9 @@
 package com.om.snipit.activities;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -11,6 +13,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -204,22 +208,13 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         switch (view.getId()) {
             case R.id.addSnippetCameraBTN:
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    photoFile = null;
-                    try {
-                        photoFile = createImageFile(constructImageFilename());
-                        photoFileUri = Uri.fromFile(photoFile);
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-
-                    if (photoFile != null) {
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                                photoFileUri);
-                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                    }
+                int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+                if (rc == PackageManager.PERMISSION_GRANTED) {
+                    openTakePictureIntent();
+                } else {
+                    requestCameraPermission();
                 }
+
                 break;
             case R.id.addSnippetFromGalleryBTN:
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK,
@@ -323,6 +318,25 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         }
 
         startActivity(openCropSnippetIntent);
+    }
+
+    public void openTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            photoFile = null;
+            try {
+                photoFile = createImageFile(constructImageFilename());
+                photoFileUri = Uri.fromFile(photoFile);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+            if (photoFile != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                        photoFileUri);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
     }
 
     public String getPhotoPathFromGallery(Uri uri) {
@@ -587,6 +601,45 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             pq = snippetQueryBuilder.prepare();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void requestCameraPermission() {
+        final String[] permissions = new String[]{Manifest.permission.CAMERA};
+
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.CAMERA)) {
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_IMAGE_CAPTURE);
+            return;
+        }
+
+        Snackbar.with(getApplicationContext())
+                .actionLabel(R.string.request_permission)
+                .dismissOnActionClicked(true)
+                .duration(8000)
+                .actionColor(getResources().getColor(R.color.yellow))
+                .text(R.string.permission_camera_rationale)
+                .actionListener(new ActionClickListener() {
+                    @Override
+                    public void onActionClicked(Snackbar snackbar) {
+                        ActivityCompat.requestPermissions(Snippets_Activity.this, permissions,
+                                REQUEST_IMAGE_CAPTURE);
+                    }
+                }).show(Snippets_Activity.this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode != REQUEST_IMAGE_CAPTURE) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            return;
+        }
+
+        if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            openTakePictureIntent();
+            return;
         }
     }
 
