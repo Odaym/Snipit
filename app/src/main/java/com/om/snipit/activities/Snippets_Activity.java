@@ -58,6 +58,7 @@ import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.Helper_Methods;
+import com.om.snipit.classes.PermissionsChecker;
 import com.om.snipit.classes.RoundedTransform;
 import com.om.snipit.dragsort_listview.DragSortListView;
 import com.om.snipit.models.Book;
@@ -85,8 +86,9 @@ import me.grantland.widget.AutofitTextView;
 
 public class Snippets_Activity extends Base_Activity implements SearchView.OnQueryTextListener {
 
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    static final int REQUEST_PICK_IMAGE_GALLERY = 2;
+    private static final int REQUEST_CAPTURE_PERMISSIONS = 1;
+    private static final int REQUEST_PICK_IMAGE_GALLERY = 2;
+    private static final int REQUEST_WRITE_STORAGE = 3;
 
     @Bind(R.id.createNewSnippetBTN)
     FloatingActionsMenu createNewSnippetBTN;
@@ -205,21 +207,27 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
     public void onAddSnippetMenuBtnClicked(View view) {
         createNewSnippetBTN.collapse();
+        PermissionsChecker permissionsChecker = new PermissionsChecker(this);
 
         switch (view.getId()) {
             case R.id.addSnippetCameraBTN:
-                int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-                if (rc == PackageManager.PERMISSION_GRANTED) {
+                String[] neededPermissions = new String[]{Manifest.permission.CAMERA,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                if (!permissionsChecker.lacksPermissions(neededPermissions)) {
                     openTakePictureIntent();
                 } else {
-                    requestCameraPermission();
+                    requestCapturePermissions();
                 }
-
                 break;
             case R.id.addSnippetFromGalleryBTN:
-                Intent galleryIntent = new Intent(Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(galleryIntent, REQUEST_PICK_IMAGE_GALLERY);
+                String neededPermission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+                if (!permissionsChecker.lacksPermissions(neededPermission)) {
+                    Intent galleryIntent = new Intent(Intent.ACTION_PICK,
+                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(galleryIntent, REQUEST_PICK_IMAGE_GALLERY);
+                } else {
+                    requestStoragePermission();
+                }
                 break;
         }
     }
@@ -307,7 +315,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         openCropSnippetIntent.putExtra(Constants.EXTRAS_BOOK, book);
 
         switch (requestCode) {
-            case REQUEST_IMAGE_CAPTURE:
+            case REQUEST_CAPTURE_PERMISSIONS:
                 openCropSnippetIntent.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, photoFile.getAbsolutePath());
                 break;
             case REQUEST_PICK_IMAGE_GALLERY:
@@ -334,7 +342,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             if (photoFile != null) {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         photoFileUri);
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                startActivityForResult(takePictureIntent, REQUEST_CAPTURE_PERMISSIONS);
             }
         }
     }
@@ -604,12 +612,12 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         }
     }
 
-    private void requestCameraPermission() {
-        final String[] permissions = new String[]{Manifest.permission.CAMERA};
+    private void requestStoragePermission() {
+        final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.CAMERA)) {
-            ActivityCompat.requestPermissions(this, permissions, REQUEST_IMAGE_CAPTURE);
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_WRITE_STORAGE);
             return;
         }
 
@@ -618,12 +626,39 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 .dismissOnActionClicked(true)
                 .duration(8000)
                 .actionColor(getResources().getColor(R.color.yellow))
-                .text(R.string.permission_camera_rationale)
+                .text(R.string.permission_storage_rationale)
                 .actionListener(new ActionClickListener() {
                     @Override
                     public void onActionClicked(Snackbar snackbar) {
                         ActivityCompat.requestPermissions(Snippets_Activity.this, permissions,
-                                REQUEST_IMAGE_CAPTURE);
+                                REQUEST_WRITE_STORAGE);
+                    }
+                }).show(Snippets_Activity.this);
+    }
+
+    private void requestCapturePermissions() {
+        final String[] permissions = new String[]{Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.CAMERA) ||
+                !ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_CAPTURE_PERMISSIONS);
+            return;
+        }
+
+        Snackbar.with(getApplicationContext())
+                .actionLabel(R.string.request_permission)
+                .dismissOnActionClicked(true)
+                .duration(8000)
+                .actionColor(getResources().getColor(R.color.yellow))
+                .text(R.string.permission_capture_rationale)
+                .actionListener(new ActionClickListener() {
+                    @Override
+                    public void onActionClicked(Snackbar snackbar) {
+                        ActivityCompat.requestPermissions(Snippets_Activity.this, permissions,
+                                REQUEST_CAPTURE_PERMISSIONS);
                     }
                 }).show(Snippets_Activity.this);
     }
@@ -632,14 +667,26 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if (requestCode != REQUEST_IMAGE_CAPTURE) {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults.length == 0)
             return;
-        }
 
-        if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            openTakePictureIntent();
-            return;
+        boolean isAllPermissionsGranted;
+        for (int result : grantResults) {
+            isAllPermissionsGranted = (result == PackageManager.PERMISSION_GRANTED);
+            if (!isAllPermissionsGranted)
+                return; // If not all permissions granted, then don't run anything.
+        }
+        switch (requestCode) {
+            case REQUEST_CAPTURE_PERMISSIONS:
+                openTakePictureIntent();
+                break;
+            case REQUEST_WRITE_STORAGE:
+                Intent galleryIntent = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(galleryIntent, REQUEST_PICK_IMAGE_GALLERY);
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 

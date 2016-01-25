@@ -97,7 +97,8 @@
     <string name="empty_author_name_error">Author name required</string>
     <!--<string name="pages_count_error_label">Pages count</string>-->
     <!--<string name="pages_count_page_reached_difference_error">Pages count cannot be smaller than page reached!</string>-->
-    <string name="permission_camera_rationale">Access to the camera is needed</string>
+    <string name="permission_capture_rationale">Access to the camera is needed</string>
+    <string name="permission_storage_rationale">Access to the storage is needed</string>
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
     <string name="no_camera_permission">To scan barcodes, Snipit needs permission to use the camera</string>
 
