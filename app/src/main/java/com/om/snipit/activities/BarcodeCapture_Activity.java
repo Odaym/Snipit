@@ -156,7 +156,7 @@ public final class BarcodeCapture_Activity extends Base_Activity {
             }
         };
 
-        Snackbar.make(mGraphicOverlay, R.string.permission_camera_rationale,
+        Snackbar.make(mGraphicOverlay, R.string.permission_capture_rationale,
                 Snackbar.LENGTH_LONG)
                 .setAction(R.string.OK, listener)
                 .show();
