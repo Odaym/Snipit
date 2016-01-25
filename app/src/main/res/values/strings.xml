@@ -10,7 +10,7 @@
 
     <string name="app_name">Snipit</string>
     <string name="app_tagline">Digitize documents and textbooks</string>
-    <string name="app_version">2.1.8</string>
+    <string name="app_version">2.1.9</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
     <string name="SAVE">SAVE</string>
@@ -20,6 +20,7 @@
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="undo_deletion_title">UNDO</string>
+    <string name="request_permission">REQUEST</string>
     <string name="action_needs_internet">This action needs an Internet connection</string>
 
     <!-- SHARING -->
@@ -96,7 +97,7 @@
     <string name="empty_author_name_error">Author name required</string>
     <!--<string name="pages_count_error_label">Pages count</string>-->
     <!--<string name="pages_count_page_reached_difference_error">Pages count cannot be smaller than page reached!</string>-->
-    <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
+    <string name="permission_camera_rationale">Access to the camera is needed</string>
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
     <string name="no_camera_permission">To scan barcodes, Snipit needs permission to use the camera</string>
 
