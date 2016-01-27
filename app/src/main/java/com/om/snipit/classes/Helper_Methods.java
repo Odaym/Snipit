@@ -58,18 +58,6 @@ public class Helper_Methods {
         }
     }
 
-//    public boolean isBookmarkOnDisk(String bookmarkImagePath) {
-//        try {
-//            //If the String was a URL then this bookmark is a sample
-//            new URL(bookmarkImagePath);
-//        } catch (MalformedURLException e) {
-//            //Else it's on disk
-//            return true;
-//        }
-//
-//        return false;
-//    }
-
     public boolean validateFields(ArrayList<FormEditText> allFields) {
         boolean allValid = true;
 
@@ -79,33 +67,6 @@ public class Helper_Methods {
 
         return allValid;
     }
-
-//    public void uploadBookDataToParse(DatabaseHelperasdasd dbHelper) {
-//        List<Book> books = dbHelper.getAllBooks();
-//
-//        for (Book book : books) {
-//            ParseObject bookObject = new ParseObject("Book");
-//            bookObject.put("title", book.getTitle());
-//            bookObject.put("author", book.getAuthor());
-//            bookObject.saveInBackground();
-//        }
-//    }
-//
-//    public void uploadBookmarkDataToParse(DatabaseHelperasdasd dbHelper) {
-//        List<Book> books = dbHelper.getAllBooks();
-//        List<Bookmark> bookmarks;
-//
-//        for (Book book : books) {
-//            bookmarks = dbHelper.getAllBookmarks(book.getId());
-//            for (Bookmark bookmark : bookmarks) {
-//                ParseObject bookmarkObject = new ParseObject("Bookmark");
-//                bookmarkObject.put("book_id", bookmark.getBookId());
-//                bookmarkObject.put("title", bookmark.getName());
-//                bookmarkObject.put("page_number", bookmark.getPage_number());
-//                bookmarkObject.saveInBackground();
-//            }
-//        }
-//    }
 
     //Used to determine whether to allow scanning of Book Barcodes
     public static boolean isInternetAvailable(Context context) {
