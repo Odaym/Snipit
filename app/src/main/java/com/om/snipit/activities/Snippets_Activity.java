@@ -46,6 +46,7 @@ import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
+import com.j256.ormlite.stmt.Where;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
@@ -605,7 +606,10 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             SelectArg noteSelectArg = new SelectArg("%" + searchQuery + "%");
             SelectArg ocrSelectArg = new SelectArg("%" + searchQuery + "%");
 
-            snippetQueryBuilder.where().eq("book_id", book.getId()).and().like("name", nameSelectArg).or().like("note", noteSelectArg).or().like("ocr_content", ocrSelectArg);
+            Where where = snippetQueryBuilder.where();
+            where.or(where.eq("book_id", book.getId()).and().like("name", nameSelectArg),
+                    where.eq("book_id", book.getId()).and().like("note", noteSelectArg),
+                    where.eq("book_id", book.getId()).and().like("ocr_content", ocrSelectArg));
             pq = snippetQueryBuilder.prepare();
         } catch (SQLException e) {
             e.printStackTrace();
