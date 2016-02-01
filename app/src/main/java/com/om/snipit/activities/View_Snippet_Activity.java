@@ -70,6 +70,11 @@ import butterknife.ButterKnife;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class View_Snippet_Activity extends Base_Activity {
@@ -103,8 +108,6 @@ public class View_Snippet_Activity extends Base_Activity {
 
         ButterKnife.bind(this);
 
-        snippetDAO = getHelper().getSnippetDAO();
-        snippetQueryBuilder = snippetDAO.queryBuilder();
 
         //These two fields are common amongst both Intents that lead up to this Activity. Whether we are in Snippets Gallery or not, and what the position of the current Snippet is within the list of all grabbed snippets, perfect.
         extras_viewing_snippets_gallery = getIntent().getExtras().getBoolean(Constants.EXTRAS_VIEWING_SNIPPETS_GALLERY);
@@ -121,17 +124,35 @@ public class View_Snippet_Activity extends Base_Activity {
         if (!extras_viewing_snippets_gallery)
             extras_search_term = getIntent().getExtras().getString(Constants.EXTRAS_SEARCH_TERM, Constants.EXTRAS_NO_SEARCH_TERM);
 
-        handleWhichBookmarksToLoad();
-
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
 
-        NUM_PAGES = snippets.size();
+        Observable.create(new Observable.OnSubscribe<Void>() {
+            @Override
+            public void call(Subscriber<? super Void> subscriber) {
 
-        mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+                snippetDAO = getHelper().getSnippetDAO();
+                snippetQueryBuilder = snippetDAO.queryBuilder();
 
-        mPager.setAdapter(mPagerAdapter);
-        mPager.setCurrentItem(current_snippet_position);
+                handleWhichBookmarksToLoad();
+
+                subscriber.onNext(null);
+                subscriber.onCompleted();
+            }
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void s) {
+                        NUM_PAGES = snippets.size();
+
+                        mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+
+                        mPager.setAdapter(mPagerAdapter);
+                        mPager.setCurrentItem(current_snippet_position);
+                    }
+                });
     }
 
     @Subscribe

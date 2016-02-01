@@ -61,6 +61,11 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 public class Books_Activity extends ActionBarActivity {
 
@@ -134,17 +139,33 @@ public class Books_Activity extends ActionBarActivity {
 
         Helper_Methods helperMethods = new Helper_Methods(this);
 
-        bookDAO = getHelper().getBookDAO();
-        snippetDAO = getHelper().getSnippetDAO();
+        Observable.create(new Observable.OnSubscribe<Void>() {
+            @Override
+            public void call(Subscriber<? super Void> subscriber) {
+                bookDAO = getHelper().getBookDAO();
+                snippetDAO = getHelper().getSnippetDAO();
 
-        bookQueryBuilder = bookDAO.queryBuilder();
-        snippetQueryBuilder = snippetDAO.queryBuilder();
+                bookQueryBuilder = bookDAO.queryBuilder();
+                snippetQueryBuilder = snippetDAO.queryBuilder();
 
-        prepareQueryBuilder();
+                prepareQueryBuilder();
 
-        books = bookDAO.query(pqBook);
+                books = bookDAO.query(pqBook);
 
-        handleEmptyOrPopulatedScreen();
+                subscriber.onNext(null);
+                subscriber.onCompleted();
+            }
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void s) {
+                        handleEmptyOrPopulatedScreen();
+                    }
+                });
+
+
 
         setSupportActionBar(toolbar);
         helperMethods.setUpActionbarColors(this, Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS);
@@ -184,7 +205,6 @@ public class Books_Activity extends ActionBarActivity {
                     case R.id.navigation_drawer_item_settings:
                         Intent openSettingsIntent = new Intent(Books_Activity.this, Settings_Activity.class);
                         startActivity(openSettingsIntent);
-
                         break;
                     default:
                         return true;

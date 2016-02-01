@@ -83,6 +83,11 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 public class Snippets_Activity extends Base_Activity implements SearchView.OnQueryTextListener {
 
@@ -156,12 +161,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
 
         helperMethods = new Helper_Methods(this);
 
-        snippetDAO = getHelper().getSnippetDAO();
-
-        snippetQueryBuilder = snippetDAO.queryBuilder();
-
-        Helper_Methods helperMethods = new Helper_Methods(this);
-
         book = getIntent().getParcelableExtra(Constants.EXTRAS_BOOK);
 
         toolbar.setTitle(book.getTitle());
@@ -172,11 +171,29 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             toolbar.setElevation(25f);
         }
 
-        prepareQueryBuilder(book.getId());
+        Observable.create(new Observable.OnSubscribe<List<Snippet>>() {
+            @Override
+            public void call(Subscriber<? super List<Snippet>> subscriber) {
+                snippetDAO = getHelper().getSnippetDAO();
 
-        snippets = snippetDAO.query(pq);
+                snippetQueryBuilder = snippetDAO.queryBuilder();
 
-        handleEmptyOrPopulatedScreen(snippets);
+                prepareQueryBuilder(book.getId());
+
+                snippets = snippetDAO.query(pq);
+
+                subscriber.onNext(snippets);
+                subscriber.onCompleted();
+            }
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<Snippet>>() {
+                    @Override
+                    public void call(List<Snippet> snippetsFromObservable) {
+                        handleEmptyOrPopulatedScreen(snippetsFromObservable);
+                    }
+                });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
