@@ -56,6 +56,8 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         libraries.add(new Open_Source_Library("Picasso", "https://github.com/square/picasso", "A powerful image downloading and caching library for Android."));
         libraries.add(new Open_Source_Library("Otto", "http://square.github.io/otto/", "An enhanced event bus with emphasis on Android support."));
         libraries.add(new Open_Source_Library("ButterKnife", "https://github.com/JakeWharton/butterknife/", "Field and method binding for Android views which uses annotation processing to generate boilerplate code for you."));
+        libraries.add(new Open_Source_Library("RxJava", "https://github.com/ReactiveX/RxJava", "RxJava is a Java VM implementation of Reactive Extensions: a library for composing asynchronous and event-based programs by using observable sequences."));
+        libraries.add(new Open_Source_Library("RxAndroid", "https://github.com/ReactiveX/RxAndroid", "Android specific bindings for RxJava."));
         libraries.add(new Open_Source_Library("PhotoView", "https://github.com/chrisbanes/PhotoView", "PhotoView aims to help produce an easily usable implementation of a zooming Android ImageView. It is currently being used in photup."));
         libraries.add(new Open_Source_Library("SimpleCropView", "https://github.com/IsseiAoki/SimpleCropView", "SimpleCropView is an image cropping library for Android."));
         libraries.add(new Open_Source_Library("Crouton", "https://github.com/keyboardsurfer/Crouton", "Context sensitive notifications for Android."));
