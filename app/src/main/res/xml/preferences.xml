@@ -13,9 +13,6 @@
         android:key="pref_key_about"
         android:title="@string/pref_about_section_title">
         <Preference
-            android:key="pref_key_send_feedback"
-            android:title="@string/pref_feedback_title"/>
-        <Preference
             android:summary="@string/pref_rate_google_play_summary"
             android:title="@string/pref_rate_google_play">
             <intent

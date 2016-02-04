@@ -29,6 +29,11 @@
     <!-- NAVDRAWER -->
     <string name="navdrawer_snippets_global_stream">Global Stream</string>
     <string name="navdrawer_settings_item">Settings</string>
+    <string name="navdrawer_sendfeedback">Send feedback</string>
+    <string name="navdrawer_sendfeedback_button_title">SEND</string>
+    <string name="navdrawer_sendfeedback_alert_hint_tell_us_what_you_think">Don\'t hold back!</string>
+    <string name="navdrawer_sendfeedback_alert_title">Compose Feedback</string>
+    <string name="navdrawer_sendfeedback_alert_summary">We will respond via email to the feedback you provide. You can also send your feedback to:</string>
     <string name="navigation_drawer_open"></string>
     <string name="navigation_drawer_closed"></string>
 
@@ -36,11 +41,6 @@
     <string name="pref_configuration_section_title">Configuration</string>
     <string name="pref_configuration_keep_introduction_slider">Enable app intro</string>
     <string name="pref_about_section_title">About</string>
-    <string name="pref_feedback_title">Send feedback</string>
-    <string name="pref_send_feedback_button_title">SEND</string>
-    <string name="pref_sendfeedback_alert_hint_tell_us_what_you_think">Don\'t hold back!</string>
-    <string name="pref_sendfeedback_alert_title">Compose Feedback</string>
-    <string name="pref_sendfeedback_alert_summary">We will respond via email to the feedback you provide. You can also send your feedback to:</string>
     <string name="pref_open_source_libraries_title">Open Source Libraries</string>
     <string name="pref_rate_google_play">Rate Snipit on Google Play</string>
     <string name="pref_rate_google_play_summary">Consider writing a review, it really helps!</string>

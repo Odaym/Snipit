@@ -21,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
-            android:hint="@string/pref_sendfeedback_alert_hint_tell_us_what_you_think"
+            android:hint="@string/navdrawer_sendfeedback_alert_hint_tell_us_what_you_think"
             android:inputType="textCapSentences"
             android:paddingTop="10dp"
             android:singleLine="true"
@@ -38,5 +38,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="@string/pref_sendfeedback_alert_summary" />
+        android:text="@string/navdrawer_sendfeedback_alert_summary" />
 </LinearLayout>

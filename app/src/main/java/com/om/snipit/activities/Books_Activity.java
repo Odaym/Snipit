@@ -2,9 +2,11 @@ package com.om.snipit.activities;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -13,9 +15,12 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -24,6 +29,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -32,6 +38,7 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.andreabaccega.widget.FormEditText;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -44,6 +51,7 @@ import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
+import com.om.snipit.classes.GMailSender;
 import com.om.snipit.classes.Helper_Methods;
 import com.om.snipit.dragsort_listview.DragSortListView;
 import com.om.snipit.models.Book;
@@ -59,6 +67,8 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 import rx.Observable;
@@ -88,6 +98,8 @@ public class Books_Activity extends ActionBarActivity {
     TextView navdrawer_header_user_email;
     @Bind(R.id.toolbar)
     Toolbar toolbar;
+
+    private ProgressDialog sendEmailFeedbackDialog;
 
     private ActionBarDrawerToggle drawerToggle;
 
@@ -166,7 +178,6 @@ public class Books_Activity extends ActionBarActivity {
                 });
 
 
-
         setSupportActionBar(toolbar);
         helperMethods.setUpActionbarColors(this, Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS);
 
@@ -205,6 +216,57 @@ public class Books_Activity extends ActionBarActivity {
                     case R.id.navigation_drawer_item_settings:
                         Intent openSettingsIntent = new Intent(Books_Activity.this, Settings_Activity.class);
                         startActivity(openSettingsIntent);
+                        break;
+                    case R.id.navigation_drawer_item_send_feedback:
+                        AlertDialog.Builder alert = new AlertDialog.Builder(Books_Activity.this);
+
+                        LayoutInflater inflater = (LayoutInflater) Books_Activity.this
+                                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        View alertComposeFeedback = inflater.inflate(R.layout.alert_send_feedback, null, false);
+
+                        final FormEditText inputFeedbackET = (FormEditText) alertComposeFeedback.findViewById(R.id.feedbackET);
+                        inputFeedbackET.setHintTextColor(Books_Activity.this.getResources().getColor(R.color.edittext_hint_color));
+                        inputFeedbackET.setSelection(inputFeedbackET.getText().length());
+
+                        alert.setPositiveButton(Books_Activity.this.getResources().getString(R.string.navdrawer_sendfeedback_button_title), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                if (Helper_Methods.isInternetAvailable(Books_Activity.this)) {
+                                    if (inputFeedbackET.testValidity()) {
+                                        try {
+                                            new SendFeedbackEmail().execute(inputFeedbackET.getText().toString());
+                                        } catch (Exception e) {
+                                            Log.e("SendMail", e.getMessage(), e);
+                                        }
+                                    }
+                                } else {
+                                    Crouton.makeText(Books_Activity.this, getString(R.string.action_needs_internet), Style.ALERT).show();
+                                }
+                            }
+                        });
+
+                        alert.setNegativeButton(Books_Activity.this.getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                            }
+                        });
+
+                        inputFeedbackET.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                InputMethodManager keyboard = (InputMethodManager)
+                                        Books_Activity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+                                keyboard.showSoftInput(inputFeedbackET, 0);
+                            }
+                        }, 0);
+
+                        TextView feedbackSendingSummaryTV = (TextView) alertComposeFeedback.findViewById(R.id.feedbackSendingSummaryTV);
+                        feedbackSendingSummaryTV.append(" ");
+                        feedbackSendingSummaryTV.append(Html.fromHtml("<a href=\"mailto:snipit.me@gmail.com\">snipit.me@gmail.com</a>"));
+                        feedbackSendingSummaryTV.setMovementMethod(LinkMovementMethod.getInstance());
+
+                        alert.setTitle(Books_Activity.this.getResources().getString(R.string.navdrawer_sendfeedback_alert_title));
+                        alert.setView(alertComposeFeedback);
+                        alert.show();
+
                         break;
                     default:
                         return true;
@@ -414,6 +476,36 @@ public class Books_Activity extends ActionBarActivity {
         prepareForNotifyDataChanged();
         booksAdapter.notifyDataSetChanged();
         itemPendingDeleteDecision = false;
+    }
+
+    private class SendFeedbackEmail extends AsyncTask<String, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            sendEmailFeedbackDialog = ProgressDialog.show(Books_Activity.this, getResources().getString(R.string.loading_book_info_title),
+                    getResources().getString(R.string.loading_sending_feedback), true);
+        }
+
+        @Override
+        protected Void doInBackground(String... feedbackContent) {
+            try {
+                GMailSender sender = new GMailSender(Constants.FEEDBACK_EMAIL_FROM_ADDRESS, Constants.FEEDBACK_EMAIL_FROM_ADDRESS_PASSWORD);
+                sender.sendMail(Constants.FEEDBACK_EMAIL_SUBJECT,
+                        feedbackContent[0],
+                        Constants.FEEDBACK_EMAIL_APPEARS_AS,
+                        Constants.FEEDBACK_EMAIL_TO);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void nothing) {
+            sendEmailFeedbackDialog.hide();
+            Crouton.makeText(Books_Activity.this, getResources().getString(R.string.feedback_sent_alert), Style.CONFIRM).show();
+        }
     }
 
     @Override
