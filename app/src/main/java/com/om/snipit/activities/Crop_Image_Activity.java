@@ -60,16 +60,16 @@ public class Crop_Image_Activity extends Base_Activity {
 
         tempImagePath_fromIntent = getIntent().getExtras().getString(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH);
 
-        File imageFileCheck = new File(tempImagePath_fromIntent);
-
-        if (!imageFileCheck.exists()) {
-            Toast.makeText(Crop_Image_Activity.this, R.string.wrong_photo_gallery, Toast.LENGTH_LONG).show();
-            finish();
-        }
-
         CALL_PURPOSE = getIntent().getIntExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING, -1);
 
         Picasso.with(this).load(new File(tempImagePath_fromIntent)).resize(1000, 1000).centerInside().into(picassoCropTarget);
+
+        File imageFileCheck = new File(tempImagePath_fromIntent);
+
+        if (!imageFileCheck.exists() || cropImageView.getImageBitmap() == null) {
+            Toast.makeText(Crop_Image_Activity.this, R.string.rare_case_scenario, Toast.LENGTH_LONG).show();
+            finish();
+        }
 
         doneBTN.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -10,7 +10,7 @@
 
     <string name="app_name">Snipit</string>
     <string name="app_tagline">Digitize documents and textbooks</string>
-    <string name="app_version">2.2</string>
+    <string name="app_version">2.2.1</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
     <string name="SAVE">SAVE</string>
@@ -142,7 +142,7 @@
     <!-- CROP_IMAGE_ACTIVITY -->
     <string name="crop_image_activity_title">Crop Snippet</string>
     <string name="seems_out_of_memory">Please try that again with a lower resolution setting for the camera.</string>
-    <string name="wrong_photo_gallery">We\'re sorry, that image was not accessible, attach photos from your own photo gallery and try again</string>
+    <string name="rare_case_scenario">We\'re sorry, that image was not accessible, this should never happen</string>
 
     <!-- PAINT_BOOKMARK_ACTIVITY -->
     <string name="paint_snippet_activity_title">Draw and Highlight</string>
