@@ -281,7 +281,7 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
 
-        if (!snippets.isEmpty()) {
+        if (snippets != null && !snippets.isEmpty()) {
             inflater.inflate(R.menu.snippets_activity, menu);
 
             MenuItem searchItem = menu.findItem(R.id.search);
