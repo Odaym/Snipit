@@ -134,7 +134,7 @@ public class View_Snippet_Activity extends Base_Activity {
                 snippetDAO = getHelper().getSnippetDAO();
                 snippetQueryBuilder = snippetDAO.queryBuilder();
 
-                handleWhichBookmarksToLoad();
+                handleWhichSnippetsToLoad();
 
                 subscriber.onNext(null);
                 subscriber.onCompleted();
@@ -159,12 +159,12 @@ public class View_Snippet_Activity extends Base_Activity {
     public void handle_BusEvents(EventBus_Poster ebp) {
         switch (ebp.getMessage()) {
             case "snippet_image_needs_reload":
-                handleWhichBookmarksToLoad();
+                handleWhichSnippetsToLoad();
 
                 mPagerAdapter.notifyDataSetChanged();
                 break;
             case "snippet_ocr_content_changed":
-                handleWhichBookmarksToLoad();
+                handleWhichSnippetsToLoad();
 
                 mPagerAdapter.notifyDataSetChanged();
 
@@ -255,7 +255,7 @@ public class View_Snippet_Activity extends Base_Activity {
         alert.show();
     }
 
-    public void handleWhichBookmarksToLoad() {
+    public void handleWhichSnippetsToLoad() {
         try {
             if (extras_viewing_snippets_gallery) {
                 snippets = snippetDAO.queryForAll();
