@@ -66,7 +66,7 @@ public class Crop_Image_Activity extends Base_Activity {
 
         File imageFileCheck = new File(tempImagePath_fromIntent);
 
-        if (!imageFileCheck.exists() || cropImageView.getImageBitmap() == null) {
+        if (!imageFileCheck.exists()) {
             Toast.makeText(Crop_Image_Activity.this, R.string.rare_case_scenario, Toast.LENGTH_LONG).show();
             finish();
         }
