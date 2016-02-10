@@ -3,27 +3,16 @@ package com.om.snipit.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-
-@DatabaseTable(tableName = "User")
-
 public class User implements Parcelable {
 
-    @DatabaseField(generatedId = true)
-    int id;
-    @DatabaseField
-    String full_name;
-    @DatabaseField
-    String email_address;
-    @DatabaseField
-    String photo_url;
+    private String full_name;
+    private String email_address;
+    private String photo_url;
 
     public User() {
     }
 
     public User(Parcel in) {
-        id = in.readInt();
         full_name = in.readString();
         email_address = in.readString();
         photo_url = in.readString();
@@ -38,15 +27,6 @@ public class User implements Parcelable {
             return new User[size];
         }
     };
-
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getFull_name() {
         return full_name;
@@ -79,6 +59,8 @@ public class User implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-
+        out.writeString(full_name);
+        out.writeString(email_address);
+        out.writeString(photo_url);
     }
 }
