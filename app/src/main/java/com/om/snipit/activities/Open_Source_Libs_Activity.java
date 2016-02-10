@@ -63,7 +63,6 @@ public class Open_Source_Libs_Activity extends Base_Activity {
         libraries.add(new Open_Source_Library("Crouton", "https://github.com/keyboardsurfer/Crouton", "Context sensitive notifications for Android."));
         libraries.add(new Open_Source_Library("Autofit TextView", "https://github.com/grantland/android-autofittextview", "A TextView that automatically resizes text to fit perfectly within its bounds."));
         libraries.add(new Open_Source_Library("Android Form EditText", "https://github.com/vekexasia/android-edittext-validator", "Android form edit text is an extension of EditText that brings data validation facilities to the edittext."));
-        libraries.add(new Open_Source_Library("AppIntro", "https://github.com/PaoloRotolo/AppIntro", "AppIntro is an Android Library that helps you make a cool intro for your app, like the ones in Google apps."));
 
 //        final View listViewFooterAd = View.inflate(this, R.layout.adview_open_source_libs_list_footer, null);
 //        AdView mAdView = (AdView) listViewFooterAd.findViewById(R.id.adView);
