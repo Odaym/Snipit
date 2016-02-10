@@ -10,7 +10,7 @@
 
     <string name="app_name">Snipit</string>
     <string name="app_tagline">Digitize documents and textbooks</string>
-    <string name="app_version">2.2.1</string>
+    <string name="app_version">2.2.2</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
     <string name="SAVE">SAVE</string>
