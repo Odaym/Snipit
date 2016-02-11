@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -47,6 +48,7 @@ import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.nispok.snackbar.listeners.EventListener;
 import com.om.snipit.R;
+import com.om.snipit.classes.CircleTransform;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
@@ -56,6 +58,7 @@ import com.om.snipit.classes.Helper_Methods;
 import com.om.snipit.dragsort_listview.DragSortListView;
 import com.om.snipit.models.Book;
 import com.om.snipit.models.Snippet;
+import com.om.snipit.models.User;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
@@ -90,18 +93,19 @@ public class Books_Activity extends ActionBarActivity {
     @Bind(R.id.navDrawer)
     NavigationView navDrawer;
     View navDrawerheaderLayout;
-    //    @Bind(R.id.navdrawer_header_user_profile_image)
     ImageView navdrawer_header_user_profile_image;
-    //    @Bind(R.id.navdrawer_header_user_full_name)
     TextView navdrawer_header_user_full_name;
-    //    @Bind(R.id.navdrawer_header_user_email)
     TextView navdrawer_header_user_email;
     @Bind(R.id.toolbar)
     Toolbar toolbar;
 
+    private User user;
+
     private ProgressDialog sendEmailFeedbackDialog;
 
     private ActionBarDrawerToggle drawerToggle;
+
+    private SharedPreferences prefs;
 
     private Books_Adapter booksAdapter;
     private List<Book> books;
@@ -140,6 +144,8 @@ public class Books_Activity extends ActionBarActivity {
         setContentView(R.layout.activity_books);
 
         ButterKnife.bind(this);
+
+        prefs = getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
 
         navDrawerheaderLayout = navDrawer.inflateHeaderView(R.layout.navigation_drawer_header);
 
@@ -201,9 +207,17 @@ public class Books_Activity extends ActionBarActivity {
         drawerLayout.setDrawerListener(drawerToggle);
         drawerLayout.closeDrawer(GravityCompat.START);
 
-        Picasso.with(this).load(R.drawable.ic_launcher).fit().into(navdrawer_header_user_profile_image);
-        navdrawer_header_user_full_name.setText(R.string.app_name);
-        navdrawer_header_user_email.setText(R.string.app_tagline);
+        if (prefs.getBoolean(Constants.EXTRAS_USER_LOGGED_IN, false)) {
+            String userPhoto = prefs.getString(Constants.EXTRAS_USER_DISPLAY_PHOTO, "");
+
+            Picasso.with(this).load(userPhoto).fit().transform(new CircleTransform()).into(navdrawer_header_user_profile_image);
+            navdrawer_header_user_full_name.setText(prefs.getString(Constants.EXTRAS_USER_FULL_NAME, ""));
+            navdrawer_header_user_email.setText(prefs.getString(Constants.EXTRAS_USER_EMAIL, ""));
+        } else {
+            Picasso.with(this).load(R.drawable.ic_launcher).fit().into(navdrawer_header_user_profile_image);
+            navdrawer_header_user_full_name.setText(R.string.app_name);
+            navdrawer_header_user_email.setText(R.string.app_tagline);
+        }
 
         navDrawer.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override

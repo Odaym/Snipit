@@ -2,14 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/pink"
-    android:paddingBottom="16dp"
-    android:paddingTop="16dp">
+    android:background="@color/pink">
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"
         android:src="@drawable/app_intro_keep_it" />
 
 </RelativeLayout>

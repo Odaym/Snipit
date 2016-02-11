@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:key="pref_key_configuration"
-        android:title="@string/pref_configuration_section_title">
-        <CheckBoxPreference
-            android:key="pref_key_configuration_intro_slider"
-            android:title="@string/pref_configuration_keep_introduction_slider"
-            android:defaultValue="true"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:key="pref_key_about"
         android:title="@string/pref_about_section_title">
         <Preference
