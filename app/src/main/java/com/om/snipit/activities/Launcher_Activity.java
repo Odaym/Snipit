@@ -13,11 +13,10 @@ public class Launcher_Activity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //If prefs do not yet contain the APP_INTRO_ENABLED preference or if prefs does contain it and its value is true
-        if (!getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE).contains(Constants.APP_INTRO_ENABLED) || getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE).getBoolean(Constants.APP_INTRO_ENABLED, false))
-            startActivity(new Intent(Launcher_Activity.this, Login_Activity.class));
-        else
+        if (getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE).getBoolean(Constants.EXTRAS_USER_LOGGED_IN, false))
             startActivity(new Intent(Launcher_Activity.this, Books_Activity.class));
+        else
+            startActivity(new Intent(Launcher_Activity.this, Login_Activity.class));
     }
 
     @Override
