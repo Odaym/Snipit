@@ -34,20 +34,21 @@
             android:value="36e136351325660be3ac92f428de565fcbdc3033" />
 
         <activity
-            android:name="com.om.snipit.activities.Login_Activity"
-            android:theme="@style/IntroSlider_Activity_Theme">
+            android:name=".activities.Launcher_Activity"
+            android:noHistory="true"
+            android:theme="@style/Launcher_Activity_Theme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <activity
-            android:name=".activities.Launcher_Activity"
-            android:noHistory="true"
-            android:theme="@style/Launcher_Activity_Theme" />
+            android:name="com.om.snipit.activities.Login_Activity"
+            android:theme="@style/IntroSlider_Activity_Theme">
+        </activity>
+
 
         <activity
             android:name="com.om.snipit.activities.Books_Activity"
