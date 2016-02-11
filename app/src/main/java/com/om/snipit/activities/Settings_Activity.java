@@ -1,11 +1,9 @@
 package com.om.snipit.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -15,12 +13,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.om.snipit.R;
-import com.om.snipit.classes.Constants;
 
 public class Settings_Activity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-
-    private SharedPreferences prefs;
-    private SharedPreferences.Editor prefsEditor;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,8 +32,6 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
         toolbar.setBackgroundColor(getResources().getColor(R.color.red));
         toolbar.setTitleTextColor(getResources().getColor(R.color.white));
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white);
-
-        prefs = getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
 
         root.addView(toolbar, 0);
 
@@ -61,26 +53,6 @@ public class Settings_Activity extends PreferenceActivity implements SharedPrefe
             public boolean onPreferenceClick(Preference preference) {
                 Intent startAboutOpenSourceLibs_Activity = new Intent(Settings_Activity.this, Open_Source_Libs_Activity.class);
                 startActivity(startAboutOpenSourceLibs_Activity);
-                return false;
-            }
-        });
-
-        final CheckBoxPreference keepIntroSlider = (CheckBoxPreference) findPreference("pref_key_configuration_intro_slider");
-
-        if (prefs.getBoolean(Constants.APP_INTRO_ENABLED, false))
-            keepIntroSlider.setChecked(true);
-        else
-            keepIntroSlider.setChecked(false);
-
-        keepIntroSlider.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object o) {
-                prefsEditor = prefs.edit();
-                prefsEditor.putBoolean(Constants.APP_INTRO_ENABLED, !prefs.getBoolean(Constants.APP_INTRO_ENABLED, false));
-                prefsEditor.apply();
-
-                keepIntroSlider.setChecked(!keepIntroSlider.isChecked());
-
                 return false;
             }
         });

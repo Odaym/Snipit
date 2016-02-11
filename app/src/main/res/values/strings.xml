@@ -38,8 +38,6 @@
     <string name="navigation_drawer_closed"></string>
 
     <!-- PREFERENCE ACTIVITY-->
-    <string name="pref_configuration_section_title">Configuration</string>
-    <string name="pref_configuration_keep_introduction_slider">Enable app intro</string>
     <string name="pref_about_section_title">About</string>
     <string name="pref_open_source_libraries_title">Open Source Libraries</string>
     <string name="pref_rate_google_play">Rate Snipit on Google Play</string>
