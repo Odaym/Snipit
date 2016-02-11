@@ -1,6 +1,8 @@
 package com.om.snipit.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -31,6 +33,9 @@ public class Login_Activity extends Base_Activity implements
     private DefaultIndicatorController indicatorController;
     private GoogleApiClient googleApiClient;
 
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor prefsEditor;
+
     private static final int RC_SIGN_IN = 0;
 
     @Bind(R.id.viewpager)
@@ -46,6 +51,8 @@ public class Login_Activity extends Base_Activity implements
         setContentView(R.layout.activity_login);
 
         ButterKnife.bind(this);
+
+        prefs = getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -106,7 +113,6 @@ public class Login_Activity extends Base_Activity implements
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
 
-            // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
 
             if (acct != null) {
@@ -117,8 +123,14 @@ public class Login_Activity extends Base_Activity implements
                 assert acct.getPhotoUrl() != null;
                 user.setPhoto_url(acct.getPhotoUrl().toString());
 
+                prefsEditor = prefs.edit();
+                prefsEditor.putBoolean(Constants.EXTRAS_USER_LOGGED_IN, true);
+                prefsEditor.putString(Constants.EXTRAS_USER_FULL_NAME, user.getFull_name());
+                prefsEditor.putString(Constants.EXTRAS_USER_DISPLAY_PHOTO, user.getPhoto_url());
+                prefsEditor.putString(Constants.EXTRAS_USER_EMAIL, user.getEmail_address());
+                prefsEditor.apply();
+
                 Intent openBooksActivity = new Intent(Login_Activity.this, Books_Activity.class);
-                openBooksActivity.putExtra(Constants.EXTRAS_USER, user);
                 startActivity(openBooksActivity);
 
                 finish();
