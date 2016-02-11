@@ -85,7 +85,7 @@
 
     <android.support.design.widget.NavigationView
         android:id="@+id/navDrawer"
-        android:layout_width="wrap_content"
+        android:layout_width="250dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="@drawable/navdrawer_background_repeat"

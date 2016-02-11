@@ -18,6 +18,7 @@
 
     <dimen name="navdrawer_profile_image_top_padding">20dp</dimen>
 
+    <dimen name="navdrawer_width">250dp</dimen>
     <dimen name="navdrawer_header_height">160dp</dimen>
     <dimen name="navdrawer_header_email_fontsize">15dp</dimen>
     <dimen name="navdrawer_header_username_fontsize">17dp</dimen>
