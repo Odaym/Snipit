@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -104,6 +105,8 @@ public class Books_Activity extends ActionBarActivity {
 
     private ActionBarDrawerToggle drawerToggle;
 
+    private SharedPreferences prefs;
+
     private Books_Adapter booksAdapter;
     private List<Book> books;
     private Book tempBook;
@@ -141,6 +144,8 @@ public class Books_Activity extends ActionBarActivity {
         setContentView(R.layout.activity_books);
 
         ButterKnife.bind(this);
+
+        prefs = getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
 
         navDrawerheaderLayout = navDrawer.inflateHeaderView(R.layout.navigation_drawer_header);
 
@@ -202,12 +207,12 @@ public class Books_Activity extends ActionBarActivity {
         drawerLayout.setDrawerListener(drawerToggle);
         drawerLayout.closeDrawer(GravityCompat.START);
 
-        if (getIntent().getExtras() != null) {
-            user = getIntent().getExtras().getParcelable(Constants.EXTRAS_USER);
+        if (prefs.getBoolean(Constants.EXTRAS_USER_LOGGED_IN, false)) {
+            String userPhoto = prefs.getString(Constants.EXTRAS_USER_DISPLAY_PHOTO, "");
 
-            Picasso.with(this).load(user.getPhoto_url()).fit().transform(new CircleTransform()).into(navdrawer_header_user_profile_image);
-            navdrawer_header_user_full_name.setText(user.getFull_name());
-            navdrawer_header_user_email.setText(user.getEmail_address());
+            Picasso.with(this).load(userPhoto).fit().transform(new CircleTransform()).into(navdrawer_header_user_profile_image);
+            navdrawer_header_user_full_name.setText(prefs.getString(Constants.EXTRAS_USER_FULL_NAME, ""));
+            navdrawer_header_user_email.setText(prefs.getString(Constants.EXTRAS_USER_EMAIL, ""));
         } else {
             Picasso.with(this).load(R.drawable.ic_launcher).fit().into(navdrawer_header_user_profile_image);
             navdrawer_header_user_full_name.setText(R.string.app_name);
