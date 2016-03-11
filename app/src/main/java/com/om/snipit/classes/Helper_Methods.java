@@ -13,6 +13,7 @@ import com.crashlytics.android.answers.CustomEvent;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.ObjectAnimator;
+import com.om.snipit.BuildConfig;
 import com.om.snipit.R;
 
 import java.io.File;
@@ -46,7 +47,7 @@ public class Helper_Methods {
                 break;
         }
 
-        if (Constants.APPLICATION_CODE_STATE.equals("PRODUCTION"))
+        if (!BuildConfig.DEBUG)
             Answers.getInstance().logCustom(customEvent);
     }
 
