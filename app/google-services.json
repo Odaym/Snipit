@@ -1,20 +1,29 @@
 {
   "project_info": {
-    "project_id": "snipit-debug",
-    "project_number": "283986359460",
-    "name": "Snipit Debug"
+    "project_id": "snipit-1090",
+    "project_number": "1044663333283",
+    "name": "Snipit"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:283986359460:android:8666aa9db304f3c8",
-        "client_id": "android:com.om.snipit.debug",
+        "mobilesdk_app_id": "1:1044663333283:android:e678e0848630dd3e",
+        "client_id": "android:com.om.snipit",
         "client_type": 1,
         "android_client_info": {
-          "package_name": "com.om.snipit.debug"
+          "package_name": "com.om.snipit"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1044663333283-0h7eafk7oigger15g3pilefcviqnhqui.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.om.snipit",
+            "certificate_hash": "1d882a35b4b097c9b56ef8f2a1349aa4674d22f0"
+          }
+        }
+      ],
       "api_key": [],
       "services": {
         "analytics_service": {
@@ -29,7 +38,7 @@
           "other_platform_oauth_client": []
         },
         "google_signin_service": {
-          "status": 1
+          "status": 2
         },
         "ads_service": {
           "status": 1
