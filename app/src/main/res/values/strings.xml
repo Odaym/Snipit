@@ -10,7 +10,7 @@
 
     <string name="app_name">Snipit</string>
     <string name="app_tagline">Digitize documents and textbooks</string>
-    <string name="app_version">2.2.2</string>
+    <string name="app_version">2.3.0</string>
     <string name="cancel">Cancel</string>
     <string name="OK">OK</string>
     <string name="SAVE">SAVE</string>
@@ -38,6 +38,7 @@
     <string name="navigation_drawer_closed"></string>
 
     <!-- PREFERENCE ACTIVITY-->
+    <string name="pref_key_sign_out_title">Sign Out</string>
     <string name="pref_about_section_title">About</string>
     <string name="pref_open_source_libraries_title">Open Source Libraries</string>
     <string name="pref_rate_google_play">Rate Snipit on Google Play</string>

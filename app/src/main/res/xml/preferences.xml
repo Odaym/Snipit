@@ -13,5 +13,8 @@
         <Preference
             android:key="pref_key_open_source_libs"
             android:title="@string/pref_open_source_libraries_title" />
+        <Preference
+            android:key="pref_key_sign_out"
+            android:title="@string/pref_key_sign_out_title" />
     </PreferenceCategory>
 </PreferenceScreen>

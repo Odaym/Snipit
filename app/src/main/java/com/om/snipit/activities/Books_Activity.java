@@ -367,6 +367,9 @@ public class Books_Activity extends ActionBarActivity {
         String ebpMessage = ebp.getMessage();
 
         switch (ebpMessage) {
+            case "logged_out":
+                finish();
+                break;
             case "book_added":
                 handleBusEvents_ListRefresher();
                 Log.d("EVENTS", "book_added - Books_Activity");
