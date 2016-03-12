@@ -76,8 +76,6 @@ public class Crop_Image_Activity extends Base_Activity {
             public void onClick(View view) {
                 String finalImagePath = create_CroppedImageFile(cropImageView.getCroppedBitmap());
 
-                Helper_Methods.delete_image_from_disk(tempImagePath_fromIntent);
-
                 if (CALL_PURPOSE == Constants.EDIT_SNIPPET_PURPOSE_VALUE || CALL_PURPOSE == Constants.EDIT_SNIPPET_IMAGE_PURPOSE_VALUE) {
                     EventBus_Singleton.getInstance().post(new EventBus_Poster("snippet_picture_changed", finalImagePath));
                 } else {
