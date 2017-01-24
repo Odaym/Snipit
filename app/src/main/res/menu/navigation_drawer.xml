@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group
-        android:id="@+id/contentGroup"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/navigation_drawer_item_snippets_global_stream"
-            android:icon="@drawable/ic_global_stream_black"
-            android:title="@string/navdrawer_snippets_global_stream"/>
-    </group>
-
-    <group
         android:id="@+id/metaGroup"
         android:checkableBehavior="single">
         <item

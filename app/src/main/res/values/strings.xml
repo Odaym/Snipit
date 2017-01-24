@@ -23,6 +23,9 @@
     <string name="request_permission">REQUEST</string>
     <string name="action_needs_internet">This action needs an Internet connection</string>
 
+    <!-- LOGIN ACTIVITY-->
+    <string name="logging_in_dialog_message">Logging in…</string>
+
     <!-- SHARING -->
     <string name="sharing_message">I used Snipit to take this, have a look!</string>
 
@@ -50,6 +53,7 @@
     <!-- BOOKS_ACTIVITY -->
     <string name="empty_books_layout_hint">Books you add appear here</string>
     <string name="delete_book_confirmation_message">Deleted</string>
+    <string name="dropbox_insufficient_storage_error">It seems that you\'ve exceeded your Dropbox storage limit. Please free up some space and try again</string>
 
     <!-- SNIPPETS_ACTIVITY -->
     <string name="edit_snippet_option">Edit</string>
@@ -163,35 +167,5 @@
     <string name="about_open_source_libraries_activity_title">Open Source Libraries</string>
     <string name="introduction_text">Snipit is made with ❤ by <a href="http://odaymaleh.com">Oday Maleh</a>. App intro slides graciously provided by <a href="http://risingsunv1.deviantart.com/">Rami Kobeissi</a>. And when love was not enough, these libraries came to the rescue.</string>
 
-    <!-- SHARE SNIPPET ACTIVITY -->
-    <string name="share_snippet_activity_title">Share Snippet</string>
-    <string name="screen_name_empty_error">Gotta have a screen name!</string>
-    <string name="screen_name_too_short_too_long">length: 5 – 20 with no spaces</string>
-    <string name="screen_name">Choose a screen name (Share as)</string>
-    <string name="alert_already_shared_snippet_title">Snippet exists</string>
-    <string name="uploading_snippet_server">Uploading snippet to server…</string>
-    <string name="progress_checking_existing_snippets_title">One moment</string>
-    <string name="progress_checking_existing_snippets_message">Checking for existing snippets…</string>
-    <string name="alert_already_shared_snippet_message">A snippet with these same details already exists.</string>
-    <string name="publish_snippet">Publish Snippet</string>
-    <string name="amazon_upload_error_connection_too_slow">Encountered network problems while trying to upload, please try that again</string>
-
-    <!-- SNIPPETS STREAM ACTIVITY -->
-    <string name="snippets_stream_activity_title">Snippets Global Stream</string>
-    <string name="no_internet_connection">Check your Internet connection and try again</string>
-    <string name="loading_snippets_stream">Snippets from around the world!</string>
-    <string name="load_more_snippets_message_1">Loading more snippets…</string>
-    <string name="load_more_snippets_message_2">More is coming…</string>
-    <string name="load_more_snippets_message_3">Here\'s some more snippets!</string>
-    <string name="load_more_snippets_message_4">Share your own snippets!</string>
-    <string name="load_more_snippets_message_5">Thank you for using Snipit</string>
-    <string name="load_more_snippets_message_6">Knowledge is power</string>
-    <string name="load_more_snippets_message_7">If not today, then tomorrow!</string>
-    <string name="load_more_snippets_message_8">We read to know we\'re not alone</string>
-    <string name="load_more_snippets_message_9">Today a reader, tomorrow a leader!</string>
-    <string name="load_more_snippets_message_10">I love the smell of books in the morning…</string>
-    <string name="you_are_offline">You are offline</string>
-    <string name="shared_by_label">shared by:</string>
-    <string name="book_title_label">book:</string>
-    <string name="book_author_label">author:</string>
+    <string name="no_internet_connection">Please check your Internet connection and try again</string>
 </resources>

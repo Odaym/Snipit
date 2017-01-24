@@ -1,6 +1,9 @@
 package com.om.snipit.activities;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -21,6 +24,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.om.snipit.R;
 import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.DefaultIndicatorController;
+import com.om.snipit.classes.Helper_Methods;
 import com.om.snipit.models.User;
 
 import butterknife.Bind;
@@ -34,7 +38,6 @@ public class Login_Activity extends Base_Activity implements
     private GoogleApiClient googleApiClient;
 
     private SharedPreferences prefs;
-    private SharedPreferences.Editor prefsEditor;
 
     private static final int RC_SIGN_IN = 0;
 
@@ -112,28 +115,44 @@ public class Login_Activity extends Base_Activity implements
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
+            if (Helper_Methods.isInternetAvailable(this)) {
+                ProgressDialog loggingInDialog = ProgressDialog.show(Login_Activity.this, "",
+                        getResources().getString(R.string.logging_in_dialog_message), true);
 
-            GoogleSignInAccount acct = result.getSignInAccount();
+                GoogleSignInAccount acct = result.getSignInAccount();
 
-            if (acct != null) {
-                User user = new User();
+                if (acct != null) {
+                    User user = new User();
 
-                user.setFull_name(acct.getDisplayName());
-                user.setEmail_address(acct.getEmail());
-                assert acct.getPhotoUrl() != null;
-                user.setPhoto_url(acct.getPhotoUrl().toString());
+                    user.setFull_name(acct.getDisplayName());
+                    user.setEmail_address(acct.getEmail());
+                    if (acct.getPhotoUrl() == null)
+                        user.setPhoto_url(null);
+                    else
+                        user.setPhoto_url(acct.getPhotoUrl().toString());
 
-                prefsEditor = prefs.edit();
-                prefsEditor.putBoolean(Constants.EXTRAS_USER_LOGGED_IN, true);
-                prefsEditor.putString(Constants.EXTRAS_USER_FULL_NAME, user.getFull_name());
-                prefsEditor.putString(Constants.EXTRAS_USER_DISPLAY_PHOTO, user.getPhoto_url());
-                prefsEditor.putString(Constants.EXTRAS_USER_EMAIL, user.getEmail_address());
-                prefsEditor.apply();
+                    SharedPreferences.Editor prefsEditor = prefs.edit();
+                    prefsEditor.putBoolean(Constants.EXTRAS_USER_LOGGED_IN, true);
+                    prefsEditor.putString(Constants.EXTRAS_USER_FULL_NAME, user.getFull_name());
+                    prefsEditor.putString(Constants.EXTRAS_USER_DISPLAY_PHOTO, user.getPhoto_url());
+                    prefsEditor.putString(Constants.EXTRAS_USER_EMAIL, user.getEmail_address());
+                    prefsEditor.apply();
 
-                Intent openBooksActivity = new Intent(Login_Activity.this, Books_Activity.class);
-                startActivity(openBooksActivity);
+                    Intent openBooksActivity = new Intent(Login_Activity.this, Books_Activity.class);
+                    startActivity(openBooksActivity);
 
-                finish();
+                    finish();
+                }
+            } else {
+                new AlertDialog.Builder(Login_Activity.this)
+                        .setMessage(R.string.no_internet_connection)
+                        .setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
             }
         } else {
             // Signed out, show unauthenticated UI.

@@ -90,7 +90,9 @@
 
 ######## Parse
 
--keep class com.parse.*
+-keep class com.parse.** { *; }
+-dontwarn android.net.SSLCertificateSocketFactory
+-dontwarn android.app.Notification
 -dontwarn okio.**
 
 ######## Fix: Unable to compute hash for classes.jar
@@ -145,3 +147,9 @@
 -keepclassmembers interface com.j256.**
 -keep class com.om.snipit.models.**
 -keepclassmembers class com.om.snipit.models.** { *; } 
+
+######## RxJava
+
+-keep class rx.** { * ; }
+
+-dontwarn rx.internal.util.unsafe.*

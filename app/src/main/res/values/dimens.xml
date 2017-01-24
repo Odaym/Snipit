@@ -71,11 +71,4 @@
 
     <!-- VIEW SNIPPET ACTIVITY -->
     <dimen name="ocr_scan_result_layout_padding_sides">10dp</dimen>
-
-    <!-- SNIPPETS STREAM ACTIVITY -->
-    <dimen name="list_item_snippet_stream_height">420dp</dimen>
-    <dimen name="list_item_snippet_stream_thumb_height">300dp</dimen>
-    <dimen name="list_snippets_stream_padding_bottom">5dp</dimen>
-    <dimen name="snippet_stream_list_item_snippet_name_width">200dp</dimen>
-    <dimen name="shared_label_font_size">12dp</dimen>
 </resources>

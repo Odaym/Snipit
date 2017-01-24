@@ -82,7 +82,6 @@ import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import hugo.weaving.DebugLog;
 import me.grantland.widget.AutofitTextView;
 import rx.Observable;
 import rx.Subscriber;
@@ -423,7 +422,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         }
     }
 
-    @DebugLog
     private String constructImageFilename() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp;
@@ -441,12 +439,10 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         return mediaStorageDir.getPath() + File.separator + imageFileName;
     }
 
-    @DebugLog
     private File createImageFile(String imagePath) throws IOException {
         return new File(imagePath);
     }
 
-    @DebugLog
     public void prepareForNotifyDataChanged(int book_id) {
         /**
          * If a specific sorting order exists, follow that order when getting the snippets
@@ -470,7 +466,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
         }
     }
 
-    @DebugLog
     public void handleEmptyOrPopulatedScreen(List<Snippet> snippets) {
         handleEmptyUI(snippets);
 
@@ -847,6 +842,8 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
                 holder.snippetNoteBTN.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.white_bookmark));
             }
 
+//            Log.d("Snippets", snippets.get(position).getImage_path());
+
             holder.snippetName.setText(snippets.get(position).getName());
 
             if (snippets.get(position).getPage_number() == Constants.NO_SNIPPET_PAGE_NUMBER)
@@ -1000,7 +997,6 @@ public class Snippets_Activity extends Base_Activity implements SearchView.OnQue
             return parentView;
         }
 
-        @DebugLog
         public void swap(int from, int to) {
             if (to < snippets.size() && from < snippets.size()) {
                 Collections.swap(snippets, from, to);

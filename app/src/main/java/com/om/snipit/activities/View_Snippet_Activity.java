@@ -589,10 +589,6 @@ public class View_Snippet_Activity extends Base_Activity {
         public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.share_snippet:
-                    Intent shareSnippetIntent = new Intent(getActivity(), Share_Snippet_Activity.class);
-                    shareSnippetIntent.putExtra(Constants.EXTRAS_SNIPPET, snippet);
-                    shareSnippetIntent.putExtra(Constants.EXTRAS_BOOK, book);
-                    startActivity(shareSnippetIntent);
                     break;
             }
 
@@ -628,7 +624,7 @@ public class View_Snippet_Activity extends Base_Activity {
                 snippetPageNumberTV.setVisibility(View.INVISIBLE);
             } else {
                 snippetPageNumberLabelTV.setText(getString(R.string.page));
-                snippetPageNumberTV.setText(" " + String.valueOf(snippet.getPage_number()));
+                snippetPageNumberTV.setText(String.valueOf(snippet.getPage_number()));
             }
 
             snippetDateAddedTV.setText(snippet.getDate_added());

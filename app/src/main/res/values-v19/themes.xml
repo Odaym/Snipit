@@ -19,8 +19,6 @@
 
     <style name="Snippets_Activity_Theme" parent="AppTheme" />
 
-    <style name="Snippets_Gallery_Activity_Theme" parent="AppTheme" />
-
     <style name="Settings_Activity_Theme" parent="AppTheme" />
 
     <style name="Create_Snippet_Activity" parent="AppTheme" />

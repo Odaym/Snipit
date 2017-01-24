@@ -11,17 +11,22 @@
         "client_id": "android:com.om.snipit",
         "client_type": 1,
         "android_client_info": {
-          "package_name": "com.om.snipit"
+          "package_name": "com.om.snipit",
+          "certificate_hash": []
         }
       },
       "oauth_client": [
         {
-          "client_id": "1044663333283-0h7eafk7oigger15g3pilefcviqnhqui.apps.googleusercontent.com",
+          "client_id": "1044663333283-oqd8p21j2tpdii7qk3d4k5blq7rvckge.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.om.snipit",
-            "certificate_hash": "1d882a35b4b097c9b56ef8f2a1349aa4674d22f0"
+            "certificate_hash": "72E17061A00A3CF3BD8F8090632DCFE109897BA7"
           }
+        },
+        {
+          "client_id": "1044663333283-8it5j3givvvnt76fbpp8vgqlquotp6r1.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [],
