@@ -2,82 +2,87 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:validator="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
 
-    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/toolbar"
+  <include
+      layout="@layout/toolbar"
+      android:id="@+id/toolbarLayout"
+      />
+
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_below="@+id/toolbarLayout"
+      android:paddingBottom="@dimen/activity_vertical_margin"
+      android:paddingLeft="@dimen/activity_horizontal_margin"
+      android:paddingRight="@dimen/activity_horizontal_margin"
+      android:paddingTop="@dimen/activity_horizontal_margin"
+      >
+
+    <com.wrapp.floatlabelededittext.FloatLabeledEditText
+        android:id="@+id/nameETFloating"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="@style/ToolBarStyle_Global"
-        app:navigationIcon="?attr/homeAsUpIndicator" />
+        >
 
-    <RelativeLayout
+      <com.andreabaccega.widget.FormEditText
+          android:id="@+id/nameET"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:hint="@string/snippet_name"
+          android:inputType="textCapWords"
+          android:singleLine="true"
+          android:textColor="@android:color/black"
+          android:textColorHint="@color/edittext_hint_color"
+          android:textCursorDrawable="@null"
+          validator:emptyErrorString="@string/empty_snippet_name_error"
+          />
+
+    </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+
+    <com.wrapp.floatlabelededittext.FloatLabeledEditText
+        android:id="@+id/pageNumberETFloating"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/nameETFloating"
+        >
+
+      <com.andreabaccega.widget.FormEditText
+          android:id="@+id/pageNumberET"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:hint="@string/snippet_page"
+          android:inputType="numberSigned"
+          android:singleLine="true"
+          android:textColor="@android:color/black"
+          android:textColorHint="@color/edittext_hint_color"
+          android:textCursorDrawable="@null"
+          />
+    </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+
+    <ImageView
+        android:id="@+id/snippetIMG"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/toolbar"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_horizontal_margin">
+        android:layout_below="@+id/pageNumberETFloating"
+        android:layout_marginTop="20dp"
+        />
+  </RelativeLayout>
 
-        <com.wrapp.floatlabelededittext.FloatLabeledEditText
-            android:id="@+id/nameETFloating"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.andreabaccega.widget.FormEditText
-                android:id="@+id/nameET"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/snippet_name"
-                android:inputType="textCapWords"
-                android:singleLine="true"
-                android:textColor="@android:color/black"
-                android:textColorHint="@color/edittext_hint_color"
-                android:textCursorDrawable="@null"
-                validator:emptyErrorString="@string/empty_snippet_name_error" />
-
-        </com.wrapp.floatlabelededittext.FloatLabeledEditText>
-
-        <com.wrapp.floatlabelededittext.FloatLabeledEditText
-            android:id="@+id/pageNumberETFloating"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/nameETFloating">
-
-            <com.andreabaccega.widget.FormEditText
-                android:id="@+id/pageNumberET"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/snippet_page"
-                android:inputType="numberSigned"
-                android:singleLine="true"
-                android:textColor="@android:color/black"
-                android:textColorHint="@color/edittext_hint_color"
-                android:textCursorDrawable="@null" />
-        </com.wrapp.floatlabelededittext.FloatLabeledEditText>
-
-        <ImageView
-            android:id="@+id/snippetIMG"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/pageNumberETFloating"
-            android:layout_marginTop="20dp" />
-    </RelativeLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/doneBTN"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_margin="@dimen/fab_buttons_margins"
-        android:src="@drawable/ic_done_black"
-        app:backgroundTint="@color/white"
-        app:borderWidth="0dp"
-        app:elevation="6dp"
-        app:fabSize="normal" />
+  <android.support.design.widget.FloatingActionButton
+      android:id="@+id/doneBTN"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:layout_margin="@dimen/fab_buttons_margins"
+      android:src="@drawable/ic_done_black"
+      app:backgroundTint="@color/white"
+      app:borderWidth="0dp"
+      app:elevation="6dp"
+      app:fabSize="normal"
+      />
 
 </RelativeLayout>

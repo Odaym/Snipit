@@ -1,86 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="ocrLanguagesArray">
-        <item>English</item>
-        <item>Arabic</item>
-        <item>Albanian</item>
-        <item>Armenian (Eastern)</item>
-        <item>Armenian (Grabar)</item>
-        <item>Armenian (Western)</item>
-        <item>Azerbaijani (Cyrillic)</item>
-        <item>Azerbaijani (Latin)</item>
-        <item>Belarussian</item>
-        <item>Bulgarian</item>
-        <item>Catalan</item>
-        <item>Chechen</item>
-        <item>Chinese Simplified</item>
-        <item>Chinese Traditional</item>
-        <item>Corsican</item>
-        <item>Croatian</item>
-        <item>Czech</item>
-        <item>Danish</item>
-        <item>Dutch (Netherlands)</item>
-        <item>Dutch (Belgium)</item>
-        <item>Eskimo (Cyrillic)</item>
-        <item>Eskimo (Latin)</item>
-        <item>Estonian</item>
-        <item>Finnish</item>
-        <item>French</item>
-        <item>Ganda</item>
-        <item>German</item>
-        <item>German (New spelling)</item>
-        <item>German (Luxembourg)</item>
-        <item>Greek</item>
-        <item>Hawaiian</item>
-        <item>Hebrew</item>
-        <item>Hungarian</item>
-        <item>Icelandic</item>
-        <item>Indonesian</item>
-        <item>Irish</item>
-        <item>Italian</item>
-        <item>Japanese</item>
-        <item>Kazakh</item>
-        <item>Kongo</item>
-        <item>Korean</item>
-        <item>Korean (Hangul)</item>
-        <item>Koryak</item>
-        <item>Kurdish</item>
-        <item>Lak</item>
-        <item>Latin</item>
-        <item>Latvian</item>
-        <item>Lithuanian</item>
-        <item>Macedonian</item>
-        <item>Malay (Malaysian)</item>
-        <item>Mongol</item>
-        <item>Nahuatl</item>
-        <item>Norwegian (Bokmal)</item>
-        <item>Norwegian (Nynorsk)</item>
-        <item>Old English</item>
-        <item>Old French</item>
-        <item>Old German</item>
-        <item>Old Italian</item>
-        <item>Old Slavonic</item>
-        <item>Old Spanish</item>
-        <item>Polish</item>
-        <item>Portuguese (Brazil)</item>
-        <item>Portuguese (Portugal)</item>
-        <item>Romanian</item>
-        <item>Romanian (Moldavia)</item>
-        <item>Russian (Old Spelling)</item>
-        <item>Russian</item>
-        <item>Samoan</item>
-        <item>Serbian (Cyrillic)</item>
-        <item>Serbian (Latin)</item>
-        <item>Slovenian</item>
-        <item>Somali</item>
-        <item>Spanish</item>
-        <item>Swedish</item>
-        <item>Thai</item>
-        <item>Turkish</item>
-        <item>Ukrainian</item>
-        <item>Uzbek (Cyrillic)</item>
-        <item>Uzbek (Latin)</item>
-        <item>Vietnamese</item>
-        <item>Yiddish</item>
-    </string-array>
+  <string-array name="ocrLanguagesArray">
+    <item>English</item>
+    <item>Arabic</item>
+    <item>Albanian</item>
+    <item>Armenian (Eastern)</item>
+    <item>Armenian (Grabar)</item>
+    <item>Armenian (Western)</item>
+    <item>Azerbaijani (Cyrillic)</item>
+    <item>Azerbaijani (Latin)</item>
+    <item>Belarussian</item>
+    <item>Bulgarian</item>
+    <item>Catalan</item>
+    <item>Chechen</item>
+    <item>Chinese Simplified</item>
+    <item>Chinese Traditional</item>
+    <item>Corsican</item>
+    <item>Croatian</item>
+    <item>Czech</item>
+    <item>Danish</item>
+    <item>Dutch (Netherlands)</item>
+    <item>Dutch (Belgium)</item>
+    <item>Eskimo (Cyrillic)</item>
+    <item>Eskimo (Latin)</item>
+    <item>Estonian</item>
+    <item>Finnish</item>
+    <item>French</item>
+    <item>Ganda</item>
+    <item>German</item>
+    <item>German (New spelling)</item>
+    <item>German (Luxembourg)</item>
+    <item>Greek</item>
+    <item>Hawaiian</item>
+    <item>Hebrew</item>
+    <item>Hungarian</item>
+    <item>Icelandic</item>
+    <item>Indonesian</item>
+    <item>Irish</item>
+    <item>Italian</item>
+    <item>Japanese</item>
+    <item>Kazakh</item>
+    <item>Kongo</item>
+    <item>Korean</item>
+    <item>Korean (Hangul)</item>
+    <item>Koryak</item>
+    <item>Kurdish</item>
+    <item>Lak</item>
+    <item>Latin</item>
+    <item>Latvian</item>
+    <item>Lithuanian</item>
+    <item>Macedonian</item>
+    <item>Malay (Malaysian)</item>
+    <item>Mongol</item>
+    <item>Nahuatl</item>
+    <item>Norwegian (Bokmal)</item>
+    <item>Norwegian (Nynorsk)</item>
+    <item>Old English</item>
+    <item>Old French</item>
+    <item>Old German</item>
+    <item>Old Italian</item>
+    <item>Old Slavonic</item>
+    <item>Old Spanish</item>
+    <item>Polish</item>
+    <item>Portuguese (Brazil)</item>
+    <item>Portuguese (Portugal)</item>
+    <item>Romanian</item>
+    <item>Romanian (Moldavia)</item>
+    <item>Russian (Old Spelling)</item>
+    <item>Russian</item>
+    <item>Samoan</item>
+    <item>Serbian (Cyrillic)</item>
+    <item>Serbian (Latin)</item>
+    <item>Slovenian</item>
+    <item>Somali</item>
+    <item>Spanish</item>
+    <item>Swedish</item>
+    <item>Thai</item>
+    <item>Turkish</item>
+    <item>Ukrainian</item>
+    <item>Uzbek (Cyrillic)</item>
+    <item>Uzbek (Latin)</item>
+    <item>Vietnamese</item>
+    <item>Yiddish</item>
+  </string-array>
 </resources>

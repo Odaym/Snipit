@@ -2,94 +2,98 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/main_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/light_gray">
+  <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/main_content"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:background="@color/light_gray"
+      >
 
-        <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/green"
-            android:minHeight="?attr/actionBarSize"
-            android:paddingTop="@dimen/toolbar_top_padding"
-            android:theme="@style/ToolBarStyle_Global" />
+    <include
+        layout="@layout/toolbar"
+        android:id="@+id/toolbarLayout"
+        />
 
-        <com.om.snipit.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/booksList"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/toolbar"
-            android:background="@color/light_gray"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="@dimen/listview_padding_between"
-            android:drawSelectorOnTop="false"
-            android:listSelector="@android:color/transparent"
-            android:paddingBottom="@dimen/listview_padding_between"
-            android:paddingLeft="@dimen/listview_padding_left_right"
-            android:paddingRight="@dimen/listview_padding_left_right"
-            android:paddingTop="@dimen/listview_padding_between"
-            android:scrollbars="none"
-            dslv:drag_scroll_start="0.11"
-            dslv:drag_start_mode="onLongPress"
-            dslv:float_alpha="0.6"
-            dslv:float_background_color="@color/light_gray"
-            dslv:max_drag_scroll_speed="0.9"
-            dslv:slide_shuffle_speed="0.2" />
+    <com.om.snipit.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/booksList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbarLayout"
+        android:background="@color/light_gray"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="@dimen/listview_padding_between"
+        android:drawSelectorOnTop="false"
+        android:listSelector="@android:color/transparent"
+        android:paddingBottom="@dimen/listview_padding_between"
+        android:paddingLeft="@dimen/listview_padding_left_right"
+        android:paddingRight="@dimen/listview_padding_left_right"
+        android:paddingTop="@dimen/listview_padding_between"
+        android:scrollbars="none"
+        dslv:drag_scroll_start="0.11"
+        dslv:drag_start_mode="onLongPress"
+        dslv:float_alpha="0.6"
+        dslv:float_background_color="@color/light_gray"
+        dslv:max_drag_scroll_speed="0.9"
+        dslv:slide_shuffle_speed="0.2"
+        />
 
-        <RelativeLayout
-            android:id="@+id/emptyListLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:alpha="0.5">
+    <RelativeLayout
+        android:id="@+id/emptyListLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:alpha="0.5"
+        >
 
-            <ImageView
-                android:id="@+id/bookIMG"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_centerInParent="true"
-                android:src="@drawable/book_outline" />
+      <ImageView
+          android:id="@+id/bookIMG"
+          android:layout_width="150dp"
+          android:layout_height="150dp"
+          android:layout_centerInParent="true"
+          android:src="@drawable/book_outline"
+          />
 
-            <me.grantland.widget.AutofitTextView
-                android:id="@+id/emptyLayoutMessageTV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/bookIMG"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/padding_books_activity_hint_above_image"
-                android:text="@string/empty_books_layout_hint"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        </RelativeLayout>
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/createNewBookBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="@dimen/fab_buttons_margins"
-            android:src="@drawable/ic_add_white"
-            app:backgroundTint="@color/green"
-            app:borderWidth="0dp"
-            app:elevation="6dp"
-            app:fabSize="normal" />
+      <me.grantland.widget.AutofitTextView
+          android:id="@+id/emptyLayoutMessageTV"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_below="@+id/bookIMG"
+          android:layout_centerHorizontal="true"
+          android:layout_marginTop="@dimen/padding_books_activity_hint_above_image"
+          android:text="@string/empty_books_layout_hint"
+          android:textAppearance="?android:attr/textAppearanceMedium"
+          />
 
     </RelativeLayout>
 
-    <android.support.design.widget.NavigationView
-        android:id="@+id/navDrawer"
-        android:layout_width="250dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="@drawable/navdrawer_background_repeat"
-        android:fitsSystemWindows="true"
-        app:menu="@menu/navigation_drawer" />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/createNewBookBTN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/fab_buttons_margins"
+        android:src="@drawable/ic_add_white"
+        app:backgroundTint="@color/green"
+        app:borderWidth="0dp"
+        app:elevation="6dp"
+        app:fabSize="normal"
+        />
+
+  </RelativeLayout>
+
+  <android.support.design.widget.NavigationView
+      android:id="@+id/navDrawer"
+      android:layout_width="250dp"
+      android:layout_height="match_parent"
+      android:layout_gravity="start"
+      android:background="@drawable/navdrawer_background_repeat"
+      android:fitsSystemWindows="true"
+      app:menu="@menu/navigation_drawer"
+      />
 
 </android.support.v4.widget.DrawerLayout>

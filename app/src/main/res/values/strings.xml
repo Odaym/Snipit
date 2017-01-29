@@ -1,171 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="banner_ad_unit_id_testing">ca-app-pub-3940256099942544/6300978111</string>
+  <string name="banner_ad_unit_id_testing">ca-app-pub-3940256099942544/6300978111</string>
 
-    <string name="banner_ad_unit_id_books">ca-app-pub-7047539644799809/6004168294</string>
-    <string name="banner_ad_unit_id_snippets">ca-app-pub-7047539644799809/8957634697</string>
-    <string name="banner_ad_unit_id_searchresults">ca-app-pub-7047539644799809/6418663895</string>
-    <string name="banner_ad_unit_id_opensource_libs">ca-app-pub-7047539644799809/2417489494</string>
+  <string name="banner_ad_unit_id_books">ca-app-pub-7047539644799809/6004168294</string>
+  <string name="banner_ad_unit_id_snippets">ca-app-pub-7047539644799809/8957634697</string>
+  <string name="banner_ad_unit_id_searchresults">ca-app-pub-7047539644799809/6418663895</string>
+  <string name="banner_ad_unit_id_opensource_libs">ca-app-pub-7047539644799809/2417489494</string>
 
-    <string name="app_name">Snipit</string>
-    <string name="app_tagline">Digitize documents and textbooks</string>
-    <string name="app_version">2.3.0</string>
-    <string name="cancel">Cancel</string>
-    <string name="OK">OK</string>
-    <string name="SAVE">SAVE</string>
-    <string name="about">About</string>
-    <string name="settings">Settings</string>
-    <string name="share">Share</string>
-    <string name="delete">Delete</string>
-    <string name="edit">Edit</string>
-    <string name="undo_deletion_title">UNDO</string>
-    <string name="request_permission">REQUEST</string>
-    <string name="action_needs_internet">This action needs an Internet connection</string>
+  <string name="app_name">Snipit</string>
+  <string name="app_tagline">Digitize documents and textbooks</string>
+  <string name="app_version">2.3.0</string>
+  <string name="cancel">Cancel</string>
+  <string name="OK">OK</string>
+  <string name="SAVE">SAVE</string>
+  <string name="about">About</string>
+  <string name="settings">Settings</string>
+  <string name="share">Share</string>
+  <string name="delete">Delete</string>
+  <string name="edit">Edit</string>
+  <string name="undo_deletion_title">UNDO</string>
+  <string name="request_permission">REQUEST</string>
+  <string name="action_needs_internet">This action needs an Internet connection</string>
 
-    <!-- LOGIN ACTIVITY-->
-    <string name="logging_in_dialog_message">Logging in…</string>
+  <!-- LOGIN ACTIVITY-->
+  <string name="logging_in_dialog_message">Logging in…</string>
 
-    <!-- SHARING -->
-    <string name="sharing_message">I used Snipit to take this, have a look!</string>
+  <!-- SHARING -->
+  <string name="sharing_message">I used Snipit to take this, have a look!</string>
 
-    <!-- NAVDRAWER -->
-    <string name="navdrawer_snippets_global_stream">Global Stream</string>
-    <string name="navdrawer_settings_item">Settings</string>
-    <string name="navdrawer_sendfeedback">Send feedback</string>
-    <string name="navdrawer_sendfeedback_button_title">SEND</string>
-    <string name="navdrawer_sendfeedback_alert_hint_tell_us_what_you_think">Don\'t hold back!</string>
-    <string name="navdrawer_sendfeedback_alert_title">Compose Feedback</string>
-    <string name="navdrawer_sendfeedback_alert_summary">We will respond via email to the feedback you provide. You can also send your feedback to:</string>
-    <string name="navigation_drawer_open"></string>
-    <string name="navigation_drawer_closed"></string>
+  <!-- NAVDRAWER -->
+  <string name="navdrawer_snippets_global_stream">Global Stream</string>
+  <string name="navdrawer_settings_item">Settings</string>
+  <string name="navdrawer_sendfeedback">Send feedback</string>
+  <string name="navdrawer_sendfeedback_button_title">SEND</string>
+  <string name="navdrawer_sendfeedback_alert_hint_tell_us_what_you_think">Don\'t hold back!</string>
+  <string name="navdrawer_sendfeedback_alert_title">Compose Feedback</string>
+  <string name="navdrawer_sendfeedback_alert_summary">We will respond via email to the feedback you provide. You can also send your feedback to:</string>
+  <string name="navigation_drawer_open"></string>
+  <string name="navigation_drawer_closed"></string>
 
-    <!-- PREFERENCE ACTIVITY-->
-    <string name="pref_key_sign_out_title">Sign Out</string>
-    <string name="pref_about_section_title">About</string>
-    <string name="pref_open_source_libraries_title">Open Source Libraries</string>
-    <string name="pref_rate_google_play">Rate Snipit on Google Play</string>
-    <string name="pref_rate_google_play_summary">Consider writing a review, it really helps!</string>
-    <string name="empty_feedback_field_error">This can\'t be empty</string>
-    <string name="loading_sending_feedback">Sending your feedback</string>
-    <string name="feedback_sent_alert">Feedback sent!</string>
+  <!-- PREFERENCE ACTIVITY-->
+  <string name="pref_key_sign_out_title">Sign Out</string>
+  <string name="pref_about_section_title">About</string>
+  <string name="pref_open_source_libraries_title">Open Source Libraries</string>
+  <string name="pref_rate_google_play">Rate Snipit on Google Play</string>
+  <string name="pref_rate_google_play_summary">Consider writing a review, it really helps!</string>
+  <string name="empty_feedback_field_error">This can\'t be empty</string>
+  <string name="loading_sending_feedback">Sending your feedback</string>
+  <string name="feedback_sent_alert">Feedback sent!</string>
 
-    <!-- BOOKS_ACTIVITY -->
-    <string name="empty_books_layout_hint">Books you add appear here</string>
-    <string name="delete_book_confirmation_message">Deleted</string>
-    <string name="dropbox_insufficient_storage_error">It seems that you\'ve exceeded your Dropbox storage limit. Please free up some space and try again</string>
+  <!-- BOOKS_ACTIVITY -->
+  <string name="empty_books_layout_hint">Books you add appear here</string>
+  <string name="delete_book_confirmation_message">Deleted</string>
+  <string name="dropbox_insufficient_storage_error">It seems that you\'ve exceeded your Dropbox storage limit. Please free up some space and try again</string>
 
-    <!-- SNIPPETS_ACTIVITY -->
-    <string name="edit_snippet_option">Edit</string>
-    <string name="remove_snippet_option">Remove</string>
-    <string name="snippet_views_label">Views:</string>
-    <string name="snippet_page_number_label">page:</string>
-    <string name="sort_option_title">Sort</string>
-    <string name="search_icon_title">Search</string>
-    <string name="sort_action_by_page_number">Sort by Page</string>
-    <string name="sort_action_by_name">Sort by Name</string>
-    <string name="sort_action_by_date">Sort by Views</string>
-    <string name="sort_order_override">Sorting preference override. Restoring previous order.</string>
-    <string name="empty_snippets_layout_hint">Snippets you add appear here</string>
-    <string name="delete_snippet_confirmation_message">Deleted</string>
-    <string name="add_snippet_camera">Capture</string>
-    <string name="add_snippet_voice">Record</string>
-    <string name="add_snippet_from_gallery">Browse</string>
+  <!-- SNIPPETS_ACTIVITY -->
+  <string name="edit_snippet_option">Edit</string>
+  <string name="remove_snippet_option">Remove</string>
+  <string name="snippet_views_label">Views:</string>
+  <string name="snippet_page_number_label">page:</string>
+  <string name="sort_option_title">Sort</string>
+  <string name="search_icon_title">Search</string>
+  <string name="sort_action_by_page_number">Sort by Page</string>
+  <string name="sort_action_by_name">Sort by Name</string>
+  <string name="sort_action_by_date">Sort by Views</string>
+  <string name="sort_order_override">Sorting preference override. Restoring previous order.</string>
+  <string name="empty_snippets_layout_hint">Snippets you add appear here</string>
+  <string name="delete_snippet_confirmation_message">Deleted</string>
+  <string name="add_snippet_camera">Capture</string>
+  <string name="add_snippet_voice">Record</string>
+  <string name="add_snippet_from_gallery">Browse</string>
 
-    <!-- CREATE_BOOKMARK_ACTIVITY -->
-    <string name="create_snippet_activity_title">New Snippet</string>
-    <string name="edit_snippet_activity_title">Edit Snippet</string>
-    <string name="snippet_name">Snippet Name</string>
-    <string name="snippet_page">Page</string>
-    <string name="page_number_error">Invalid page number</string>
-    <string name="empty_snippet_name_error">Give it a good name</string>
+  <!-- CREATE_BOOKMARK_ACTIVITY -->
+  <string name="create_snippet_activity_title">New Snippet</string>
+  <string name="edit_snippet_activity_title">Edit Snippet</string>
+  <string name="snippet_name">Snippet Name</string>
+  <string name="snippet_page">Page</string>
+  <string name="page_number_error">Invalid page number</string>
+  <string name="empty_snippet_name_error">Give it a good name</string>
 
-    <!-- CREATE_BOOK_ACTIVITY -->
-    <string name="create_book_activity_title">New Book</string>
-    <string name="edit_book_activity_title">Edit Book</string>
-    <string name="book_title">Book Title</string>
-    <string name="book_author">Author</string>
-    <string name="book_pages_count">Pages</string>
-    <string name="done_and_create_book">Done</string>
-    <string name="loading_book_info_title">Hang on</string>
-    <string name="loading_book_info_msg">Gathering book data…</string>
-    <string name="finding_book_image">Finding book cover art</string>
-    <string name="scan_result_error">Scan result was not a book</string>
-    <string name="book_not_found">Couldn\'t find that book</string>
-    <string name="book_image_not_found_error">Couldn\'t find book image</string>
-    <string name="book_author_not_found_error">Couldn\'t find book author</string>
-    <string name="book_title_not_found_error">Couldn\'t find book title</string>
-    <string name="no_scan_data">No barcode captured</string>
-    <string name="empty_book_title_error">Book title required</string>
-    <string name="empty_author_name_error">Author name required</string>
-    <!--<string name="pages_count_error_label">Pages count</string>-->
-    <!--<string name="pages_count_page_reached_difference_error">Pages count cannot be smaller than page reached!</string>-->
-    <string name="permission_capture_rationale">Access to the camera is needed</string>
-    <string name="permission_storage_rationale">Access to the storage is needed</string>
-    <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
-    <string name="no_camera_permission">To scan barcodes, Snipit needs permission to use the camera</string>
+  <!-- CREATE_BOOK_ACTIVITY -->
+  <string name="create_book_activity_title">New Book</string>
+  <string name="edit_book_activity_title">Edit Book</string>
+  <string name="book_title">Book Title</string>
+  <string name="book_author">Author</string>
+  <string name="book_pages_count">Pages</string>
+  <string name="done_and_create_book">Done</string>
+  <string name="loading_book_info_title">Hang on</string>
+  <string name="loading_book_info_msg">Gathering book data…</string>
+  <string name="finding_book_image">Finding book cover art</string>
+  <string name="scan_result_error">Scan result was not a book</string>
+  <string name="book_not_found">Couldn\'t find that book</string>
+  <string name="book_image_not_found_error">Couldn\'t find book image</string>
+  <string name="book_author_not_found_error">Couldn\'t find book author</string>
+  <string name="book_title_not_found_error">Couldn\'t find book title</string>
+  <string name="no_scan_data">No barcode captured</string>
+  <string name="empty_book_title_error">Book title required</string>
+  <string name="empty_author_name_error">Author name required</string>
+  <!--<string name="pages_count_error_label">Pages count</string>-->
+  <!--<string name="pages_count_page_reached_difference_error">Pages count cannot be smaller than page reached!</string>-->
+  <string name="permission_capture_rationale">Access to the camera is needed</string>
+  <string name="permission_storage_rationale">Access to the storage is needed</string>
+  <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
+  <string name="no_camera_permission">To scan barcodes, Snipit needs permission to use the camera</string>
 
-    <!-- BARCODE_CAPTURE_ACTIVITY-->
-    <string name="barcode_capture_activity">Barcode Capture</string>
-    <string name="capture_barcode_instructions">Tap to capture. Pinch/Stretch to zoom.</string>
-    <!--<string name="camera_service_failed_alert_title">Camera Failed</string>-->
-    <!--<string name="camera_service_failed_alert_message">This is one of those rare cases where the Android Camera Service has failed, try launching the normal Camera app to confirm this</string>-->
-    <string name="no_barcode_detected_here">No barcode detected here</string>
+  <!-- BARCODE_CAPTURE_ACTIVITY-->
+  <string name="barcode_capture_activity">Barcode Capture</string>
+  <string name="capture_barcode_instructions">Tap to capture. Pinch/Stretch to zoom.</string>
+  <!--<string name="camera_service_failed_alert_title">Camera Failed</string>-->
+  <!--<string name="camera_service_failed_alert_message">This is one of those rare cases where the Android Camera Service has failed, try launching the normal Camera app to confirm this</string>-->
+  <string name="no_barcode_detected_here">No barcode detected here</string>
 
-    <!-- VIEW_SNIPPET_ACTIVITY -->
-    <string name="rotate_left">Rotate Left</string>
-    <string name="rotate_right">Rotate Right</string>
-    <string name="page">page:</string>
-    <string name="share_snippet">Share!</string>
-    <string name="set_brush_thickness">Set brush thickness</string>
-    <string name="takeNote">Take a note</string>
-    <string name="writeSomething">Write something here…</string>
-    <string name="run_ocr">Run OCR</string>
-    <string name="view_ocr_results">View OCR Result</string>
-    <string name="clear_ocr_result">Clear OCR Result</string>
-    <string name="ocr_scan_result">OCR Scan Result</string>
-    <string name="ocr_scan_error">Something went wrong while trying to scan your snippet, it\'s probably nothing but please try that again</string>
-    <string name="ocr_scan_empty">OCR scan came up with nothing. Make sure to take the picture in a good light where the text is clearly visible and try again</string>
-    <string name="ocr_first_run_message">Setting you up for first run…</string>
-    <string name="ocr_setup_finished">All set!</string>
-    <string name="ocr_uploading_snippet">Uploading snippet for processing…</string>
-    <string name="ocr_processing">Processing snippet…</string>
-    <string name="ocr_almost_done">Almost done…</string>
-    <string name="ocr_downloading_result">Downloading result…</string>
-    <string name="ocr_recognition_languages_alert_title">OCR Recognition languages</string>
-    <string name="ocr_not_available_for_text_to_speech">This snippet has to be scanned for OCR text before it can be read out loud, would you like to do that now?</string>
-    <string name="waiting_text_to_speech_loader">Waiting for Android Text To Speech…</string>
-    <string name="tts_language_not_available_downloading_now">Your current locale language is not supported natively. Allow Android to download the required language files now?</string>
-    <string name="text_to_speech_failed">Sorry! Text To Speech failed…</string>
+  <!-- VIEW_SNIPPET_ACTIVITY -->
+  <string name="rotate_left">Rotate Left</string>
+  <string name="rotate_right">Rotate Right</string>
+  <string name="page">page:</string>
+  <string name="share_snippet">Share!</string>
+  <string name="set_brush_thickness">Set brush thickness</string>
+  <string name="takeNote">Take a note</string>
+  <string name="writeSomething">Write something here…</string>
+  <string name="run_ocr">Run OCR</string>
+  <string name="view_ocr_results">View OCR Result</string>
+  <string name="clear_ocr_result">Clear OCR Result</string>
+  <string name="ocr_scan_result">OCR Scan Result</string>
+  <string name="ocr_scan_error">Something went wrong while trying to scan your snippet, it\'s probably nothing but please try that again</string>
+  <string name="ocr_scan_empty">OCR scan came up with nothing. Make sure to take the picture in a good light where the text is clearly visible and try again</string>
+  <string name="ocr_first_run_message">Setting you up for first run…</string>
+  <string name="ocr_setup_finished">All set!</string>
+  <string name="ocr_uploading_snippet">Uploading snippet for processing…</string>
+  <string name="ocr_processing">Processing snippet…</string>
+  <string name="ocr_almost_done">Almost done…</string>
+  <string name="ocr_downloading_result">Downloading result…</string>
+  <string name="ocr_recognition_languages_alert_title">OCR Recognition languages</string>
+  <string name="ocr_not_available_for_text_to_speech">This snippet has to be scanned for OCR text before it can be read out loud, would you like to do that now?</string>
+  <string name="waiting_text_to_speech_loader">Waiting for Android Text To Speech…</string>
+  <string name="tts_language_not_available_downloading_now">Your current locale language is not supported natively. Allow Android to download the required language files now?</string>
+  <string name="text_to_speech_failed">Sorry! Text To Speech failed…</string>
 
-    <!-- SEARCH_RESULTS_ACTIVITY -->
-    <string name="search_results_activity_title">Search Results</string>
-    <string name="search_not_found">Couldn\'t find anything for</string>
+  <!-- SEARCH_RESULTS_ACTIVITY -->
+  <string name="search_results_activity_title">Search Results</string>
+  <string name="search_not_found">Couldn\'t find anything for</string>
 
-    <!-- CROP_IMAGE_ACTIVITY -->
-    <string name="crop_image_activity_title">Crop Snippet</string>
-    <string name="seems_out_of_memory">Please try that again with a lower resolution setting for the camera.</string>
-    <string name="rare_case_scenario">We\'re sorry, that image was not accessible, this should never happen</string>
+  <!-- CROP_IMAGE_ACTIVITY -->
+  <string name="crop_image_activity_title">Crop Snippet</string>
+  <string name="seems_out_of_memory">Please try that again with a lower resolution setting for the camera.</string>
+  <string name="rare_case_scenario">We\'re sorry, that image was not accessible, this should never happen</string>
 
-    <!-- PAINT_BOOKMARK_ACTIVITY -->
-    <string name="paint_snippet_activity_title">Draw and Highlight</string>
-    <string name="fab_action_clear">Clear</string>
-    <string name="fab_action_color">Color</string>
-    <string name="fab_action_undo">Undo</string>
-    <string name="fab_action_thickness">Thickness</string>
-    <string name="fab_action_back">Back</string>
-    <string name="menu_action_save">SAVE</string>
-    <string name="alert_dialog_save_action">Save</string>
-    <string name="alert_dialog_save_title">Are you sure?</string>
-    <string name="snippet_updated_successfully">Snippet updated successfully, wonderful!</string>
-    <string name="snippet_failed_update">Couldn\'t update snippet, please try that again!</string>
-    <string name="snippet_update_message">This will permanently overwrite the original snippet</string>
-    <string name="save_painted_snippet_dialog_title">Just a moment</string>
-    <string name="save_painted_snippet_dialog_message">Updating snippet…</string>
+  <!-- PAINT_BOOKMARK_ACTIVITY -->
+  <string name="paint_snippet_activity_title">Draw and Highlight</string>
+  <string name="fab_action_clear">Clear</string>
+  <string name="fab_action_color">Color</string>
+  <string name="fab_action_undo">Undo</string>
+  <string name="fab_action_thickness">Thickness</string>
+  <string name="fab_action_back">Back</string>
+  <string name="menu_action_save">SAVE</string>
+  <string name="alert_dialog_save_action">Save</string>
+  <string name="alert_dialog_save_title">Are you sure?</string>
+  <string name="snippet_updated_successfully">Snippet updated successfully, wonderful!</string>
+  <string name="snippet_failed_update">Couldn\'t update snippet, please try that again!</string>
+  <string name="snippet_update_message">This will permanently overwrite the original snippet</string>
+  <string name="save_painted_snippet_dialog_title">Just a moment</string>
+  <string name="save_painted_snippet_dialog_message">Updating snippet…</string>
 
-    <!-- ABOUT OPEN SOURCE LIBRARIES ACTIVITY -->
-    <string name="about_open_source_libraries_activity_title">Open Source Libraries</string>
-    <string name="introduction_text">Snipit is made with ❤ by <a href="http://odaymaleh.com">Oday Maleh</a>. App intro slides graciously provided by <a href="http://risingsunv1.deviantart.com/">Rami Kobeissi</a>. And when love was not enough, these libraries came to the rescue.</string>
+  <!-- ABOUT OPEN SOURCE LIBRARIES ACTIVITY -->
+  <string name="about_open_source_libraries_activity_title">Open Source Libraries</string>
+  <string name="introduction_text">Snipit is made with ❤ by <a href="http://odaymaleh.com">Oday Maleh</a>. App intro slides graciously provided by <a href="http://risingsunv1.deviantart.com/">Rami Kobeissi</a>. And when love was not enough, these libraries came to the rescue.</string>
 
-    <string name="no_internet_connection">Please check your Internet connection and try again</string>
+  <string name="no_internet_connection">Please check your Internet connection and try again</string>
 </resources>

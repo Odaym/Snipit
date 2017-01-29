@@ -4,93 +4,102 @@
     android:id="@+id/list_item_book"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/listview_items_shape">
+    android:background="@drawable/listview_items_shape"
+    >
 
-    <RelativeLayout
-        android:layout_width="match_parent"
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:paddingBottom="20dp"
+      android:paddingEnd="20dp"
+      android:paddingLeft="20dp"
+      android:paddingRight="20dp"
+      android:paddingStart="20dp"
+      android:paddingTop="25dp"
+      >
+
+    <ImageView
+        android:id="@+id/bookThumbIMG"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="20dp"
+        />
+
+    <me.grantland.widget.AutofitTextView
+        android:id="@+id/bookTitleTV"
+        android:layout_width="@dimen/book_list_item_book_name_width"
         android:layout_height="wrap_content"
-        android:paddingBottom="20dp"
-        android:paddingEnd="20dp"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:paddingStart="20dp"
-        android:paddingTop="25dp">
+        android:layout_toEndOf="@+id/bookThumbIMG"
+        android:layout_toRightOf="@+id/bookThumbIMG"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/book_name_fsize"
+        />
 
-        <ImageView
-            android:id="@+id/bookThumbIMG"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="20dp"
-            android:layout_marginRight="20dp" />
-
-        <me.grantland.widget.AutofitTextView
-            android:id="@+id/bookTitleTV"
-            android:layout_width="@dimen/book_list_item_book_name_width"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@+id/bookThumbIMG"
-            android:layout_toRightOf="@+id/bookThumbIMG"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/book_name_fsize" />
-
-        <me.grantland.widget.AutofitTextView
-            android:id="@+id/bookAuthorTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/bookTitleTV"
-            android:layout_marginTop="5dp"
-            android:layout_toEndOf="@+id/bookThumbIMG"
-            android:layout_toRightOf="@+id/bookThumbIMG"
-            android:ellipsize="end"
-            android:textColor="@color/mokhmal"
-            android:textSize="@dimen/book_author_fsize" />
-    </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/bookActionLayout"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:focusable="false">
-
-        <Button
-            android:id="@+id/bookAction"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/menu_overflow_fade"
-            android:clickable="false"
-            android:focusable="false" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/snippetsNumberTV"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginEnd="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="5dp"
-        android:gravity="center"
-        android:textColor="@color/white"
-        android:textSize="@dimen/number_of_snippets_fsize" />
-
-    <TextView
-        android:id="@+id/bookDateAddedTV"
+    <me.grantland.widget.AutofitTextView
+        android:id="@+id/bookAuthorTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginEnd="5dp"
-        android:layout_marginRight="5dp"
-        android:paddingBottom="5dp"
+        android:layout_below="@+id/bookTitleTV"
+        android:layout_marginTop="5dp"
+        android:layout_toEndOf="@+id/bookThumbIMG"
+        android:layout_toRightOf="@+id/bookThumbIMG"
+        android:ellipsize="end"
         android:textColor="@color/mokhmal"
-        android:textSize="@dimen/book_date_added_fsize" />
+        android:textSize="@dimen/book_author_fsize"
+        />
+  </RelativeLayout>
+
+  <LinearLayout
+      android:id="@+id/bookActionLayout"
+      android:layout_width="35dp"
+      android:layout_height="35dp"
+      android:focusable="false"
+      >
+
+    <Button
+        android:id="@+id/bookAction"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/menu_overflow_fade"
+        android:clickable="false"
+        android:focusable="false"
+        />
+  </LinearLayout>
+
+  <TextView
+      android:id="@+id/snippetsNumberTV"
+      android:layout_width="30dp"
+      android:layout_height="30dp"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:layout_alignParentTop="true"
+      android:layout_marginEnd="5dp"
+      android:layout_marginRight="5dp"
+      android:layout_marginTop="5dp"
+      android:gravity="center"
+      android:textColor="@color/white"
+      android:textSize="@dimen/number_of_snippets_fsize"
+      />
+
+  <TextView
+      android:id="@+id/bookDateAddedTV"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:layout_marginEnd="5dp"
+      android:layout_marginRight="5dp"
+      android:paddingBottom="5dp"
+      android:textColor="@color/mokhmal"
+      android:textSize="@dimen/book_date_added_fsize"
+      />
 
 </RelativeLayout>

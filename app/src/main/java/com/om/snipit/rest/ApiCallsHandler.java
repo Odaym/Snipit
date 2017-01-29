@@ -10,7 +10,8 @@ public class ApiCallsHandler {
   public static void uploadBook(UserObject userObj, String book_title,
       List<SnippetObject> snippetObjs, final Callback<DefaultGetResponse> callback) {
     Call<DefaultGetResponse> apiCall = new RestClient().getApiService()
-        .uploadBook(new JSONBookRequestParent(new UploadBookRequest(userObj, book_title, snippetObjs)));
+        .uploadBook(
+            new JSONBookRequestParent(new UploadBookRequest(userObj, book_title, snippetObjs)));
 
     apiCall.enqueue(new Callback<DefaultGetResponse>() {
       @Override

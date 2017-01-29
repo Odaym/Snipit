@@ -1,27 +1,27 @@
 /**
- * 
+ *
  */
 package com.om.snipit.abbyy_ocr;
 
 /**
  * Barcode recognition settings.
- * 
+ *
  * For all possible parameters see
  * http://ocrsdk.com/documentation/apireference/processBarcodeField/
  */
 public class BarcodeSettings {
 
-	public String asUrlParams() {
-		return "barcodeType=" + barcodeType;
-	}
+  private String barcodeType = "autodetect";
 
-	public String getType() {
-		return barcodeType;
-	}
+  public String asUrlParams() {
+    return "barcodeType=" + barcodeType;
+  }
 
-	public void setType(String newType) {
-		barcodeType = newType;
-	}
+  public String getType() {
+    return barcodeType;
+  }
 
-	private String barcodeType = "autodetect";
+  public void setType(String newType) {
+    barcodeType = newType;
+  }
 }

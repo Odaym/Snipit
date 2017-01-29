@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -14,7 +13,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
@@ -47,8 +45,6 @@ import com.amazonaws.event.ProgressListener;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.andreabaccega.widget.FormEditText;
-import com.j256.ormlite.android.apptools.OpenHelperManager;
-import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.nispok.snackbar.Snackbar;
@@ -57,11 +53,10 @@ import com.nispok.snackbar.listeners.EventListener;
 import com.om.snipit.R;
 import com.om.snipit.classes.CircleTransform;
 import com.om.snipit.classes.Constants;
-import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.GMailSender;
-import com.om.snipit.classes.Helper_Methods;
+import com.om.snipit.classes.Helpers;
 import com.om.snipit.dragsort_listview.DragSortListView;
 import com.om.snipit.models.Book;
 import com.om.snipit.models.Snippet;
@@ -90,7 +85,7 @@ import rx.schedulers.Schedulers;
 
 import static com.om.snipit.classes.Constants.DEBUG_TAG;
 
-public class Books_Activity extends ActionBarActivity {
+public class BooksActivity extends BaseActivity implements BooksActivityView {
 
   @Bind(R.id.booksList) DragSortListView listView;
   @Bind(R.id.emptyListLayout) RelativeLayout emptyListLayout;
@@ -107,15 +102,9 @@ public class Books_Activity extends ActionBarActivity {
 
   private ActionBarDrawerToggle drawerToggle;
 
-  private SharedPreferences prefs;
-
   private Books_Adapter booksAdapter;
   private List<Book> books;
   private Book tempBook;
-
-  private DatabaseHelper databaseHelper = null;
-  private RuntimeExceptionDao<Book, Integer> bookDAO;
-  private RuntimeExceptionDao<Snippet, Integer> snippetDAO;
 
   private QueryBuilder<Book, Integer> bookQueryBuilder;
   private QueryBuilder<Snippet, Integer> snippetQueryBuilder;
@@ -136,6 +125,7 @@ public class Books_Activity extends ActionBarActivity {
       booksAdapter.swap(from, to);
     }
   };
+  private BooksActivityPresenter presenter;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -143,7 +133,7 @@ public class Books_Activity extends ActionBarActivity {
 
     ButterKnife.bind(this);
 
-    prefs = getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
+    setupToolbar(toolbar, null, false, Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS);
 
     navDrawerheaderLayout = navDrawer.inflateHeaderView(R.layout.navigation_drawer_header);
 
@@ -156,13 +146,10 @@ public class Books_Activity extends ActionBarActivity {
 
     EventBus_Singleton.getInstance().register(this);
 
-    Helper_Methods helperMethods = new Helper_Methods(this);
+    presenter = new BooksActivityPresenter(this, null);
 
     Observable.create(new Observable.OnSubscribe<Void>() {
       @Override public void call(Subscriber<? super Void> subscriber) {
-        bookDAO = getHelper().getBookDAO();
-        snippetDAO = getHelper().getSnippetDAO();
-
         bookQueryBuilder = bookDAO.queryBuilder();
         snippetQueryBuilder = snippetDAO.queryBuilder();
 
@@ -173,24 +160,13 @@ public class Books_Activity extends ActionBarActivity {
         subscriber.onNext(null);
         subscriber.onCompleted();
       }
-    })
-        .subscribeOn(Schedulers.newThread())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<Void>() {
-          @Override public void call(Void s) {
-            handleEmptyOrPopulatedScreen();
-          }
-        });
+    }).subscribeOn(Schedulers.newThread())
 
-    setSupportActionBar(toolbar);
-    helperMethods.setUpActionbarColors(this, Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS);
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      toolbar.setElevation(25f);
-    } else {
-      listView.setDrawSelectorOnTop(true);
-      listView.setSelector(R.drawable.abc_list_selector_holo_dark);
-    }
+        .observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Void>() {
+      @Override public void call(Void s) {
+        handleEmptyOrPopulatedScreen();
+      }
+    });
 
     drawerToggle =
         new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open,
@@ -239,14 +215,13 @@ public class Books_Activity extends ActionBarActivity {
           @Override public boolean onNavigationItemSelected(MenuItem menuItem) {
             switch (menuItem.getItemId()) {
               case R.id.navigation_drawer_item_settings:
-                Intent openSettingsIntent =
-                    new Intent(Books_Activity.this, Settings_Activity.class);
+                Intent openSettingsIntent = new Intent(BooksActivity.this, SettingsActivity.class);
                 startActivity(openSettingsIntent);
                 break;
               case R.id.navigation_drawer_item_send_feedback:
-                AlertDialog.Builder alert = new AlertDialog.Builder(Books_Activity.this);
+                AlertDialog.Builder alert = new AlertDialog.Builder(BooksActivity.this);
 
-                LayoutInflater inflater = (LayoutInflater) Books_Activity.this.getSystemService(
+                LayoutInflater inflater = (LayoutInflater) BooksActivity.this.getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
                 View alertComposeFeedback =
                     inflater.inflate(R.layout.alert_send_feedback, null, false);
@@ -254,14 +229,14 @@ public class Books_Activity extends ActionBarActivity {
                 final FormEditText inputFeedbackET =
                     (FormEditText) alertComposeFeedback.findViewById(R.id.feedbackET);
                 inputFeedbackET.setHintTextColor(
-                    Books_Activity.this.getResources().getColor(R.color.edittext_hint_color));
+                    BooksActivity.this.getResources().getColor(R.color.edittext_hint_color));
                 inputFeedbackET.setSelection(inputFeedbackET.getText().length());
 
-                alert.setPositiveButton(Books_Activity.this.getResources()
+                alert.setPositiveButton(BooksActivity.this.getResources()
                         .getString(R.string.navdrawer_sendfeedback_button_title),
                     new DialogInterface.OnClickListener() {
                       public void onClick(DialogInterface dialog, int whichButton) {
-                        if (Helper_Methods.isInternetAvailable(Books_Activity.this)) {
+                        if (Helpers.isInternetAvailable(BooksActivity.this)) {
                           if (inputFeedbackET.testValidity()) {
                             try {
                               new SendFeedbackEmail().execute(inputFeedbackET.getText().toString());
@@ -270,14 +245,14 @@ public class Books_Activity extends ActionBarActivity {
                             }
                           }
                         } else {
-                          Crouton.makeText(Books_Activity.this,
+                          Crouton.makeText(BooksActivity.this,
                               getString(R.string.action_needs_internet), Style.ALERT).show();
                         }
                       }
                     });
 
                 alert.setNegativeButton(
-                    Books_Activity.this.getResources().getString(R.string.cancel),
+                    BooksActivity.this.getResources().getString(R.string.cancel),
                     new DialogInterface.OnClickListener() {
                       public void onClick(DialogInterface dialog, int whichButton) {
                       }
@@ -286,7 +261,7 @@ public class Books_Activity extends ActionBarActivity {
                 inputFeedbackET.postDelayed(new Runnable() {
                   @Override public void run() {
                     InputMethodManager keyboard =
-                        (InputMethodManager) Books_Activity.this.getSystemService(
+                        (InputMethodManager) BooksActivity.this.getSystemService(
                             Context.INPUT_METHOD_SERVICE);
                     keyboard.showSoftInput(inputFeedbackET, 0);
                   }
@@ -299,7 +274,7 @@ public class Books_Activity extends ActionBarActivity {
                     "<a href=\"mailto:snipit.me@gmail.com\">snipit.me@gmail.com</a>"));
                 feedbackSendingSummaryTV.setMovementMethod(LinkMovementMethod.getInstance());
 
-                alert.setTitle(Books_Activity.this.getResources()
+                alert.setTitle(BooksActivity.this.getResources()
                     .getString(R.string.navdrawer_sendfeedback_alert_title));
                 alert.setView(alertComposeFeedback);
                 alert.show();
@@ -315,7 +290,7 @@ public class Books_Activity extends ActionBarActivity {
 
     createNewBookBTN.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
-        Intent openCreateBookActivity = new Intent(Books_Activity.this, Create_Book_Activity.class);
+        Intent openCreateBookActivity = new Intent(BooksActivity.this, CreateBookActivity.class);
         startActivity(openCreateBookActivity);
       }
     });
@@ -323,7 +298,7 @@ public class Books_Activity extends ActionBarActivity {
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
       public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-        Intent openSnippetsForBook = new Intent(Books_Activity.this, Snippets_Activity.class);
+        Intent openSnippetsForBook = new Intent(BooksActivity.this, SnippetsActivity.class);
         Book book = (Book) listView.getItemAtPosition(position);
 
         //Clicking on an adview when there's no Internet connection will cause this condition to be
@@ -334,14 +309,6 @@ public class Books_Activity extends ActionBarActivity {
         }
       }
     });
-  }
-
-  public DatabaseHelper getHelper() {
-    if (databaseHelper == null) {
-      databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
-    }
-
-    return databaseHelper;
   }
 
   public void prepareQueryBuilder() {
@@ -499,7 +466,7 @@ public class Books_Activity extends ActionBarActivity {
               }
             });
 
-    undoDeleteBookSB.show(Books_Activity.this);
+    undoDeleteBookSB.show(BooksActivity.this);
   }
 
   public void finalizeBookDeletion(Book tempBook) {
@@ -510,10 +477,47 @@ public class Books_Activity extends ActionBarActivity {
     itemPendingDeleteDecision = false;
   }
 
+  @Override protected void onPause() {
+    super.onPause();
+
+    if (itemPendingDeleteDecision) {
+
+      finalizeBookDeletion(tempBook);
+
+      if (undoDeleteBookSB.isShowing()) {
+        undoDeleteBookSB.dismiss();
+      }
+    }
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    EventBus_Singleton.getInstance().unregister(this);
+  }
+
+  @Override public void displayBooks(List<Book> bookList) {
+
+  }
+
+  @Override public void displayNoBooks() {
+
+  }
+
+  public static class BooksViewHolder {
+    RelativeLayout list_item_book;
+    TextView bookDateAddedTV;
+    AutofitTextView bookTitleTV;
+    AutofitTextView bookAuthorTV;
+    ImageView bookThumbIMG;
+    TextView snippetsNumberTV;
+    LinearLayout bookActionLayout;
+    boolean needInflate;
+  }
+
   private class SendFeedbackEmail extends AsyncTask<String, Void, Void> {
     @Override protected void onPreExecute() {
       super.onPreExecute();
-      sendEmailFeedbackDialog = ProgressDialog.show(Books_Activity.this,
+      sendEmailFeedbackDialog = ProgressDialog.show(BooksActivity.this,
           getResources().getString(R.string.loading_book_info_title),
           getResources().getString(R.string.loading_sending_feedback), true);
     }
@@ -533,27 +537,9 @@ public class Books_Activity extends ActionBarActivity {
 
     @Override protected void onPostExecute(Void nothing) {
       sendEmailFeedbackDialog.hide();
-      Crouton.makeText(Books_Activity.this, getResources().getString(R.string.feedback_sent_alert),
+      Crouton.makeText(BooksActivity.this, getResources().getString(R.string.feedback_sent_alert),
           Style.CONFIRM).show();
     }
-  }
-
-  @Override protected void onPause() {
-    super.onPause();
-
-    if (itemPendingDeleteDecision) {
-
-      finalizeBookDeletion(tempBook);
-
-      if (undoDeleteBookSB.isShowing()) {
-        undoDeleteBookSB.dismiss();
-      }
-    }
-  }
-
-  @Override protected void onDestroy() {
-    super.onDestroy();
-    EventBus_Singleton.getInstance().unregister(this);
   }
 
   public class Books_Adapter extends BaseAdapter {
@@ -615,7 +601,7 @@ public class Books_Activity extends ActionBarActivity {
       holder.bookAuthorTV.setText(books.get(position).getAuthor());
 
       //            Picasso.with(Books_Activity.this).load(books.get(position).getImagePath()).error(getResources().getDrawable(R.drawable.notfound_1)).into(holder.bookThumbIMG);
-      Picasso.with(Books_Activity.this)
+      Picasso.with(BooksActivity.this)
           .load(books.get(position).getImagePath())
           .into(holder.bookThumbIMG);
 
@@ -678,8 +664,7 @@ public class Books_Activity extends ActionBarActivity {
                       position);
                   break;
                 case R.id.edit:
-                  Intent editBookIntent =
-                      new Intent(Books_Activity.this, Create_Book_Activity.class);
+                  Intent editBookIntent = new Intent(BooksActivity.this, CreateBookActivity.class);
                   editBookIntent.putExtra(Constants.EXTRAS_BOOK, books.get(position));
                   editBookIntent.putExtra(Constants.EDIT_BOOK_PURPOSE_STRING,
                       Constants.EDIT_BOOK_PURPOSE_VALUE);
@@ -739,7 +724,7 @@ public class Books_Activity extends ActionBarActivity {
         totalSnippetsFileSize += file.length();
       }
 
-      uploadingSnippets_AWS = new ProgressDialog(Books_Activity.this);
+      uploadingSnippets_AWS = new ProgressDialog(BooksActivity.this);
       uploadingSnippets_AWS.setMessage("Uploading Book images to AWS");
       uploadingSnippets_AWS.setMax((int) Math.ceil(totalSnippetsFileSize / 1000));
       uploadingSnippets_AWS.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -844,16 +829,5 @@ public class Books_Activity extends ActionBarActivity {
         bookDAO.update(books.get(to));
       }
     }
-  }
-
-  public static class BooksViewHolder {
-    RelativeLayout list_item_book;
-    TextView bookDateAddedTV;
-    AutofitTextView bookTitleTV;
-    AutofitTextView bookAuthorTV;
-    ImageView bookThumbIMG;
-    TextView snippetsNumberTV;
-    LinearLayout bookActionLayout;
-    boolean needInflate;
   }
 }

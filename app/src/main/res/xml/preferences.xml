@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory
-        android:key="pref_key_about"
-        android:title="@string/pref_about_section_title">
-        <Preference
-            android:summary="@string/pref_rate_google_play_summary"
-            android:title="@string/pref_rate_google_play">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="https://play.google.com/store/apps/details?id=com.om.snipit" />
-        </Preference>
-        <Preference
-            android:key="pref_key_open_source_libs"
-            android:title="@string/pref_open_source_libraries_title" />
-        <Preference
-            android:key="pref_key_sign_out"
-            android:title="@string/pref_key_sign_out_title" />
-    </PreferenceCategory>
+  <PreferenceCategory
+      android:key="pref_key_about"
+      android:title="@string/pref_about_section_title">
+    <Preference
+        android:summary="@string/pref_rate_google_play_summary"
+        android:title="@string/pref_rate_google_play">
+      <intent
+          android:action="android.intent.action.VIEW"
+          android:data="https://play.google.com/store/apps/details?id=com.om.snipit"/>
+    </Preference>
+    <Preference
+        android:key="pref_key_open_source_libs"
+        android:title="@string/pref_open_source_libraries_title"/>
+    <Preference
+        android:key="pref_key_sign_out"
+        android:title="@string/pref_key_sign_out_title"/>
+  </PreferenceCategory>
 </PreferenceScreen>

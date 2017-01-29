@@ -1,44 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/navdrawer_header_height">
+    android:layout_height="@dimen/navdrawer_header_height"
+    >
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/navdrawer_background" />
+  <ImageView
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:scaleType="centerCrop"
+      android:src="@drawable/navdrawer_background"
+      />
 
-    <ImageView
-        android:id="@+id/navdrawer_header_user_profile_image"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="@dimen/navdrawer_profile_image_top_padding" />
+  <ImageView
+      android:id="@+id/navdrawer_header_user_profile_image"
+      android:layout_width="70dp"
+      android:layout_height="70dp"
+      android:layout_marginBottom="10dp"
+      android:layout_marginLeft="10dp"
+      android:layout_marginStart="10dp"
+      android:layout_marginTop="@dimen/navdrawer_profile_image_top_padding"
+      />
 
-    <TextView
-        android:id="@+id/navdrawer_header_user_full_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/navdrawer_header_user_profile_image"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="@dimen/activity_vertical_margin"
-        android:layout_marginStart="@dimen/activity_vertical_margin"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/navdrawer_header_username_fontsize"
-        android:textStyle="bold" />
+  <TextView
+      android:id="@+id/navdrawer_header_user_full_name"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/navdrawer_header_user_profile_image"
+      android:layout_marginBottom="5dp"
+      android:layout_marginLeft="@dimen/activity_vertical_margin"
+      android:layout_marginStart="@dimen/activity_vertical_margin"
+      android:textColor="@android:color/white"
+      android:textSize="@dimen/navdrawer_header_username_fontsize"
+      android:textStyle="bold"
+      />
 
-    <TextView
-        android:id="@+id/navdrawer_header_user_email"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/navdrawer_header_user_full_name"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="@dimen/activity_vertical_margin"
-        android:layout_marginStart="@dimen/activity_vertical_margin"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/navdrawer_header_email_fontsize" />
+  <TextView
+      android:id="@+id/navdrawer_header_user_email"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/navdrawer_header_user_full_name"
+      android:layout_gravity="bottom"
+      android:layout_marginBottom="5dp"
+      android:layout_marginLeft="@dimen/activity_vertical_margin"
+      android:layout_marginStart="@dimen/activity_vertical_margin"
+      android:textColor="@android:color/white"
+      android:textSize="@dimen/navdrawer_header_email_fontsize"
+      />
 </RelativeLayout>

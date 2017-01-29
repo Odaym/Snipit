@@ -1,120 +1,133 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
 
-    <ImageView
-        android:id="@+id/snippetIMG"
+  <ImageView
+      android:id="@+id/snippetIMG"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_centerInParent="true"
+      />
+
+  <ProgressBar
+      android:id="@+id/imageProgressBar"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_centerInParent="true"
+      android:indeterminate="false"
+      android:visibility="visible"
+      />
+
+  <RelativeLayout
+      android:id="@+id/snippetDetailsView"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/snippet_details_layout_height_landscape"
+      android:layout_alignParentBottom="true"
+      android:background="@drawable/snippet_details_gradient"
+      android:paddingEnd="10dp"
+      android:paddingLeft="10dp"
+      android:paddingRight="10dp"
+      android:paddingStart="10dp"
+      >
+
+    <TextView
+        android:id="@+id/snippetNameTV"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true" />
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/book_author_fsize"
+        android:textStyle="bold"
+        />
 
-    <ProgressBar
-        android:id="@+id/imageProgressBar"
+    <TextView
+        android:id="@+id/snippetPageNumberLabelTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:indeterminate="false"
-        android:visibility="visible" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/snippetNameTV"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/book_date_added_fsize"
+        />
 
-    <RelativeLayout
-        android:id="@+id/snippetDetailsView"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/snippet_details_layout_height_landscape"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/snippet_details_gradient"
-        android:paddingEnd="10dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingStart="10dp">
-
-        <TextView
-            android:id="@+id/snippetNameTV"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/book_author_fsize"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/snippetPageNumberLabelTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/snippetNameTV"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/book_date_added_fsize" />
-
-        <TextView
-            android:id="@+id/snippetPageNumberTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/snippetNameTV"
-            android:layout_toEndOf="@+id/snippetPageNumberLabelTV"
-            android:layout_toRightOf="@+id/snippetPageNumberLabelTV"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/book_date_added_fsize"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/snippetDateAddedTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/snippetNameTV"
-            android:layout_marginEnd="@dimen/snippet_details_margins_end_landscape"
-            android:layout_marginRight="@dimen/snippet_details_margins_end_landscape"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/book_date_added_fsize" />
-    </RelativeLayout>
-
-    <com.getbase.floatingactionbutton.FloatingActionsMenu xmlns:fab="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/snippet_actions_fab"
+    <TextView
+        android:id="@+id/snippetPageNumberTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/snippetDetailsView"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/snippetNameTV"
+        android:layout_toEndOf="@+id/snippetPageNumberLabelTV"
+        android:layout_toRightOf="@+id/snippetPageNumberLabelTV"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/book_date_added_fsize"
+        android:textStyle="bold"
+        />
+
+    <TextView
+        android:id="@+id/snippetDateAddedTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/snippet_details_layout_height_landscape"
+        android:layout_below="@+id/snippetNameTV"
         android:layout_marginEnd="@dimen/snippet_details_margins_end_landscape"
         android:layout_marginRight="@dimen/snippet_details_margins_end_landscape"
-        fab:fab_addButtonColorNormal="@color/blue"
-        fab:fab_addButtonSize="mini"
-        fab:fab_expandDirection="left">
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/book_date_added_fsize"
+        />
+  </RelativeLayout>
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/textToSpeechOCRBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_size="mini"
-            fab:fab_colorNormal="@color/pink"
-            fab:fab_icon="@drawable/ic_text_to_speech_ocr" />
+  <com.getbase.floatingactionbutton.FloatingActionsMenu xmlns:fab="http://schemas.android.com/apk/res-auto"
+      android:id="@+id/snippet_actions_fab"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_above="@id/snippetDetailsView"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:layout_marginBottom="@dimen/snippet_details_layout_height_landscape"
+      android:layout_marginEnd="@dimen/snippet_details_margins_end_landscape"
+      android:layout_marginRight="@dimen/snippet_details_margins_end_landscape"
+      fab:fab_addButtonColorNormal="@color/blue"
+      fab:fab_addButtonSize="mini"
+      fab:fab_expandDirection="left"
+      >
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/ocrSnippetBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_colorNormal="@color/yellow"
-            fab:fab_icon="@drawable/ic_ocr_white"
-            fab:fab_size="mini" />
+    <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/textToSpeechOCRBTN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        fab:fab_colorNormal="@color/pink"
+        fab:fab_icon="@drawable/ic_text_to_speech_ocr"
+        fab:fab_size="mini"
+        />
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/paintSnippetBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_colorNormal="@color/green"
-            fab:fab_icon="@drawable/ic_gesture_white"
-            fab:fab_size="mini" />
+    <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/ocrSnippetBTN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        fab:fab_colorNormal="@color/yellow"
+        fab:fab_icon="@drawable/ic_ocr_white"
+        fab:fab_size="mini"
+        />
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/createNewNoteBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_colorNormal="@color/red"
-            fab:fab_icon="@drawable/ic_note_white"
-            fab:fab_size="mini" />
-    </com.getbase.floatingactionbutton.FloatingActionsMenu>
+    <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/paintSnippetBTN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        fab:fab_colorNormal="@color/green"
+        fab:fab_icon="@drawable/ic_gesture_white"
+        fab:fab_size="mini"
+        />
+
+    <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/createNewNoteBTN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        fab:fab_colorNormal="@color/red"
+        fab:fab_icon="@drawable/ic_note_white"
+        fab:fab_size="mini"
+        />
+  </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
 </RelativeLayout>

@@ -25,17 +25,15 @@ import com.om.snipit.classes.ui.camera.GraphicOverlay;
  * multi-processor uses this factory to create barcode trackers as needed -- one for each barcode.
  */
 public class BarcodeTrackerFactory implements MultiProcessor.Factory<Barcode> {
-    private GraphicOverlay<BarcodeGraphic> mGraphicOverlay;
+  private GraphicOverlay<BarcodeGraphic> mGraphicOverlay;
 
-    public BarcodeTrackerFactory(GraphicOverlay<BarcodeGraphic> barcodeGraphicOverlay) {
-        mGraphicOverlay = barcodeGraphicOverlay;
-    }
+  public BarcodeTrackerFactory(GraphicOverlay<BarcodeGraphic> barcodeGraphicOverlay) {
+    mGraphicOverlay = barcodeGraphicOverlay;
+  }
 
-    @Override
-    public Tracker<Barcode> create(Barcode barcode) {
-        BarcodeGraphic graphic = new BarcodeGraphic(mGraphicOverlay);
-        return new BarcodeGraphicTracker(mGraphicOverlay, graphic);
-    }
-
+  @Override public Tracker<Barcode> create(Barcode barcode) {
+    BarcodeGraphic graphic = new BarcodeGraphic(mGraphicOverlay);
+    return new BarcodeGraphicTracker(mGraphicOverlay, graphic);
+  }
 }
 

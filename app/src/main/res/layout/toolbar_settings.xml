@@ -8,4 +8,5 @@
     android:theme="@style/ToolBarStyle_Global"
     app:navigationContentDescription="@string/abc_action_bar_up_description"
     app:navigationIcon="?attr/homeAsUpIndicator"
-    app:title="@string/settings" />
+    app:title="@string/settings"
+    />

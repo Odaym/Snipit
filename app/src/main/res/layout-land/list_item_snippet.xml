@@ -4,108 +4,119 @@
     android:id="@+id/list_item_snippet"
     android:layout_width="match_parent"
     android:layout_height="@dimen/snippet_list_item_height"
-    android:background="@drawable/listview_items_shape">
+    android:background="@drawable/listview_items_shape"
+    >
 
-    <me.grantland.widget.AutofitTextView
-        android:id="@+id/snippetNoteTV"
-        android:layout_width="@dimen/snippet_list_item_note_width"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/activity_horizontal_margin"
-        android:layout_marginLeft="@dimen/activity_vertical_margin"
-        android:layout_marginStart="@dimen/activity_vertical_margin"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
-        android:maxLines="4"
-        android:textColor="@android:color/white"
-        android:visibility="visible" />
+  <me.grantland.widget.AutofitTextView
+      android:id="@+id/snippetNoteTV"
+      android:layout_width="@dimen/snippet_list_item_note_width"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="@dimen/activity_horizontal_margin"
+      android:layout_marginLeft="@dimen/activity_vertical_margin"
+      android:layout_marginStart="@dimen/activity_vertical_margin"
+      android:layout_marginTop="@dimen/activity_horizontal_margin"
+      android:maxLines="4"
+      android:textColor="@android:color/white"
+      android:visibility="visible"
+      />
 
-    <RelativeLayout
-        android:id="@+id/snippetIMG_LoaderLayout"
-        android:layout_width="@dimen/snippet_thumb_width"
-        android:layout_height="match_parent">
+  <RelativeLayout
+      android:id="@+id/snippetIMG_LoaderLayout"
+      android:layout_width="@dimen/snippet_thumb_width"
+      android:layout_height="match_parent"
+      >
 
-        <ProgressBar
-            android:id="@+id/imageProgressLoader"
-            style="?android:attr/progressBarStyleSmall"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_centerInParent="true" />
+    <ProgressBar
+        android:id="@+id/imageProgressLoader"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_centerInParent="true"
+        style="?android:attr/progressBarStyleSmall"
+        />
 
-        <ImageView
-            android:id="@+id/snippetIMG"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </RelativeLayout>
+    <ImageView
+        android:id="@+id/snippetIMG"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+  </RelativeLayout>
 
-    <me.grantland.widget.AutofitTextView
-        android:id="@+id/snippetNameTV"
-        android:layout_width="@dimen/snippet_list_item_snippet_name_width_land"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_toEndOf="@+id/snippetIMG_LoaderLayout"
-        android:layout_toRightOf="@+id/snippetIMG_LoaderLayout"
-        android:ellipsize="end"
-        android:maxLines="4"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/book_name_fsize" />
+  <me.grantland.widget.AutofitTextView
+      android:id="@+id/snippetNameTV"
+      android:layout_width="@dimen/snippet_list_item_snippet_name_width_land"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="10dp"
+      android:layout_marginStart="10dp"
+      android:layout_marginTop="10dp"
+      android:layout_toEndOf="@+id/snippetIMG_LoaderLayout"
+      android:layout_toRightOf="@+id/snippetIMG_LoaderLayout"
+      android:ellipsize="end"
+      android:maxLines="4"
+      android:textColor="@android:color/black"
+      android:textSize="@dimen/book_name_fsize"
+      />
 
-    <RelativeLayout
-        android:id="@+id/snippetActionLayout"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:focusable="false">
-
-        <Button
-            android:id="@+id/snippetAction"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/menu_overflow_fade"
-            android:clickable="false"
-            android:focusable="false" />
-    </RelativeLayout>
+  <RelativeLayout
+      android:id="@+id/snippetActionLayout"
+      android:layout_width="35dp"
+      android:layout_height="35dp"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:focusable="false"
+      >
 
     <Button
-        android:id="@+id/snippetNoteBTN"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_below="@+id/snippetActionLayout"
+        android:id="@+id/snippetAction"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:background="@drawable/gray_bookmark"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/menu_overflow_fade"
+        android:clickable="false"
         android:focusable="false"
-        android:visibility="gone" />
+        />
+  </RelativeLayout>
 
-    <TextView
-        android:id="@+id/snippetViewsTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:paddingBottom="10dp"
-        android:paddingEnd="10dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:textColor="@color/mokhmal"
-        android:textSize="@dimen/book_date_added_fsize" />
+  <Button
+      android:id="@+id/snippetNoteBTN"
+      android:layout_width="35dp"
+      android:layout_height="35dp"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:layout_below="@+id/snippetActionLayout"
+      android:background="@drawable/gray_bookmark"
+      android:focusable="false"
+      android:visibility="gone"
+      />
 
-    <TextView
-        android:id="@+id/snippetPageNumberTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:paddingBottom="10dp"
-        android:paddingEnd="10dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:textColor="@color/mokhmal"
-        android:textSize="@dimen/book_date_added_fsize" />
+  <TextView
+      android:id="@+id/snippetViewsTV"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:paddingBottom="10dp"
+      android:paddingEnd="10dp"
+      android:paddingLeft="10dp"
+      android:paddingRight="10dp"
+      android:textColor="@color/mokhmal"
+      android:textSize="@dimen/book_date_added_fsize"
+      />
+
+  <TextView
+      android:id="@+id/snippetPageNumberTV"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:paddingBottom="10dp"
+      android:paddingEnd="10dp"
+      android:paddingLeft="10dp"
+      android:paddingRight="10dp"
+      android:textColor="@color/mokhmal"
+      android:textSize="@dimen/book_date_added_fsize"
+      />
 </RelativeLayout>

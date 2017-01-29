@@ -7,33 +7,31 @@ import com.j256.ormlite.table.DatabaseTable;
 
 public class Param {
 
-    @DatabaseField(id = true)
-    private int id;
-    @DatabaseField
-    private boolean enabled;
+  @DatabaseField(id = true) private int id;
+  @DatabaseField private boolean enabled;
 
-    public Param() {
-        super();
-    }
+  public Param() {
+    super();
+  }
 
-    public Param(int id, boolean enabled) {
-        this.id = id;
-        this.enabled = enabled;
-    }
+  public Param(int id, boolean enabled) {
+    this.id = id;
+    this.enabled = enabled;
+  }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+  public int getId() {
+    return id;
+  }
 
-    public int getId() {
-        return id;
-    }
+  public void setId(int id) {
+    this.id = id;
+  }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
+  public boolean isEnabled() {
+    return enabled;
+  }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
 }

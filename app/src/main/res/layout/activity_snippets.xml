@@ -1,101 +1,105 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_gray">
+    android:background="@color/light_gray"
+    >
 
-    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="@style/ToolBarStyle_Global"
-        app:navigationIcon="?attr/homeAsUpIndicator" />
+  <include
+      layout="@layout/toolbar"
+      android:id="@+id/toolbarLayout"
+      />
 
-    <com.om.snipit.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/snippetsList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"
-        android:background="@color/light_gray"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="@dimen/listview_padding_between"
-        android:drawSelectorOnTop="false"
-        android:listSelector="@android:color/transparent"
-        android:paddingBottom="@dimen/listview_padding_between"
-        android:paddingLeft="@dimen/listview_padding_left_right"
-        android:paddingRight="@dimen/listview_padding_left_right"
-        android:paddingTop="@dimen/listview_padding_between"
-        android:scrollbars="none"
-        dslv:drag_scroll_start="0.11"
-        dslv:drag_start_mode="onLongPress"
-        dslv:float_alpha="0.6"
-        dslv:float_background_color="@color/light_gray"
-        dslv:max_drag_scroll_speed="0.9"
-        dslv:slide_shuffle_speed="0.2" />
+  <com.om.snipit.dragsort_listview.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res-auto"
+      android:id="@+id/snippetsList"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/toolbarLayout"
+      android:background="@color/light_gray"
+      android:divider="@android:color/transparent"
+      android:dividerHeight="@dimen/listview_padding_between"
+      android:drawSelectorOnTop="false"
+      android:listSelector="@android:color/transparent"
+      android:paddingBottom="@dimen/listview_padding_between"
+      android:paddingLeft="@dimen/listview_padding_left_right"
+      android:paddingRight="@dimen/listview_padding_left_right"
+      android:paddingTop="@dimen/listview_padding_between"
+      android:scrollbars="none"
+      dslv:drag_scroll_start="0.11"
+      dslv:drag_start_mode="onLongPress"
+      dslv:float_alpha="0.6"
+      dslv:float_background_color="@color/light_gray"
+      dslv:max_drag_scroll_speed="0.9"
+      dslv:slide_shuffle_speed="0.2"
+      />
 
-    <RelativeLayout
-        android:id="@+id/emptyListLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+  <RelativeLayout
+      android:id="@+id/emptyListLayout"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_centerInParent="true"
+      android:alpha="0.5"
+      android:visibility="gone"
+      >
+
+    <ImageView
+        android:id="@+id/snippetIMG"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_centerInParent="true"
-        android:alpha="0.5"
-        android:visibility="gone">
+        android:src="@drawable/snippet_outline"
+        />
 
-        <ImageView
-            android:id="@+id/snippetIMG"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_centerInParent="true"
-            android:src="@drawable/snippet_outline" />
-
-        <me.grantland.widget.AutofitTextView
-            android:id="@+id/emptyLayoutMessageTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/snippetIMG"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/padding_snippets_activity_hint_above_image"
-            android:text="@string/empty_snippets_layout_hint"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    </RelativeLayout>
-
-    <com.getbase.floatingactionbutton.FloatingActionsMenu
-        android:id="@+id/createNewSnippetBTN"
+    <me.grantland.widget.AutofitTextView
+        android:id="@+id/emptyLayoutMessageTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginEnd="@dimen/invis_fab_menu_button_margin_end"
-        android:layout_marginRight="@dimen/invis_fab_menu_button_margin_end"
-        android:layout_marginBottom="@dimen/invis_fab_menu_button_margin_bottom"
-        fab:fab_addButtonColorNormal="@color/green"
-        fab:fab_labelStyle="@style/menu_labels_style"
-        fab:fab_addButtonSize="normal"
-        fab:fab_expandDirection="up">
+        android:layout_below="@+id/snippetIMG"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/padding_snippets_activity_hint_above_image"
+        android:text="@string/empty_snippets_layout_hint"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        />
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/addSnippetCameraBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onAddSnippetMenuBtnClicked"
-            fab:fab_colorNormal="@color/red"
-            fab:fab_icon="@drawable/ic_camera_white"
-            fab:fab_title="@string/add_snippet_camera"
-            fab:fab_size="mini" />
+  </RelativeLayout>
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/addSnippetFromGalleryBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onAddSnippetMenuBtnClicked"
-            fab:fab_title="@string/add_snippet_from_gallery"
-            fab:fab_icon="@drawable/ic_photo_gallery_white"
-            fab:fab_colorNormal="@color/purple"
-            fab:fab_size="mini" />
+  <com.getbase.floatingactionbutton.FloatingActionsMenu
+      android:id="@+id/createNewSnippetBTN"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:layout_marginBottom="@dimen/invis_fab_menu_button_margin_bottom"
+      android:layout_marginEnd="@dimen/invis_fab_menu_button_margin_end"
+      android:layout_marginRight="@dimen/invis_fab_menu_button_margin_end"
+      fab:fab_addButtonColorNormal="@color/green"
+      fab:fab_addButtonSize="normal"
+      fab:fab_expandDirection="up"
+      fab:fab_labelStyle="@style/menu_labels_style"
+      >
 
-    </com.getbase.floatingactionbutton.FloatingActionsMenu>
+    <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addSnippetCameraBTN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onAddSnippetMenuBtnClicked"
+        fab:fab_colorNormal="@color/red"
+        fab:fab_icon="@drawable/ic_camera_white"
+        fab:fab_size="mini"
+        fab:fab_title="@string/add_snippet_camera"
+        />
+
+    <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addSnippetFromGalleryBTN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onAddSnippetMenuBtnClicked"
+        fab:fab_colorNormal="@color/purple"
+        fab:fab_icon="@drawable/ic_photo_gallery_white"
+        fab:fab_size="mini"
+        fab:fab_title="@string/add_snippet_from_gallery"
+        />
+
+  </com.getbase.floatingactionbutton.FloatingActionsMenu>
 </RelativeLayout>

@@ -1,74 +1,74 @@
 <resources>
-    <dimen name="snippet_action_margin">10dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="activity_horizontal_margin">16dp</dimen>
+  <dimen name="snippet_action_margin">10dp</dimen>
+  <dimen name="activity_vertical_margin">16dp</dimen>
+  <dimen name="activity_horizontal_margin">16dp</dimen>
 
-    <dimen name="book_list_item_book_name_width">200dp</dimen>
+  <dimen name="book_list_item_book_name_width">200dp</dimen>
 
-    <dimen name="snippet_list_item_note_width">270dp</dimen>
+  <dimen name="snippet_list_item_note_width">270dp</dimen>
 
-    <dimen name="snippet_list_item_snippet_name_width">170dp</dimen>
-    <dimen name="snippet_list_item_snippet_page_width">170dp</dimen>
-    <dimen name="snippet_list_item_snippet_name_width_land">370dp</dimen>
-    <dimen name="snippet_list_item_snippet_pagenumber_width">100dp</dimen>
+  <dimen name="snippet_list_item_snippet_name_width">170dp</dimen>
+  <dimen name="snippet_list_item_snippet_page_width">170dp</dimen>
+  <dimen name="snippet_list_item_snippet_name_width_land">370dp</dimen>
+  <dimen name="snippet_list_item_snippet_pagenumber_width">100dp</dimen>
 
-    <dimen name="snippet_list_item_height">100dp</dimen>
-    <dimen name="snippet_details_layout_height">100dp</dimen>
-    <dimen name="snippet_details_layout_height_landscape">50dp</dimen>
-    <dimen name="snippet_details_margins_end_landscape">40dp</dimen>
-    <dimen name="padding_end_landscape">35dp</dimen>
+  <dimen name="snippet_list_item_height">100dp</dimen>
+  <dimen name="snippet_details_layout_height">100dp</dimen>
+  <dimen name="snippet_details_layout_height_landscape">50dp</dimen>
+  <dimen name="snippet_details_margins_end_landscape">40dp</dimen>
+  <dimen name="padding_end_landscape">35dp</dimen>
 
-    <dimen name="snippet_thumb_height">100dp</dimen>
-    <dimen name="snippet_thumb_width">100dp</dimen>
+  <dimen name="snippet_thumb_height">100dp</dimen>
+  <dimen name="snippet_thumb_width">100dp</dimen>
 
-    <dimen name="snippet_image_shape_corners_radius">3dp</dimen>
-    <dimen name="snippet_image_shape_corners_padding_bottom">3dp</dimen>
+  <dimen name="snippet_image_shape_corners_radius">3dp</dimen>
+  <dimen name="snippet_image_shape_corners_padding_bottom">3dp</dimen>
 
-    <dimen name="fab_buttons_margins">0dp</dimen>
-    <dimen name="fab_buttons_right_left_margins">0dp</dimen>
-    <dimen name="invis_fab_menu_button_margin_end">3dp</dimen>
-    <dimen name="invis_fab_menu_button_margin_bottom">6dp</dimen>
+  <dimen name="fab_buttons_margins">0dp</dimen>
+  <dimen name="fab_buttons_right_left_margins">0dp</dimen>
+  <dimen name="invis_fab_menu_button_margin_end">3dp</dimen>
+  <dimen name="invis_fab_menu_button_margin_bottom">6dp</dimen>
 
-    <dimen name="navdrawer_width">250dp</dimen>
-    <dimen name="navdrawer_header_height">160dp</dimen>
-    <dimen name="navdrawer_header_email_fontsize">15dp</dimen>
-    <dimen name="navdrawer_header_username_fontsize">17dp</dimen>
+  <dimen name="navdrawer_width">250dp</dimen>
+  <dimen name="navdrawer_header_height">160dp</dimen>
+  <dimen name="navdrawer_header_email_fontsize">15dp</dimen>
+  <dimen name="navdrawer_header_username_fontsize">17dp</dimen>
 
-    <!-- FONT SIZES -->
-    <dimen name="book_name_fsize">18dp</dimen>
-    <dimen name="book_author_fsize">15dp</dimen>
-    <dimen name="book_date_added_fsize">12dp</dimen>
-    <dimen name="number_of_snippets_fsize">15dp</dimen>
-    <dimen name="books_snippets_activity_hint_fsize">20dp</dimen>
-    <dimen name="snippet_list_item_snippet_page_fsize">13dp</dimen>
+  <!-- FONT SIZES -->
+  <dimen name="book_name_fsize">18dp</dimen>
+  <dimen name="book_author_fsize">15dp</dimen>
+  <dimen name="book_date_added_fsize">12dp</dimen>
+  <dimen name="number_of_snippets_fsize">15dp</dimen>
+  <dimen name="books_snippets_activity_hint_fsize">20dp</dimen>
+  <dimen name="snippet_list_item_snippet_page_fsize">13dp</dimen>
 
-    <!-- BOOKS ACTIVITY -->
-    <dimen name="toolbar_top_padding">0dp</dimen>
-    <dimen name="navdrawer_profile_image_top_padding">20dp</dimen>
+  <!-- BOOKS ACTIVITY -->
+  <dimen name="toolbar_top_padding">0dp</dimen>
+  <dimen name="navdrawer_profile_image_top_padding">20dp</dimen>
 
-    <!-- SNIPPETS GALLERY-->
-    <dimen name="snippet_grid_item_margin_end">1dp</dimen>
-    <dimen name="snippet_grid_item_picture_height">250dp</dimen>
-    <dimen name="snippet_grid_item_picture_width">250dp</dimen>
-    <dimen name="snippet_grid_item_layout_height">230dp</dimen>
-    <dimen name="snippet_grid_item_image_layout_height">170dp</dimen>
-    <dimen name="snippet_grid_image_padding_start">10dp</dimen>
-    <dimen name="snippet_grid_image_padding_end">10dp</dimen>
-    <dimen name="snippets_gridview_padding_between">5dp</dimen>
-    <dimen name="snippet_name_grid_item_font_size">13dp</dimen>
-    <dimen name="snippet_grid_item_separator_height">0.3dp</dimen>
+  <!-- SNIPPETS GALLERY-->
+  <dimen name="snippet_grid_item_margin_end">1dp</dimen>
+  <dimen name="snippet_grid_item_picture_height">250dp</dimen>
+  <dimen name="snippet_grid_item_picture_width">250dp</dimen>
+  <dimen name="snippet_grid_item_layout_height">230dp</dimen>
+  <dimen name="snippet_grid_item_image_layout_height">170dp</dimen>
+  <dimen name="snippet_grid_image_padding_start">10dp</dimen>
+  <dimen name="snippet_grid_image_padding_end">10dp</dimen>
+  <dimen name="snippets_gridview_padding_between">5dp</dimen>
+  <dimen name="snippet_name_grid_item_font_size">13dp</dimen>
+  <dimen name="snippet_grid_item_separator_height">0.3dp</dimen>
 
-    <!-- PAINT_BOOKMARK_ACTIVITY -->
-    <dimen name="fab_actions_menu_buttons_bottom_padding">20dp</dimen>
+  <!-- PAINT_BOOKMARK_ACTIVITY -->
+  <dimen name="fab_actions_menu_buttons_bottom_padding">20dp</dimen>
 
-    <dimen name="average_screen_height">150dp</dimen>
+  <dimen name="average_screen_height">150dp</dimen>
 
-    <dimen name="padding_books_activity_hint_above_image">50dp</dimen>
-    <dimen name="padding_snippets_activity_hint_above_image">10dp</dimen>
+  <dimen name="padding_books_activity_hint_above_image">50dp</dimen>
+  <dimen name="padding_snippets_activity_hint_above_image">10dp</dimen>
 
-    <dimen name="listview_padding_left_right">5dp</dimen>
-    <dimen name="listview_padding_between">10dp</dimen>
+  <dimen name="listview_padding_left_right">5dp</dimen>
+  <dimen name="listview_padding_between">10dp</dimen>
 
-    <!-- VIEW SNIPPET ACTIVITY -->
-    <dimen name="ocr_scan_result_layout_padding_sides">10dp</dimen>
+  <!-- VIEW SNIPPET ACTIVITY -->
+  <dimen name="ocr_scan_result_layout_padding_sides">10dp</dimen>
 </resources>

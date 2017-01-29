@@ -8,35 +8,39 @@
     android:paddingEnd="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_vertical_margin"
     android:paddingRight="@dimen/activity_vertical_margin"
-    android:paddingStart="@dimen/activity_vertical_margin">
+    android:paddingStart="@dimen/activity_vertical_margin"
+    >
 
-    <com.wrapp.floatlabelededittext.FloatLabeledEditText
-        android:id="@+id/sendFeedbackETFloating"
+  <com.wrapp.floatlabelededittext.FloatLabeledEditText
+      android:id="@+id/sendFeedbackETFloating"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp"
+      >
+
+    <com.andreabaccega.widget.FormEditText
+        android:id="@+id/feedbackET"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp">
+        android:layout_marginBottom="20dp"
+        android:hint="@string/navdrawer_sendfeedback_alert_hint_tell_us_what_you_think"
+        android:inputType="textCapSentences"
+        android:paddingTop="10dp"
+        android:singleLine="true"
+        android:textColor="@android:color/black"
+        android:textColorHint="@color/edittext_hint_color"
+        android:textCursorDrawable="@null"
+        validator:emptyErrorString="@string/empty_feedback_field_error"
+        validator:testType="alpha"
+        />
 
-        <com.andreabaccega.widget.FormEditText
-            android:id="@+id/feedbackET"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:hint="@string/navdrawer_sendfeedback_alert_hint_tell_us_what_you_think"
-            android:inputType="textCapSentences"
-            android:paddingTop="10dp"
-            android:singleLine="true"
-            android:textColor="@android:color/black"
-            android:textColorHint="@color/edittext_hint_color"
-            android:textCursorDrawable="@null"
-            validator:emptyErrorString="@string/empty_feedback_field_error"
-            validator:testType="alpha" />
+  </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 
-    </com.wrapp.floatlabelededittext.FloatLabeledEditText>
-
-    <TextView
-        android:id="@+id/feedbackSendingSummaryTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/navdrawer_sendfeedback_alert_summary" />
+  <TextView
+      android:id="@+id/feedbackSendingSummaryTV"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp"
+      android:text="@string/navdrawer_sendfeedback_alert_summary"
+      />
 </LinearLayout>

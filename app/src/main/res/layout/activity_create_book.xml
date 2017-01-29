@@ -2,101 +2,108 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:validator="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
 
-    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        android:theme="@style/ToolBarStyle_Global" />
+  <include
+      layout="@layout/toolbar"
+      android:id="@+id/toolbarLayout"
+      />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbar"
-        android:orientation="vertical"
-        android:paddingLeft="@dimen/activity_vertical_margin"
-        android:paddingRight="@dimen/activity_vertical_margin">
-
-        <ImageView
-            android:id="@+id/poweredByGoogleBadge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/powered_by_google" />
-
-        <com.wrapp.floatlabelededittext.FloatLabeledEditText
-            android:id="@+id/titleETFloating"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.andreabaccega.widget.FormEditText
-                android:id="@+id/titleET"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/book_title"
-                android:inputType="textCapWords"
-                android:singleLine="true"
-                android:textColor="@android:color/black"
-                android:textColorHint="@color/edittext_hint_color"
-                android:textCursorDrawable="@null"
-                validator:emptyErrorString="@string/empty_book_title_error" />
-
-        </com.wrapp.floatlabelededittext.FloatLabeledEditText>
-
-        <com.wrapp.floatlabelededittext.FloatLabeledEditText
-            android:id="@+id/authorETFloating"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.andreabaccega.widget.FormEditText
-                android:id="@+id/authorET"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:hint="@string/book_author"
-                android:inputType="textCapWords"
-                android:singleLine="true"
-                android:textColor="@android:color/black"
-                android:textColorHint="@color/edittext_hint_color"
-                android:textCursorDrawable="@null"
-                validator:emptyErrorString="@string/empty_author_name_error" />
-        </com.wrapp.floatlabelededittext.FloatLabeledEditText>
-
-        <ImageView
-            android:id="@+id/bookIMG"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </LinearLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/doneBTN"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_margin="@dimen/fab_buttons_margins"
-        android:src="@drawable/ic_done_black"
-        app:backgroundTint="@color/white"
-        app:borderWidth="0dp"
-        app:elevation="6dp"
-        app:fabSize="normal" />
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_below="@id/toolbarLayout"
+      android:orientation="vertical"
+      android:paddingLeft="@dimen/activity_vertical_margin"
+      android:paddingRight="@dimen/activity_vertical_margin"
+      >
 
     <ImageView
-        android:id="@+id/scanBTN"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="@dimen/activity_horizontal_margin"
-        android:layout_marginLeft="@dimen/activity_vertical_margin"
-        android:layout_marginStart="@dimen/activity_vertical_margin"
-        android:background="@drawable/fab_scan"
-        android:src="@drawable/scan_book" />
+        android:id="@+id/poweredByGoogleBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/powered_by_google"
+        />
+
+    <com.wrapp.floatlabelededittext.FloatLabeledEditText
+        android:id="@+id/titleETFloating"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+      <com.andreabaccega.widget.FormEditText
+          android:id="@+id/titleET"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:hint="@string/book_title"
+          android:inputType="textCapWords"
+          android:singleLine="true"
+          android:textColor="@android:color/black"
+          android:textColorHint="@color/edittext_hint_color"
+          android:textCursorDrawable="@null"
+          validator:emptyErrorString="@string/empty_book_title_error"
+          />
+
+    </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+
+    <com.wrapp.floatlabelededittext.FloatLabeledEditText
+        android:id="@+id/authorETFloating"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+      <com.andreabaccega.widget.FormEditText
+          android:id="@+id/authorET"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="20dp"
+          android:hint="@string/book_author"
+          android:inputType="textCapWords"
+          android:singleLine="true"
+          android:textColor="@android:color/black"
+          android:textColorHint="@color/edittext_hint_color"
+          android:textCursorDrawable="@null"
+          validator:emptyErrorString="@string/empty_author_name_error"
+          />
+    </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+
+    <ImageView
+        android:id="@+id/bookIMG"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+  </LinearLayout>
+
+  <android.support.design.widget.FloatingActionButton
+      android:id="@+id/doneBTN"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:layout_margin="@dimen/fab_buttons_margins"
+      android:src="@drawable/ic_done_black"
+      app:backgroundTint="@color/white"
+      app:borderWidth="0dp"
+      app:elevation="6dp"
+      app:fabSize="normal"
+      />
+
+  <ImageView
+      android:id="@+id/scanBTN"
+      android:layout_width="60dp"
+      android:layout_height="60dp"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentLeft="true"
+      android:layout_alignParentStart="true"
+      android:layout_marginBottom="@dimen/activity_horizontal_margin"
+      android:layout_marginLeft="@dimen/activity_vertical_margin"
+      android:layout_marginStart="@dimen/activity_vertical_margin"
+      android:background="@drawable/fab_scan"
+      android:src="@drawable/scan_book"
+      />
 
 </RelativeLayout>

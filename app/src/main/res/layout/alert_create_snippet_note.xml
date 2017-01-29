@@ -6,23 +6,26 @@
     android:paddingEnd="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_vertical_margin"
     android:paddingRight="@dimen/activity_vertical_margin"
-    android:paddingStart="@dimen/activity_vertical_margin">
+    android:paddingStart="@dimen/activity_vertical_margin"
+    >
 
-    <com.wrapp.floatlabelededittext.FloatLabeledEditText
-        android:id="@+id/snippetNoteETFloating"
-        android:layout_width="match_parent"
+  <com.wrapp.floatlabelededittext.FloatLabeledEditText
+      android:id="@+id/snippetNoteETFloating"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="20dp"
+      >
+
+    <EditText
+        android:id="@+id/snippetNoteET"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp">
-
-        <EditText
-            android:id="@+id/snippetNoteET"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/writeSomething"
-            android:inputType="textCapSentences"
-            android:paddingTop="20dp"
-            android:singleLine="true"
-            android:textColor="@android:color/black"
-            android:textCursorDrawable="@null" />
-    </com.wrapp.floatlabelededittext.FloatLabeledEditText>
+        android:hint="@string/writeSomething"
+        android:inputType="textCapSentences"
+        android:paddingTop="20dp"
+        android:singleLine="true"
+        android:textColor="@android:color/black"
+        android:textCursorDrawable="@null"
+        />
+  </com.wrapp.floatlabelededittext.FloatLabeledEditText>
 </LinearLayout>

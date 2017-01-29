@@ -27,47 +27,43 @@ import com.om.snipit.classes.ui.camera.GraphicOverlay;
  * goes away.
  */
 public class BarcodeGraphicTracker extends Tracker<Barcode> {
-    private GraphicOverlay<BarcodeGraphic> mOverlay;
-    private BarcodeGraphic mGraphic;
+  private GraphicOverlay<BarcodeGraphic> mOverlay;
+  private BarcodeGraphic mGraphic;
 
-    BarcodeGraphicTracker(GraphicOverlay<BarcodeGraphic> overlay, BarcodeGraphic graphic) {
-        mOverlay = overlay;
-        mGraphic = graphic;
-    }
+  BarcodeGraphicTracker(GraphicOverlay<BarcodeGraphic> overlay, BarcodeGraphic graphic) {
+    mOverlay = overlay;
+    mGraphic = graphic;
+  }
 
-    /**
-     * Start tracking the detected item instance within the item overlay.
-     */
-    @Override
-    public void onNewItem(int id, Barcode item) {
-        mGraphic.setId(id);
-    }
+  /**
+   * Start tracking the detected item instance within the item overlay.
+   */
+  @Override public void onNewItem(int id, Barcode item) {
+    mGraphic.setId(id);
+  }
 
-    /**
-     * Update the position/characteristics of the item within the overlay.
-     */
-    @Override
-    public void onUpdate(Detector.Detections<Barcode> detectionResults, Barcode item) {
-        mOverlay.add(mGraphic);
-        mGraphic.updateItem(item);
-    }
+  /**
+   * Update the position/characteristics of the item within the overlay.
+   */
+  @Override public void onUpdate(Detector.Detections<Barcode> detectionResults, Barcode item) {
+    mOverlay.add(mGraphic);
+    mGraphic.updateItem(item);
+  }
 
-    /**
-     * Hide the graphic when the corresponding object was not detected.  This can happen for
-     * intermediate frames temporarily, for example if the object was momentarily blocked from
-     * view.
-     */
-    @Override
-    public void onMissing(Detector.Detections<Barcode> detectionResults) {
-        mOverlay.remove(mGraphic);
-    }
+  /**
+   * Hide the graphic when the corresponding object was not detected.  This can happen for
+   * intermediate frames temporarily, for example if the object was momentarily blocked from
+   * view.
+   */
+  @Override public void onMissing(Detector.Detections<Barcode> detectionResults) {
+    mOverlay.remove(mGraphic);
+  }
 
-    /**
-     * Called when the item is assumed to be gone for good. Remove the graphic annotation from
-     * the overlay.
-     */
-    @Override
-    public void onDone() {
-        mOverlay.remove(mGraphic);
-    }
+  /**
+   * Called when the item is assumed to be gone for good. Remove the graphic annotation from
+   * the overlay.
+   */
+  @Override public void onDone() {
+    mOverlay.remove(mGraphic);
+  }
 }

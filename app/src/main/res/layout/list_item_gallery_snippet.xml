@@ -4,56 +4,63 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/snippet_grid_item_layout_height"
     android:background="@drawable/listview_items_shape"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    >
 
-    <RelativeLayout
-        android:id="@+id/snippetIMG_LoaderLayout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/snippet_grid_item_image_layout_height"
+  <RelativeLayout
+      android:id="@+id/snippetIMG_LoaderLayout"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/snippet_grid_item_image_layout_height"
+      android:paddingEnd="@dimen/snippets_gridview_padding_between"
+      android:paddingLeft="@dimen/snippets_gridview_padding_between"
+      android:paddingRight="@dimen/snippets_gridview_padding_between"
+      android:paddingStart="@dimen/snippets_gridview_padding_between"
+      >
+
+    <ProgressBar
+        android:id="@+id/imageProgressLoader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        style="?android:attr/progressBarStyleSmall"
+        />
+
+    <ImageView
+        android:id="@+id/snippetIMG"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+  </RelativeLayout>
+
+  <View
+      android:id="@+id/separatorView"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/snippet_grid_item_separator_height"
+      android:layout_marginEnd="@dimen/snippet_grid_item_margin_end"
+      android:layout_marginRight="@dimen/snippet_grid_item_margin_end"
+      android:background="@color/black_transparent"
+      />
+
+  <LinearLayout
+      android:id="@+id/snippetNameLayout"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      >
+
+    <me.grantland.widget.AutofitTextView
+        android:id="@+id/snippetNameTV"
+        android:layout_width="@dimen/snippet_list_item_snippet_name_width"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:maxLines="4"
         android:paddingEnd="@dimen/snippets_gridview_padding_between"
         android:paddingLeft="@dimen/snippets_gridview_padding_between"
         android:paddingRight="@dimen/snippets_gridview_padding_between"
-        android:paddingStart="@dimen/snippets_gridview_padding_between">
-
-        <ProgressBar
-            android:id="@+id/imageProgressLoader"
-            style="?android:attr/progressBarStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true" />
-
-        <ImageView
-            android:id="@+id/snippetIMG"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </RelativeLayout>
-
-    <View
-        android:id="@+id/separatorView"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/snippet_grid_item_separator_height"
-        android:layout_marginEnd="@dimen/snippet_grid_item_margin_end"
-        android:layout_marginRight="@dimen/snippet_grid_item_margin_end"
-        android:background="@color/black_transparent" />
-
-    <LinearLayout
-        android:id="@+id/snippetNameLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <me.grantland.widget.AutofitTextView
-            android:id="@+id/snippetNameTV"
-            android:layout_width="@dimen/snippet_list_item_snippet_name_width"
-            android:layout_height="wrap_content"
-            android:paddingEnd="@dimen/snippets_gridview_padding_between"
-            android:paddingLeft="@dimen/snippets_gridview_padding_between"
-            android:paddingRight="@dimen/snippets_gridview_padding_between"
-            android:paddingStart="@dimen/snippets_gridview_padding_between"
-            android:paddingTop="@dimen/snippets_gridview_padding_between"
-            android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:maxLines="4"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/snippet_name_grid_item_font_size" />
-    </LinearLayout>
+        android:paddingStart="@dimen/snippets_gridview_padding_between"
+        android:paddingTop="@dimen/snippets_gridview_padding_between"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/snippet_name_grid_item_font_size"
+        />
+  </LinearLayout>
 </LinearLayout>
