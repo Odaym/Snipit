@@ -60,6 +60,7 @@ import com.om.snipit.classes.Helpers;
 import com.om.snipit.dragsort_listview.DragSortListView;
 import com.om.snipit.models.Book;
 import com.om.snipit.models.Snippet;
+import com.om.snipit.repositories.impl.DatabaseBooksRepository;
 import com.om.snipit.rest.ApiCallsHandler;
 import com.om.snipit.rest.DefaultGetResponse;
 import com.squareup.otto.Subscribe;
@@ -85,7 +86,9 @@ import rx.schedulers.Schedulers;
 
 import static com.om.snipit.classes.Constants.DEBUG_TAG;
 
-public class BooksActivity extends BaseActivity implements BooksActivityView {
+  public class BooksActivity extends BaseActivity implements BooksActivityView {
+
+  private static final String TAG = BooksActivity.class.getSimpleName();
 
   @Bind(R.id.booksList) DragSortListView listView;
   @Bind(R.id.emptyListLayout) RelativeLayout emptyListLayout;
@@ -106,7 +109,6 @@ public class BooksActivity extends BaseActivity implements BooksActivityView {
   private List<Book> books;
   private Book tempBook;
 
-  private QueryBuilder<Book, Integer> bookQueryBuilder;
   private QueryBuilder<Snippet, Integer> snippetQueryBuilder;
   private PreparedQuery<Snippet> pq;
   private PreparedQuery<Book> pqBook;
@@ -146,27 +148,10 @@ public class BooksActivity extends BaseActivity implements BooksActivityView {
 
     EventBus_Singleton.getInstance().register(this);
 
-    presenter = new BooksActivityPresenter(this, null);
+    presenter = new BooksActivityPresenter(this, new DatabaseBooksRepository(getApplication()));
+    presenter.loadBooks();
 
-    Observable.create(new Observable.OnSubscribe<Void>() {
-      @Override public void call(Subscriber<? super Void> subscriber) {
-        bookQueryBuilder = bookDAO.queryBuilder();
-        snippetQueryBuilder = snippetDAO.queryBuilder();
-
-        prepareQueryBuilder();
-
-        books = bookDAO.query(pqBook);
-
-        subscriber.onNext(null);
-        subscriber.onCompleted();
-      }
-    }).subscribeOn(Schedulers.newThread())
-
-        .observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Void>() {
-      @Override public void call(Void s) {
-        handleEmptyOrPopulatedScreen();
-      }
-    });
+    snippetQueryBuilder = snippetDAO.queryBuilder();
 
     drawerToggle =
         new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open,
@@ -311,16 +296,6 @@ public class BooksActivity extends BaseActivity implements BooksActivityView {
     });
   }
 
-  public void prepareQueryBuilder() {
-    try {
-      bookQueryBuilder.where().not().eq("title", "null");
-      bookQueryBuilder.orderBy("order", true);
-      pqBook = bookQueryBuilder.prepare();
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-  }
-
   @Override public void onConfigurationChanged(Configuration newConfig) {
     super.onConfigurationChanged(newConfig);
     drawerToggle.onConfigurationChanged(newConfig);
@@ -380,31 +355,12 @@ public class BooksActivity extends BaseActivity implements BooksActivityView {
     handleEmptyUI();
   }
 
-  public void handleEmptyOrPopulatedScreen() {
-    handleEmptyUI();
-
-    booksAdapter = new Books_Adapter(this);
-
-    listView.setDropListener(onDrop);
-    listView.setDragListener(onDrag);
-
-    //        final View listViewHeaderAd = View.inflate(this, R.layout.adview_books_list_footer, null);
-    //        AdView mAdView = (AdView) listViewHeaderAd.findViewById(R.id.adView);
-    //        AdRequest adRequest = new AdRequest.Builder().build();
-    //        mAdView.loadAd(adRequest);
-
-    //        listView.addFooterView(listViewHeaderAd);
-    listView.setAdapter(booksAdapter);
-  }
-
   public void handleEmptyUI() {
     if (bookDAO.queryForAll().isEmpty()) {
       emptyListLayout.setVisibility(View.VISIBLE);
       JumpingBeans.with((TextView) emptyListLayout.findViewById(R.id.emptyLayoutMessageTV))
           .appendJumpingDots()
           .build();
-    } else if (bookDAO.queryForAll().isEmpty()) {
-      emptyListLayout.setVisibility(View.GONE);
     } else {
       emptyListLayout.setVisibility(View.INVISIBLE);
     }
@@ -496,11 +452,22 @@ public class BooksActivity extends BaseActivity implements BooksActivityView {
   }
 
   @Override public void displayBooks(List<Book> bookList) {
+    Log.d(TAG, "displayBooks: found some books");
+    this.books = bookList;
+    emptyListLayout.setVisibility(View.INVISIBLE);
+    booksAdapter = new Books_Adapter(this);
 
+    listView.setDropListener(onDrop);
+    listView.setDragListener(onDrag);
+    listView.setAdapter(booksAdapter);
   }
 
   @Override public void displayNoBooks() {
-
+    Log.d(TAG, "displayBooks: found NO books");
+    emptyListLayout.setVisibility(View.VISIBLE);
+    JumpingBeans.with((TextView) emptyListLayout.findViewById(R.id.emptyLayoutMessageTV))
+            .appendJumpingDots()
+            .build();
   }
 
   public static class BooksViewHolder {
