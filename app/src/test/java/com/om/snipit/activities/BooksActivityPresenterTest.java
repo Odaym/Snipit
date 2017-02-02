@@ -3,66 +3,48 @@ package com.om.snipit.activities;
 import com.om.snipit.models.Book;
 import com.om.snipit.repositories.BooksRepository;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Test;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import static java.util.Collections.EMPTY_LIST;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
 public class BooksActivityPresenterTest {
 
+  @Mock
+  BooksRepository booksRepository;
+
+  @Mock
+  BooksActivityView view;
+
+  BooksActivityPresenter presenter;
+  private final List<Book> MANY_BOOKS = Arrays.asList(new Book(), new Book(), new Book());
+
+  @Before
+  public void setUp() {
+    presenter = new BooksActivityPresenter(view, booksRepository);
+  }
+
   @Test public void shouldPassBooksToView() {
+    when(booksRepository.getBooks()).thenReturn(MANY_BOOKS);
 
-    // given
-    BooksActivityView view = new MockView();
-    BooksRepository booksRepository = new MockBooksRepository(true);
-
-    // when
-    BooksActivityPresenter presenter = new BooksActivityPresenter(view, booksRepository);
     presenter.loadBooks();
 
-    // then
-    Assert.assertEquals(true, ((MockView) view).displayBooksWithBooksCalled);
+    verify(view).displayBooks(MANY_BOOKS);
   }
 
   @Test public void shouldHandleNoBooksFound() {
-    BooksActivityView view = new MockView();
-    BooksRepository booksRepository = new MockBooksRepository(false);
+    when(booksRepository.getBooks()).thenReturn(EMPTY_LIST);
 
-    BooksActivityPresenter presenter = new BooksActivityPresenter(view, booksRepository);
     presenter.loadBooks();
 
-    Assert.assertEquals(true, ((MockView) view).displayBooksWithNoBooksCalled);
-  }
-
-  private class MockView implements BooksActivityView {
-
-    boolean displayBooksWithBooksCalled;
-    boolean displayBooksWithNoBooksCalled;
-
-    @Override public void displayBooks(List<Book> bookList) {
-      if (bookList.size() == 3) displayBooksWithBooksCalled = true;
-    }
-
-    @Override public void displayNoBooks() {
-      displayBooksWithNoBooksCalled = true;
-    }
-  }
-
-  private class MockBooksRepository implements BooksRepository {
-
-    private boolean returnSomeBooks;
-
-    public MockBooksRepository(boolean returnSomeBooks) {
-      this.returnSomeBooks = returnSomeBooks;
-    }
-
-    @Override public List<Book> getBooks() {
-
-      if (returnSomeBooks) {
-        return Arrays.asList(new Book(), new Book(), new Book());
-      } else {
-        return Collections.emptyList();
-      }
-    }
+    verify(view).displayNoBooks();
   }
 }
