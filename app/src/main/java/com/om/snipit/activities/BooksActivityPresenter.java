@@ -16,11 +16,16 @@ public class BooksActivityPresenter {
     }
 
     public void loadBooks() {
-        List<Book> bookList = booksRepository.getBooks();
-        if (bookList.isEmpty()) {
-            view.displayNoBooks();
-        } else {
-            view.displayBooks(bookList);
+        List<Book> bookList;
+        try {
+            bookList = booksRepository.getBooks();
+            if (bookList.isEmpty()) {
+                view.displayNoBooks();
+            } else {
+                view.displayBooks(bookList);
+            }
+        } catch (Exception e) {
+            view.displayError();
         }
     }
 }

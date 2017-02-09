@@ -26,8 +26,8 @@ public class DatabaseBooksRepository implements BooksRepository {
             return databaseHelper.getBookDAO().queryBuilder()
                     .orderBy("order", true)
                     .query();
-        } catch (SQLException e) {
-            return Collections.emptyList();
+        } catch (Exception e) {
+            throw new RuntimeException();
         }
     }
 }

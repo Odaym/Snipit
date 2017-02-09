@@ -36,6 +36,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import com.amazonaws.AmazonClientException;
@@ -352,6 +354,7 @@ import static com.om.snipit.classes.Constants.DEBUG_TAG;
 
   public void prepareForNotifyDataChanged() {
     books = bookDAO.query(pqBook);
+    books = bookDAO.query(pqBook);
     handleEmptyUI();
   }
 
@@ -470,7 +473,12 @@ import static com.om.snipit.classes.Constants.DEBUG_TAG;
             .build();
   }
 
-  public static class BooksViewHolder {
+    @Override
+    public void displayError() {
+      Toast.makeText(this, "Error accessing data", Toast.LENGTH_SHORT).show();
+    }
+
+    public static class BooksViewHolder {
     RelativeLayout list_item_book;
     TextView bookDateAddedTV;
     AutofitTextView bookTitleTV;

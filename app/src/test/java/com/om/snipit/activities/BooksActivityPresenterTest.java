@@ -6,17 +6,22 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoRule;
 
 import static java.util.Collections.EMPTY_LIST;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class BooksActivityPresenterTest {
+
+  @Rule
+  public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @Mock
   BooksRepository booksRepository;
@@ -46,5 +51,13 @@ public class BooksActivityPresenterTest {
     presenter.loadBooks();
 
     verify(view).displayNoBooks();
+  }
+
+  @Test public void shouldHandleError() {
+    when(booksRepository.getBooks()).thenThrow(new RuntimeException("boom"));
+
+    presenter.loadBooks();
+
+    verify(view).displayError();
   }
 }
