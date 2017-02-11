@@ -10,6 +10,9 @@ import android.content.Context;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
+
+import io.reactivex.Single;
 
 
 public class DatabaseBooksRepository implements BooksRepository {
@@ -21,13 +24,18 @@ public class DatabaseBooksRepository implements BooksRepository {
     }
 
     @Override
-    public List<Book> getBooks() {
-        try {
-            return databaseHelper.getBookDAO().queryBuilder()
-                    .orderBy("order", true)
-                    .query();
-        } catch (Exception e) {
-            throw new RuntimeException();
-        }
+    public Single<List<Book>> getBooks() {
+        return Single.fromCallable(new Callable<List<Book>>() {
+            @Override
+            public List<Book> call() throws Exception {
+                try {
+                    return databaseHelper.getBookDAO().queryBuilder()
+                            .orderBy("order", true)
+                            .query();
+                } catch (Exception e) {
+                    throw new RuntimeException();
+                }
+            }
+        });
     }
 }

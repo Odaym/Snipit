@@ -3,16 +3,17 @@ package com.om.snipit.activities;
 import com.om.snipit.models.Book;
 import com.om.snipit.repositories.BooksRepository;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.MockitoRule;
+
+import io.reactivex.Single;
 
 import static java.util.Collections.EMPTY_LIST;
 import static org.mockito.Mockito.verify;
@@ -38,7 +39,7 @@ public class BooksActivityPresenterTest {
   }
 
   @Test public void shouldPassBooksToView() {
-    when(booksRepository.getBooks()).thenReturn(MANY_BOOKS);
+    when(booksRepository.getBooks()).thenReturn(Single.just(MANY_BOOKS));
 
     presenter.loadBooks();
 
@@ -46,7 +47,7 @@ public class BooksActivityPresenterTest {
   }
 
   @Test public void shouldHandleNoBooksFound() {
-    when(booksRepository.getBooks()).thenReturn(EMPTY_LIST);
+    when(booksRepository.getBooks()).thenReturn(Single.just(Collections.<Book>emptyList()));
 
     presenter.loadBooks();
 
@@ -54,7 +55,7 @@ public class BooksActivityPresenterTest {
   }
 
   @Test public void shouldHandleError() {
-    when(booksRepository.getBooks()).thenThrow(new RuntimeException("boom"));
+    when(booksRepository.getBooks()).thenReturn(Single.<List<Book>>error(new Throwable("boom")));
 
     presenter.loadBooks();
 
