@@ -11,7 +11,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import butterknife.Bind;
@@ -101,64 +100,60 @@ public class CreateBookActivity extends BaseActivity {
           Constants.DEFAULT_ACTIVITY_TOOLBAR_COLORS);
     }
 
-    doneBTN.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
-        if (Helpers.validateFields(allFields)) {
-          //If you are creating a new book
-          if (CALL_PURPOSE != Constants.EDIT_BOOK_PURPOSE_VALUE) {
-            titleET.addTextChangedListener(new BookInfoTextWatcher());
-            authorET.addTextChangedListener(new BookInfoTextWatcher());
+    doneBTN.setOnClickListener(view -> {
+      if (Helpers.validateFields(allFields)) {
+        //If you are creating a new book
+        if (CALL_PURPOSE != Constants.EDIT_BOOK_PURPOSE_VALUE) {
+          titleET.addTextChangedListener(new BookInfoTextWatcher());
+          authorET.addTextChangedListener(new BookInfoTextWatcher());
 
-            String bookSearchString = "https://www.googleapis.com/books/v1/volumes?"
-                +
-                "q=intitle:"
-                + titleET.getText().toString().replace(" ", "%20")
-                + "?q=inauthor:"
-                + authorET.getText().toString().replace(" ", "%20")
-                + "&key="
-                + Constants.GOOGLE_BOOKS_API_KEY;
-            if (Helpers.isInternetAvailable(CreateBookActivity.this)) {
-              //                            if (bookImageFoundAtGoogle) {
-              finalizeInsertBook(bookImagePath);
-              //                            } else {
-              //                                new GetBookImage().execute(bookSearchString);
-              //                            }
-            } else {
-              finalizeInsertBook(bookImagePath);
-            }
+          String bookSearchString = "https://www.googleapis.com/books/v1/volumes?"
+              +
+              "q=intitle:"
+              + titleET.getText().toString().replace(" ", "%20")
+              + "?q=inauthor:"
+              + authorET.getText().toString().replace(" ", "%20")
+              + "&key="
+              + Constants.GOOGLE_BOOKS_API_KEY;
+          if (Helpers.isInternetAvailable(CreateBookActivity.this)) {
+            //                            if (bookImageFoundAtGoogle) {
+            finalizeInsertBook(bookImagePath);
+            //                            } else {
+            //                                new GetBookImage().execute(bookSearchString);
+            //                            }
           } else {
-            //If you are editing an existing book
-            book_from_list.setTitle(titleET.getText().toString());
-            book_from_list.setAuthor(authorET.getText().toString());
-
-            bookDAO.update(book_from_list);
-
-            EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
-
-            finish();
+            finalizeInsertBook(bookImagePath);
           }
+        } else {
+          //If you are editing an existing book
+          book_from_list.setTitle(titleET.getText().toString());
+          book_from_list.setAuthor(authorET.getText().toString());
 
-          if (getCurrentFocus() != null) {
-            InputMethodManager inputMethodManager =
-                (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-          }
+          bookDAO.update(book_from_list);
+
+          EventBus_Singleton.getInstance().post(new EventBus_Poster("book_added"));
+
+          finish();
+        }
+
+        if (getCurrentFocus() != null) {
+          InputMethodManager inputMethodManager =
+              (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+          inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
       }
     });
 
-    scanBTN.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
-        if (Helpers.isInternetAvailable(CreateBookActivity.this)) {
-          Intent intent = new Intent(CreateBookActivity.this, BarcodeCaptureActivity.class);
-          intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
-          intent.putExtra(BarcodeCaptureActivity.UseFlash, false);
+    scanBTN.setOnClickListener(view -> {
+      if (Helpers.isInternetAvailable(CreateBookActivity.this)) {
+        Intent intent = new Intent(CreateBookActivity.this, BarcodeCaptureActivity.class);
+        intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
+        intent.putExtra(BarcodeCaptureActivity.UseFlash, false);
 
-          startActivityForResult(intent, RC_BARCODE_CAPTURE);
-        } else {
-          Crouton.makeText(CreateBookActivity.this, getString(R.string.action_needs_internet),
-              Style.ALERT).show();
-        }
+        startActivityForResult(intent, RC_BARCODE_CAPTURE);
+      } else {
+        Crouton.makeText(CreateBookActivity.this, getString(R.string.action_needs_internet),
+            Style.ALERT).show();
       }
     });
   }

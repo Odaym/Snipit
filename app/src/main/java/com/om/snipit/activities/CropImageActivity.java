@@ -67,31 +67,26 @@ public class CropImageActivity extends BaseActivity {
       finish();
     }
 
-    doneBTN.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
-        String finalImagePath = create_CroppedImageFile(cropImageView.getCroppedBitmap());
+    doneBTN.setOnClickListener(view -> {
+      String finalImagePath = create_CroppedImageFile(cropImageView.getCroppedBitmap());
 
-        if (CALL_PURPOSE == Constants.EDIT_SNIPPET_PURPOSE_VALUE
-            || CALL_PURPOSE == Constants.EDIT_SNIPPET_IMAGE_PURPOSE_VALUE) {
-          EventBus_Singleton.getInstance()
-              .post(new EventBus_Poster("snippet_picture_changed", finalImagePath));
-        } else {
-          Intent openCreateSnippet =
-              new Intent(CropImageActivity.this, Create_Snippet_Activity.class);
-          openCreateSnippet.putExtra(Constants.EXTRAS_BOOK, book);
-          openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, finalImagePath);
-          startActivity(openCreateSnippet);
-        }
-
-        finish();
+      if (CALL_PURPOSE == Constants.EDIT_SNIPPET_PURPOSE_VALUE
+          || CALL_PURPOSE == Constants.EDIT_SNIPPET_IMAGE_PURPOSE_VALUE) {
+        EventBus_Singleton.getInstance()
+            .post(new EventBus_Poster("snippet_picture_changed", finalImagePath));
+      } else {
+        Intent openCreateSnippet =
+            new Intent(CropImageActivity.this, Create_Snippet_Activity.class);
+        openCreateSnippet.putExtra(Constants.EXTRAS_BOOK, book);
+        openCreateSnippet.putExtra(Constants.EXTRAS_SNIPPET_TEMP_IMAGE_PATH, finalImagePath);
+        startActivity(openCreateSnippet);
       }
+
+      finish();
     });
 
-    rotateImageBTN.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
-        cropImageView.rotateImage(CropImageView.RotateDegrees.ROTATE_90D);
-      }
-    });
+    rotateImageBTN.setOnClickListener(
+        view -> cropImageView.rotateImage(CropImageView.RotateDegrees.ROTATE_90D));
   }
 
   Target picassoCropTarget = new Target() {

@@ -276,11 +276,7 @@ public class DragSortListView extends ListView {
    * where scroll speed increases linearly as the floating View
    * nears the top/bottom of the ListView.
    */
-  private DragScrollProfile mScrollProfile = new DragScrollProfile() {
-    @Override public float getSpeed(float w, long t) {
-      return mMaxScrollSpeed * w;
-    }
-  };
+  private DragScrollProfile mScrollProfile = (w, t) -> mMaxScrollSpeed * w;
   /**
    * Current touch x.
    */

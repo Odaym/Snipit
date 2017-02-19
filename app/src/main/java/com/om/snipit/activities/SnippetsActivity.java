@@ -146,48 +146,39 @@ public class SnippetsActivity extends BaseActivity implements SearchView.OnQuery
 
     setupToolbar(toolbar, book.getTitle(), true, book.getColorCode());
 
-    Observable.create(new Observable.OnSubscribe<List<Snippet>>() {
-      @Override public void call(Subscriber<? super List<Snippet>> subscriber) {
-        snippetQueryBuilder = snippetDAO.queryBuilder();
+    Observable.create((Observable.OnSubscribe<List<Snippet>>) subscriber -> {
+      snippetQueryBuilder = snippetDAO.queryBuilder();
 
-        prepareQueryBuilder(book.getId());
+      prepareQueryBuilder(book.getId());
 
-        snippets = snippetDAO.query(pq);
+      snippets = snippetDAO.query(pq);
 
-        subscriber.onNext(snippets);
-        subscriber.onCompleted();
-      }
+      subscriber.onNext(snippets);
+      subscriber.onCompleted();
     })
         .subscribeOn(Schedulers.newThread())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<List<Snippet>>() {
-          @Override public void call(List<Snippet> snippetsFromObservable) {
-            handleEmptyOrPopulatedScreen(snippetsFromObservable);
-          }
-        });
+        .subscribe(snippetsFromObservable -> handleEmptyOrPopulatedScreen(snippetsFromObservable));
 
-    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-      @Override
-      public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-        final Snippet snippet = ((Snippet) listView.getItemAtPosition(position));
+    listView.setOnItemClickListener((adapterView, view, position, l) -> {
+      final Snippet snippet = ((Snippet) listView.getItemAtPosition(position));
 
-        //Clicking on an adview when there's no Internet connection will cause this condition to be satisfied because no Book will be found at the index of that adview
-        if (snippet != null) {
-          if (snippet.getIsNoteShowing() == 0) {
-            /**
-             * UPDATING SNIPPET VIEWS HERE
-             */
-            int snippetViews = snippetDAO.queryForId(snippet.getId()).getViews();
-            snippet.setViews(snippetViews + 1);
-            snippetDAO.update(snippet);
+      //Clicking on an adview when there's no Internet connection will cause this condition to be satisfied because no Book will be found at the index of that adview
+      if (snippet != null) {
+        if (snippet.getIsNoteShowing() == 0) {
+          /**
+           * UPDATING SNIPPET VIEWS HERE
+           */
+          int snippetViews = snippetDAO.queryForId(snippet.getId()).getViews();
+          snippet.setViews(snippetViews + 1);
+          snippetDAO.update(snippet);
 
-            Intent intent = new Intent(SnippetsActivity.this, ViewSnippetActivity.class);
-            intent.putExtra(Constants.EXTRAS_BOOK, book);
-            intent.putExtra(Constants.EXTRAS_VIEWING_SNIPPETS_GALLERY, false);
-            intent.putExtra(Constants.EXTRAS_SEARCH_TERM, searchQueryForGlobalUse);
-            intent.putExtra(Constants.EXTRAS_CURRENT_SNIPPET_POSITION, position);
-            startActivity(intent);
-          }
+          Intent intent = new Intent(SnippetsActivity.this, ViewSnippetActivity.class);
+          intent.putExtra(Constants.EXTRAS_BOOK, book);
+          intent.putExtra(Constants.EXTRAS_VIEWING_SNIPPETS_GALLERY, false);
+          intent.putExtra(Constants.EXTRAS_SEARCH_TERM, searchQueryForGlobalUse);
+          intent.putExtra(Constants.EXTRAS_CURRENT_SNIPPET_POSITION, position);
+          startActivity(intent);
         }
       }
     });
@@ -244,17 +235,11 @@ public class SnippetsActivity extends BaseActivity implements SearchView.OnQuery
 
       MenuItem searchItem = menu.findItem(R.id.search);
       searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-      searchView.setOnSearchClickListener(new View.OnClickListener() {
-        @Override public void onClick(View view) {
-          inSearchMode = true;
-        }
-      });
-      searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-        @Override public boolean onClose() {
-          inSearchMode = false;
-          searchQueryForGlobalUse = Constants.EXTRAS_NO_SEARCH_TERM;
-          return false;
-        }
+      searchView.setOnSearchClickListener(view -> inSearchMode = true);
+      searchView.setOnCloseListener(() -> {
+        inSearchMode = false;
+        searchQueryForGlobalUse = Constants.EXTRAS_NO_SEARCH_TERM;
+        return false;
       });
       searchView.setOnQueryTextListener(this);
     }
@@ -513,14 +498,12 @@ public class SnippetsActivity extends BaseActivity implements SearchView.OnQuery
               @Override public void onDismissed(Snackbar snackbar) {
               }
             })
-            .actionListener(new ActionClickListener() {
-              @Override public void onActionClicked(Snackbar snackbar) {
-                prepareForNotifyDataChanged(book.getId());
-                snippetsAdapter.notifyDataSetChanged();
+            .actionListener(snackbar -> {
+              prepareForNotifyDataChanged(book.getId());
+              snippetsAdapter.notifyDataSetChanged();
 
-                itemPendingDeleteDecision = false;
-                undeleteSnippetSB.dismiss();
-              }
+              itemPendingDeleteDecision = false;
+              undeleteSnippetSB.dismiss();
             });
 
     undeleteSnippetSB.show(SnippetsActivity.this);
@@ -596,12 +579,9 @@ public class SnippetsActivity extends BaseActivity implements SearchView.OnQuery
         .duration(8000)
         .actionColor(getResources().getColor(R.color.yellow))
         .text(R.string.permission_storage_rationale)
-        .actionListener(new ActionClickListener() {
-          @Override public void onActionClicked(Snackbar snackbar) {
-            ActivityCompat.requestPermissions(SnippetsActivity.this, permissions,
-                REQUEST_WRITE_STORAGE);
-          }
-        })
+        .actionListener(
+            snackbar -> ActivityCompat.requestPermissions(SnippetsActivity.this, permissions,
+                REQUEST_WRITE_STORAGE))
         .show(SnippetsActivity.this);
   }
 
@@ -623,12 +603,9 @@ public class SnippetsActivity extends BaseActivity implements SearchView.OnQuery
         .duration(8000)
         .actionColor(getResources().getColor(R.color.yellow))
         .text(R.string.permission_capture_rationale)
-        .actionListener(new ActionClickListener() {
-          @Override public void onActionClicked(Snackbar snackbar) {
-            ActivityCompat.requestPermissions(SnippetsActivity.this, permissions,
-                REQUEST_CAPTURE_PERMISSIONS);
-          }
-        })
+        .actionListener(
+            snackbar -> ActivityCompat.requestPermissions(SnippetsActivity.this, permissions,
+                REQUEST_CAPTURE_PERMISSIONS))
         .show(SnippetsActivity.this);
   }
 
@@ -817,149 +794,139 @@ public class SnippetsActivity extends BaseActivity implements SearchView.OnQuery
           .error(context.getResources().getDrawable(R.drawable.snippet_not_found))
           .into(holder.snippetIMG, picassoImageLoadedCallback);
 
-      holder.snippetActionLayout.setOnClickListener(new View.OnClickListener() {
-        @Override public void onClick(View view) {
-          final View overflowButton = view.findViewById(R.id.snippetAction);
-          overflowButton.findViewById(R.id.snippetAction)
-              .setBackgroundDrawable(
-                  context.getResources().getDrawable(R.drawable.menu_overflow_focus));
+      holder.snippetActionLayout.setOnClickListener(view -> {
+        final View overflowButton = view.findViewById(R.id.snippetAction);
+        overflowButton.findViewById(R.id.snippetAction)
+            .setBackgroundDrawable(
+                context.getResources().getDrawable(R.drawable.menu_overflow_focus));
 
-          PopupMenu popup = new PopupMenu(context, view);
-          popup.getMenuInflater().inflate(R.menu.snippet_list_item, popup.getMenu());
-          for (int i = 0; i < popup.getMenu().size(); i++) {
-            MenuItem item = popup.getMenu().getItem(i);
-            SpannableString spanString = new SpannableString(item.getTitle().toString());
-            spanString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, spanString.length(), 0);
-            item.setTitle(spanString);
-          }
-          popup.show();
-          popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override public boolean onMenuItemClick(MenuItem item) {
-              switch (item.getItemId()) {
-                case R.id.edit:
-                  Intent editSnippetIntent =
-                      new Intent(SnippetsActivity.this, Create_Snippet_Activity.class);
-                  editSnippetIntent.putExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING,
-                      Constants.EDIT_SNIPPET_PURPOSE_VALUE);
-                  editSnippetIntent.putExtra(Constants.EXTRAS_BOOK, book);
-                  editSnippetIntent.putExtra(Constants.EXTRAS_SNIPPET, snippets.get(position));
-                  startActivity(editSnippetIntent);
-                  break;
-                case R.id.delete:
-                  //Dissmiss the UNDO Snackbar and handle the deletion of the previously awaiting item yourself
-                  if (undeleteSnippetSB != null && undeleteSnippetSB.isShowing()) {
-                    //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
-                    snippetDAO.delete(tempSnippet);
-                    itemPendingDeleteDecision = false;
-                    undeleteSnippetSB.dismiss();
-                  }
-
-                  showUndeleteDialog(snippets.get(position));
-
-                  break;
+        PopupMenu popup = new PopupMenu(context, view);
+        popup.getMenuInflater().inflate(R.menu.snippet_list_item, popup.getMenu());
+        for (int i = 0; i < popup.getMenu().size(); i++) {
+          MenuItem item = popup.getMenu().getItem(i);
+          SpannableString spanString = new SpannableString(item.getTitle().toString());
+          spanString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, spanString.length(), 0);
+          item.setTitle(spanString);
+        }
+        popup.show();
+        popup.setOnMenuItemClickListener(item -> {
+          switch (item.getItemId()) {
+            case R.id.edit:
+              Intent editSnippetIntent =
+                  new Intent(SnippetsActivity.this, Create_Snippet_Activity.class);
+              editSnippetIntent.putExtra(Constants.EDIT_SNIPPET_PURPOSE_STRING,
+                  Constants.EDIT_SNIPPET_PURPOSE_VALUE);
+              editSnippetIntent.putExtra(Constants.EXTRAS_BOOK, book);
+              editSnippetIntent.putExtra(Constants.EXTRAS_SNIPPET, snippets.get(position));
+              startActivity(editSnippetIntent);
+              break;
+            case R.id.delete:
+              //Dissmiss the UNDO Snackbar and handle the deletion of the previously awaiting item yourself
+              if (undeleteSnippetSB != null && undeleteSnippetSB.isShowing()) {
+                //Careful about position that is passed from the adapter! This has to be accounted for again by using getItemAtPosition because there's an adview among the views
+                snippetDAO.delete(tempSnippet);
+                itemPendingDeleteDecision = false;
+                undeleteSnippetSB.dismiss();
               }
 
-              return true;
-            }
-          });
-          popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
-            @Override public void onDismiss(PopupMenu popupMenu) {
-              overflowButton.findViewById(R.id.snippetAction)
-                  .setBackgroundDrawable(
-                      context.getResources().getDrawable(R.drawable.menu_overflow_fade));
-            }
-          });
-        }
+              showUndeleteDialog(snippets.get(position));
+
+              break;
+          }
+
+          return true;
+        });
+        popup.setOnDismissListener(popupMenu -> overflowButton.findViewById(R.id.snippetAction)
+            .setBackgroundDrawable(
+                context.getResources().getDrawable(R.drawable.menu_overflow_fade)));
       });
 
-      holder.snippetNoteBTN.setOnClickListener(new View.OnClickListener() {
-        @Override public void onClick(final View view) {
-          ArrayList<ObjectAnimator> arrayListObjectAnimators = new ArrayList<ObjectAnimator>();
-          Animator[] objectAnimators;
+      holder.snippetNoteBTN.setOnClickListener(view -> {
+        ArrayList<ObjectAnimator> arrayListObjectAnimators = new ArrayList<ObjectAnimator>();
+        Animator[] objectAnimators;
 
-          RelativeLayout motherView = (RelativeLayout) view.getParent();
-          TextView snippetNoteTV = (TextView) motherView.getChildAt(0);
-          ProgressBar imageProgressLoader =
-              (ProgressBar) ((RelativeLayout) motherView.getChildAt(1)).getChildAt(0);
-          ImageView snippetIMG =
-              (ImageView) ((RelativeLayout) motherView.getChildAt(1)).getChildAt(1);
-          TextView snippetName = (TextView) motherView.getChildAt(2);
-          RelativeLayout snippetActionLayout = (RelativeLayout) motherView.getChildAt(3);
-          TextView snippetPageNumber = (TextView) motherView.getChildAt(6);
+        RelativeLayout motherView = (RelativeLayout) view.getParent();
+        TextView snippetNoteTV = (TextView) motherView.getChildAt(0);
+        ProgressBar imageProgressLoader =
+            (ProgressBar) ((RelativeLayout) motherView.getChildAt(1)).getChildAt(0);
+        ImageView snippetIMG =
+            (ImageView) ((RelativeLayout) motherView.getChildAt(1)).getChildAt(1);
+        TextView snippetName = (TextView) motherView.getChildAt(2);
+        RelativeLayout snippetActionLayout = (RelativeLayout) motherView.getChildAt(3);
+        TextView snippetPageNumber = (TextView) motherView.getChildAt(6);
 
-          int isNoteShowing = snippets.get(position).getIsNoteShowing();
+        int isNoteShowing = snippets.get(position).getIsNoteShowing();
 
-          GradientDrawable gradient;
+        GradientDrawable gradient1;
 
-          if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            LayerDrawable drawable =
-                (LayerDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(
-                    R.id.content);
-            gradient = (GradientDrawable) drawable.findDrawableByLayerId(R.id.innerView);
-          } else {
-            gradient =
-                ((GradientDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(
-                    R.id.innerView));
-          }
-
-          //Note was showing, hide
-          if (isNoteShowing == 1) {
-            view.setBackgroundDrawable(
-                context.getResources().getDrawable(R.drawable.gray_bookmark));
-
-            gradient.setColor(context.getResources().getColor(R.color.white));
-
-            arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetNoteTV));
-            arrayListObjectAnimators.add(helperMethods.showViewElement(snippetActionLayout));
-            arrayListObjectAnimators.add(helperMethods.showViewElement(snippetIMG));
-            arrayListObjectAnimators.add(helperMethods.showViewElement(snippetPageNumber));
-            arrayListObjectAnimators.add(helperMethods.showViewElement(snippetName));
-            arrayListObjectAnimators.add(helperMethods.showViewElement(imageProgressLoader));
-
-            snippets.get(position).setIsNoteShowing(0);
-          } else {
-            view.setBackgroundDrawable(
-                context.getResources().getDrawable(R.drawable.white_bookmark));
-
-            gradient.setColor(context.getResources()
-                .getColor(helperMethods.determineNoteViewBackground(book.getColorCode())));
-
-            snippetNoteTV.setText(snippets.get(position).getNote());
-
-            arrayListObjectAnimators.add(helperMethods.showViewElement(snippetNoteTV));
-            arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetActionLayout));
-            arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetIMG));
-            arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetPageNumber));
-            arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetName));
-            arrayListObjectAnimators.add(helperMethods.hideViewElement(imageProgressLoader));
-
-            snippets.get(position).setIsNoteShowing(1);
-          }
-
-          objectAnimators =
-              arrayListObjectAnimators.toArray(new ObjectAnimator[arrayListObjectAnimators.size()]);
-          AnimatorSet hideClutterSet = new AnimatorSet();
-          hideClutterSet.addListener(new Animator.AnimatorListener() {
-            @Override public void onAnimationStart(Animator animator) {
-              view.setEnabled(false);
-            }
-
-            @Override public void onAnimationEnd(Animator animator) {
-              view.setEnabled(true);
-            }
-
-            @Override public void onAnimationCancel(Animator animator) {
-
-            }
-
-            @Override public void onAnimationRepeat(Animator animator) {
-
-            }
-          });
-          hideClutterSet.playTogether(objectAnimators);
-          hideClutterSet.setDuration(WAIT_DURATION_BFEORE_HIDE_CLUTTER_ANIMATION);
-          hideClutterSet.start();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+          LayerDrawable drawable =
+              (LayerDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(
+                  R.id.content);
+          gradient1 = (GradientDrawable) drawable.findDrawableByLayerId(R.id.innerView);
+        } else {
+          gradient1 =
+              ((GradientDrawable) ((LayerDrawable) motherView.getBackground()).findDrawableByLayerId(
+                  R.id.innerView));
         }
+
+        //Note was showing, hide
+        if (isNoteShowing == 1) {
+          view.setBackgroundDrawable(
+              context.getResources().getDrawable(R.drawable.gray_bookmark));
+
+          gradient1.setColor(context.getResources().getColor(R.color.white));
+
+          arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetNoteTV));
+          arrayListObjectAnimators.add(helperMethods.showViewElement(snippetActionLayout));
+          arrayListObjectAnimators.add(helperMethods.showViewElement(snippetIMG));
+          arrayListObjectAnimators.add(helperMethods.showViewElement(snippetPageNumber));
+          arrayListObjectAnimators.add(helperMethods.showViewElement(snippetName));
+          arrayListObjectAnimators.add(helperMethods.showViewElement(imageProgressLoader));
+
+          snippets.get(position).setIsNoteShowing(0);
+        } else {
+          view.setBackgroundDrawable(
+              context.getResources().getDrawable(R.drawable.white_bookmark));
+
+          gradient1.setColor(context.getResources()
+              .getColor(helperMethods.determineNoteViewBackground(book.getColorCode())));
+
+          snippetNoteTV.setText(snippets.get(position).getNote());
+
+          arrayListObjectAnimators.add(helperMethods.showViewElement(snippetNoteTV));
+          arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetActionLayout));
+          arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetIMG));
+          arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetPageNumber));
+          arrayListObjectAnimators.add(helperMethods.hideViewElement(snippetName));
+          arrayListObjectAnimators.add(helperMethods.hideViewElement(imageProgressLoader));
+
+          snippets.get(position).setIsNoteShowing(1);
+        }
+
+        objectAnimators =
+            arrayListObjectAnimators.toArray(new ObjectAnimator[arrayListObjectAnimators.size()]);
+        AnimatorSet hideClutterSet = new AnimatorSet();
+        hideClutterSet.addListener(new Animator.AnimatorListener() {
+          @Override public void onAnimationStart(Animator animator) {
+            view.setEnabled(false);
+          }
+
+          @Override public void onAnimationEnd(Animator animator) {
+            view.setEnabled(true);
+          }
+
+          @Override public void onAnimationCancel(Animator animator) {
+
+          }
+
+          @Override public void onAnimationRepeat(Animator animator) {
+
+          }
+        });
+        hideClutterSet.playTogether(objectAnimators);
+        hideClutterSet.setDuration(WAIT_DURATION_BFEORE_HIDE_CLUTTER_ANIMATION);
+        hideClutterSet.start();
       });
 
       return parentView;

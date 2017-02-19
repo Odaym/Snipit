@@ -86,76 +86,74 @@ public class Create_Snippet_Activity extends BaseActivity {
           book.getColorCode());
     }
 
-    doneBTN.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
-        if (Helpers.validateFields(allFields)) {
-          //If you are editing an existing snippet
-          if (CALL_PURPOSE == Constants.EDIT_SNIPPET_PURPOSE_VALUE) {
-            try {
-              snippet_from_list.setName(nameET.getText().toString());
+    doneBTN.setOnClickListener(view -> {
+      if (Helpers.validateFields(allFields)) {
+        //If you are editing an existing snippet
+        if (CALL_PURPOSE == Constants.EDIT_SNIPPET_PURPOSE_VALUE) {
+          try {
+            snippet_from_list.setName(nameET.getText().toString());
 
-              //Only try to parse if there was a number given
-              if (!pageNumberET.getText().toString().isEmpty()) {
-                snippet_from_list.setPage_number(
-                    Short.parseShort(pageNumberET.getText().toString()));
-              } else {
-                snippet_from_list.setPage_number(Constants.NO_SNIPPET_PAGE_NUMBER);
-              }
-
-              snippet_from_list.setBook(book);
-
-              snippetDAO.update(snippet_from_list);
-
-              EventBus_Singleton.getInstance()
-                  .post(new EventBus_Poster("snippet_name_page_edited"));
-
-              finish();
-            } catch (NumberFormatException e) {
-              pageNumberET.setText("");
-              Crouton.makeText(Create_Snippet_Activity.this, getString(R.string.page_number_error),
-                  Style.ALERT).show();
+            //Only try to parse if there was a number given
+            if (!pageNumberET.getText().toString().isEmpty()) {
+              snippet_from_list.setPage_number(
+                  Short.parseShort(pageNumberET.getText().toString()));
+            } else {
+              snippet_from_list.setPage_number(Constants.NO_SNIPPET_PAGE_NUMBER);
             }
-          } else {
-            //If you are creating a new snippet
-            Date date = new Date();
-            String month = (String) DateFormat.format("MMM", date);
-            String day = (String) DateFormat.format("dd", date);
-            String year = (String) DateFormat.format("yyyy", date);
 
-            try {
-              Snippet snippet = new Snippet();
-              snippet.setName(nameET.getText().toString());
-              snippet.setOrder(snippetDAO.queryForEq("book_id", book.getId()).size() + 1);
+            snippet_from_list.setBook(book);
 
-              //Only try to parse if there was a number given
-              if (!pageNumberET.getText().toString().isEmpty()) {
-                snippet.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
-              } else {
-                snippet.setPage_number(Constants.NO_SNIPPET_PAGE_NUMBER);
-              }
+            snippetDAO.update(snippet_from_list);
 
-              snippet.setImage_path(snippetImagePath);
+            EventBus_Singleton.getInstance()
+                .post(new EventBus_Poster("snippet_name_page_edited"));
 
-              snippet.setDate_added(month + " " + day + ", " + year);
+            finish();
+          } catch (NumberFormatException e) {
+            pageNumberET.setText("");
+            Crouton.makeText(Create_Snippet_Activity.this, getString(R.string.page_number_error),
+                Style.ALERT).show();
+          }
+        } else {
+          //If you are creating a new snippet
+          Date date = new Date();
+          String month = (String) DateFormat.format("MMM", date);
+          String day = (String) DateFormat.format("dd", date);
+          String year = (String) DateFormat.format("yyyy", date);
 
-              snippet.setBook(book);
+          try {
+            Snippet snippet = new Snippet();
+            snippet.setName(nameET.getText().toString());
+            snippet.setOrder(snippetDAO.queryForEq("book_id", book.getId()).size() + 1);
 
-              int snippet_id = snippetDAO.create(snippet);
-
-              Helpers.logEvent("Created Snippet", new String[] { snippet.getName() });
-
-              EventBus_Singleton.getInstance()
-                  .post(new EventBus_Poster("snippet_added_snippets_activity",
-                      String.valueOf(snippet_id)));
-              EventBus_Singleton.getInstance()
-                  .post(new EventBus_Poster("snippet_added_books_activity"));
-
-              finish();
-            } catch (NumberFormatException e) {
-              pageNumberET.setText("");
-              Crouton.makeText(Create_Snippet_Activity.this, getString(R.string.page_number_error),
-                  Style.ALERT).show();
+            //Only try to parse if there was a number given
+            if (!pageNumberET.getText().toString().isEmpty()) {
+              snippet.setPage_number(Short.parseShort(pageNumberET.getText().toString()));
+            } else {
+              snippet.setPage_number(Constants.NO_SNIPPET_PAGE_NUMBER);
             }
+
+            snippet.setImage_path(snippetImagePath);
+
+            snippet.setDate_added(month + " " + day + ", " + year);
+
+            snippet.setBook(book);
+
+            int snippet_id = snippetDAO.create(snippet);
+
+            Helpers.logEvent("Created Snippet", new String[] { snippet.getName() });
+
+            EventBus_Singleton.getInstance()
+                .post(new EventBus_Poster("snippet_added_snippets_activity",
+                    String.valueOf(snippet_id)));
+            EventBus_Singleton.getInstance()
+                .post(new EventBus_Poster("snippet_added_books_activity"));
+
+            finish();
+          } catch (NumberFormatException e) {
+            pageNumberET.setText("");
+            Crouton.makeText(Create_Snippet_Activity.this, getString(R.string.page_number_error),
+                Style.ALERT).show();
           }
         }
       }

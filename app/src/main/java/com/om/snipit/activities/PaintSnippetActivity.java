@@ -108,84 +108,70 @@ public class PaintSnippetActivity extends BaseActivity {
       finish();
     }
 
-    fabActionUndo.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
-        canvasView.undo();
+    fabActionUndo.setOnClickListener(view -> canvasView.undo());
+
+    fabActionDrawingMode.setOnClickListener(view -> {
+      if (canvasView.getDrawer() == CanvasView.Drawer.PEN) {
+        canvasView.setDrawer(CanvasView.Drawer.RECTANGLE);
+        fabActionDrawingMode.setIconDrawable(
+            getResources().getDrawable(R.drawable.ic_brush_white));
+      } else {
+        canvasView.setDrawer(CanvasView.Drawer.PEN);
+        fabActionDrawingMode.setIconDrawable(
+            getResources().getDrawable(R.drawable.ic_square_white));
       }
+      prefsEditor.putInt(Constants.CANVAS_DRAWING_MODE, canvasView.getDrawer().ordinal());
+      prefsEditor.apply();
     });
 
-    fabActionDrawingMode.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
-        if (canvasView.getDrawer() == CanvasView.Drawer.PEN) {
-          canvasView.setDrawer(CanvasView.Drawer.RECTANGLE);
-          fabActionDrawingMode.setIconDrawable(
-              getResources().getDrawable(R.drawable.ic_brush_white));
-        } else {
-          canvasView.setDrawer(CanvasView.Drawer.PEN);
-          fabActionDrawingMode.setIconDrawable(
-              getResources().getDrawable(R.drawable.ic_square_white));
-        }
-        prefsEditor.putInt(Constants.CANVAS_DRAWING_MODE, canvasView.getDrawer().ordinal());
-        prefsEditor.apply();
-      }
+    fabActionColor.setOnClickListener(view -> {
+      floatingActionsMenu.collapse();
+      floatingActionsMenu.setVisibility(View.GONE);
+
+      floatingColorsMenu.setVisibility(View.VISIBLE);
+      floatingColorsMenu.expand();
     });
 
-    fabActionColor.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
-        floatingActionsMenu.collapse();
-        floatingActionsMenu.setVisibility(View.GONE);
+    fabActionThickness.setOnClickListener(view -> {
 
-        floatingColorsMenu.setVisibility(View.VISIBLE);
-        floatingColorsMenu.expand();
+      floatingActionsMenu.collapse();
+
+      AlertDialog.Builder alert = new AlertDialog.Builder(PaintSnippetActivity.this);
+
+      LayoutInflater inflater = (LayoutInflater) PaintSnippetActivity.this.getSystemService(
+          Context.LAYOUT_INFLATER_SERVICE);
+      View setBrushThicknessAlert =
+          inflater.inflate(R.layout.alert_change_brush_thickness, null, false);
+
+      final SeekBar brushThicknessBar =
+          (SeekBar) setBrushThicknessAlert.findViewById(R.id.brushThicknessSeeker);
+
+      float brushThicknessPref = prefs.getFloat(Constants.BRUSH_THICKNESS_PREF, 0);
+
+      //First time editing brush thickness
+      if (brushThicknessPref == 0) {
+        brushThicknessBar.setProgress(60);
+      } else {
+        brushThicknessBar.setProgress((int) brushThicknessPref);
       }
-    });
 
-    fabActionThickness.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
+      alert.setPositiveButton(PaintSnippetActivity.this.getResources().getString(R.string.OK),
+          (dialog, whichButton) -> {
+            canvasView.setPaintStrokeWidth(brushThicknessBar.getProgress());
+            prefsEditor.putFloat(Constants.BRUSH_THICKNESS_PREF,
+                brushThicknessBar.getProgress());
+            prefsEditor.apply();
+          });
 
-        floatingActionsMenu.collapse();
+      alert.setNegativeButton(PaintSnippetActivity.this.getResources().getString(R.string.cancel),
+          (dialog, whichButton) -> {
+          });
 
-        AlertDialog.Builder alert = new AlertDialog.Builder(PaintSnippetActivity.this);
-
-        LayoutInflater inflater = (LayoutInflater) PaintSnippetActivity.this.getSystemService(
-            Context.LAYOUT_INFLATER_SERVICE);
-        View setBrushThicknessAlert =
-            inflater.inflate(R.layout.alert_change_brush_thickness, null, false);
-
-        final SeekBar brushThicknessBar =
-            (SeekBar) setBrushThicknessAlert.findViewById(R.id.brushThicknessSeeker);
-
-        float brushThicknessPref = prefs.getFloat(Constants.BRUSH_THICKNESS_PREF, 0);
-
-        //First time editing brush thickness
-        if (brushThicknessPref == 0) {
-          brushThicknessBar.setProgress(60);
-        } else {
-          brushThicknessBar.setProgress((int) brushThicknessPref);
-        }
-
-        alert.setPositiveButton(PaintSnippetActivity.this.getResources().getString(R.string.OK),
-            new DialogInterface.OnClickListener() {
-              public void onClick(DialogInterface dialog, int whichButton) {
-                canvasView.setPaintStrokeWidth(brushThicknessBar.getProgress());
-                prefsEditor.putFloat(Constants.BRUSH_THICKNESS_PREF,
-                    brushThicknessBar.getProgress());
-                prefsEditor.apply();
-              }
-            });
-
-        alert.setNegativeButton(PaintSnippetActivity.this.getResources().getString(R.string.cancel),
-            new DialogInterface.OnClickListener() {
-              public void onClick(DialogInterface dialog, int whichButton) {
-              }
-            });
-
-        alert.setTitle(
-            PaintSnippetActivity.this.getResources().getString(R.string.set_brush_thickness));
-        alert.setView(setBrushThicknessAlert);
-        alert.setMessage("");
-        alert.show();
-      }
+      alert.setTitle(
+          PaintSnippetActivity.this.getResources().getString(R.string.set_brush_thickness));
+      alert.setView(setBrushThicknessAlert);
+      alert.setMessage("");
+      alert.show();
     });
 
     floatingActionsMenu.expand();
@@ -244,11 +230,9 @@ public class PaintSnippetActivity extends BaseActivity {
             R.string.alert_dialog_save_title)
             .setMessage(R.string.snippet_update_message)
             .setPositiveButton(R.string.alert_dialog_save_action,
-                new DialogInterface.OnClickListener() {
-                  @Override public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    new SavePaintedBookmark_Task().execute();
-                  }
+                (dialog, which) -> {
+                  dialog.dismiss();
+                  new SavePaintedBookmark_Task().execute();
                 })
             .setNegativeButton(R.string.cancel, null)
             .show();

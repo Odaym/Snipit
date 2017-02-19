@@ -122,28 +122,24 @@ public class ViewSnippetActivity extends BaseActivity {
         .setSystemUiVisibility(
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
 
-    Observable.create(new Observable.OnSubscribe<Void>() {
-      @Override public void call(Subscriber<? super Void> subscriber) {
+    Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
 
-        snippetQueryBuilder = snippetDAO.queryBuilder();
+      snippetQueryBuilder = snippetDAO.queryBuilder();
 
-        handleWhichSnippetsToLoad();
+      handleWhichSnippetsToLoad();
 
-        subscriber.onNext(null);
-        subscriber.onCompleted();
-      }
+      subscriber.onNext(null);
+      subscriber.onCompleted();
     })
         .subscribeOn(Schedulers.newThread())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<Void>() {
-          @Override public void call(Void s) {
-            NUM_PAGES = snippets.size();
+        .subscribe(s -> {
+          NUM_PAGES = snippets.size();
 
-            mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+          mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 
-            mPager.setAdapter(mPagerAdapter);
-            mPager.setCurrentItem(current_snippet_position);
-          }
+          mPager.setAdapter(mPagerAdapter);
+          mPager.setCurrentItem(current_snippet_position);
         });
   }
 
@@ -210,20 +206,16 @@ public class ViewSnippetActivity extends BaseActivity {
 
         builder.setTitle(R.string.ocr_scan_result);
         builder.setView(lay);
-        builder.setPositiveButton(R.string.SAVE, new DialogInterface.OnClickListener() {
-          @Override public void onClick(DialogInterface dialogInterface, int i) {
-            snippets.get(mPager.getCurrentItem()).setOcr_content(ocrResultET.getText().toString());
-            snippetDAO.update(snippets.get(mPager.getCurrentItem()));
+        builder.setPositiveButton(R.string.SAVE, (dialogInterface, i) -> {
+          snippets.get(mPager.getCurrentItem()).setOcr_content(ocrResultET.getText().toString());
+          snippetDAO.update(snippets.get(mPager.getCurrentItem()));
 
-            EventBus_Singleton.getInstance()
-                .post(new EventBus_Poster("snippet_ocr_content_changed"));
-          }
+          EventBus_Singleton.getInstance()
+              .post(new EventBus_Poster("snippet_ocr_content_changed"));
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-          @Override public void onClick(DialogInterface dialogInterface, int i) {
-            dialogInterface.dismiss();
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-          }
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+          dialogInterface.dismiss();
+          setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         });
         break;
       case Constants.OCR_SCAN_SUCCESS_EMPTY:
@@ -234,11 +226,8 @@ public class ViewSnippetActivity extends BaseActivity {
 
         builder.setTitle(R.string.ocr_scan_result);
         builder.setMessage(ocrResult);
-        builder.setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
-          @Override public void onClick(DialogInterface dialogInterface, int i) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-          }
-        });
+        builder.setPositiveButton(R.string.OK,
+            (dialogInterface, i) -> setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR));
         break;
     }
 
@@ -334,72 +323,54 @@ public class ViewSnippetActivity extends BaseActivity {
 
           imageProgressBar.setVisibility(View.INVISIBLE);
 
-          createNewNoteBTN.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-              AlertDialog.Builder alert = new AlertDialog.Builder(context);
+          createNewNoteBTN.setOnClickListener(view -> {
+            AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
-              LayoutInflater inflater =
-                  (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-              View alertCreateNoteView =
-                  inflater.inflate(R.layout.alert_create_snippet_note, null, false);
+            LayoutInflater inflater =
+                (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
+            View alertCreateNoteView =
+                inflater.inflate(R.layout.alert_create_snippet_note, null, false);
 
-              final EditText inputNoteET =
-                  (EditText) alertCreateNoteView.findViewById(R.id.snippetNoteET);
-              inputNoteET.setHintTextColor(
-                  getActivity().getResources().getColor(R.color.edittext_hint_color));
-              inputNoteET.setText(snippetDAO.queryForId(snippet.getId()).getNote());
-              inputNoteET.setSelection(inputNoteET.getText().length());
+            final EditText inputNoteET =
+                (EditText) alertCreateNoteView.findViewById(R.id.snippetNoteET);
+            inputNoteET.setHintTextColor(
+                getActivity().getResources().getColor(R.color.edittext_hint_color));
+            inputNoteET.setText(snippetDAO.queryForId(snippet.getId()).getNote());
+            inputNoteET.setSelection(inputNoteET.getText().length());
 
-              alert.setPositiveButton(context.getResources().getString(R.string.OK),
-                  new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                      snippet.setNote(inputNoteET.getText().toString());
-                      snippetDAO.update(snippet);
+            alert.setPositiveButton(context.getResources().getString(R.string.OK),
+                (dialog, whichButton) -> {
+                  snippet.setNote(inputNoteET.getText().toString());
+                  snippetDAO.update(snippet);
 
-                      EventBus_Singleton.getInstance()
-                          .post(new EventBus_Poster("snippet_note_changed"));
-                    }
-                  });
+                  EventBus_Singleton.getInstance()
+                      .post(new EventBus_Poster("snippet_note_changed"));
+                });
 
-              alert.setNegativeButton(context.getResources().getString(R.string.cancel),
-                  new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                    }
-                  });
+            alert.setNegativeButton(context.getResources().getString(R.string.cancel),
+                (dialog, whichButton) -> {
+                });
 
-              inputNoteET.postDelayed(new Runnable() {
-                @Override public void run() {
-                  InputMethodManager keyboard =
-                      (InputMethodManager) context.getSystemService(INPUT_METHOD_SERVICE);
-                  keyboard.showSoftInput(inputNoteET, 0);
-                }
-              }, 0);
+            inputNoteET.postDelayed(() -> {
+              InputMethodManager keyboard =
+                  (InputMethodManager) context.getSystemService(INPUT_METHOD_SERVICE);
+              keyboard.showSoftInput(inputNoteET, 0);
+            }, 0);
 
-              alert.setTitle(context.getResources().getString(R.string.takeNote));
-              alert.setView(alertCreateNoteView);
-              alert.show();
-            }
+            alert.setTitle(context.getResources().getString(R.string.takeNote));
+            alert.setView(alertCreateNoteView);
+            alert.show();
           });
 
-          paintSnippetBTN.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-              Intent openPaintActivity = new Intent(context, PaintSnippetActivity.class);
-              openPaintActivity.putExtra(Constants.EXTRAS_SNIPPET, snippet);
-              startActivity(openPaintActivity);
-            }
+          paintSnippetBTN.setOnClickListener(view -> {
+            Intent openPaintActivity = new Intent(context, PaintSnippetActivity.class);
+            openPaintActivity.putExtra(Constants.EXTRAS_SNIPPET, snippet);
+            startActivity(openPaintActivity);
           });
 
-          ocrSnippetBTN.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-              promptForOCR();
-            }
-          });
+          ocrSnippetBTN.setOnClickListener(view -> promptForOCR());
 
-          textToSpeechOCRBTN.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-              beginTextToSpeech();
-            }
-          });
+          textToSpeechOCRBTN.setOnClickListener(view -> beginTextToSpeech());
         }
 
         @Override public void onError() {
@@ -448,11 +419,7 @@ public class ViewSnippetActivity extends BaseActivity {
           new AlertDialog.Builder(getActivity()).setMessage(
               R.string.ocr_not_available_for_text_to_speech)
               .setCancelable(false)
-              .setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                  promptForOCR();
-                }
-              })
+              .setPositiveButton(R.string.OK, (dialog, id) -> promptForOCR())
               .setNegativeButton(R.string.cancel, null)
               .show();
         }
@@ -470,13 +437,11 @@ public class ViewSnippetActivity extends BaseActivity {
           new AlertDialog.Builder(getActivity()).setMessage(
               R.string.tts_language_not_available_downloading_now)
               .setCancelable(false)
-              .setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                  //no data - install it now
-                  Intent installTTSIntent = new Intent();
-                  installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                  startActivity(installTTSIntent);
-                }
+              .setPositiveButton(R.string.OK, (dialog, id) -> {
+                //no data - install it now
+                Intent installTTSIntent = new Intent();
+                installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installTTSIntent);
               })
               .show();
         }
@@ -493,20 +458,16 @@ public class ViewSnippetActivity extends BaseActivity {
           final String[] types = getResources().getStringArray(R.array.ocrLanguagesArray);
 
           ocrLanguagePickerDialog.setNegativeButton(R.string.cancel,
-              new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialogInterface, int i) {
+              (dialogInterface, i) -> {
 
-                }
               });
 
-          ocrLanguagePickerDialog.setItems(types, new DialogInterface.OnClickListener() {
-            @Override public void onClick(DialogInterface dialog, int which) {
+          ocrLanguagePickerDialog.setItems(types, (dialog, which) -> {
 
-              new AsyncTask_ProcessOCR((ViewSnippetActivity) getActivity()).execute(
-                  snippet.getImage_path(), "results.txt", types[which]);
+            new AsyncTask_ProcessOCR((ViewSnippetActivity) getActivity()).execute(
+                snippet.getImage_path(), "results.txt", types[which]);
 
-              Helpers.logEvent("OCR Scan Run", new String[] { types[which] });
-            }
+            Helpers.logEvent("OCR Scan Run", new String[] { types[which] });
           });
 
           ocrLanguagePickerDialog.show();
@@ -527,20 +488,15 @@ public class ViewSnippetActivity extends BaseActivity {
         lay.addView(ocrResultET);
 
         builder.setTitle(R.string.ocr_scan_result);
-        builder.setPositiveButton(R.string.SAVE, new DialogInterface.OnClickListener() {
-          @Override public void onClick(DialogInterface dialogInterface, int i) {
-            snippet.setOcr_content(ocrResultET.getText().toString());
-            snippetDAO.update(snippet);
+        builder.setPositiveButton(R.string.SAVE, (dialogInterface, i) -> {
+          snippet.setOcr_content(ocrResultET.getText().toString());
+          snippetDAO.update(snippet);
 
-            EventBus_Singleton.getInstance()
-                .post(new EventBus_Poster("snippet_ocr_content_changed"));
-          }
+          EventBus_Singleton.getInstance()
+              .post(new EventBus_Poster("snippet_ocr_content_changed"));
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-          @Override public void onClick(DialogInterface dialogInterface, int i) {
-            dialogInterface.dismiss();
-          }
-        });
+        builder.setNegativeButton(R.string.cancel,
+            (dialogInterface, i) -> dialogInterface.dismiss());
         builder.setView(lay);
 
         AlertDialog alert = builder.create();
@@ -612,16 +568,14 @@ public class ViewSnippetActivity extends BaseActivity {
           .into(snippetIMG, picassoCallback);
 
       PhotoViewAttacher mAttacher = new PhotoViewAttacher(snippetIMG);
-      mAttacher.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
-        @Override public void onPhotoTap(View view, float v, float v2) {
-          if (!clutterHidden) {
-            dealWithClutter(clutterHidden, view);
-          } else {
-            dealWithClutter(clutterHidden, view);
-          }
-
-          clutterHidden = !clutterHidden;
+      mAttacher.setOnPhotoTapListener((view, v, v2) -> {
+        if (!clutterHidden) {
+          dealWithClutter(clutterHidden, view);
+        } else {
+          dealWithClutter(clutterHidden, view);
         }
+
+        clutterHidden = !clutterHidden;
       });
 
       getActivity().invalidateOptionsMenu();

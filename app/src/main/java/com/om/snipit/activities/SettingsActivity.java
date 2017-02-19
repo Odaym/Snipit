@@ -61,11 +61,7 @@ public class SettingsActivity extends PreferenceActivity
 
     root.addView(toolbar, 0);
 
-    toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View v) {
-        onBackPressed();
-      }
-    });
+    toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
     GoogleSignInOptions gso =
         new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
@@ -84,35 +80,29 @@ public class SettingsActivity extends PreferenceActivity
 
     Preference aboutOpenSourceLibs = findPreference("pref_key_open_source_libs");
 
-    aboutOpenSourceLibs.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-      @Override public boolean onPreferenceClick(Preference preference) {
-        Intent startAboutOpenSourceLibs_Activity =
-            new Intent(SettingsActivity.this, OpenSourceLibsActivity.class);
-        startActivity(startAboutOpenSourceLibs_Activity);
-        return false;
-      }
+    aboutOpenSourceLibs.setOnPreferenceClickListener(preference -> {
+      Intent startAboutOpenSourceLibs_Activity =
+          new Intent(SettingsActivity.this, OpenSourceLibsActivity.class);
+      startActivity(startAboutOpenSourceLibs_Activity);
+      return false;
     });
 
     Preference signOut = findPreference("pref_key_sign_out");
 
-    signOut.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-      @Override public boolean onPreferenceClick(Preference preference) {
-        prefsEditor.putBoolean(Constants.EXTRAS_USER_LOGGED_IN, false);
-        prefsEditor.apply();
+    signOut.setOnPreferenceClickListener(preference -> {
+      prefsEditor.putBoolean(Constants.EXTRAS_USER_LOGGED_IN, false);
+      prefsEditor.apply();
 
-        signOut();
-        return false;
-      }
+      signOut();
+      return false;
     });
   }
 
   private void signOut() {
-    Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
-      @Override public void onResult(Status status) {
-        EventBus_Singleton.getInstance().post(new EventBus_Poster("logged_out"));
-        startActivity(new Intent(SettingsActivity.this, LoginActivity.class));
-        finish();
-      }
+    Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(status -> {
+      EventBus_Singleton.getInstance().post(new EventBus_Poster("logged_out"));
+      startActivity(new Intent(SettingsActivity.this, LoginActivity.class));
+      finish();
     });
   }
 

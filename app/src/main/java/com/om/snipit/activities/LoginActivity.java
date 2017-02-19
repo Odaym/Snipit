@@ -54,11 +54,7 @@ public class LoginActivity extends BaseActivity
     signInGoogleBTN.setSize(SignInButton.SIZE_WIDE);
     signInGoogleBTN.setColorScheme(SignInButton.COLOR_DARK);
 
-    signInGoogleBTN.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
-        signInGoogle();
-      }
-    });
+    signInGoogleBTN.setOnClickListener(view -> signInGoogle());
 
     viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
       @Override
@@ -124,11 +120,7 @@ public class LoginActivity extends BaseActivity
         }
       } else {
         new AlertDialog.Builder(LoginActivity.this).setMessage(R.string.no_internet_connection)
-            .setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
-              @Override public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-              }
-            })
+            .setPositiveButton(R.string.OK, (dialog, which) -> dialog.dismiss())
             .show();
       }
     } else {
