@@ -5,12 +5,14 @@ import com.om.snipit.repositories.BooksRepository;
 
 import java.util.List;
 
-import io.reactivex.functions.Consumer;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableSingleObserver;
 
 public class BooksActivityPresenter {
 
     private BooksActivityView view;
     private BooksRepository booksRepository;
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     public BooksActivityPresenter(BooksActivityView view, BooksRepository booksRepository) {
         this.view = view;
@@ -18,21 +20,25 @@ public class BooksActivityPresenter {
     }
 
     public void loadBooks() {
-        booksRepository.getBooks()
-                .subscribe(new Consumer<List<Book>>() {
+        compositeDisposable.add(booksRepository.getBooks()
+                .subscribeWith(new DisposableSingleObserver<List<Book>>() {
                     @Override
-                    public void accept(List<Book> bookList) throws Exception {
+                    public void onSuccess(List<Book> bookList) {
                         if (bookList.isEmpty()) {
                             view.displayNoBooks();
                         } else {
                             view.displayBooks(bookList);
                         }
                     }
-                }, new Consumer<Throwable>() {
+
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
+                    public void onError(Throwable e) {
                         view.displayError();
                     }
-                });
+                }));
+    }
+
+    public void unsubscribe() {
+        compositeDisposable.clear();
     }
 }

@@ -47,7 +47,7 @@ public class BooksActivityPresenterTest {
   }
 
   @Test public void shouldHandleNoBooksFound() {
-    when(booksRepository.getBooks()).thenReturn(Single.just(Collections.<Book>emptyList()));
+    when(booksRepository.getBooks()).thenReturn(Single.just(Collections.emptyList()));
 
     presenter.loadBooks();
 

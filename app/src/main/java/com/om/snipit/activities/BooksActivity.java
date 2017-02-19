@@ -449,7 +449,13 @@ import static com.om.snipit.classes.Constants.DEBUG_TAG;
     }
   }
 
-  @Override protected void onDestroy() {
+    @Override
+    protected void onStop() {
+      super.onStop();
+      presenter.unsubscribe();
+    }
+
+    @Override protected void onDestroy() {
     super.onDestroy();
     EventBus_Singleton.getInstance().unregister(this);
   }

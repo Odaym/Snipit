@@ -25,16 +25,13 @@ public class DatabaseBooksRepository implements BooksRepository {
 
     @Override
     public Single<List<Book>> getBooks() {
-        return Single.fromCallable(new Callable<List<Book>>() {
-            @Override
-            public List<Book> call() throws Exception {
-                try {
-                    return databaseHelper.getBookDAO().queryBuilder()
-                            .orderBy("order", true)
-                            .query();
-                } catch (Exception e) {
-                    throw new RuntimeException();
-                }
+        return Single.fromCallable(() -> {
+            try {
+                return databaseHelper.getBookDAO().queryBuilder()
+                        .orderBy("order", true)
+                        .query();
+            } catch (Exception e) {
+                throw new RuntimeException();
             }
         });
     }
