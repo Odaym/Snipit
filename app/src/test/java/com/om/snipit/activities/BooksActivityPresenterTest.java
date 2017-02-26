@@ -2,10 +2,8 @@ package com.om.snipit.activities;
 
 import com.om.snipit.models.Book;
 import com.om.snipit.repositories.BooksRepository;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,52 +11,66 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import io.reactivex.Single;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-import static java.util.Collections.EMPTY_LIST;
+import io.reactivex.Single;
+import io.reactivex.plugins.RxJavaPlugins;
+import io.reactivex.schedulers.Schedulers;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class BooksActivityPresenterTest {
 
-  @Rule
-  public MockitoRule mockitoRule = MockitoJUnit.rule();
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-  @Mock
-  BooksRepository booksRepository;
+    @Mock
+    BooksRepository booksRepository;
 
-  @Mock
-  BooksActivityView view;
+    @Mock
+    BooksActivityView view;
 
-  BooksActivityPresenter presenter;
-  private final List<Book> MANY_BOOKS = Arrays.asList(new Book(), new Book(), new Book());
+    BooksActivityPresenter presenter;
+    private final List<Book> MANY_BOOKS = Arrays.asList(new Book(), new Book(), new Book());
 
-  @Before
-  public void setUp() {
-    presenter = new BooksActivityPresenter(view, booksRepository);
-  }
+    @Before
+    public void setUp() {
+        presenter = new BooksActivityPresenter(view, booksRepository, Schedulers.trampoline());
+        RxJavaPlugins.setIoSchedulerHandler(scheduler -> Schedulers.trampoline());
+    }
 
-  @Test public void shouldPassBooksToView() {
-    when(booksRepository.getBooks()).thenReturn(Single.just(MANY_BOOKS));
+    @After
+    public void cleanUp() {
+        RxJavaPlugins.reset();
+    }
 
-    presenter.loadBooks();
+    @Test
+    public void shouldPassBooksToView() {
+        when(booksRepository.getBooks()).thenReturn(Single.just(MANY_BOOKS));
 
-    verify(view).displayBooks(MANY_BOOKS);
-  }
+        presenter.loadBooks();
 
-  @Test public void shouldHandleNoBooksFound() {
-    when(booksRepository.getBooks()).thenReturn(Single.just(Collections.emptyList()));
+        verify(view).displayBooks(MANY_BOOKS);
+    }
 
-    presenter.loadBooks();
+    @Test
+    public void shouldHandleNoBooksFound() throws InterruptedException {
+        when(booksRepository.getBooks()).thenReturn(Single.just(Collections.emptyList()));
 
-    verify(view).displayNoBooks();
-  }
+        presenter.loadBooks();
 
-  @Test public void shouldHandleError() {
-    when(booksRepository.getBooks()).thenReturn(Single.<List<Book>>error(new Throwable("boom")));
+        verify(view).displayNoBooks();
+    }
 
-    presenter.loadBooks();
+    @Test
+    public void shouldHandleError() {
+        when(booksRepository.getBooks()).thenReturn(Single.<List<Book>>error(new Throwable("boom")));
 
-    verify(view).displayError();
-  }
+        presenter.loadBooks();
+
+        verify(view).displayError();
+    }
 }

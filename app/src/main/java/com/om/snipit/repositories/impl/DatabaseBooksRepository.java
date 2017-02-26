@@ -27,6 +27,7 @@ public class DatabaseBooksRepository implements BooksRepository {
     public Single<List<Book>> getBooks() {
         return Single.fromCallable(() -> {
             try {
+                System.out.println("Thread db: " + Thread.currentThread().getId());
                 return databaseHelper.getBookDAO().queryBuilder()
                         .orderBy("order", true)
                         .query();

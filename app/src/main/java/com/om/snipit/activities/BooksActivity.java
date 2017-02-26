@@ -76,15 +76,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import me.grantland.widget.AutofitTextView;
 import net.frakbot.jumpingbeans.JumpingBeans;
 import retrofit2.Call;
 import retrofit2.Callback;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 import static com.om.snipit.classes.Constants.DEBUG_TAG;
 
@@ -150,7 +148,7 @@ import static com.om.snipit.classes.Constants.DEBUG_TAG;
 
     EventBus_Singleton.getInstance().register(this);
 
-    presenter = new BooksActivityPresenter(this, new DatabaseBooksRepository(getApplication()));
+    presenter = new BooksActivityPresenter(this, new DatabaseBooksRepository(getApplication()), AndroidSchedulers.mainThread());
     presenter.loadBooks();
 
     snippetQueryBuilder = snippetDAO.queryBuilder();
