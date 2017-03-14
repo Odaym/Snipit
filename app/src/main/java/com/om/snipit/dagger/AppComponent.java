@@ -1,6 +1,7 @@
 package com.om.snipit.dagger;
 
 import com.om.snipit.activities.BaseActivity;
+import com.om.snipit.activities.BooksActivity;
 import com.om.snipit.activities.LauncherActivity;
 import com.om.snipit.activities.SettingsActivity;
 import com.om.snipit.activities.ViewSnippetActivity;
@@ -19,4 +20,6 @@ import javax.inject.Singleton;
   void inject(SettingsActivity settingsActivity);
 
   void inject(ViewSnippetActivity.View_Snippet_Fragment viewSnippetFragment);
+
+  void inject(BooksActivity booksActivity);
 }

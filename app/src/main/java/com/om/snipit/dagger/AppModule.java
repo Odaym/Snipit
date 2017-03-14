@@ -3,6 +3,7 @@ package com.om.snipit.dagger;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.om.snipit.classes.Constants;
@@ -10,43 +11,67 @@ import com.om.snipit.classes.DatabaseHelper;
 import com.om.snipit.classes.SnipitApplication;
 import com.om.snipit.models.Book;
 import com.om.snipit.models.Snippet;
+import com.om.snipit.repositories.BooksRepository;
+import com.om.snipit.repositories.impl.DatabaseBooksRepository;
+
 import dagger.Module;
 import dagger.Provides;
+
 import javax.inject.Singleton;
 
-@Module public class AppModule {
-  private final SnipitApplication application;
+@Module
+public class AppModule {
 
-  public AppModule(SnipitApplication app) {
-    this.application = app;
-  }
+    private final SnipitApplication application;
 
-  @Provides @Singleton Context providesApplicationContext() {
-    return application;
-  }
+    public AppModule(SnipitApplication app) {
+        this.application = app;
+    }
 
-  @Provides @Singleton Resources provideActivityResources(Context app) {
-    return app.getResources();
-  }
+    @Provides
+    @Singleton
+    Context providesApplicationContext() {
+        return application;
+    }
 
-  @Provides DatabaseHelper providesDBHelper(Context app) {
-    return OpenHelperManager.getHelper(app, DatabaseHelper.class);
-  }
+    @Provides
+    @Singleton
+    Resources provideActivityResources(Context app) {
+        return app.getResources();
+    }
 
-  @Provides RuntimeExceptionDao<Book, Integer> providesBookDAO(DatabaseHelper dbHelper) {
-    return dbHelper.getBookDAO();
-  }
+    @Provides
+    @Singleton
+    DatabaseHelper providesDBHelper(Context app) {
+        return OpenHelperManager.getHelper(app, DatabaseHelper.class);
+    }
 
-  @Provides RuntimeExceptionDao<Snippet, Integer> providesSnippetDAO(DatabaseHelper dbHelper) {
-    return dbHelper.getSnippetDAO();
-  }
+    @Provides
+    RuntimeExceptionDao<Book, Integer> providesBookDAO(DatabaseHelper dbHelper) {
+        return dbHelper.getBookDAO();
+    }
 
-  @Provides @Singleton SharedPreferences providesSharedPreferences(Context app) {
-    return app.getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
-  }
+    @Provides
+    RuntimeExceptionDao<Snippet, Integer> providesSnippetDAO(DatabaseHelper dbHelper) {
+        return dbHelper.getSnippetDAO();
+    }
 
-  @Provides @Singleton SharedPreferences.Editor providesSharedPreferencesEditor(
-      SharedPreferences prefs) {
-    return prefs.edit();
-  }
+    @Provides
+    @Singleton
+    SharedPreferences providesSharedPreferences(Context app) {
+        return app.getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
+    }
+
+    @Provides
+    @Singleton
+    SharedPreferences.Editor providesSharedPreferencesEditor(
+            SharedPreferences prefs) {
+        return prefs.edit();
+    }
+
+    @Provides
+    @Singleton
+    BooksRepository providesBooksRepository(DatabaseHelper dbHelper) {
+        return new DatabaseBooksRepository(dbHelper);
+    }
 }

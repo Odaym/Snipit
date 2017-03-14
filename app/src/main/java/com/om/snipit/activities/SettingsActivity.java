@@ -24,6 +24,8 @@ import com.om.snipit.classes.Constants;
 import com.om.snipit.classes.EventBus_Poster;
 import com.om.snipit.classes.EventBus_Singleton;
 import com.om.snipit.classes.SnipitApplication;
+import com.om.snipit.dagger.DaggerAppComponent;
+
 import javax.inject.Inject;
 
 public class SettingsActivity extends PreferenceActivity
