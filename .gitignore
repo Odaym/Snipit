@@ -53,4 +53,7 @@ google-services.json
 ### Android Patch ###
 gen-external-apklibs
 
+### Some keys ###
+pass.txt
+
 # End of https://www.gitignore.io/api/android
