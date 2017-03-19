@@ -11,8 +11,8 @@ buildscript {
     }
 }
 
-def googlePlayServicesVersion = "10.0.1"
-def androidSupportLibVersion = "25.1.0"
+def googlePlayServicesVersion = "10.2.0"
+def androidSupportLibVersion = "25.2.0"
 def buildToolsVer = "25.0.0"
 def retroFitVersion = '2.1.0'
 def okHttpVersion = '3.4.1'
