@@ -1,5 +1,8 @@
-Snipit allows you to capture and save interesting sections from any source of information. Be it textbooks, journals, computer screens, photographs, flyers, writings on a whiteboard, etc.
+# Snipit Text Grabber
 
+[![](https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=com.om.snipit)
+
+Snipit allows you to capture and save interesting sections from any source of information. Be it textbooks, journals, computer screens, photographs, flyers, writings on a whiteboard, etc.
 
 Take a picture of the section you're interested in and let Snipit turn it into an editable and searchable snippet that you can save for a book you're reading, a research paper you're working on, or a journal article you're writing.
 
